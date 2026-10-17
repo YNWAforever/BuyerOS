@@ -84,6 +84,8 @@ def test_registry_covers_every_unimplemented_contract_operation():
         "quoteLookup", "getLookupQuote", "cancelLookupQuote", "confirmLookup",
         "getEnrichmentJob", "cancelEnrichmentJob", "reconcileEnrichmentJob", "receiveProviderCallback",
         "listPolicyDecisions", "recordPolicyDecision", "listSuppressions", "createSuppression", "removeSuppression",
+        "listPolicyControllerAuthorities", "submitPolicyActivationRequest", "listPolicyActivationRequests",
+        "getPolicyActivationRequest", "decidePolicyActivationRequest", "withdrawPolicyActivationRequest",
         "uploadOfferDocument", "ingestOfferUrl", "getOfferDocument", "listOfferDocuments", "deleteOfferDocument",
         "listDrafts", "generateDraft", "getDraft", "editDraft",
         "requestDraftReview", "approveDraft", "disabledDeliveryBoundary",

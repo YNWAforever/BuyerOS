@@ -19,6 +19,23 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
   async function reach(target:Locator,kind:string){
     const page=target.page();await expect(target).toBeVisible();await expect(target).toBeEnabled();
     const visited:string[]=[];let tabs=0;
+    // Follow the shorter native sequential focus route. Long settings forms can
+    // put the header just behind the current control and hundreds of Tabs ahead.
+    const direction=await target.evaluate(element=>{
+      const active=document.activeElement;
+      if(!active||active===document.body)return 'Tab';
+      const controls=Array.from(document.querySelectorAll<HTMLElement>(
+        'a[href],button,input,select,textarea,summary,[tabindex],[contenteditable]'))
+        .filter(control=>control.tabIndex>=0&&!control.matches(':disabled')&&!control.closest('[inert]')
+          &&control.getClientRects().length>0&&!['hidden','collapse'].includes(getComputedStyle(control).visibility))
+        .map((control,order)=>({control,order,priority:control.tabIndex>0?control.tabIndex:Number.MAX_SAFE_INTEGER}))
+        .sort((left,right)=>left.priority-right.priority||left.order-right.order);
+      const current=controls.findIndex(row=>row.control===active),destination=controls.findIndex(row=>row.control===element);
+      if(current<0||destination<0)return 'Tab';
+      const forward=(destination-current+controls.length)%controls.length;
+      const backward=(current-destination+controls.length)%controls.length;
+      return backward<forward?'Shift+Tab':'Tab';
+    });
     // Probe latency must not misclassify a partial tab cycle as unreachable.
     // The native Tab count and the owning test timeout still bound traversal.
     while(tabs<=250){
@@ -32,7 +49,7 @@ export function createJourneyInput(mode:JourneyInputMode='pointer'){
       }
       if(tabs===250)break;
       visited.push(await page.evaluate(()=>{const element=document.activeElement;return `${element?.tagName}:${element?.getAttribute('aria-label')??element?.textContent?.trim().slice(0,80)??''}`;}));
-      await page.keyboard.press('Tab');tabs++;
+      await page.keyboard.press(direction);tabs++;
     }
     throw new Error(`Control unreachable by Tab after ${tabs} steps: ${target}; last focus: ${visited.slice(-8).join(' | ')}`);
   }

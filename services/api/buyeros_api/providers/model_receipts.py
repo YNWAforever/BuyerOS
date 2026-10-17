@@ -9,9 +9,14 @@ from ..execution.provider_context import execution_session
 from sqlalchemy import select,text
 
 class PostgresModelReceipts:
-    def __init__(self,engine,workspace_id,capability,*,model_id,route):
+    def __init__(self,engine,workspace_id,capability,*,model_id,route,policy_binding=None):
         if (engine is None or not isinstance(workspace_id,uuid.UUID) or capability.provider not in LIVE_MODEL_PROVIDERS or capability.service!='model' or capability.max_liability is None or not isinstance(route,ModelRoute) or not route.route_id or route.permitted_tools):raise ValueError('bounded code-owned model receipt contract required')
         self.engine,self.workspace_id,self.capability,self.model_id,self.route=engine,workspace_id,capability,model_id,route
+        from ..api.policy_activation_schemas import ResearchProviderBinding
+        from ..services.research_policy_context import selected_binding
+        if policy_binding is not None and not isinstance(policy_binding,ResearchProviderBinding):
+            raise ValueError('private reviewed model policy binding required')
+        self.policy_binding=policy_binding if policy_binding is not None else selected_binding(capability)
         self.contract_hash=ProviderRegistration(capability,lambda:None).contract_hash
 
     async def _schema(self,session):
@@ -44,6 +49,15 @@ class PostgresModelReceipts:
         state={key:basis[key] for key in ['workspace_id','run_id','buyer_id','basis_hash']};state['workflow_version']='fit-v1'
         current,_=await runner._model_basis(session,state)
         if current!=basis:raise ValueError('model basis changed')
+        from ..services.research_policy_context import research_use,evidence_urls
+        from ..services.policy_service import evaluate_current_policy
+        from datetime import datetime,timezone
+        urls=await evidence_urls(session,project_id=basis['project_id'],
+            source_ids=[item['source_id'] for item in basis['evidence']])
+        policy=await evaluate_current_policy(session,{'workspace_id':self.workspace_id,
+            'project_id':basis['project_id']},'account_research',datetime.now(timezone.utc),
+            use_context=research_use(basis['project_id'],'research.model',binding=self.policy_binding,urls=urls))
+        if not policy['allowed']:raise ValueError('exact current model purpose permission unavailable')
         operation=(await session.execute(select(ProviderOperation).where(ProviderOperation.id==operation_id).with_for_update())).scalar_one_or_none()
         event=(await session.execute(select(OutboxEvent).where(OutboxEvent.id==outbox_id).with_for_update())).scalar_one_or_none()
         reservation=(await session.execute(select(BudgetReservation).where(BudgetReservation.operation_id==operation_id).with_for_update())).scalar_one_or_none()
@@ -116,5 +130,7 @@ class PostgresModelReceipts:
             if saved is not None and saved['state']=='received':
                 from ..services.receipt_retention import require_current_receipt_read
                 request=saved['request']
-                await require_current_receipt_read(session,workspace_id=self.workspace_id,actor_id=uuid.UUID(request.basis['actor_id']),project_id=uuid.UUID(request.basis['project_id']))
+                await require_current_receipt_read(session,workspace_id=self.workspace_id,actor_id=uuid.UUID(request.basis['actor_id']),
+                    project_id=uuid.UUID(request.basis['project_id']),
+                    source_ids=[item['source_id'] for item in request.basis['evidence']])
             return saved

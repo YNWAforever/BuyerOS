@@ -80,9 +80,15 @@ async def research_page_scope(session,*,workspace_id,run_id,raw_candidate_id,cap
         source.retrieved_at!=datetime.fromisoformat(item['retrieved_at']) or source.retention_until is None or source.retention_until<=now):
         raise ValueError('exact current metadata provenance required')
     url=canonical_source_url(source.canonical_url)
+    from .policy_service import evaluate_current_policy
+    from .research_policy_context import research_use
+    gate=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},
+        'account_research',now,use_context=research_use(run.project_id,'research.fetch',urls=(url,)))
+    if not gate['allowed']:
+        raise ValueError('current approved research fetch permission required')
     permission=(await session.execute(select(PolicyDecision).where(PolicyDecision.workspace_id==workspace_id,
         PolicyDecision.controller_scope_id==workspace_id,PolicyDecision.subject_type=='project',PolicyDecision.subject_id==run.project_id,
-        PolicyDecision.purpose=='account_research').order_by(PolicyDecision.created_at.desc(),PolicyDecision.id.desc()).limit(1).with_for_update(read=True))).scalar_one_or_none()
+        PolicyDecision.purpose=='account_research').order_by(PolicyDecision.created_at.desc(),PolicyDecision.id.desc()).limit(1))).scalar_one_or_none()
     if (permission is None or permission.status!='permitted' or permission.basis_reference!=url or
         permission.expires_at<=now or not permission.provenance.strip() or permission.decision_author_id is None or
         not 1<=permission.retention_days<=30):

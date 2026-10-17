@@ -115,9 +115,12 @@ async def _retry_preconditions(session, run):
     ))).scalar_one_or_none()
     if actor is None or not permission_for_roles(actor.roles, "startRun"):
         raise ApiError(409, "RETRY_UNSAFE", "original run actor is no longer authorized")
+    from .research_policy_context import research_use, metadata_binding
     policy = await evaluate_current_policy(session, {
         "workspace_id": workspace_id, "project_id": run.project_id,
-    }, "account_research", datetime.now(timezone.utc))
+    }, "account_research", datetime.now(timezone.utc),
+        use_context=research_use(run.project_id, "research.search",
+                                binding=metadata_binding(snapshot.get("capability", {}))))
     if not policy["allowed"]:
         raise ApiError(409, "POLICY_BLOCKED", "current account research policy is required")
     from buyeros_api.execution.provider_context import pending_run_work

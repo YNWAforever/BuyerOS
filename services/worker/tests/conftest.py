@@ -85,9 +85,11 @@ def _docker(*args: str) -> subprocess.CompletedProcess:
 
 
 def _start_container() -> tuple[str, str]:
+    from tests.controlled_policy_fixtures import owned_policy_gate
+    owned_policy_gate().local_docker_context()
     name = f"buyeros-worker-test-{uuid.uuid4().hex[:8]}"
     created = _docker(
-        "run", "-d", "--name", name,
+        "run", "-d", "--name", name, "--label", "buyeros.policy.run=" + name,
         "-e", f"POSTGRES_PASSWORD={DB_PASSWORD}",
         "-e", f"POSTGRES_USER={DB_USER}",
         "-e", f"POSTGRES_DB={DB_NAME}",
@@ -109,6 +111,8 @@ def _start_container() -> tuple[str, str]:
     mapping = _docker("port", name, "5432").stdout.strip().splitlines()[0]
     port = mapping.rsplit(":", 1)[1]
     dsn = f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:{port}/{DB_NAME}"
+    from tests.controlled_policy_fixtures import owned_policy_gate
+    owned_policy_gate().register_created_fixture(created.stdout.strip(), dsn, run_id=name, image=POSTGRES_IMAGE)
     # pg_isready can succeed against the temporary init server before it
     # restarts; migrations connect through the published host port.
     import psycopg
@@ -134,6 +138,10 @@ def pg_dsn():
     env_dsn = os.environ.get("BUYEROS_TEST_DATABASE_URL")
     if env_dsn:
         _require_disposable_test_dsn(env_dsn)
+        receipt = os.environ.get("BUYEROS_POLICY_TARGET_RECEIPT")
+        if receipt:
+            from tests.controlled_policy_fixtures import owned_policy_gate
+            owned_policy_gate().inspect_target(Path(receipt))
         yield env_dsn
         return
     if shutil.which("docker") is None:

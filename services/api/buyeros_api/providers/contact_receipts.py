@@ -45,6 +45,8 @@ class PostgresContactReceipts:
         from ..db.runs import CompanyAlias
         from ..api.deps import permission_for_roles
         from ..services.policy_service import evaluate_current_policy, evaluate_current_policy_readonly
+        from ..services.provider_policy_context import contact_context
+        from ..db.contact import EnrichmentQuote
         member=(await session.execute(select(Membership).where(Membership.user_id==request.actor_id,Membership.active.is_(True)))).scalar_one_or_none()
         project=(await session.execute(select(Project).where(Project.id==request.project_id))).scalar_one_or_none()
         buyer=(await session.execute(select(ProjectBuyer).where(ProjectBuyer.id==request.buyer_id,ProjectBuyer.project_id==request.project_id))).scalar_one_or_none()
@@ -52,7 +54,12 @@ class PostgresContactReceipts:
         alias=(await session.execute(select(CompanyAlias.id).where(CompanyAlias.company_id==request.company_id,CompanyAlias.alias_type=='domain',CompanyAlias.normalized_value==request.domain,CompanyAlias.reviewed.is_(True),CompanyAlias.superseded_at.is_(None),CompanyAlias.provenance.is_not(None)).limit(1))).scalar_one_or_none()
         if (member is None or not permission_for_roles(member.roles,'confirmLookup') or project is None or project.status!='active' or request.market not in project.markets or request.language not in project.language_preferences or buyer is None or buyer.version!=request.buyer_version or buyer.company_id!=request.company_id or company is None or company.domain!=request.domain or alias is None):raise ValueError('current confirmed contact actor/company basis unavailable')
         evaluate = evaluate_current_policy_readonly if read_only else evaluate_current_policy
-        policy=await evaluate(session,{'workspace_id':self.workspace_id,'project_id':request.project_id,'company_id':request.company_id},'contact_research',datetime.now(timezone.utc))
+        quote = await session.scalar(select(EnrichmentQuote).where(EnrichmentQuote.id == request.quote_id))
+        use = await contact_context(session, project_id=request.project_id, company_id=request.company_id,
+                                    capability=self.capability,
+                                    configuration=(quote.selection or {}).get("contact_configuration") if quote else None,
+                                    environment=self.environment)
+        policy=await evaluate(session,{'workspace_id':self.workspace_id,'project_id':request.project_id,'company_id':request.company_id},'contact_research',datetime.now(timezone.utc),use_context=use)
         if not policy['allowed']:raise ValueError('current contact purpose permission unavailable')
 
     async def _authorize(self,session,request,operation_id,outbox_id,*,statuses):

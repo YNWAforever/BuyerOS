@@ -115,12 +115,6 @@ def draft_job(worker_database_url, pg_dsn):
         db.execute("INSERT INTO human_reviews(id,workspace_id,project_buyer_id,state,actor_user_id,"
                    "fit_assessment_id) VALUES (%s,%s,%s,'accepted',%s,%s)",
                    (review, WS_A, buyer, actor, fit))
-        db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,"
-                   "controller_scope_id,purpose,status,policy_version,basis_reference,provenance,"
-                   "countries,expires_at,retention_days,decision_author_id) "
-                   "VALUES (%s,%s,'project',%s,%s,'draft_preparation','permitted','fixture-v1',"
-                   "'fixture','fixture',ARRAY['US'],now()+interval '1 day',1,%s)",
-                   (policy, WS_A, PROJECT_A, WS_A, actor))
         db.execute("INSERT INTO async_jobs(id,workspace_id,project_id,actor_user_id,kind,operation,"
                    "command,status,requested,processed,updated,unchanged,blocked,conflicts) "
                    "VALUES (%s,%s,%s,%s,'draft_generation','generateDraft',%s::jsonb,'queued',1,0,0,0,0,0)",
@@ -130,13 +124,26 @@ def draft_job(worker_database_url, pg_dsn):
         db.execute("INSERT INTO outbox_events(id,workspace_id,intent_key,event_type,payload,state,"
                    "fencing_generation) VALUES (%s,%s,%s,'draft.generate',%s::jsonb,'dispatched',1)",
                    (uuid.uuid4(), WS_A, intent_key, json.dumps(payload)))
+    from tests.controlled_policy_fixtures import api_fixture_helpers
+    helpers = api_fixture_helpers()
+    controller = helpers.ensure_fixture_controller(pg_dsn, WS_A, PROJECT_A)
+    helpers.approve_provider_fixture(pg_dsn, WS_A, PROJECT_A, controller,
+        purpose="draft_preparation", domains=("fixture.example",), transaction_role=True,
+        scope={"provider_name": "fixture", "account_reference": "owned-draft-fixture",
+               "contract_sha256": "a" * 64, "sender_identity_id": str(sender), "allow_unaddressed_drafts": True})
+    with psycopg.connect(pg_dsn) as db:
+        policy = db.execute("SELECT id FROM policy_decisions WHERE workspace_id=%s AND purpose='draft_preparation' "
+                            "ORDER BY version DESC LIMIT 1", (WS_A,)).fetchone()[0]
+        command["policy_decision_ids"] = [str(policy)]
+        db.execute("UPDATE async_jobs SET command=%s::jsonb WHERE id=%s", (json.dumps(command), job))
     try:
         yield {"dsn": pg_dsn, "workspace": WS_A, "job": job, "buyer": buyer,
                "company": company, "intent_key": intent_key, "policy": policy,
-               "actor": actor}
+               "actor": actor, "sender": sender, "controller": controller}
     finally:
         with psycopg.connect(pg_dsn, autocommit=True) as db:
-            for table in ("approvals", "draft_revisions", "outreach_drafts", "async_job_items",
+            for table in ("policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities",
+                          "approvals", "draft_revisions", "outreach_drafts", "async_job_items",
                           "outbox_events", "async_jobs", "suppressions", "policy_decisions", "contact_points",
                           "human_reviews", "fit_assessments", "evidence", "source_documents",
                           "project_buyers", "companies"):
@@ -222,21 +229,35 @@ def _address_job(case):
             "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
             "'recipient@fixture.example.test','provider_marked_valid',now(),false,now()+interval '1 day') RETURNING checked_at,retention_expires_at",
             (contact_id, case["workspace"], case["company"])).fetchone()
-        for purpose in ("outreach", "export_contacts"):
+        for purpose in ("export_contacts",):
             db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,"
                 "controller_scope_id,purpose,status,policy_version,basis_reference,provenance,countries,"
                 "expires_at,retention_days,decision_author_id) VALUES (%s,%s,'project',%s,%s,%s,"
                 "'permitted','fixture-v1','fixture','fixture',ARRAY['US'],now()+interval '1 day',1,%s)",
                 (uuid.uuid4(), case["workspace"], PROJECT_A, case["workspace"], purpose, case["actor"]))
-        policies = [{"id":str(row[0]), "version":row[1], "purpose":row[2], "status":row[3],
-                     "expires_at":row[4].isoformat()} for row in db.execute(
-            "SELECT id,version,purpose,status,expires_at FROM policy_decisions "
-            "WHERE workspace_id=%s ORDER BY id", (case["workspace"],))]
-        context = {"contact":{"id":str(contact_id), "version":1, "type":"business_email",
-            "validity":"provider_marked_valid", "value_hash":hashlib.sha256(b'recipient@fixture.example.test').hexdigest(),
-            "checked_at":checked.isoformat(), "retention_until":retention.isoformat()}, "policies":policies}
+    from tests.controlled_policy_fixtures import api_fixture_helpers
+    helpers = api_fixture_helpers()
+    scope = {"provider_name": "fixture", "account_reference": "owned-draft-fixture", "contract_sha256": "a" * 64,
+             "sender_identity_id": str(case["sender"]), "recipient_refs": [str(contact_id)]}
+    helpers.approve_provider_fixture(case["dsn"], case["workspace"], PROJECT_A, case["controller"],
+        purpose="outreach", domains=("fixture.example",), scope=scope, actions=["delivery.review"], transaction_role=True)
+    helpers.approve_provider_fixture(case["dsn"], case["workspace"], PROJECT_A, case["controller"],
+        purpose="draft_preparation", domains=("fixture.example",), scope=scope, transaction_role=True)
+    from buyeros_api.services.draft_service import preparation_recipient_context
+    import uuid
+    async def canonical(session):
+        return await preparation_recipient_context(session, workspace_id=uuid.UUID(case["workspace"]),
+            project_id=uuid.UUID(PROJECT_A), company_id=case["company"], contact_id=contact_id)
+    context = helpers.owner_run({"dsn": case["dsn"], "workspace": uuid.UUID(case["workspace"])},
+                                canonical, runtime="transaction_role")
+    with psycopg.connect(case["dsn"]) as db:
+        policies = [str(row[0]) for row in db.execute("SELECT id FROM policy_decisions WHERE workspace_id=%s "
+                    "AND purpose='draft_preparation' ORDER BY id", (case["workspace"],))]
+        case["policy"] = db.execute("SELECT id FROM policy_decisions WHERE workspace_id=%s "
+                                   "AND purpose='draft_preparation' ORDER BY version DESC LIMIT 1",
+                                   (case["workspace"],)).fetchone()[0]
         db.execute("UPDATE async_jobs SET command=command || %s::jsonb WHERE id=%s",
-                   (json.dumps({"recipient_context":context}), case["job"]))
+                   (json.dumps({"recipient_context":context, "policy_decision_ids": policies}), case["job"]))
     return contact_id
 
 

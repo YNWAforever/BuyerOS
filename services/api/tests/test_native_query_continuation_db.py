@@ -35,15 +35,18 @@ def query_case(admission_case,monkeypatch,request):
     api,dsn=admission_case;ws=uuid.UUID(WORKSPACE_A);holder={};calls=[];factories=[]
     cap=capability(provider='brave-search',service='search',markets=frozenset({'US','HK'}),languages=frozenset({'en','zh-HK'}),roles=frozenset({'company','distributor'}),max_liability=Money(Decimal('0.005000')))
     def factory():factories.append('native');return holder['adapter']
-    scope=ProviderRegistration(cap,factory,('synthetic:bounded-query-fixture-only',),frozenset({'market','language'}),(('HK',('zh-HK',)),('US',('en',))))
+    scope=ProviderRegistration(cap,factory,('synthetic:bounded-query-fixture-only',),frozenset({'market','language'}),(('HK',('zh-HK',)),('US',('en',))),
+                               policy_account_reference='owned-query-account')
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}));monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}));monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry((scope,)))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(dsn,ws,PROJECT_A,domains=('example.org','fixture.invalid','fixture.example','sensors.example.test','bounded.example.test'),
+                             search=scope.policy_binding,countries=('US','HK'))
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED','true');monkeypatch.setenv('BUYEROS_CLOUDFLARE_EXECUTION_ENABLED','true');get_settings.cache_clear();api.app.dependency_overrides.pop(selected_run_capability)
     with psycopg.connect(dsn) as db:
         content=db.execute('SELECT content FROM icp_versions WHERE id=%s',(ICP_ID,)).fetchone()[0]
         content.update(markets=['US','HK'],languages=['en','zh-HK'])
         db.execute('UPDATE icp_versions SET content=%s::jsonb,content_hash=%s WHERE id=%s',(json.dumps(content),canonical_hash(content),ICP_ID))
         db.execute("UPDATE projects SET markets='{US,HK}' WHERE id=%s",(PROJECT_A,))
-        db.execute("UPDATE policy_decisions SET countries='{US,HK}' WHERE workspace_id=%s",(ws,))
         db.execute("UPDATE worker_runtime_control SET backend='cloudflare',enabled=true,epoch=epoch+1,active_owner=NULL,active_until=NULL WHERE singleton=1")
         db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
     body=_request();body['limits']=dict(body['limits'])

@@ -46,7 +46,7 @@ def admission_case(isolated_quote_case):
     client,dsn,buyers,args=approved(isolated_quote_case)
     with psycopg.connect(dsn,autocommit=True) as db:
         assert db.execute("SELECT to_regclass('public.delivery_authorizations')").fetchone()[0] is not None,'durable delivery authority schema is missing'
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0055_lead_workflow',)
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
         db.execute('UPDATE worker_runtime_control SET enabled=true,epoch=epoch+1,active_owner=NULL,active_until=NULL WHERE singleton=1')
     limits(dsn);auth=authority(args)
     try:yield client,dsn,args,auth
@@ -168,9 +168,11 @@ def test_populated_authority_downgrade_refuses_and_retains_original_refs_and_ful
     client,dsn,args,auth=admission_case;result=run(dsn,args,auth);original=snapshot(dsn,result)
     monkeypatch.setenv('BUYEROS_DATABASE_URL',dsn);get_settings.cache_clear()
     try:
-        with pytest.raises(RuntimeError,match='retain original delivery authority'):command.downgrade(config(),'0049_c61_delivery_money')
+        # Controlled provider approvals are now real retained policy history.
+        # The first current-head safeguard must refuse before reaching0050.
+        with pytest.raises(RuntimeError,match='0056 downgrade blocked: preserve controller policy history'):command.downgrade(config(),'0049_c61_delivery_money')
         assert snapshot(dsn,result)==original
-        with psycopg.connect(dsn) as db:assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0055_lead_workflow',)
+        with psycopg.connect(dsn) as db:assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
     finally:get_settings.cache_clear()
 
 
@@ -378,9 +380,11 @@ def test_SQL_original_message_and_outbox_cannot_acquire_a_second_authority(admis
     assert snapshot(dsn,result)==original
 
 
-def test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards(isolated_quote_case,monkeypatch):
+def test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards(isolated_migrated,monkeypatch):
     from buyeros_api.settings import get_settings
-    client,dsn,buyers=isolated_quote_case
+    # A quote fixture intentionally has approvals; use the genuinely empty
+    # schema for this reversible empty-schema rehearsal.
+    dsn=isolated_migrated
     monkeypatch.setenv('BUYEROS_DATABASE_URL',dsn);get_settings.cache_clear()
     def guards():
         with psycopg.connect(dsn) as db:return db.execute('SELECT buyeros_search_receipts_writable(),buyeros_model_receipts_writable(),buyeros_contact_receipts_writable()').fetchone()
@@ -394,7 +398,7 @@ def test_empty0050_downgrade_and_reupgrade_restore_exact_head_receipt_guards(iso
         with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0049_c61_delivery_money',None)
         assert guards()==(True,True,True)
         command.upgrade(config(),'head');assert guards()==(True,True,True)
-        with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0055_lead_workflow','delivery_authorizations')
+        with psycopg.connect(dsn) as db:assert db.execute("SELECT version_num,to_regclass('public.delivery_authorizations') FROM alembic_version").fetchone()==('0056_policy_activation','delivery_authorizations')
     finally:
         try:command.upgrade(config(),'head')
         finally:get_settings.cache_clear()

@@ -90,9 +90,16 @@ def test_usage_real_ledger_holds_refunds_and_distinct_policy_contactability(quot
                        "VALUES (%s,%s,%s,%s,%s)", (run_id, WORKSPACE_A, PROJECT,
                        "d0000000-0000-4000-8000-000000000021", status))
         for index, company in enumerate((company_a, company_a, company_a, company_b)):
-            db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,validity,checked_at,quarantined) "
-                       "VALUES (%s,%s,%s,'business_email',%s,'provider_marked_valid',%s,false)",
+            db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,validity,checked_at,quarantined,retention_expires_at) "
+                       "VALUES (%s,%s,%s,'business_email',%s,'provider_marked_valid',%s,false,now()+interval '1 day')",
                        (uuid.uuid4(), WORKSPACE_A, company, f"metric{index}@fixture.example", now-timedelta(minutes=1)))
+        contacts = [str(r[0]) for r in db.execute("SELECT id FROM contact_points WHERE workspace_id=%s", (WORKSPACE_A,))]
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="contact_research", domains=("fixture1.example", "fixture2.example"), actions=["contact.read"],
+        scope={"provider_name": "fixture", "account_reference": "owned-usage-fixture",
+               "contract_sha256": "b" * 64, "recipient_refs": contacts})
 
     async def setup_accounts():
         engine = create_async_engine(async_database_url(runtime_role_dsn(dsn)))
@@ -139,6 +146,15 @@ def test_usage_real_ledger_holds_refunds_and_distinct_policy_contactability(quot
     assert data["cost_per_contactable_accepted_company"] == {"amount": "1.400000", "currency": "USD"}
     category = next(row for row in data["categories"] if row["category"] == "discovery")
     assert category["settled"] == data["total_settled"] and category["reserved"] == data["total_reserved"]
+    with psycopg.connect(dsn) as db:
+        db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' WHERE workspace_id=%s",
+                   (WORKSPACE_A,))
+    expired = api.get(f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/usage",
+                      params=_period(), headers=_h(REVIEWER))
+    assert expired.status_code == 200, expired.text
+    assert expired.json()["data"]["eligible_contactable_company_count"] == 0
+    assert expired.json()["data"]["cost_per_contactable_accepted_company"] is None
+    assert expired.json()["data"]["total_settled"] == data["total_settled"]
 
 
 def test_outcome_pagination_correction_guards_and_contract(quote_case):

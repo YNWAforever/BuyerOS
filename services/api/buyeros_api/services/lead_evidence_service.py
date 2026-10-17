@@ -1,6 +1,7 @@
 """Manual source observations. This module has no provider or network dependency."""
 import re
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import func, or_, select
@@ -18,7 +19,7 @@ from ..db.models import Membership
 from ..db.policy import PolicyDecision
 from ..db.runs import Person, ContactPoint
 from .audit_service import append_audit
-from .policy_service import evaluate_current_policy
+from .policy_service import evaluate_current_policy, policy_workspace_lock
 
 
 async def resolve_lead_scope(
@@ -50,17 +51,106 @@ def require_permission(scope: LeadScope, operation: str) -> None:
         raise ApiError(403, "PERMISSION_DENIED", "insufficient role")
 
 
-async def personal_policy(session, scope: LeadScope, now: datetime, contact_id=None, *, required=True):
+async def personal_policy(session, scope: LeadScope, now: datetime, contact_id=None, *, required=True,
+                          action="lead.evidence.read", sources=None, source_ids=(), observation_ids=None):
+    try:
+        receipt = await authorize_native_policy_use(
+            session, scope, action=action, source_ids=tuple(source_ids), now=now,
+            sources=sources, contact_id=contact_id, observation_ids=observation_ids)
+        return receipt.deadline
+    except ApiError:
+        if required:
+            raise
+        return None
+
+
+async def _native_source_context(session, scope, action, source_ids, sources, now, observation_ids=None):
+    from urllib.parse import urlsplit
+    from ..api.policy_activation_schemas import PolicyUseContext, MANUAL_DATA, exact_domain
+    if sources is None:
+        sources = []
+        if scope.buyer_id is not None:
+            query = select(LeadPrivatePayload.contents).join(
+                LeadObservation, (LeadObservation.workspace_id == LeadPrivatePayload.workspace_id)
+                & (LeadObservation.payload_id == LeadPrivatePayload.id)
+            ).where(
+                LeadObservation.workspace_id == scope.workspace_id,
+                LeadObservation.project_id == scope.project_id,
+                LeadObservation.buyer_id == scope.buyer_id,
+                LeadPrivatePayload.retention_expires_at > now,
+                LeadPrivatePayload.contents.is_not(None),
+            )
+            if observation_ids is not None:
+                query = query.where(LeadObservation.id.in_(observation_ids))
+            for body in (await session.scalars(query)).all():
+                sources.extend(body.get("sources", []))
+    domains = []
+    for item in sources:
+        source = item.model_dump(mode="json") if hasattr(item, "model_dump") else item
+        parsed = urlsplit(source.get("url", ""))
+        try:
+            if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+                or parsed.port not in {None, 443}):
+                raise ValueError("exact HTTPS source required")
+            domains.append(exact_domain(parsed.hostname))
+        except ValueError:
+            raise ApiError(403, "POLICY_BLOCKED", "source does not match supported manual scope") from None
+    deadlines = []
+    for identity in source_ids:
+        document = await session.scalar(select(OfferDocument).where(
+            OfferDocument.workspace_id == scope.workspace_id, OfferDocument.project_id == scope.project_id,
+            OfferDocument.id == identity))
+        if (not document or document.status != "ready" or document.deleted_at is not None
+            or document.retention_until is None or document.retention_until <= now):
+            raise ApiError(403, "POLICY_BLOCKED", "provided source is no longer retained")
+        deadlines.append(document.retention_until)
+    if observation_ids is not None:
+        # Every cited observation must still exist with a retained payload; a
+        # source-free longer-lived sibling may not keep an expired citation alive.
+        requested = [uuid.UUID(str(value)) for value in observation_ids]
+        if requested:
+            query = select(LeadObservation.id, LeadPrivatePayload.retention_expires_at).join(
+                LeadPrivatePayload, (LeadPrivatePayload.workspace_id == LeadObservation.workspace_id)
+                & (LeadPrivatePayload.id == LeadObservation.payload_id)).where(
+                LeadObservation.workspace_id == scope.workspace_id,
+                LeadObservation.project_id == scope.project_id,
+                LeadObservation.id.in_(requested),
+                LeadPrivatePayload.retention_expires_at > now,
+                LeadPrivatePayload.contents.is_not(None),
+            )
+            if scope.buyer_id is not None:
+                query = query.where(LeadObservation.buyer_id == scope.buyer_id)
+            rows = (await session.execute(query)).all()
+            if {row[0] for row in rows} != set(requested):
+                raise ApiError(403, "POLICY_BLOCKED", "a cited observation is no longer retained")
+            deadlines.extend(row[1] for row in rows)
+    return PolicyUseContext(action=action, project_id=scope.project_id, source_ids=tuple(source_ids),
+                            source_domains=tuple(sorted(set(domains))), data_categories=MANUAL_DATA), deadlines
+
+
+@dataclass(frozen=True)
+class PolicyUseReceipt:
+    deadline: datetime
+    context_hash: str
+    use_context: object
+
+
+async def authorize_native_policy_use(session, scope: LeadScope, *, action: str,
+                                       source_ids: tuple, now: datetime, sources=None,
+                                       contact_id=None, observation_ids=None, purposes=None) -> PolicyUseReceipt:
+    await policy_workspace_lock(session, scope.workspace_id)
+    now = max(now, datetime.now(timezone.utc))
+    context, deadlines = await _native_source_context(
+        session, scope, action, source_ids, sources, now, observation_ids)
     subject = {"workspace_id": scope.workspace_id, "project_id": scope.project_id,
                "company_id": scope.company_id}
     if contact_id is not None:
         subject["contact_point_id"] = contact_id
-    for purpose in ("account_research", "contact_research"):
-        gate = await evaluate_current_policy(session, subject, purpose, now)
+    needed = purposes or ("account_research", "contact_research")
+    for purpose in needed:
+        gate = await evaluate_current_policy(session, subject, purpose, now, use_context=context)
         if not gate["allowed"]:
-            if required:
-                raise ApiError(403, "POLICY_BLOCKED", "manual personal-data purpose requires a current permission")
-            return None
+            raise ApiError(403, "POLICY_BLOCKED", "current source-bound manual purpose permission required")
     conditions = [((PolicyDecision.subject_type == "project") & (PolicyDecision.subject_id == scope.project_id))]
     if scope.company_id:
         conditions.append((PolicyDecision.subject_type == "company") & (PolicyDecision.subject_id == scope.company_id))
@@ -68,16 +158,32 @@ async def personal_policy(session, scope: LeadScope, now: datetime, contact_id=N
         conditions.append((PolicyDecision.subject_type == "contact_point") & (PolicyDecision.subject_id == contact_id))
     policies = list((await session.scalars(select(PolicyDecision).where(
         PolicyDecision.workspace_id == scope.workspace_id, PolicyDecision.controller_scope_id == scope.workspace_id,
-        PolicyDecision.purpose.in_(("account_research", "contact_research")), or_(*conditions),
+        PolicyDecision.purpose.in_(needed), or_(*conditions),
     ).distinct(PolicyDecision.subject_type, PolicyDecision.subject_id, PolicyDecision.purpose)
       .order_by(PolicyDecision.subject_type, PolicyDecision.subject_id, PolicyDecision.purpose,
-                PolicyDecision.created_at.desc(), PolicyDecision.id.desc()))).all())
+                PolicyDecision.version.desc(), PolicyDecision.created_at.desc(), PolicyDecision.id.desc()))).all())
     if not policies or any(row.retention_days <= 0 or row.expires_at <= now for row in policies):
-        if required:
-            raise ApiError(403, "POLICY_BLOCKED", "a current retention period is required")
-        return None
-    return min([now + timedelta(days=min(row.retention_days for row in policies))]
-               + [row.expires_at for row in policies])
+        raise ApiError(403, "POLICY_BLOCKED", "a current retention period is required")
+    deadline = min([now + timedelta(days=min(row.retention_days for row in policies))]
+                   + [row.expires_at for row in policies] + deadlines)
+    if deadline <= datetime.now(timezone.utc):
+        raise ApiError(403, "POLICY_BLOCKED", "manual policy or source deadline elapsed")
+    from ..db.policy_activation import PolicyActivationRequest, PolicyActivationResolution
+    proof_rows = (await session.execute(select(
+        PolicyActivationResolution.decision_id, PolicyActivationRequest.terms_hash,
+        PolicyActivationRequest.authority_id, PolicyActivationRequest.authority_version,
+    ).join(PolicyActivationRequest, (PolicyActivationRequest.workspace_id == PolicyActivationResolution.workspace_id)
+           & (PolicyActivationRequest.id == PolicyActivationResolution.request_id)).where(
+        PolicyActivationResolution.workspace_id == scope.workspace_id,
+        PolicyActivationResolution.decision_id.in_([row.id for row in policies]),
+    ))).all()
+    proofs = {row.decision_id: {"terms_hash": row.terms_hash, "authority_id": str(row.authority_id),
+                              "authority_version": row.authority_version} for row in proof_rows}
+    fingerprint = canonical_hash([
+        {"id": str(row.id), "version": row.version, "expires_at": row.expires_at.isoformat()}
+        | proofs.get(row.id, {})
+        for row in sorted(policies, key=lambda row: str(row.id))])
+    return PolicyUseReceipt(deadline, fingerprint, context)
 
 
 async def assert_active_project(session, scope):
@@ -156,10 +262,11 @@ async def validate_observation(session, scope, data, now):
     await assert_active_project(session, scope)
     if scope.buyer_id is None or scope.company_id is None or data.checked_at > now:
         raise ApiError(422, "INVALID_REQUEST", "buyer and an actual observed timestamp are required")
-    deadline = await personal_policy(session, scope, now)
+    deadline = await personal_policy(session, scope, now, action="observation.append", sources=data.sources)
     person, contact = await observation_subjects(session, scope, data, now)
     if contact:
-        deadline = await personal_policy(session, scope, now, contact.id)
+        deadline = await personal_policy(session, scope, now, contact.id,
+                                         action="observation.append", sources=data.sources)
     if data.supersedes_id:
         previous = await session.scalar(select(LeadObservation).where(
             LeadObservation.workspace_id == scope.workspace_id, LeadObservation.project_id == scope.project_id,
@@ -237,8 +344,9 @@ async def retained_payload(session, scope, payload_id, now, *, cache=None):
 
 async def observation_data(session, scope, row, now, *, policy_allowed=None, cache=None):
     payload, content = await retained_payload(session, scope, row.payload_id, now, cache=cache)
-    if policy_allowed is None:
-        policy_allowed = await personal_policy(session, scope, now, row.contact_id, required=False) is not None
+    bound = await personal_policy(session, scope, now, row.contact_id, required=False,
+                                   sources=(content or {}).get("sources", [])) is not None
+    policy_allowed = bound and policy_allowed is not False
     availability = "available"
     if not policy_allowed:
         availability, content = "policy_blocked", None
@@ -297,7 +405,5 @@ async def list_observations(session, scope, *, offset, limit, now):
     total = await session.scalar(select(func.count()).select_from(LeadObservation).where(*conditions))
     rows = list((await session.scalars(select(LeadObservation).where(*conditions)
         .order_by(LeadObservation.created_at, LeadObservation.id).offset(offset).limit(limit))).all())
-    allowed = await personal_policy(session, scope, now, required=False) is not None
-    items = [await observation_data(session, scope, row, now,
-                                    policy_allowed=None if row.contact_id else allowed) for row in rows]
+    items = [await observation_data(session, scope, row, now) for row in rows]
     return {"items": items, "offset": offset, "limit": limit, "total": total, "reviews": []}

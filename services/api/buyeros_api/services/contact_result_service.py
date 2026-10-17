@@ -128,10 +128,15 @@ async def apply_verified_result(session, *, workspace_id: uuid.UUID, operation_i
     basis = next((row for row in (quote.selection or {}).get("resolved", [])
                   if row.get("buyer_id") == str(operation.buyer_id)), None)
     if basis and basis.get("company_id"):
+        from .provider_policy_context import company_context
+        binding = (quote.selection or {}).get("provider_policy_binding") or {}
+        use = await company_context(session, project_id=quote.project_id, company_id=basis["company_id"],
+            action="contact.enrich", provider_name=operation.provider_name,
+            account_reference=operation.account_reference, contract_sha256=binding.get("contract_sha256"))
         policy = await evaluate_current_policy(session, {
             "workspace_id": workspace_id, "project_id": quote.project_id,
             "company_id": basis["company_id"],
-        }, "contact_research", datetime.now(timezone.utc))
+        }, "contact_research", datetime.now(timezone.utc), use_context=use)
         event.processing_state = "applied" if policy["allowed"] and not job.cancel_requested else "quarantined"
     else:
         event.processing_state = "quarantined"

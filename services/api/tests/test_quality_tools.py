@@ -81,7 +81,7 @@ def test_zero_denominator_and_small_n_wilson_are_explicit():
 
 @pytest.mark.parametrize('variable',['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL'])
 def test_legacy_benchmark_refuses_each_inherited_database_before_pytest(variable,tmp_path):
-    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL','BUYEROS_DATABASE_MIGRATION_URL']}
     env[variable]='postgresql://not-used.example/shared'
     # RED safety: if old wrapper ignores this DSN, collect only. No DB fixture
     # starts, so the test proves the guard without touching any shared database.
@@ -202,7 +202,7 @@ def test_p99_with_only_one_expected_tail_observation_stays_unstable():
 
 
 def test_legacy_benchmark_preserves_existing_dispatcher_evidence(tmp_path):
-    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL']}
+    env={k:v for k,v in os.environ.items() if k not in ['BUYEROS_TEST_DATABASE_URL','BUYEROS_DATABASE_URL','DATABASE_URL','BUYEROS_WORKER_DATABASE_URL','BUYEROS_DATABASE_MIGRATION_URL']}
     env['PYTEST_ADDOPTS']='--collect-only'
     output=tmp_path/'result.json';dispatcher=tmp_path/'result-dispatcher.json'
     dispatcher.write_bytes(b'previous dispatcher evidence')
@@ -212,17 +212,27 @@ def test_legacy_benchmark_preserves_existing_dispatcher_evidence(tmp_path):
 
 
 def test_legacy_benchmark_rejects_collection_without_observations(tmp_path):
-    env={k:v for k,v in os.environ.items() if k not in metrics().DATABASE_VARIABLES}
+    env={k:v for k,v in os.environ.items() if k not in (*metrics().DATABASE_VARIABLES, "BUYEROS_DATABASE_MIGRATION_URL")}
     env['PYTEST_ADDOPTS']='--collect-only'
+    env['PYTEST_PLUGINS']='tools.policy_activation_pytest'
+    env['BUYEROS_POLICY_TARGET_RECEIPT']=str(tmp_path/'unrelated-ci-target.json')
     output=tmp_path/'empty-observations.json'
     result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000','--workspaces','1','--output',str(output)],env=env,capture_output=True,text=True,timeout=45)
     assert result.returncode==2 and 'collection is not verification' in result.stderr
     assert not output.exists()
 
+    # An independent benchmark must reject every endpoint the migrator can use.
+    # collect-only keeps this negative test free of SQL even before the fix.
+    env['BUYEROS_DATABASE_MIGRATION_URL']='postgresql://not-used.example/production'
+    denied=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000',
+        '--workspaces','1','--output',str(output)],env=env,capture_output=True,text=True,timeout=45)
+    assert denied.returncode==2 and 'BUYEROS_DATABASE_MIGRATION_URL' in denied.stderr
+    assert not output.exists()
+
 
 @pytest.mark.parametrize("actors",[1,10,25])
 def test_buyer_capture_accepts_capacity_actors_but_refuses_empty_observations(actors,tmp_path):
-    env={k:v for k,v in os.environ.items() if k not in metrics().DATABASE_VARIABLES}
+    env={k:v for k,v in os.environ.items() if k not in (*metrics().DATABASE_VARIABLES, "BUYEROS_DATABASE_MIGRATION_URL")}
     env['PYTEST_ADDOPTS']='--collect-only'
     output=tmp_path/'new.json'
     result=subprocess.run([sys.executable,str(ROOT/'scripts/benchmark-buyeros.py'),'--fixture-size','1000','--workspaces','1','--capacity-actors',str(actors),'--samples','30','--output',str(output)],env=env,capture_output=True,text=True,timeout=45)

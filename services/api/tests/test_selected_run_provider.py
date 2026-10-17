@@ -80,10 +80,14 @@ def test_registry_selected_scope_reaches_real_atomic_admission_without_route_ove
     cap=capability(provider='brave-search',service='search',markets=frozenset({'US'}),languages=frozenset({'en'}),roles=frozenset({'company','distributor'}))
     item=ProviderRegistration(cap,lambda:calls.append('tenant-factory-must-not-run'),('synthetic:owned-HTTP-scope-proof',),
                               None if mode=='missing-scope' else frozenset({'market','language'}),
-                              None if mode=='missing-scope' else (('US',('en',)),))
+                              None if mode=='missing-scope' else (('US',('en',)),),
+                              policy_account_reference='owned-selected-account')
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry(()) if mode=='default' else ProviderRegistry((item,)))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    from tests.test_run_admission_integration_db import PROJECT_A,RESEARCH_FIXTURE_DOMAINS
+    approve_research_fixture(dsn,WORKSPACE_A,PROJECT_A,domains=RESEARCH_FIXTURE_DOMAINS,search=item.policy_binding)
     # Test-owned process/DB only; paid gate is never changed in committed defaults.
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED','false' if mode=='paid-off' else 'true');get_settings.cache_clear()
     api.app.dependency_overrides.pop(selected_run_capability)

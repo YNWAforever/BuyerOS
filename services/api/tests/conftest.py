@@ -81,13 +81,15 @@ def _docker(*args: str) -> subprocess.CompletedProcess:
 
 
 def _start_container() -> tuple[str, str]:
+    from tests.policy_activation_target import local_docker_context
+    local_docker_context()  # Refuse a remote engine before creating any target.
     import psycopg
 
     last_error = "disposable postgres did not start"
     for attempt in range(2):
         name = f"buyeros-test-{uuid.uuid4().hex[:8]}"
         created = _docker(
-            "run", "-d", "--name", name,
+            "run", "-d", "--name", name, "--label", "buyeros.policy.run=" + name,
             "-e", f"POSTGRES_PASSWORD={DB_PASSWORD}",
             "-e", f"POSTGRES_USER={DB_USER}",
             "-e", f"POSTGRES_DB={DB_NAME}",
@@ -104,6 +106,7 @@ def _start_container() -> tuple[str, str]:
         # port forwards. Require both signals, with a bounded retry under load.
         deadline = time.time() + 120
         ready_inside = False
+        identity_verified = False
         while time.time() < deadline:
             if not ready_inside:
                 ready_inside = "accepting connections" in _docker(
@@ -113,6 +116,10 @@ def _start_container() -> tuple[str, str]:
             if ready_inside and mapping:
                 port = mapping[0].rsplit(":", 1)[1]
                 dsn = f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:{port}/{DB_NAME}"
+                if not identity_verified:
+                    from tests.policy_activation_target import register_created_fixture
+                    register_created_fixture(created.stdout.strip(), dsn, run_id=name, image=POSTGRES_IMAGE)
+                    identity_verified = True
                 try:
                     with psycopg.connect(dsn, connect_timeout=2):
                         return name, dsn
@@ -167,6 +174,16 @@ def seeded(migrated):
     import psycopg
 
     with psycopg.connect(migrated, autocommit=True) as conn:
+        # Current controlled policy history holds FKs to decisions/members.
+        # Clear only this shared fixture's derived append-only rows before its
+        # usual reset; production never uses this harness.
+        if conn.execute("SELECT to_regclass('public.policy_activation_resolutions')").fetchone()[0]:
+            for table in ("policy_activation_resolutions", "policy_activation_requests",
+                          "policy_controller_authorities", "idempotency_records", "policy_decisions"):
+                if conn.execute("SELECT to_regclass(%s)", ("public." + table,)).fetchone()[0]:
+                    conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
+                                 ("11111111-1111-4111-8111-111111111111",
+                                  "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM workspace_preferences WHERE workspace_id IN (%s, %s)",
@@ -181,6 +198,10 @@ def seeded(migrated):
             conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
                          ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM offer_documents WHERE workspace_id IN (%s, %s)",
+                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+        # A failing test may leave members before its teardown; workspace
+        # deletion must not cascade the whole shared-fixture session.
+        conn.execute("DELETE FROM memberships WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM projects WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
@@ -315,3 +336,11 @@ def isolated_api(isolated_seeded,monkeypatch):
 def isolated_quote_case(isolated_api,isolated_seeded):
     from tests.test_lookup_quotes_db import quote_case
     yield from quote_case.__wrapped__(isolated_api,isolated_seeded)
+
+
+@pytest.fixture
+def native_model_registration(monkeypatch):
+    # Resolve the model before the page license is approved. A later policy
+    # replacement correctly invalidates the old page's frozen permission.
+    from tests.test_run_model_admission_db import build_model_registration
+    return build_model_registration(monkeypatch)

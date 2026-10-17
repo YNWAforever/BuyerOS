@@ -122,8 +122,8 @@ def test_signed_native_search_continues_to_only_an_explicitly_permitted_page(run
     from buyeros_api.execution import provider_dispatch
     from buyeros_api.providers.live_search import LiveSearchAdapter,BraveSearchClient
     c=run_case
-    with psycopg.connect(c['dsn']) as db:
-        c['policy']=db.execute("UPDATE policy_decisions SET basis_reference=%s,provenance='synthetic exact source licensing',retention_days=1 WHERE subject_id=%s AND purpose='account_research' RETURNING id",(URL,c['project'])).fetchone()[0]
+    from tests.policy_activation_fixtures import approve_page_license_fixture
+    c['policy'],_=approve_page_license_fixture(c['dsn'],c['workspace'],c['project'],URL)
     monkeypatch.setenv('BUYEROS_EXECUTION_DATABASE_URL',role_dsn(c['dsn'],'buyeros_worker'))
     monkeypatch.setenv('BUYEROS_PAID_DISPATCH_ENABLED','true');get_settings.cache_clear();worker_settings.cache_clear()
     def response(req):
@@ -150,6 +150,7 @@ def test_signed_native_search_continues_to_only_an_explicitly_permitted_page(run
         assert db.execute('SELECT canonical_company_id FROM raw_candidates WHERE run_id=%s',(c['run'],)).fetchone()==(None,)
 
 def test_page_migration_rollback_keeps_rows_hashes_holds_and_closes_writes(page_case,monkeypatch):
+    from tests.migration_guards import invoke_revision
     from alembic import command
     from alembic.config import Config
     from tests.conftest import ALEMBIC_INI,SERVICE_ROOT
@@ -161,7 +162,9 @@ def test_page_migration_rollback_keeps_rows_hashes_holds_and_closes_writes(page_
         hold=db.execute('SELECT state,remaining_hold FROM budget_reservations').fetchall()
     monkeypatch.setenv('BUYEROS_DATABASE_URL',c['dsn']);get_settings.cache_clear()
     try:
-        command.downgrade(cfg,'0044_c61_search_intake')
+        with pytest.raises(RuntimeError,match='preserve controller policy history'):
+            command.downgrade(cfg,'0044_c61_search_intake')
+        invoke_revision(c['dsn'],cfg,'0045_c61_research_page_privacy')
         with psycopg.connect(c['dsn']) as db:
             assert db.execute('SELECT public.buyeros_search_receipts_writable(),public.buyeros_model_receipts_writable(),public.buyeros_contact_receipts_writable()').fetchone()==(False,False,False)
             assert db.execute('SELECT request_hash,response_hash,intent_key,runtime_epoch FROM search_receipts WHERE id=%s',(c['receipt'],)).fetchone()==before
@@ -169,7 +172,8 @@ def test_page_migration_rollback_keeps_rows_hashes_holds_and_closes_writes(page_
             assert db.execute('SELECT count(*) FROM source_documents WHERE id=%s',(uuid.UUID(result['source_document_id']),)).fetchone()==(1,)
         assert execute(c,t)['status']=='stale' and t.calls==1
     finally:
-        command.upgrade(cfg,'head');monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
+        invoke_revision(c['dsn'],cfg,'0056_policy_activation','_fences',('0056_policy_activation',))
+        monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert execute(c,t)==result and t.calls==1
 
 

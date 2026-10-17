@@ -27,6 +27,9 @@ class BrowserSearchFixture:
     price_version = 'fixture-price-v1'
     quoted_upper_bound = Decimal('0.100000')
     retention_seconds = 86400
+    from buyeros_api.api.policy_activation_schemas import ResearchProviderBinding
+    from tools.seed_legacy_policy_fixture import SEARCH_BINDING
+    policy_binding = ResearchProviderBinding.model_validate(SEARCH_BINDING)
 
     def __init__(self):
         self.accepted = {}
@@ -56,7 +59,8 @@ def main():
     released = asyncio.Event()
     from datetime import datetime, timezone
     from buyeros_api.providers.base import FixtureProviderAdapter, Money, ProviderCapability
-    contact = FixtureProviderAdapter(ProviderCapability(provider='fixture', adapter_version='contact-fixture-v1', service='contact', markets=frozenset({'US'}), languages=frozenset({'en'}), roles=frozenset({'Procurement manager'}), auth_model='fixture', pricing_version='fixture-price-v1', max_liability=Money(Decimal('0.300000')), idempotency='verified', status='verified', callback='unsupported', cancel='unsupported', retention='fixture-only', verified_at=datetime.now(timezone.utc), source_urls=('https://fixture.invalid/capability',)), environment='test', outcome='timeout_after_acceptance')
+    from tools.seed_legacy_policy_fixture import browser_contact_capability
+    contact = FixtureProviderAdapter(browser_contact_capability(), environment='test', outcome='timeout_after_acceptance')
 
     def seed(owner_dsn):
         # Combined browser fixture seeds research before contact's upserted budget.

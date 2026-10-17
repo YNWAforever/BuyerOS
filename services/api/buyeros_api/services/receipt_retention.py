@@ -16,7 +16,8 @@ def redacted_receipt(row,*,response_key='response'):
         return result
     return None
 
-async def require_current_receipt_read(session,*,workspace_id,actor_id,project_id):
+async def require_current_receipt_read(session,*,workspace_id,actor_id,project_id,source_urls=(),source_ids=(),
+                                       empty_search_binding=None):
     from sqlalchemy import select
     from ..db.models import Membership
     from ..db.icp import Project
@@ -25,7 +26,20 @@ async def require_current_receipt_read(session,*,workspace_id,actor_id,project_i
     member=(await session.execute(select(Membership).where(Membership.workspace_id==workspace_id,Membership.user_id==actor_id,Membership.active.is_(True)))).scalar_one_or_none()
     project=(await session.execute(select(Project).where(Project.workspace_id==workspace_id,Project.id==project_id,Project.status=='active'))).scalar_one_or_none()
     if member is None or not permission_for_roles(member.roles,'startRun') or project is None:raise ValueError('current receipt read permission unavailable')
-    policy=await evaluate_current_policy_readonly(session,{'workspace_id':workspace_id,'project_id':project_id},'account_research',datetime.now(timezone.utc))
+    from .research_policy_context import research_use,evidence_urls
+    urls=list(source_urls)
+    if source_ids:urls.extend(await evidence_urls(session,project_id=project_id,source_ids=source_ids))
+    if empty_search_binding is not None:
+        from ..api.policy_activation_schemas import ResearchProviderBinding
+        if urls or source_ids or not isinstance(empty_search_binding,ResearchProviderBinding):
+            raise ValueError('empty search bookkeeping cannot authorize source content')
+        # The decoded receipt has no output content. Reading the original
+        # operation still requires its exact approved search account/contract.
+        context=research_use(project_id,'research.search',binding=empty_search_binding)
+    else:
+        context=research_use(project_id,'research.read',urls=urls)
+    policy=await evaluate_current_policy_readonly(session,{'workspace_id':workspace_id,'project_id':project_id},
+        'account_research',datetime.now(timezone.utc),use_context=context)
     if not policy['allowed']:raise ValueError('current receipt purpose policy unavailable')
 
 async def bind_receipt_source(session,*,service,receipt_id,source_id):

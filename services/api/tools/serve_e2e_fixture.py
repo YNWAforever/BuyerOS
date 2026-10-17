@@ -415,7 +415,8 @@ def fake_principal(request: Request) -> Principal:
     subjects = {"Bearer fixture-access": SUBJECT,
                 "Bearer fixture-reviewer": "reviewer",
                 "Bearer fixture-viewer": "viewer",
-                "Bearer fixture-admin": "admin"}
+                "Bearer fixture-admin": "admin",
+                "Bearer fixture-requester": "policy-requester"}
     if token not in subjects:
         raise ApiError(401, "AUTH_REQUIRED", "fixture bearer required")
     return Principal(issuer=ISSUER, subject=subjects[token])
@@ -427,6 +428,12 @@ def main() -> None:
 
     container = None
     owner_dsn = os.environ.get("BUYEROS_TEST_DATABASE_URL")
+    policy_receipt = os.environ.get("BUYEROS_POLICY_TARGET_RECEIPT")
+    if policy_receipt:
+        from tests.policy_activation_target import inspect_target
+        inspect_target(Path(policy_receipt))
+    elif os.environ.get("BUYEROS_E2E_POLICY_ACTIVATION") == "1":
+        raise RuntimeError("policy browser requires an independently verified owned target receipt")
     if owner_dsn:
         _require_disposable_test_dsn(owner_dsn)
     else:
@@ -437,12 +444,19 @@ def main() -> None:
 
     try:
         os.environ["BUYEROS_DATABASE_URL"] = owner_dsn
+        os.environ["BUYEROS_DATABASE_MIGRATION_URL"] = owner_dsn
         get_settings.cache_clear()
         service_root = Path(__file__).resolve().parents[1]
         config = Config(str(service_root / "alembic.ini"))
         config.set_main_option("script_location", str(service_root / "alembic"))
         command.upgrade(config, "head")
         seed(owner_dsn)
+        if any(os.environ.get(flag) == "1" for flag in ("BUYEROS_E2E_SEED_BUYERS", "BUYEROS_E2E_SEED_RUNS")):
+            from tools.seed_legacy_policy_fixture import seed_legacy_policy_fixture
+            seed_legacy_policy_fixture(owner_dsn)
+        if os.environ.get("BUYEROS_E2E_POLICY_ACTIVATION") == "1":
+            from tools.seed_policy_activation_fixture import seed_policy_fixture, reset_policy_fixture, policy_counts
+            seed_policy_fixture(owner_dsn)
         if os.environ.get("BUYEROS_E2E_SEED_LEAD_WORKFLOW") == "1":
             from tools.seed_lead_workflow_fixture import seed_lead_workflow_fixture
             seed_lead_workflow_fixture(owner_dsn)
@@ -451,15 +465,33 @@ def main() -> None:
         get_settings.cache_clear()
         app = create_app()
         app.dependency_overrides[get_principal] = fake_principal
+        if os.environ.get("BUYEROS_E2E_POLICY_ACTIVATION") == "1":
+            @app.post("/fixture/policy-reset", include_in_schema=False)
+            def reset_policy():
+                reset_policy_fixture(owner_dsn)
+                return {"fixture_only": True}
+
+            @app.get("/fixture/policy-counts", include_in_schema=False)
+            def counts_policy():
+                return policy_counts(owner_dsn)
+
+            @app.post("/fixture/policy-expire-authority", include_in_schema=False)
+            def expire_policy_authority():
+                from tests.policy_activation_target import assert_owned_test_dsn
+                assert_owned_test_dsn(owner_dsn)
+                with psycopg.connect(owner_dsn) as db:
+                    db.execute("UPDATE policy_controller_authorities SET expires_at=now()-interval '1 second' "
+                               "WHERE workspace_id=%s", (WORKSPACE_ID,))
+                return {"fixture_only": True}
         if os.environ.get("BUYEROS_E2E_SEED_LEAD_WORKFLOW") == "1":
             from tools.seed_lead_workflow_fixture import reset_lead_workflow_fixture, apply_lead_fixture_scenario, PROJECT as LEAD_PROJECT
             from fastapi import Body
             @app.post("/fixture/lead-scenario", include_in_schema=False)
             def lead_fixture_scenario(scenario: str = Body(embed=True)):
-                if scenario not in {"expire_channel", "product_caveat"}:
+                if scenario not in {"expire_channel", "product_caveat", "second_purchaser"}:
                     raise ApiError(422, "INVALID_REQUEST", "unsupported fixture scenario")
-                apply_lead_fixture_scenario(owner_dsn, scenario)
-                return {"fixture_only": True}
+                result=apply_lead_fixture_scenario(owner_dsn, scenario)
+                return result or {"fixture_only": True}
             @app.post("/fixture/lead-reset", include_in_schema=False)
             def reset_lead_fixture():
                 reset_lead_workflow_fixture(owner_dsn)
@@ -520,15 +552,8 @@ def main() -> None:
             from buyeros_api.api.routes.quotes import selected_contact_quote_capability
             from buyeros_api.providers.base import Money, ProviderCapability
 
-            quote_capability = ProviderCapability(
-                provider="fixture", adapter_version="contact-fixture-v1", service="contact",
-                markets=frozenset({"US"}), languages=frozenset({"en"}),
-                roles=frozenset({"Procurement manager"}), auth_model="fixture",
-                pricing_version="fixture-price-v1", max_liability=Money(Decimal("0.300000")),
-                idempotency="verified", status="verified", callback="unsupported", cancel="unsupported",
-                retention="fixture-only", verified_at=datetime.now(timezone.utc),
-                source_urls=("https://fixture.invalid/capability",),
-            )
+            from tools.seed_legacy_policy_fixture import browser_contact_capability
+            quote_capability = browser_contact_capability()
             app.dependency_overrides[selected_contact_quote_capability] = lambda: (quote_capability, "test")
 
             @app.get("/fixture/quote-counts", include_in_schema=False)
@@ -548,11 +573,15 @@ def main() -> None:
         if os.environ.get("BUYEROS_E2E_SEED_RUNS") == "1":
             from buyeros_api.api.routes.runs import selected_run_capability
             from buyeros_api.api.routes.health import capabilities_payload
+            from buyeros_api.db.icp import canonical_hash
             app.dependency_overrides[selected_run_capability] = lambda: ({
                 "service":"search", "provider":"fixture", "verified":True,
                 "price_version":"fixture-price-v1", "verified_filters":["market","language"],
                 "markets":["US"], "languages":["en"], "roles":["distributor"],
-                "market_languages":{"US":["en"]}}, "test")
+                "market_languages":{"US":["en"]},
+                "policy_binding": {"provider_name":"fixture", "account_reference":"owned-research-account",
+                    "contract_sha256": canonical_hash(
+                        {"schema":"owned-research-fixture.v1", "service":"search", "provider":"fixture"}).removeprefix("sha256:")}}, "test")
             # Only this owned fictional app admits via a test-only contract.
             # Its UI availability must describe that contract, not production
             # registry activation. No provider or production switch is enabled.

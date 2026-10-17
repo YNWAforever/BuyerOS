@@ -29,7 +29,7 @@ def main() -> int:
     args = parser.parse_args()
     if not 30 <= args.samples <= 100:
         parser.error("samples must be between30 and100")
-    for variable in ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL"):
+    for variable in ("BUYEROS_TEST_DATABASE_URL", "BUYEROS_DATABASE_URL", "DATABASE_URL", "BUYEROS_WORKER_DATABASE_URL", "BUYEROS_DATABASE_MIGRATION_URL"):
         if os.environ.get(variable):
             parser.error(f"unset inherited database {variable}; this benchmark owns a disposable Docker database")
     dispatcher_output = args.output.resolve().with_name(args.output.stem + "-dispatcher.json")
@@ -39,6 +39,10 @@ def main() -> int:
     if not python.is_file():
         parser.error(f"API virtual environment missing: {python}; run uv sync --frozen in services/api")
     env = dict(os.environ)
+    # This child owns a new target (or only collects). Parent CI proof cannot
+    # authorize it; the normal allocator independently gates its own SQL.
+    env.pop("PYTEST_PLUGINS", None)
+    env.pop("BUYEROS_POLICY_TARGET_RECEIPT", None)
     env["BUYEROS_STRICT_INTEGRATION"] = "1"
     env["BUYEROS_BENCH_FIXTURE_SIZE"] = str(args.fixture_size)
     env["BUYEROS_BENCH_WORKSPACES"] = str(args.workspaces)

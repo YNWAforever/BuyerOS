@@ -27,20 +27,9 @@ def docker(*args: str, timeout: int = 30) -> str:
 
 
 def owner_dsn() -> str:
-    marker = ROOT / "test-results" / "e2e-db-container.txt"
-    name = marker.read_text(encoding="utf-8").strip()
-    if not re.fullmatch(r"buyeros-test-[0-9a-f]{8}", name):
-        raise RuntimeError("refusing unrecognized disposable database name")
-    info = json.loads(docker("inspect", name))[0]
-    if (info["Name"] != "/" + name or info["Config"]["Image"] != "postgres:16"
-            or "POSTGRES_DB=buyeros_test_api" not in info["Config"]["Env"]
-            or any(mount["Type"] != "volume" for mount in info["Mounts"])):
-        raise RuntimeError("refusing non-fixture database container")
-    mapping = docker("port", name, "5432").splitlines()[0]
-    host, port = mapping.rsplit(":", 1)
-    if host != "127.0.0.1" or not port.isdecimal():
-        raise RuntimeError("refusing non-loopback database port")
-    return f"postgresql://buyeros:buyeros@127.0.0.1:{port}/buyeros_test_api"
+    # Use the same independently verified owned target as the actual worker.
+    from tests.fixtures.run_browser_research import owner_dsn as verified_owner_dsn
+    return verified_owner_dsn()
 
 
 def prepare_browser_runtime(dsn: str) -> str:

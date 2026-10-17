@@ -33,9 +33,12 @@ async def contact_detail(session, *, workspace_id, buyer) -> list[dict]:
     ).order_by(ContactPoint.id).limit(100))).scalars().all()
     result = []
     for contact in rows:
+        from .provider_policy_context import company_context
+        use = await company_context(session, project_id=buyer.project_id, company_id=buyer.company_id,
+                                    action="contact.read", recipient_ref=contact.id)
         gate = await evaluate_current_policy(session, {"workspace_id": workspace_id,
             "project_id": buyer.project_id, "company_id": buyer.company_id,
-            "contact_point_id": contact.id}, "contact_research", now)
+            "contact_point_id": contact.id}, "contact_research", now, use_context=use)
         if not gate["allowed"]:
             continue
         item = {"id": str(contact.id), "company_id": str(contact.company_id), "type": contact.type,

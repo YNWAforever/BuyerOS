@@ -36,6 +36,13 @@ def scoped_quote_case(quote_case,monkeypatch):
         db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
         db.execute("UPDATE companies SET domain='fictional-sensors.com' WHERE id=%s",(buyers[0][1],))
         db.execute("INSERT INTO company_aliases(id,workspace_id,company_id,alias_type,normalized_value,provenance,reviewed) VALUES(%s,%s,%s,'domain','fictional-sensors.com','owned explicit human domain review',true)",(uuid.uuid4(),WORKSPACE_A,buyers[0][1]))
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    from tests.test_lookup_quotes_db import PROJECT
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="contact_research", domains=("fictional-sensors.com", "fixture2.example"),
+        scope={"provider_name": cap.provider, "account_reference": scope.account_reference,
+               "contract_sha256": item.contract_hash})
     yield {'client':client,'dsn':dsn,'buyers':buyers,'cap':cap,'item':item,'calls':calls,'workspace':uuid.UUID(WORKSPACE_A)}
     with psycopg.connect(dsn) as db:
         db.execute('DELETE FROM contact_receipts WHERE workspace_id=%s',(WORKSPACE_A,))

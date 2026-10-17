@@ -169,9 +169,12 @@ async def quote_lookup(session, actor_id: uuid.UUID, project_id: uuid.UUID, requ
             reasons.append("evidence_stale")
         if review is None or review.state != "accepted" or fit is None or review.fit_assessment_id != fit.id:
             reasons.append("review_not_accepted")
+        from .provider_policy_context import contact_context
+        use = await contact_context(session, project_id=project_id, company_id=company.id,
+                                    capability=capability, configuration=configuration, environment=environment)
         policy = await evaluate_current_policy(session, {
             "workspace_id": workspace_id, "project_id": project_id, "company_id": company.id,
-        }, "contact_research", now)
+        }, "contact_research", now, use_context=use)
         reasons.extend(policy["reason_codes"])
         if any(role not in capability.roles for role in request.roles):
             reasons.append("unsupported_role")
@@ -215,7 +218,14 @@ async def quote_lookup(session, actor_id: uuid.UUID, project_id: uuid.UUID, requ
                "rows": basis_rows}
     if configuration is not None:
         context['contact_configuration']=configuration
+    binding = {
+        "provider_name": capability.provider,
+        "account_reference": use.account_reference if selected else None,
+        "contract_sha256": use.contract_sha256 if selected else None,
+    }
+    context["provider_policy_binding"] = binding
     frozen_selection={"request":request_data,"resolved":basis_rows,"context_hash":quote_hash(context)}
+    frozen_selection["provider_policy_binding"] = binding
     if configuration is not None:
         frozen_selection['contact_configuration']=configuration
     expires_at = now + QUOTE_TTL

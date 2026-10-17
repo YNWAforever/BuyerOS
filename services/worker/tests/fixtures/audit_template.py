@@ -34,9 +34,27 @@ def main():
                 raise RuntimeError("fictional contact changed")
             if not existing:
                 db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email','recipient@fixture.example.test','provider_marked_valid',now(),false,now()+interval '1 day')", (CONTACT, WORKSPACE, COMPANY))
-            for purpose in ("contact_research", "outreach", "export_contacts"):
+            for purpose in ("export_contacts",):
                 if not db.execute("SELECT 1 FROM policy_decisions WHERE workspace_id=%s AND subject_type='project' AND subject_id=%s AND purpose=%s", (WORKSPACE, PROJECT, purpose)).fetchone():
                     db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) VALUES (%s,%s,'project',%s,%s,%s,'permitted','fixture-v1','Q07 fictional prerequisite','fixture-only',ARRAY['US'],now()+interval '1 day',1,%s)", (uuid.uuid4(), WORKSPACE, PROJECT, WORKSPACE, purpose, REVIEWER))
+            db.commit()  # The new contact must be visible to the real approval transaction.
+            from tests.controlled_policy_fixtures import api_fixture_helpers
+            helpers = api_fixture_helpers()
+            controller = helpers.ensure_fixture_controller(dsn, WORKSPACE, PROJECT)
+            sender = db.execute("SELECT active_sender_identity_version_id FROM projects WHERE id=%s AND workspace_id=%s",
+                                (PROJECT, WORKSPACE)).fetchone()[0]
+            domain = db.execute("SELECT domain FROM companies WHERE id=%s AND workspace_id=%s",
+                                (COMPANY, WORKSPACE)).fetchone()[0]
+            db.commit()
+            scope = {"provider_name": "fixture", "account_reference": "owned-browser-account",
+                     "contract_sha256": "b"*64, "recipient_refs": [str(CONTACT)]}
+            helpers.approve_provider_fixture(dsn, WORKSPACE, PROJECT, controller, purpose="contact_research",
+                domains=(domain,"example.test"), actions=["contact.read"], scope=scope, transaction_role=True)
+            scope = {**scope, "sender_identity_id": str(sender)}
+            helpers.approve_provider_fixture(dsn, WORKSPACE, PROJECT, controller, purpose="draft_preparation",
+                domains=(domain,"example.test"), scope={**scope, "allow_unaddressed_drafts": True}, transaction_role=True)
+            helpers.approve_provider_fixture(dsn, WORKSPACE, PROJECT, controller, purpose="outreach",
+                domains=(domain,"example.test"), actions=["delivery.review"], scope=scope, transaction_role=True)
             print(json.dumps({"fixture_only": True, "contact": str(CONTACT)}))
             return
         job_id = uuid.UUID(args[1])

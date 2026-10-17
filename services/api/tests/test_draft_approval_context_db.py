@@ -47,7 +47,7 @@ def _addressed_case(api, dsn, buyers):
                             "AND retired=false", (PROJECT,)).fetchone()[0]
         fit_hash = db.execute("SELECT evidence_set_hash FROM fit_assessments WHERE project_buyer_id=%s",
                               (buyer_id,)).fetchone()[0]
-        for purpose in ("outreach", "export_contacts"):
+        for purpose in ("export_contacts",):
             db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,"
                        "controller_scope_id,purpose,status,policy_version,basis_reference,provenance,"
                        "countries,expires_at,retention_days,decision_author_id) "
@@ -84,6 +84,20 @@ def _addressed_case(api, dsn, buyers):
                    "VALUES (%s,%s,%s,1,%s::jsonb,%s,%s::jsonb,%s::jsonb)",
                    (revision_id, WORKSPACE_A, draft_id, json.dumps(content), _digest(content),
                     json.dumps([evidence_id]), json.dumps([FACT_ID])))
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    with psycopg.connect(dsn) as db:
+        sender_id = db.execute("SELECT active_sender_identity_version_id FROM projects WHERE id=%s", (PROJECT,)).fetchone()[0]
+        domain = db.execute("SELECT domain FROM companies WHERE id=%s", (company_id,)).fetchone()[0]
+    scope = {"provider_name": "resend", "account_reference": "owned-delivery-budget-fixture",
+             "contract_sha256": "b" * 64, "sender_identity_id": str(sender_id),
+             "recipient_refs": [str(contact_id)]}
+    # Install both authority actions before granting either policy, so authority
+    # supersession cannot accidentally leave the first decision stale.
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="outreach", scope=scope, domains=(domain,))
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="draft_preparation", scope=scope, domains=(domain,))
     return str(draft_id), str(contact_id)
 
 
@@ -127,7 +141,17 @@ def test_exact_context_fixture_approval_and_disabled_delivery(quote_case):
     assert review.json()["data"]["approval_review"]["recipient"]["value"] == "recipient@fixture.example"
     payload = _approval_payload(review)
     assert payload["recipient_contact_id"] == contact_id
-    assert len(payload["policy_decision_ids"]) == 3
+    with psycopg.connect(dsn) as db:
+        expected = db.execute(
+            "SELECT id,purpose FROM policy_decisions WHERE workspace_id=%s AND subject_id=%s "
+            "AND purpose IN ('draft_preparation','outreach','export_contacts') "
+            "ORDER BY created_at DESC,id DESC", (WORKSPACE_A, PROJECT)).fetchall()
+    latest = {}
+    for decision_id, purpose in expected:
+        latest.setdefault(purpose, str(decision_id))
+    assert set(latest) == {"draft_preparation", "outreach", "export_contacts"}
+    assert set(latest.values()) <= set(payload["policy_decision_ids"])
+    assert len(payload["policy_decision_ids"]) == len(set(payload["policy_decision_ids"]))
     assert _approve(api, draft_id, payload, subject=OPERATOR, key="operator-approval").status_code == 403
     approval = _approve(api, draft_id, payload)
     assert approval.status_code == 201, approval.text

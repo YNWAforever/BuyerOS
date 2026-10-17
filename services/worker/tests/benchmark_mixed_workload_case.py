@@ -11,6 +11,7 @@ import uuid
 
 from celery import Celery
 import psycopg
+import pytest
 import redis
 
 from buyeros_worker.dispatcher import dispatch_cycle
@@ -23,7 +24,40 @@ from tests.mixed_workload_cleanup import capture_then_cleanup
 from tests.mixed_timeout_probe import check_owned_timeout
 
 
-def test_owned_timeout_cleans_cooperative_and_stubborn_processes():
+def test_owned_timeout_cleans_cooperative_and_stubborn_processes(monkeypatch):
+    original_read, original_exists = Path.read_text, Path.exists
+    observations = []
+
+    def proc_stat(path):
+        return path.name == 'stat' and path.parent.parent == Path('/proc')
+
+    def observed_before_exit(path):
+        return True if proc_stat(path) else original_exists(path)
+
+    def exited_before_read(path, *args, **kwargs):
+        if proc_stat(path):
+            observations.append(path)
+            raise FileNotFoundError('owned process exited before stat read')
+        return original_read(path, *args, **kwargs)
+
+    # Deterministic reproduction of exit between exists() and read_text().
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, 'exists', observed_before_exit)
+        patch.setattr(Path, 'read_text', exited_before_read)
+        check_owned_timeout()
+    assert len(observations) == 1
+
+    def denied_stat(path, *args, **kwargs):
+        if proc_stat(path):
+            raise PermissionError('cannot verify process termination')
+        return original_read(path, *args, **kwargs)
+
+    # Only disappearance proves exit; other observation failures must fail closed.
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, 'exists', observed_before_exit)
+        patch.setattr(Path, 'read_text', denied_stat)
+        with pytest.raises(PermissionError):
+            check_owned_timeout()
     check_owned_timeout()
 
 

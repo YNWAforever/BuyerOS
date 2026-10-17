@@ -25,17 +25,40 @@ from tests.test_api_projects_db import _h
 pytestmark=pytest.mark.parametrize('run_case',['native'],indirect=True)
 
 @pytest.fixture
-def model_review_case(selected_review_case,monkeypatch):
-    c=selected_review_case;factories=[];holder={}
+def handoff_model_registration(run_case,monkeypatch):
+    factories=[];holder={}
     cap=ProviderCapability(provider='openai-responses',adapter_version='c61-review-owned-model-v1',service='model',markets=frozenset({'US','HK'}),languages=frozenset({'en','zh-HK'}),roles=frozenset({'company'}),auth_model='server-key',pricing_version='synthetic-review-model-v1',max_liability=Money(Decimal('0.100000'),'USD'),idempotency='verified',status='verified',callback='unsupported',cancel='unsupported',retention='fixture-only',verified_at=datetime.now(timezone.utc),source_urls=('https://developers.openai.com/api/reference/responses/overview',))
     route=ModelRoute('synthetic-review-prompt-v1',frozenset(),1000,500,30,0,'synthetic-review-route-v1')
     def factory():factories.append('model');return holder['adapter']
-    item=ProviderRegistration(cap,factory,('synthetic:owned-review-to-model-only',),model_route=route,model_id='synthetic-review-model-v1')
+    item=ProviderRegistration(cap,factory,('synthetic:owned-review-to-model-only',),model_route=route,model_id='synthetic-review-model-v1',
+                              policy_account_reference='owned-review-model-account')
     search=registry.DEFAULT_REGISTRY.registration('search')
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',base.SELECTED_LIVE_PROVIDERS|{'openai-responses'})
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',registry.SELECTED_LIVE_PROVIDERS|{'openai-responses'})
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry((search,item)))
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED','true');get_settings.cache_clear()
+    return {"item":item,"factories":factories,"holder":holder}
+
+
+from tests.test_research_page_scope_db import page_case as _licensed_page_case
+
+
+@pytest.fixture
+def page_case(run_case,handoff_model_registration):
+    # Approve the exact model contract in the original page license, before its
+    # claim/review proof exists. Never rewrite that approved history afterward.
+    return _licensed_page_case.__wrapped__(run_case)
+
+
+@pytest.fixture
+def model_review_case(selected_review_case,handoff_model_registration,monkeypatch):
+    c=selected_review_case
+    item=handoff_model_registration["item"];cap=item.capability;route=item.model_route
+    factories=handoff_model_registration["factories"];holder=handoff_model_registration["holder"]
+    search=registry.DEFAULT_REGISTRY.registration('search')
+    # selected_review_case replaces only the search factory to detect calls;
+    # restore the same already-approved model descriptor, without new consent.
+    monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry((search,item)))
     with psycopg.connect(c['dsn']) as db:
         before=db.execute('SELECT usage_counters,execution_snapshot FROM search_runs WHERE id=%s',(c['run'],)).fetchone()
         operations=db.execute('SELECT count(*) FROM provider_operations WHERE workspace_id=%s',(c['workspace'],)).fetchone()[0]

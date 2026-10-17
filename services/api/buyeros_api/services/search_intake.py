@@ -46,7 +46,13 @@ async def ingest_received_search(session,*,workspace_id,run_id,receipt_id,capabi
     member=(await session.execute(select(Membership).where(Membership.workspace_id==workspace_id,Membership.user_id==request.actor_id,Membership.active.is_(True)).with_for_update(read=True))).scalar_one_or_none()
     project=(await session.execute(select(Project).where(Project.workspace_id==workspace_id,Project.id==run.project_id).with_for_update(read=True))).scalar_one_or_none()
     icp=(await session.execute(select(IcpVersion).where(IcpVersion.workspace_id==workspace_id,IcpVersion.project_id==run.project_id,IcpVersion.id==run.icp_version_id).with_for_update(read=True))).scalar_one_or_none()
-    policy=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},'account_research',datetime.now(timezone.utc))
+    from .research_policy_context import research_use,metadata_binding
+    # An empty, already-received response creates only a zero-result checkpoint.
+    # No source content is copied; bind that bookkeeping to the original search.
+    use=research_use(run.project_id,'research.persist',urls=[item.get('source_url') for item in saved['sources']]) if saved['sources'] else research_use(
+        run.project_id,'research.search',binding=metadata_binding(snapshot.get('capability',{}),historical=True))
+    policy=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},
+        'account_research',datetime.now(timezone.utc),use_context=use)
     if (request.project_id!=run.project_id or snapshot.get('actor_id')!=str(request.actor_id) or
         member is None or not permission_for_roles(member.roles,'startRun') or not policy['allowed'] or
         project is None or project.status!='active' or icp is None or project.active_icp_version_id!=icp.id or

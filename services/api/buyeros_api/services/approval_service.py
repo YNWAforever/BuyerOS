@@ -234,8 +234,12 @@ async def current_approval_context(session, *, workspace_id, project, draft, rev
             raise ApiError(412, "STALE_REVISION", "uncited claim")
     subject = {"workspace_id": workspace_id, "project_id": project.id,
                "company_id": buyer.company_id, "contact_point_id": contact.id}
+    from .provider_policy_context import addressed_context
     for purpose in ("draft_preparation", "outreach", "export_contacts"):
-        gate = await evaluate_current_policy(session, subject, purpose, now)
+        use = await addressed_context(session, project_id=project.id, company_id=buyer.company_id,
+            sender_id=sender.id, recipient_id=contact.id,
+            action="delivery.review" if purpose == "outreach" else "draft.generate") if purpose != "export_contacts" else None
+        gate = await evaluate_current_policy(session, subject, purpose, now, use_context=use)
         if not gate["allowed"]:
             raise ApiError(403, "POLICY_BLOCKED", f"{purpose} is not permitted")
     scopes = [and_(PolicyDecision.subject_type == kind, PolicyDecision.subject_id == value)

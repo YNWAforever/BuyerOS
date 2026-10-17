@@ -114,6 +114,16 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
     from buyeros_api.execution.live_fit_runner import LiveFitDomainRunner
     route=ModelRoute('c61-offline-prompt-v1',frozenset(),20000,1000,30,0,'offline-model-route-v1')
     cap=ProviderCapability(provider='openai-responses',adapter_version='c61-model-v1',service='model',markets=frozenset({'US'}),languages=frozenset({'en'}),roles=frozenset({'company'}),auth_model='server-key',pricing_version='offline-model-price-v1',max_liability=Money(Decimal('0.100000'),'USD'),idempotency='verified',status='verified',callback='unsupported',cancel='unsupported',retention='offline-only',verified_at=datetime.now(timezone.utc),source_urls=('https://developers.openai.com/api/reference/responses/overview',))
+    from buyeros_api.api.policy_activation_schemas import ResearchProviderBinding
+    from buyeros_api.providers.registry import ProviderRegistration
+    from tests.controlled_policy_fixtures import api_fixture_helpers
+    from tests.test_discovery_runner_db import SEARCH_POLICY_BINDING
+    frozen_cap=replace(cap,verified_at=datetime.now(timezone.utc))
+    registration=ProviderRegistration(frozen_cap,lambda:None,model_route=route,model_id='offline-owned-model-v1')
+    binding=ResearchProviderBinding(provider_name=cap.provider,account_reference='owned-model-account',
+        contract_sha256=registration.contract_hash)
+    api_fixture_helpers().approve_research_fixture(owner_dsn,WS_A,PROJECT_A,
+        domains=('example.org',),search=SEARCH_POLICY_BINDING,model=binding,transaction_role=True)
     operation=uuid.uuid4();outbox=uuid.uuid4();intent=ProviderIntent('c17-model:'+operation.hex,'model','US','en','company');calls=[]
     with psycopg.connect(owner_dsn) as db:
         buyer=db.execute('SELECT id FROM project_buyers WHERE project_id=%s',(PROJECT_A,)).fetchone()[0]
@@ -139,9 +149,9 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
             state={'workspace_id':WS_A,'run_id':RUN_ID,'buyer_id':str(buyer),'workflow_version':'fit-v1','attempt':1}
             state.update(await runner.load_basis(state));basis=await runner.model_basis(state)
             request=m.ModelRequest(intent.key,basis,route,'offline-owned-model-v1','US','en','company')
-            api_store=cls(engine,uuid.UUID(WS_A),cap,model_id=request.model_id,route=route)
+            api_store=cls(engine,uuid.UUID(WS_A),frozen_cap,model_id=request.model_id,route=route,policy_binding=binding)
             ref=await api_store.prepare(request,operation_id=operation,outbox_id=outbox)
-            store=cls(worker_engine,uuid.UUID(WS_A),cap,model_id=request.model_id,route=route)
+            store=cls(worker_engine,uuid.UUID(WS_A),frozen_cap,model_id=request.model_id,route=route,policy_binding=binding)
             if outcome in {'revoke','offer'}:
                 with psycopg.connect(owner_dsn) as db:
                     if outcome=='revoke':db.execute('UPDATE memberships SET active=false,version=version+1 WHERE workspace_id=%s AND user_id=%s',(WS_A,ACTOR_ID))
@@ -160,7 +170,7 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
             adapter=m.LiveModelAdapter(capability=cap,client=Client(),receipts=store)
             result=await execute_external(worker_engine,uuid.UUID(WS_A),operation,1,adapter,intent,environment='test')
             assert result==('accepted' if outcome=='received' else 'unknown')
-            saved=await cls(worker_engine,uuid.UUID(WS_A),cap,model_id=request.model_id,route=route).get(ref)
+            saved=await cls(worker_engine,uuid.UUID(WS_A),frozen_cap,model_id=request.model_id,route=route,policy_binding=binding).get(ref)
             assert saved['state']==('received' if outcome=='received' else ('prepared' if outcome in {'revoke','offer'} else ('submitting' if outcome=='epoch' else 'unknown')))
             if outcome=='received':
                 assert (await adapter.submit(intent)).state=='accepted' and saved['response']['model_id']==request.model_id
@@ -172,7 +182,7 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
                     assert (await session.execute(text("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname='model_receipts'"))).one()==(True,True)
                 async with tenant_session(engine,uuid.UUID(WS_A)) as session:
                     assert (await session.execute(text("SELECT current_user,(SELECT rolbypassrls FROM pg_roles WHERE rolname=current_user),has_table_privilege(current_user,'model_receipts','UPDATE')"))).one()==('buyeros_api',False,False)
-                assert await cls(worker_engine,uuid.uuid4(),cap,model_id=request.model_id,route=route).get(ref) is None
+                assert await cls(worker_engine,uuid.uuid4(),frozen_cap,model_id=request.model_id,route=route,policy_binding=binding).get(ref) is None
                 for statement in ["UPDATE model_receipts SET state='prepared'","UPDATE model_receipts SET response='{}'","UPDATE model_receipts SET request='{}'"]:
                     with pytest.raises(IntegrityError):
                         async with tenant_session(worker_engine,uuid.UUID(WS_A)) as session:await session.execute(text(statement))
@@ -183,9 +193,19 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
                 service=Path(__file__).resolve().parents[2]/'api';config=Config(str(service/'alembic.ini'));config.set_main_option('script_location',str(service/'alembic'))
                 monkeypatch.setenv('BUYEROS_DATABASE_URL',owner_dsn);get_settings.cache_clear()
                 try:
-                    command.downgrade(config,'0040_c61_search_receipts')
+                    with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                        command.downgrade(config,'0040_c61_search_receipts')
                     assert await store.get(ref)==saved
-                    with pytest.raises(ValueError,match='0041'):await api_store.prepare(request,operation_id=operation,outbox_id=outbox)
+                    # Independent negative marker simulation, not a successful
+                    # physical rollback: current retained history forbids that.
+                    with psycopg.connect(owner_dsn) as db:
+                        original_head=db.execute('SELECT version_num FROM alembic_version').fetchone()[0]
+                        db.execute("UPDATE alembic_version SET version_num='0040_c61_search_receipts'")
+                    try:
+                        with pytest.raises(ValueError,match='0041'):await api_store.prepare(request,operation_id=operation,outbox_id=outbox)
+                    finally:
+                        with psycopg.connect(owner_dsn) as db:
+                            db.execute('UPDATE alembic_version SET version_num=%s',(original_head,))
                 finally:
                     command.upgrade(config,'head')
                     monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_dsn);get_settings.cache_clear()

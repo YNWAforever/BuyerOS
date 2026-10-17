@@ -19,6 +19,12 @@ CAPABILITY = {
     "markets": ["US"], "languages": ["en"], "roles": ["distributor"],
     "market_languages": {"US": ["en"]},
 }
+from buyeros_api.api.policy_activation_schemas import ResearchProviderBinding
+FIXTURE_SEARCH_BINDING = ResearchProviderBinding(provider_name="fixture", account_reference="owned-admission-account",
+    contract_sha256=canonical_hash(CAPABILITY).removeprefix("sha256:"))
+CAPABILITY["policy_binding"] = FIXTURE_SEARCH_BINDING.model_dump(mode="json")
+RESEARCH_FIXTURE_DOMAINS = ("sensors.example.test", "fictional-sensors.com", "example.org",
+                          "fixture.invalid", "fixture.example", "source.example.test")
 
 
 @pytest.fixture
@@ -36,14 +42,9 @@ def admission_case(project_api, seeded):
              str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))),
         )
         db.execute("UPDATE projects SET active_icp_version_id=%s WHERE id=%s", (ICP_ID, PROJECT_A))
-        db.execute(
-            "INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,"
-            "purpose,status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) "
-            "VALUES (%s,%s,'project',%s,%s,'account_research','permitted','test-v1','fixture','fixture',"
-            "'{US}',now()+interval '1 day',1,%s)",
-            (str(uuid.uuid4()), WORKSPACE_A, PROJECT_A, WORKSPACE_A,
-             str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))),
-        )
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(seeded, WORKSPACE_A, PROJECT_A, domains=RESEARCH_FIXTURE_DOMAINS,
+                             search=FIXTURE_SEARCH_BINDING)
     budgets = project_api.get(f"/v1/workspaces/{WORKSPACE_A}/budgets", headers=_h(key="run-budget-view"))
     assert budgets.status_code == 200, budgets.text
     with psycopg.connect(seeded, autocommit=True) as db:
@@ -54,7 +55,8 @@ def admission_case(project_api, seeded):
     finally:
         project_api.app.dependency_overrides.pop(selected_run_capability, None)
         with psycopg.connect(seeded, autocommit=True) as db:
-            for table in ("outbox_events", "run_events", "search_runs"):
+            for table in ("outbox_events", "run_events", "search_runs",
+                          "policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities"):
                 db.execute(f"DELETE FROM {table} WHERE workspace_id=%s", (WORKSPACE_A,))
             db.execute("DELETE FROM policy_decisions WHERE workspace_id=%s AND subject_id=%s",
                        (WORKSPACE_A, PROJECT_A))

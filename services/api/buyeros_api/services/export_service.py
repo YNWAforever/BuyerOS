@@ -71,6 +71,8 @@ async def _buyer_material(session, *, workspace_id, project_id, items, include_c
             ContactPoint.type == "business_email",
             ContactPoint.validity == "provider_marked_valid",
             ContactPoint.quarantined.is_(False),
+            ContactPoint.checked_at <= now,
+            ContactPoint.retention_expires_at > now,
         ).order_by(ContactPoint.company_id, ContactPoint.id))).scalars().all()
         for point in points:
             contacts.setdefault(point.company_id, []).append(point)
@@ -89,12 +91,17 @@ async def _buyer_material(session, *, workspace_id, project_id, items, include_c
             continue
         point = None
         if include_contact_data:
+            from .provider_policy_context import addressed_context
+            sender_id = await session.scalar(select(Project.active_sender_identity_version_id).where(
+                Project.workspace_id == workspace_id, Project.id == project_id))
             for candidate in contacts.get(company.id, []):
                 contact_subject = {**subject, "contact_point_id": candidate.id}
                 contact_gate = await evaluate_current_policy(session, contact_subject,
                                                               "export_contacts", now)
+                use = await addressed_context(session, project_id=project_id, company_id=company.id,
+                    sender_id=sender_id, recipient_id=candidate.id, action="delivery.review")
                 outreach_gate = await evaluate_current_policy(session, contact_subject,
-                                                               "outreach", now)
+                                                               "outreach", now, use_context=use)
                 if contact_gate["allowed"] and outreach_gate["allowed"]:
                     point = candidate
                     break

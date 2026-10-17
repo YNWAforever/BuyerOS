@@ -118,9 +118,11 @@ async def _prepare(engine, workspace_id, outbox_intent, generation, adapter) -> 
         ))).scalar_one_or_none()
         if member is None or not permission_for_roles(member.roles, "startRun"):
             return PreparedQuery("actor_revoked")
+        from ..services.research_policy_context import research_use, adapter_binding
+        use = research_use(run.project_id, "research.search", binding=adapter_binding(adapter))
         policy = await evaluate_current_policy(session, {
             "workspace_id": workspace_id, "project_id": run.project_id,
-        }, "account_research", datetime.now(timezone.utc))
+        }, "account_research", datetime.now(timezone.utc), use_context=use)
         if not policy["allowed"]:
             return PreparedQuery("policy_blocked")
         round_number = query.get("round")
@@ -326,9 +328,13 @@ async def _finalize(engine, workspace_id, prepared, outbox_intent, generation,
             Membership.workspace_id == workspace_id, Membership.user_id == actor_id,
             Membership.active.is_(True),
         ))).scalar_one_or_none()
+        from ..services.research_policy_context import research_use, adapter_binding
+        use = research_use(run.project_id, "research.persist" if batch.hits else "research.search",
+            binding=adapter_binding(adapter),
+            urls=[hit.get("url") if isinstance(hit, dict) else None for hit in batch.hits])
         policy = await evaluate_current_policy(session, {
             "workspace_id": workspace_id, "project_id": run.project_id,
-        }, "account_research", datetime.now(timezone.utc))
+        }, "account_research", datetime.now(timezone.utc), use_context=use)
         if (project is None or project.status != "active" or icp is None or
                 project.active_icp_version_id != icp.id or icp.approved_at is None or
                 icp.superseded_at is not None or

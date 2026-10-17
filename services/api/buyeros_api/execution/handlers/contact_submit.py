@@ -141,10 +141,23 @@ async def _prepare(engine, workspace_id, job_id, generation, adapter: ProviderAd
         ))).scalar_one_or_none()
         if buyer is None or buyer.version != basis.get("buyer_version") or str(buyer.company_id) != basis["company_id"]:
             return Preparation("blocked")
+        from buyeros_api.services.provider_policy_context import contact_context
+        configuration = (quote.selection or {}).get("contact_configuration")
+        if configuration is not None:
+            from buyeros_api.services.contact_configuration import current_contact_configuration
+            try:
+                current = current_contact_configuration(adapter.capability, market=market,
+                    language=language, role=role, environment=environment)
+            except ValueError:
+                return Preparation("blocked")
+            if current != configuration or account_reference != current["account_reference"]:
+                return Preparation("blocked")
+        use = await contact_context(session, project_id=quote.project_id, company_id=buyer.company_id,
+                                    capability=adapter.capability, configuration=configuration, environment=environment)
         policy = await evaluate_current_policy(session, {
             "workspace_id": workspace_id, "project_id": quote.project_id,
             "company_id": buyer.company_id,
-        }, "contact_research", datetime.now(timezone.utc))
+        }, "contact_research", datetime.now(timezone.utc), use_context=use)
         if not policy["allowed"]:
             next_op.status = "cancelled"
             next_op.observed_cost = Decimal("0.000000")

@@ -87,6 +87,10 @@ def test_homonyms_and_shared_channels_keep_identity_and_status(lead_api, lead_ca
 
 def test_missing_or_suppressed_policy_blocks_manual_personal_data(lead_api, lead_case):
     with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
+        # Owner-only missing-policy fault injection must remove its proof FK
+        # first; production code has no delete permission on either relation.
+        db.execute("DELETE FROM policy_activation_resolutions WHERE decision_id IN "
+                   "(SELECT id FROM policy_decisions WHERE purpose='contact_research')")
         db.execute("DELETE FROM policy_decisions WHERE purpose='contact_research'")
     result = prepare(lead_api, lead_case, "observation.append", observation_payload())
     assert result.status_code == 403, result.text

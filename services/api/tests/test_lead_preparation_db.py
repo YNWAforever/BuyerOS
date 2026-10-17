@@ -15,6 +15,38 @@ from tests.lead_fixtures import (
 from tests.test_lead_progress_db import check_company, case_view
 
 
+def test_review_projection_batches_private_rows_without_caching_policy(lead_api,lead_case):
+    import asyncio
+    from sqlalchemy import event
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from buyeros_api.api.lead_schemas import LeadScope
+    from buyeros_api.db.session import tenant_session
+    from buyeros_api.services.lead_review_service import review_observations
+    from tests.conftest import runtime_role_dsn
+    for index in range(4):
+        save_observation(lead_api,lead_case,observation_payload(person={"full_name":f"Person {index}","role":"Rice buyer"}))
+    async def read():
+        engine=create_async_engine(runtime_role_dsn(lead_case["dsn"]).replace("postgresql://","postgresql+psycopg://",1))
+        statements=[]
+        event.listen(engine.sync_engine,"before_cursor_execute",lambda c,cu,sql,p,ctx,m:statements.append(sql))
+        scope=LeadScope(uuid.UUID(WORKSPACE),uuid.UUID(PROJECT),uuid.UUID(lead_case["buyer_id"]),
+            uuid.UUID(lead_case["company_id"]),ACTORS["operator"],1,frozenset({"operator"}))
+        try:
+            async with tenant_session(engine,uuid.UUID(WORKSPACE)) as session:
+                rows=await review_observations(session,scope,datetime.now(timezone.utc))
+                assert len(rows)==4 and all(not row.redacted for row in rows)
+                payload_reads=[sql for sql in statements if "FROM lead_private_payloads" in sql]
+                assert len(payload_reads)<=1,"private projection grows one payload round-trip per observation"
+            with psycopg.connect(lead_case["dsn"]) as db:
+                db.execute("UPDATE policy_decisions SET status='blocked',version=version+1 WHERE workspace_id=%s",(WORKSPACE,))
+            async with tenant_session(engine,uuid.UUID(WORKSPACE)) as session:
+                rows=await review_observations(session,scope,datetime.now(timezone.utc))
+                assert all(row.redacted and row.availability=="policy_blocked" for row in rows)
+        finally:
+            await engine.dispose()
+    asyncio.run(read())
+
+
 def ready_preparation(api, case):
     check_company(case)
     with psycopg.connect(case["dsn"], autocommit=True) as db:
@@ -108,6 +140,26 @@ def test_preparation_public_channel_is_not_formal_recipient(lead_api, lead_case)
     delivered = lead_api.post(f"/v1/workspaces/{WORKSPACE}/drafts/{view['id']}/deliver",
                               json={}, headers=headers("workspace_admin"))
     assert delivered.status_code == 403 and delivered.json()["code"] == "DELIVERY_DISABLED"
+
+
+def test_stale_product_facts_cannot_return_private_content_without_current_policy(lead_api, lead_case, monkeypatch):
+    """Findings #1: a stale-context error is not permission to keep private content."""
+    from buyeros_api.api.errors import ApiError
+    from buyeros_api.services import lead_preparation_service as service
+    payload = ready_preparation(lead_api, lead_case)
+    view, _ = create_preparation(lead_api, lead_case, payload)
+    with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
+        db.execute("DELETE FROM policy_activation_resolutions WHERE decision_id IN "
+                   "(SELECT id FROM policy_decisions WHERE workspace_id=%s AND purpose='draft_preparation')", (WORKSPACE,))
+        db.execute("DELETE FROM policy_decisions WHERE workspace_id=%s AND purpose='draft_preparation'", (WORKSPACE,))
+    async def stale(*args, **kwargs):
+        raise ApiError(412, "STALE_REVISION", "synthetic stale product facts")
+    monkeypatch.setattr(service, "_fact_context", stale)
+    current = lead_api.get(f"{lead_case['base']}/lead-preparations/{view['id']}", headers=headers())
+    assert current.status_code == 200, current.text
+    data = current.json()["data"]
+    assert data["redacted"] is True and data["content"] is None, "private preparation content outlived its permission"
+    assert payload["body"] not in current.text
 
 
 @pytest.mark.parametrize("change", ["body", "product", "person", "channel", "source_conflict", "expiry"])
@@ -254,6 +306,8 @@ def test_deleted_product_attachment_cannot_reappear_in_preparation_or_intent(lea
                    (json.dumps(content), digest, icp))
     payload["product_fact_refs"][0]["icp_content_hash"] = digest
     payload["body"] = excerpt
+    from tests.policy_activation_fixtures import approve_native_fixture
+    approve_native_fixture(lead_case["dsn"], WORKSPACE, PROJECT, ACTORS["workspace_admin"], documents=(document,))
     view, intent = create_preparation(lead_api, lead_case, payload)
     deleted = lead_api.request("DELETE", f"/v1/workspaces/{WORKSPACE}/offer-documents/{document}",
         json={"reason": "Remove the disposable fixture attachment"},

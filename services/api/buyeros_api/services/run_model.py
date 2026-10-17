@@ -78,6 +78,13 @@ async def _request(session,*,workspace_id,run_id,buyer_id,capability,route,model
     digest,_,_,_=await runner._basis(session,lock_buyer=True)
     state={'workspace_id':str(workspace_id),'run_id':str(run_id),'buyer_id':str(buyer_id),'workflow_version':'fit-v1','basis_hash':digest}
     basis,_=await runner._model_basis(session,state,lock_buyer=True)
+    from .research_policy_context import research_use,selected_binding,evidence_urls
+    from .policy_service import evaluate_current_policy
+    urls=await evidence_urls(session,project_id=run.project_id,source_ids=[item['source_id'] for item in basis['evidence']])
+    policy=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},
+        'account_research',datetime.now(timezone.utc),
+        use_context=research_use(run.project_id,'research.model',binding=selected_binding(capability),urls=urls))
+    if not policy['allowed']:raise ValueError('exact current model admission policy required')
     # One stable logical run/buyer intent, even if route/source material changes.
     # Explicit recovery needs a separate contract; it cannot silently replace it.
     key='run-model:'+str(uuid.uuid5(workspace_id,f'{run_id}:{buyer_id}'))

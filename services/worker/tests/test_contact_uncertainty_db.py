@@ -16,6 +16,10 @@ from buyeros_api.services.quote_service import quote_hash
 from buyeros_worker.engine import create_engine
 from buyeros_worker.tasks import execute_intent_sync
 from tests.conftest import PROJECT_A, WS_A, reset_tenant, seed_outbox
+from tests.controlled_policy_fixtures import api_fixture_helpers
+
+# One fictional review packet must retain its exact hash across worker restarts.
+CONTACT_FIXTURE_REVIEWED_AT = datetime(2026, 10, 17, tzinfo=timezone.utc)
 
 
 @pytest.fixture
@@ -30,6 +34,15 @@ def worker_database_url(migrated, monkeypatch):
     get_settings.cache_clear()
     yield worker_dsn
     get_settings.cache_clear()
+    # Close only this fixture's owned tenant data before another module reuses
+    # the seeded project; retain all assertions/evidence before cleanup.
+    with psycopg.connect(migrated) as db:
+        for table in ("policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities",
+                      "provider_callback_routes", "provider_events", "async_job_items", "async_jobs",
+                      "provider_operations", "enrichment_jobs", "budget_reservation_allocations",
+                      "cost_events", "budget_reservations", "budget_accounts", "enrichment_quotes",
+                      "policy_decisions", "project_buyers", "companies"):
+            db.execute(f"DELETE FROM {table} WHERE workspace_id=%s", (WS_A,))
 
 
 def _capability():
@@ -40,7 +53,7 @@ def _capability():
         pricing_version="fixture-price-v1", max_liability=Money(Decimal("0.300000")),
         idempotency="verified", status="verified", callback="unsupported",
         cancel="unsupported", retention="fixture-only",
-        verified_at=datetime.now(timezone.utc),
+        verified_at=CONTACT_FIXTURE_REVIEWED_AT,
         source_urls=("https://fixture.invalid/capability",),
     )
 
@@ -50,7 +63,8 @@ def _setup(pg_dsn, count=1):
     buyers = [(uuid.uuid4(), uuid.uuid4(), uuid.uuid4()) for _ in range(count)]
     with psycopg.connect(pg_dsn, autocommit=True) as db:
         reset_tenant(db)
-        for table in ("provider_callback_routes", "provider_events", "async_jobs", "provider_operations", "enrichment_jobs",
+        for table in ("policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities",
+                      "provider_callback_routes", "provider_events", "async_jobs", "provider_operations", "enrichment_jobs",
                       "budget_reservation_allocations", "cost_events", "budget_reservations",
                       "budget_accounts", "enrichment_quotes", "policy_decisions", "project_buyers", "companies"):
             db.execute(f"DELETE FROM {table} WHERE workspace_id=%s", (WS_A,))
@@ -60,11 +74,13 @@ def _setup(pg_dsn, count=1):
                        (company_id, WS_A, f"Fixture {ordinal}", f"Fixture {ordinal}", f"fixture{ordinal}.example"))
             db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)",
                        (buyer_id, WS_A, PROJECT_A, company_id))
-        db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,"
-                   "policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) "
-                   "VALUES (%s,%s,'project',%s,%s,'contact_research','permitted','fixture-v1','fixture','fixture',"
-                   "'{US}',now()+interval '1 day',1,%s)",
-                   (uuid.uuid4(), WS_A, PROJECT_A, WS_A, uuid.uuid4()))
+    helpers = api_fixture_helpers()
+    controller = helpers.ensure_fixture_controller(pg_dsn, WS_A, PROJECT_A)
+    from buyeros_api.providers.registry import ProviderRegistration
+    helpers.approve_provider_fixture(pg_dsn, WS_A, PROJECT_A, controller, purpose="contact_research",
+        domains=tuple(f"fixture{i}.example" for i in range(count)), transaction_role=True,
+        scope={"provider_name": "fixture", "account_reference": "fixture-test",
+               "contract_sha256": ProviderRegistration(_capability(), lambda: None).contract_hash})
     maximum = Decimal("0.300000") * count
     async def reserve():
         engine = create_engine()

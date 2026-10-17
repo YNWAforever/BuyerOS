@@ -1962,6 +1962,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/policy-controller-authorities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** listPolicyControllerAuthorities */
+        get: operations["listPolicyControllerAuthorities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/policy-activation-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** listPolicyActivationRequests */
+        get: operations["listPolicyActivationRequests"];
+        put?: never;
+        /** submitPolicyActivationRequest */
+        post: operations["submitPolicyActivationRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** getPolicyActivationRequest */
+        get: operations["getPolicyActivationRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** decidePolicyActivationRequest */
+        post: operations["decidePolicyActivationRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/withdrawals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** withdrawPolicyActivationRequest */
+        post: operations["withdrawPolicyActivationRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5627,6 +5713,345 @@ export interface components {
             limit: number;
             /** Total */
             total: number;
+        };
+        /** PolicyDeletionPlan */
+        PolicyDeletionPlan: {
+            /**
+             * Method
+             * @constant
+             */
+            method: "redact_private_payload";
+            /**
+             * Audit
+             * @constant
+             */
+            audit: "retain_non_content";
+            /**
+             * Backup
+             * @constant
+             */
+            backup: "expiry_and_replay";
+            /** Reference */
+            reference: string;
+        };
+        /** PolicySourceScope */
+        PolicySourceScope: {
+            /**
+             * Domains
+             * @default []
+             */
+            domains: string[];
+            /**
+             * Document Ids
+             * @default []
+             */
+            document_ids: string[];
+        };
+        /** ProviderPolicyScope */
+        ProviderPolicyScope: {
+            /** Provider Name */
+            provider_name: string;
+            /** Account Reference */
+            account_reference: string;
+            /** Contract Sha256 */
+            contract_sha256: string;
+            /**
+             * Sender Identity Id
+             * @default null
+             */
+            sender_identity_id: string | null;
+            /**
+             * Recipient Refs
+             * @default []
+             */
+            recipient_refs: string[];
+            /**
+             * Allow Unaddressed Drafts
+             * @default false
+             */
+            allow_unaddressed_drafts: boolean;
+        };
+        /** ResearchPolicyScope */
+        ResearchPolicyScope: {
+            /** @default null */
+            search: components["schemas"]["ResearchProviderBinding"] | null;
+            /** @default null */
+            model: components["schemas"]["ResearchProviderBinding"] | null;
+        };
+        /** ResearchProviderBinding */
+        ResearchProviderBinding: {
+            /** Provider Name */
+            provider_name: string;
+            /** Account Reference */
+            account_reference: string;
+            /** Contract Sha256 */
+            contract_sha256: string;
+        };
+        /** PolicyTerms */
+        PolicyTerms: {
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+            /**
+             * Controller Scope Id
+             * Format: uuid
+             */
+            controller_scope_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Purpose
+             * @enum {string}
+             */
+            purpose: "account_research" | "contact_research" | "draft_preparation" | "outreach";
+            /**
+             * Template Version
+             * @enum {string}
+             */
+            template_version: "manual-native.v1" | "provider-native.v1" | "provider-research.v1";
+            provider_scope?: components["schemas"]["ProviderPolicyScope"] | null;
+            research_scope?: components["schemas"]["ResearchPolicyScope"] | null;
+            /** Allowed Data Categories */
+            allowed_data_categories: string[];
+            allowed_sources: components["schemas"]["PolicySourceScope"];
+            /** Allowed Actions */
+            allowed_actions: string[];
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Retention Days */
+            retention_days: number;
+            deletion_plan: components["schemas"]["PolicyDeletionPlan"];
+            /** Countries */
+            countries: string[];
+            /** Policy Version */
+            policy_version: string;
+            /** Basis Reference */
+            basis_reference: string;
+            /** Provenance */
+            provenance: string;
+            /** Owner Evidence Reference */
+            owner_evidence_reference: string;
+            /** Owner Evidence Sha256 */
+            owner_evidence_sha256: string;
+        };
+        /** ActivationSubmit */
+        ActivationSubmit: {
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Authority Id
+             * Format: uuid
+             */
+            authority_id: string;
+            /** Authority Version */
+            authority_version: number;
+            /** Expected Policy Id */
+            expected_policy_id: string | null;
+            /** Expected Policy Version */
+            expected_policy_version: number | null;
+            terms: components["schemas"]["PolicyTerms"];
+            /**
+             * Request Deadline
+             * Format: date-time
+             */
+            request_deadline: string;
+        };
+        /** ActivationDecision */
+        ActivationDecision: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "reject";
+            /** Terms Hash */
+            terms_hash: string;
+            /** Expected Policy Id */
+            expected_policy_id: string | null;
+            /** Expected Policy Version */
+            expected_policy_version: number | null;
+            /** Reason */
+            reason: string;
+            /**
+             * Expected Request State
+             * @default submitted
+             * @constant
+             */
+            expected_request_state: "submitted";
+        };
+        /** ActivationWithdrawal */
+        ActivationWithdrawal: {
+            /** Terms Hash */
+            terms_hash: string;
+            /** Reason */
+            reason: string;
+        };
+        /** ActivationReceipt */
+        ActivationReceipt: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /**
+             * Resolution Id
+             * @default null
+             */
+            resolution_id: string | null;
+            /**
+             * Decision Id
+             * @default null
+             */
+            decision_id: string | null;
+            /** Terms Hash */
+            terms_hash: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "submitted" | "approved" | "rejected" | "withdrawn";
+            /**
+             * Policy Version
+             * @default null
+             */
+            policy_version: number | null;
+        };
+        /** ActivationView */
+        ActivationView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Client Request Id
+             * Format: uuid
+             */
+            client_request_id: string;
+            /**
+             * Requester Id
+             * Format: uuid
+             */
+            requester_id: string;
+            /**
+             * Authority Id
+             * Format: uuid
+             */
+            authority_id: string;
+            /** Authority Version */
+            authority_version: number;
+            terms: components["schemas"]["PolicyTerms"];
+            /** Terms Hash */
+            terms_hash: string;
+            /**
+             * Request Deadline
+             * Format: date-time
+             */
+            request_deadline: string;
+            /** Request State */
+            request_state: string;
+            /** Effective Status */
+            effective_status: string;
+            receipt: components["schemas"]["ActivationReceipt"];
+        };
+        /** ActivationPage */
+        ActivationPage: {
+            /** Items */
+            items: components["schemas"]["ActivationView"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+        };
+        /** AuthoritySummary */
+        AuthoritySummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Approver User Id
+             * Format: uuid
+             */
+            approver_user_id: string;
+            /** Purposes */
+            purposes: string[];
+            /** Allowed Actions */
+            allowed_actions: string[];
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Eligible */
+            eligible: boolean;
+        };
+        /** AuthorityPage */
+        AuthorityPage: {
+            /** Items */
+            items: components["schemas"]["AuthoritySummary"][];
+            /** Offset */
+            offset: number;
+            /** Limit */
+            limit: number;
+            /** Total */
+            total: number;
+        };
+        ActivationViewResponse: {
+            data: components["schemas"]["ActivationView"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        ActivationPageResponse: {
+            data: components["schemas"]["ActivationPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
+        };
+        AuthorityPageResponse: {
+            data: components["schemas"]["AuthorityPage"];
+            /** Format: uuid */
+            request_id: string;
+            /** @enum {string} */
+            data_mode: "live";
         };
     };
     responses: {
@@ -10295,6 +10720,231 @@ export interface operations {
             422: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+        };
+    };
+    listPolicyControllerAuthorities: {
+        parameters: {
+            query: {
+                project_id: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthorityPageResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    listPolicyActivationRequests: {
+        parameters: {
+            query: {
+                project_id: string;
+                offset?: number;
+                limit?: number;
+                client_request_id?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivationPageResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    submitPolicyActivationRequest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivationSubmit"];
+            };
+        };
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivationViewResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getPolicyActivationRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivationViewResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    decidePolicyActivationRequest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivationDecision"];
+            };
+        };
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivationViewResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    withdrawPolicyActivationRequest: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Opaque non-PII key. Server scopes by workspace, actor, operation ID and key; stores canonical request hash. Same key+body returns original response; same key+different body is 409. Persistent provider operation identity outlives API replay cache. */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                workspace_id: string;
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivationWithdrawal"];
+            };
+        };
+        responses: {
+            /** @description Canonical policy result and immutable operation receipt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivationViewResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            412: components["responses"]["Error"];
+            422: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
 }

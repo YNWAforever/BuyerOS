@@ -80,7 +80,11 @@ async def frozen_run_search(session,*,workspace_id,event,capability,new_call=Fal
     member=(await session.execute(select(Membership).where(Membership.workspace_id==workspace_id,Membership.user_id==actor,Membership.active.is_(True)).with_for_update(read=True))).scalar_one_or_none()
     project=(await session.execute(select(Project).where(Project.workspace_id==workspace_id,Project.id==run.project_id).with_for_update(read=True))).scalar_one_or_none()
     icp=(await session.execute(select(IcpVersion).where(IcpVersion.workspace_id==workspace_id,IcpVersion.project_id==run.project_id,IcpVersion.id==run.icp_version_id).with_for_update(read=True))).scalar_one_or_none()
-    policy=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},'account_research',datetime.now(timezone.utc))
+    from .research_policy_context import research_use,selected_binding,metadata_binding
+    binding=selected_binding(capability) if new_call else metadata_binding(frozen,historical=True)
+    policy=await evaluate_current_policy(session,{'workspace_id':workspace_id,'project_id':run.project_id},
+        'account_research',datetime.now(timezone.utc),
+        use_context=research_use(run.project_id,'research.search',binding=binding))
     if (member is None or not permission_for_roles(member.roles,'startRun') or not policy['allowed'] or
         project is None or project.status!='active' or icp is None or project.active_icp_version_id!=icp.id or
         icp.approved_at is None or icp.approved_by is None or icp.superseded_at is not None or

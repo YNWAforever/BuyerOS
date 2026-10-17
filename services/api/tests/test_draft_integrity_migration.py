@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
 
-HEAD = "0055_lead_workflow"
+HEAD = "0056_policy_activation"
 
 
 def _config():
@@ -49,8 +49,11 @@ def test_0027_refuses_populated_downgrade(isolated_quote_case, monkeypatch):
     from buyeros_api.settings import get_settings
     get_settings.cache_clear()
     try:
-        with pytest.raises(RuntimeError, match="retained drafts"):
+        with pytest.raises(RuntimeError, match="preserve controller policy history"):
             command.downgrade(_config(), "0026_sender_identity_versions")
+        from tests.migration_guards import invoke_revision
+        with pytest.raises(RuntimeError, match="retained drafts"):
+            invoke_revision(dsn, _config(), "0027_draft_integrity")
         assert _head(dsn) == HEAD
         with psycopg.connect(dsn) as db:
             assert db.execute("SELECT count(*) FROM outreach_drafts WHERE id=%s", (draft_id,)).fetchone()[0] == 1

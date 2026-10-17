@@ -119,4 +119,10 @@ export const operationRoutes = {
   "getPilotBudget": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-budget"},
   "listPilotCostEvents": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/pilot-cost-events"},
   "listLeadReviews": {method: "GET", path: "/v1/workspaces/{workspace_id}/projects/{project_id}/buyers/{buyer_id}/lead-reviews"},
+  "listPolicyControllerAuthorities": {method: "GET", path: "/v1/workspaces/{workspace_id}/policy-controller-authorities"},
+  "submitPolicyActivationRequest": {method: "POST", path: "/v1/workspaces/{workspace_id}/policy-activation-requests"},
+  "listPolicyActivationRequests": {method: "GET", path: "/v1/workspaces/{workspace_id}/policy-activation-requests"},
+  "getPolicyActivationRequest": {method: "GET", path: "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}"},
+  "decidePolicyActivationRequest": {method: "POST", path: "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/decisions"},
+  "withdrawPolicyActivationRequest": {method: "POST", path: "/v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/withdrawals"},
 } as const satisfies Record<keyof operations, {method: string; path: string}>;

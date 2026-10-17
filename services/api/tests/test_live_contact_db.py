@@ -24,6 +24,15 @@ def contact_case(quote_case,monkeypatch):
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'hunter'}))
     cap=replace(capability(),idempotency='verified',status='verified') # fictional local status contract, no supplier claim
     client.app.dependency_overrides[selected_contact_quote_capability]=lambda:(cap,'test')
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    from buyeros_api.providers.registry import ProviderRegistration
+    with psycopg.connect(dsn) as db:
+        db.execute("UPDATE companies SET domain='fictional-sensors.com' WHERE id=%s",(buyers[0][1],))
+    approve_provider_fixture(dsn,WORKSPACE_A,'a0000000-0000-4000-8000-000000000001',
+        uuid.uuid5(uuid.NAMESPACE_URL,ADMIN),purpose='contact_research',domains=('fictional-sensors.com','fixture2.example'),
+        scope={'provider_name':cap.provider,'account_reference':'fixture-test',
+               'contract_sha256':ProviderRegistration(cap,lambda:None).contract_hash})
     _limits(client,dsn);quote=_post(client,_body(buyers[:1]),key='c18-owned-quote').json()['data']
     confirmed=_confirm(client,quote,key='c18-owned-confirm');assert confirmed.status_code==202,confirmed.text
     job=confirmed.json()['data'];workspace=uuid.UUID(WORKSPACE_A)
@@ -122,9 +131,16 @@ def test_contact_runtime_rls_immutable_private_result_and_populated_rollback(con
                 async with tenant_session(engine,case['workspace']) as session:await session.execute(text(sql))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',case['dsn']);get_settings.cache_clear();config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
         try:
-            command.downgrade(config,'0041_c61_model_receipts');assert await store.get(ref)==saved
+            with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                command.downgrade(config,'0041_c61_model_receipts')
+            from tests.migration_guards import invoke_revision
+            invoke_revision(case['dsn'],config,'0042_c61_contact_receipts')
+            invoke_revision(case['dsn'],config,'0043_c61_receipt_retention')
+            assert await store.get(ref)==saved
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
-        finally:command.upgrade(config,'head');monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
+        finally:
+            invoke_revision(case['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+            monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved
     asyncio.run(engines(case,exercise))
 

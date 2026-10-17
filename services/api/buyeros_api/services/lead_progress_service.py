@@ -71,23 +71,14 @@ async def _case_views(session, scope, now, *, detail=False, include_preparations
     results = []
     for buyer, company in buyers:
         current_scope = replace(scope, buyer_id=buyer.id, company_id=company.id)
-        policy_cache = {}
-
-        async def allowed(contact_id):
-            if contact_id not in policy_cache:
-                policy_cache[contact_id] = await personal_policy(
-                    session, current_scope, now, contact_id, required=False,
-                ) is not None
-            return policy_cache[contact_id]
-
         materialized = [
             LeadObservationRecord.model_validate(await observation_data(
-                session, current_scope, row, now, policy_allowed=await allowed(row.contact_id), cache=cache,
+                session, current_scope, row, now, cache=cache,
             )) for row in by_buyer[buyer.id]
         ]
         history = [
             await review_data(session, current_scope, row, materialized, now, cache=cache,
-                              references=refs_by_review[row.id], policy_allowed=await allowed(row.contact_id))
+                              references=refs_by_review[row.id])
             for row in review_by_buyer[buyer.id]
         ]
         subjects = reviewed_subjects(materialized, history, now)

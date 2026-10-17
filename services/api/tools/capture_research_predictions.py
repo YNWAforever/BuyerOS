@@ -108,7 +108,7 @@ async def capture_from_db(engine,manifest):
     from sqlalchemy import select,text
     from buyeros_api.db.session import tenant_session
     from buyeros_api.db.runs import SearchRun
-    from buyeros_api.db.buyers import ProjectBuyer,FitAssessment,Evidence,SourceDocument
+    from buyeros_api.db.buyers import ProjectBuyer,FitAssessment,Evidence,SourceDocument,Company
     from buyeros_api.services.receipt_retention import require_current_receipt_read
     m=validated_manifest(manifest);url=engine.url
     if url.username!='buyeros_api' or url.database!=m.database:raise ValueError('exact capture target and restricted API role required')
@@ -117,7 +117,16 @@ async def capture_from_db(engine,manifest):
     async with tenant_session(engine,m.workspace_id,read_only=True) as session:
         identity=(await session.execute(text("SELECT current_user,current_database(),current_setting('transaction_read_only'),current_setting('transaction_isolation'),rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user"))).one()
         if tuple(identity)!=('buyeros_api',m.database,'on','repeatable read',False,False):raise ValueError('restricted repeatable-read transaction required')
-        await require_current_receipt_read(session,workspace_id=m.workspace_id,actor_id=m.actor_id,project_id=m.project_id)
+        # Resolve the domain of each held-out company through its actual buyer
+        # relation. No caller-supplied URL can authorize the metadata capture.
+        domains=(await session.execute(select(ProjectBuyer.id,Company.domain).join(Company,
+            (Company.workspace_id==ProjectBuyer.workspace_id)&(Company.id==ProjectBuyer.company_id)).where(
+            ProjectBuyer.workspace_id==m.workspace_id,ProjectBuyer.project_id==m.project_id,
+            ProjectBuyer.id.in_([row.buyer_id for row in m.holdout])))).all()
+        if {row[0] for row in domains}!={row.buyer_id for row in m.holdout} or any(not row[1] for row in domains):
+            raise ValueError('current scoped company domains required for capture')
+        await require_current_receipt_read(session,workspace_id=m.workspace_id,actor_id=m.actor_id,project_id=m.project_id,
+            source_urls=tuple('https://'+row[1] for row in domains))
         scope={'workspace_id':m.workspace_id,'project_id':m.project_id}
         runs=(await session.execute(select(SearchRun).filter_by(**scope).where(SearchRun.id.in_(m.run_ids)))).scalars().all()
         for row in runs:
@@ -135,6 +144,11 @@ async def capture_from_db(engine,manifest):
         items=(await session.execute(select(Evidence).filter_by(**scope).where(Evidence.id.in_(ids)))).scalars().all() if ids else []
         sources=(await session.execute(select(SourceDocument).filter_by(**scope).where(SourceDocument.id.in_([row.source_document_id for row in items if row.source_document_id])))).scalars().all() if items else []
         sources={row.id:row for row in sources}
+        if items:
+            if len(sources)!=len({row.source_document_id for row in items}):
+                raise ValueError('current scoped evidence sources required for capture')
+            await require_current_receipt_read(session,workspace_id=m.workspace_id,actor_id=m.actor_id,project_id=m.project_id,
+                source_urls=tuple(row.canonical_url for row in sources.values()))
         for row in items:
             source=sources.get(row.source_document_id)
             current=source is not None and source.run_id==row.run_id and source.retention_until is not None and source.retention_until>now and source.permission_purpose=='account_research'

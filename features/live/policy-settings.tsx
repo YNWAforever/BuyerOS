@@ -6,6 +6,7 @@ import {LiveCancelled, describeLiveError} from '@/services/live/client';
 import {createOperationClient} from '@/services/live/operations';
 import {ActionIntent} from '@/services/live/action-intent';
 import type {SessionScope} from '@/services/live/session';
+import {PolicyActivationPanel} from './policy-activation-panel';
 
 type Policy = components['schemas']['PolicyDecision'];
 type Suppression = components['schemas']['Suppression'];
@@ -99,7 +100,7 @@ export function LivePolicySettings({roles,t}:{roles:string[];t:(label:string)=>s
     }catch(cause){if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));}
     finally{setBusy(false);}
   }
-  return <section className="panel" aria-label={t('Policy and suppression')}>
+  return <><PolicyActivationPanel roles={roles} t={t}/><section className="panel" aria-label={t('Policy and suppression')}>
     <h2>{t('Policy and suppression')}</h2>
     <p className="notice" role="status">{t('Research, contact lookup, draft approval and export require an approved purpose policy. Unknown or expired policy blocks action. Ask the data owner and qualified reviewer to approve controller scope, jurisdictions and retention.')}</p>
     {!canRead&&<p role="alert">{t('Your role cannot view policy records. Ask a workspace administrator.')}</p>}
@@ -136,5 +137,5 @@ export function LivePolicySettings({roles,t}:{roles:string[];t:(label:string)=>s
           {canAdmin&&item.active&&<button disabled={busy||reason.trim().length<3} onClick={()=>void removeSuppression(item)}>{t('Remove with reason above')}</button>}</div>)}
       </div>
     </div>}
-  </section>;
+  </section></>;
 }

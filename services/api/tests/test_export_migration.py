@@ -10,7 +10,7 @@ from tests.test_api_projects_db import api
 from tests.test_exports_authorization_db import _buyer_body, _permit
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, _h, quote_case
 
-HEAD = "0055_lead_workflow"
+HEAD = "0056_policy_activation"
 
 
 def _config():
@@ -24,7 +24,8 @@ def _head(dsn):
         return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
 
 
-def test_0029_empty_downgrade_and_reupgrade(migrated, monkeypatch):
+def test_0029_empty_downgrade_and_reupgrade(isolated_migrated, monkeypatch):
+    migrated=isolated_migrated
     assert _head(migrated) == HEAD
     monkeypatch.setenv("BUYEROS_DATABASE_URL", migrated)
     get_settings.cache_clear()
@@ -54,6 +55,9 @@ def test_0029_populated_history_refuses_downgrade(quote_case, monkeypatch):
     with psycopg.connect(dsn, autocommit=True) as db:
         assert db.execute("SELECT count(*) FROM api_rate_windows").fetchone()[0] > 0
         db.execute("DELETE FROM api_rate_windows")
-    with pytest.raises(RuntimeError, match="retained export history"):
+    with pytest.raises(RuntimeError, match="preserve controller policy history"):
         command.downgrade(_config(), "0028_draft_approval_context")
+    from tests.migration_guards import invoke_revision
+    with pytest.raises(RuntimeError, match="retained export history"):
+        invoke_revision(dsn, _config(), "0029_export_authorization")
     assert _head(dsn) == HEAD

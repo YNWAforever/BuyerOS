@@ -17,12 +17,20 @@ from tests.test_run_model_dispatch_db import clean_model_native_steps
 pytestmark=pytest.mark.parametrize('run_case',['native'],indirect=True)
 
 @pytest.fixture
-def scope_case(model_case,monkeypatch):
-    c=model_case
-    item=ProviderRegistration(c['model_cap'],lambda:None,('synthetic:model-new-call-scope-only',),model_route=c['route'],model_id='local-owned-model-v1')
+def native_model_registration(monkeypatch):
+    from tests.test_run_model_admission_db import build_model_registration
+    item=replace(build_model_registration(monkeypatch),sandbox_evidence=('synthetic:model-new-call-scope-only',),
+                 policy_account_reference='owned-scope-model')
     others=tuple(x for x in registry.DEFAULT_REGISTRY.registrations if x.capability.service!='model')
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',registry.SELECTED_LIVE_PROVIDERS|{'openai-responses'})
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry(others+(item,)))
+    return item
+
+
+@pytest.fixture
+def scope_case(model_case):
+    c=model_case;item=c['registration']
+    others=tuple(x for x in registry.DEFAULT_REGISTRY.registrations if x.capability.service!='model')
     return {**c,'registration':item,'others':others}
 
 def mutate(c,monkeypatch,gate,event=None):

@@ -23,13 +23,6 @@ def _prepare(api, dsn, buyer_id):
         evidence_id = db.execute("SELECT e.id FROM evidence e JOIN project_buyers b "
                                  "ON b.workspace_id=e.workspace_id AND b.company_id=e.company_id "
                                  "WHERE b.id=%s", (buyer_id,)).fetchone()[0]
-        db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,"
-                   "controller_scope_id,purpose,status,policy_version,basis_reference,provenance,"
-                   "countries,expires_at,retention_days,decision_author_id) "
-                   "VALUES (%s,%s,'project',%s,%s,'draft_preparation','permitted','fixture-v1',"
-                   "'fixture','fixture',ARRAY['US'],now()+interval '1 day',1,%s)",
-                   (uuid.uuid4(), WORKSPACE_A, PROJECT, WORKSPACE_A,
-                    uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER)))
         result = str(evidence_id)
     sender = api.patch(f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}",
                        json={"sender_identity": {"display_name": "Alex Chan", "role_title": "Partner",
@@ -38,6 +31,16 @@ def _prepare(api, dsn, buyer_id):
                             "reason": "Approved draft preparation identity"}},
                        headers=_h(REVIEWER, key="draft-sender-001", **{"If-Match": '"1"'}))
     assert sender.status_code == 200, sender.text
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    with psycopg.connect(dsn) as db:
+        sender_id = db.execute("SELECT active_sender_identity_version_id FROM projects WHERE id=%s", (PROJECT,)).fetchone()[0]
+        domains = [row[0] for row in db.execute("SELECT domain FROM companies WHERE workspace_id=%s", (WORKSPACE_A,)).fetchall() if row[0]]
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="draft_preparation", domains=domains,
+        scope={"provider_name": "resend", "account_reference": "owned-delivery-budget-fixture",
+               "contract_sha256": "b" * 64, "sender_identity_id": str(sender_id),
+               "allow_unaddressed_drafts": True})
     return result
 
 
@@ -181,7 +184,6 @@ def test_addressed_template_admission_binds_current_contact_without_paid_intent(
     _, contact_id = _addressed_case(api, dsn, buyers)
     with psycopg.connect(dsn, autocommit=True) as db:
         db.execute("UPDATE contact_points SET retention_expires_at=now()+interval '1 day' WHERE id=%s", (contact_id,))
-    with psycopg.connect(dsn) as db:
         evidence = str(db.execute("SELECT id FROM evidence WHERE company_id=%s",
                                   (buyers[0][1],)).fetchone()[0])
     body = {**_request(buyers[0][0], evidence), "recipient_contact_id": contact_id}
@@ -205,6 +207,13 @@ def test_buyer_contact_detail_requires_current_read_purpose_and_retention(quote_
     _, contact_id = _addressed_case(api, dsn, buyers)
     with psycopg.connect(dsn, autocommit=True) as db:
         db.execute("UPDATE contact_points SET retention_expires_at=now()+interval '1 day' WHERE id=%s", (contact_id,))
+        domain = db.execute("SELECT domain FROM companies WHERE id=%s", (buyers[0][1],)).fetchone()[0]
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="contact_research", domains=(domain,), actions=["contact.read"],
+        scope={"provider_name": "fixture", "account_reference": "fixture-test",
+               "contract_sha256": "b" * 64, "recipient_refs": [contact_id]})
     path = f"/v1/workspaces/{WORKSPACE_A}/buyers/{buyers[0][0]}"
     response = api.get(path, headers=_h(OPERATOR))
     assert response.status_code == 200, response.text

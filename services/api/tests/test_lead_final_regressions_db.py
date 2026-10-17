@@ -63,6 +63,8 @@ def test_normal_retention_discovers_person_only_and_unapplied_payloads(lead_api,
     with psycopg.connect(lead_case["dsn"]) as db:
         assert db.execute("SELECT count(*) FROM lead_private_payloads WHERE contents::text LIKE %s",
                           (f"%{marker}%",)).fetchone() == (0,)
+
+
         if subject == "person":
             assert db.execute("SELECT full_name,role FROM people WHERE id=%s",
                               (record["person_id"],)).fetchone() == (None, None)
@@ -195,7 +197,7 @@ def test_purchasing_review_history_is_bounded_complete_and_scope_checked(lead_ap
     assert lead_api.get(path.replace(PROJECT, OTHER_PROJECT), headers=headers()).status_code == 404
 
 
-@pytest.mark.parametrize("head", ["0055_lead_workflow", "9999_unreviewed"])
+@pytest.mark.parametrize("head", ["0055_lead_workflow", "0056_policy_activation", "9999_unreviewed"])
 def test_missing_current_or_future_schema_never_bypasses_native_admission(lead_case, head):
     from buyeros_api.api.errors import ApiError
     from buyeros_api.db.session import tenant_session
@@ -238,6 +240,8 @@ def test_normal_sweep_erases_preparation_at_product_document_deadline(lead_api, 
                    (json.dumps(content), digest, icp))
     payload["product_fact_refs"][0]["icp_content_hash"] = digest
     payload["body"] = marker
+    from tests.policy_activation_fixtures import approve_native_fixture
+    approve_native_fixture(lead_case["dsn"], WORKSPACE, PROJECT, ACTORS["workspace_admin"], documents=(document,))
     created, _ = create_preparation(lead_api, lead_case, payload)
     assert created["redacted"] is False and created["content"]["body"] == marker
     bound = time.monotonic() + 10
@@ -249,3 +253,26 @@ def test_normal_sweep_erases_preparation_at_product_document_deadline(lead_api, 
     with psycopg.connect(lead_case["dsn"]) as db:
         assert db.execute("SELECT count(*) FROM lead_private_payloads WHERE contents::text LIKE %s",
                           (f"%{marker}%",)).fetchone() == (0,)
+
+
+def test_review_content_cannot_outlive_one_expired_cited_observation(lead_api, lead_case):
+    """Findings #3: a surviving citation may not keep expired review content readable."""
+    payload = ready_preparation(lead_api, lead_case)
+    ids = payload["observation_ids"]
+    assert len(ids) >= 2
+    view, _ = create_preparation(lead_api, lead_case, payload)
+    assert view["redacted"] is False
+    marker = "Private rationale that must expire with its citation"
+    with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
+        review_id = db.execute(
+            "SELECT id FROM lead_reviews WHERE buyer_id=%s ORDER BY case_version DESC LIMIT 1",
+            (lead_case["buyer_id"],)).fetchone()[0]
+        db.execute("UPDATE lead_private_payloads SET contents=jsonb_set(contents,'{rationale}',%s::jsonb) "
+                   "WHERE id=(SELECT payload_id FROM lead_reviews WHERE id=%s)", (json.dumps(marker), review_id))
+        db.execute("UPDATE lead_private_payloads SET retention_expires_at=now()-interval '1 day' "
+                   "WHERE id=(SELECT payload_id FROM lead_observations WHERE id=%s)", (ids[0],))
+    path = f"{lead_case['base']}/buyers/{lead_case['buyer_id']}/lead-reviews"
+    current = lead_api.get(path, headers=headers())
+    assert current.status_code == 200, current.text
+    assert marker not in current.text, "expired citation kept its review content readable"
+    assert all(row["redacted"] is True for row in current.json()["data"]["items"])

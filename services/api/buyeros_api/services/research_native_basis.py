@@ -65,13 +65,19 @@ async def reviewed_research_evidence(session,*,workspace_id,run_id,buyer_id,evid
         raise ValueError('current bound native receipt/metadata unavailable')
     policy=(await session.execute(select(PolicyDecision).where(PolicyDecision.workspace_id==workspace_id,
         PolicyDecision.subject_type=='project',PolicyDecision.subject_id==run.project_id,PolicyDecision.purpose=='account_research')
-        .order_by(PolicyDecision.created_at.desc(),PolicyDecision.id.desc()).limit(1).with_for_update(read=True))).scalar_one_or_none()
+        .order_by(PolicyDecision.created_at.desc(),PolicyDecision.id.desc()).limit(1))).scalar_one_or_none()
     if (policy is None or policy.controller_scope_id!=workspace_id or policy.status!='permitted' or policy.expires_at<=now
         or policy.basis_reference!=source.canonical_url or not policy.provenance.strip() or policy.decision_author_id is None
         or policy.id!=uuid.UUID(claim.payload['policy_id']) or policy.version!=claim.payload.get('policy_version')
         or not 1<=policy.retention_days<=30 or source.retention_until>min(receipt['retention_until'],metadata.retention_until,
             policy.expires_at,policy.created_at+timedelta(days=policy.retention_days))):
         raise ValueError('current exact source license unavailable')
+    from .policy_activation_read import resolve_approved_policy_terms
+    from .policy_activation_terms import match_policy_use
+    from .research_policy_context import research_use
+    terms=await resolve_approved_policy_terms(session,policy,now)
+    if terms is None or not match_policy_use(terms,research_use(run.project_id,'research.read',urls=(source.canonical_url,)),now):
+        raise ValueError('current approved source read permission required')
     await _current_reviewed_material(session,workspace_id=workspace_id,run=run,raw=raw,company=company,source=source,prior=prior)
     return {'current':True,'source_hash':hashlib.sha256(source.excerpt.encode()).hexdigest(),
         'source_document_hash':source.digest,'source_kind':'research_page_excerpt'}

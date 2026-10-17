@@ -307,7 +307,8 @@ def test_duplicate_invoice_needs_exact_original_chain_and_stale_reconciliation_i
 
 def test_budget_recording_and_policy_never_require_or_enable_contact_enrichment(lead_api, lead_case):
     with psycopg.connect(lead_case["dsn"], autocommit=True) as db:
-        db.execute("DELETE FROM policy_decisions WHERE purpose='contact_research'")
+        db.execute("UPDATE policy_decisions SET status='blocked',version=version+1 "
+                   "WHERE workspace_id=%s AND purpose='contact_research'", (WORKSPACE,))
     configure(lead_api, lead_case)
     cost(lead_api, lead_case, amount="1.000000", state="settled")
     reconcile(lead_api, lead_case)

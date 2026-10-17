@@ -94,6 +94,7 @@ async def _contactable_count(session, *, workspace_id, project_id, company_ids, 
         ContactPoint.validity == "provider_marked_valid",
         ContactPoint.quarantined.is_(False),
         ContactPoint.checked_at <= as_of,
+        ContactPoint.retention_expires_at > as_of,
     ).order_by(ContactPoint.company_id, ContactPoint.id).limit(10001))).scalars().all()
     if len(points)>10000:
         raise ApiError(503, "METRIC_UNAVAILABLE", "contactable set exceeds bounded projection")
@@ -101,9 +102,12 @@ async def _contactable_count(session, *, workspace_id, project_id, company_ids, 
     for point in points:
         if point.company_id in allowed:
             continue
+        from .provider_policy_context import company_context
+        use = await company_context(session, project_id=project_id, company_id=point.company_id,
+                                    action="contact.read", recipient_ref=point.id)
         gate=await evaluate_current_policy(session, {"workspace_id": workspace_id,
             "project_id": project_id, "company_id": point.company_id,
-            "contact_point_id": point.id}, "contact_research", as_of)
+            "contact_point_id": point.id}, "contact_research", as_of, use_context=use)
         if gate["allowed"]:
             allowed.add(point.company_id)
     return len(allowed)

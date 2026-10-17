@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, TenantMixin, UUIDPk
+from .policy_activation import PolicyActivationRequest, PolicyActivationResolution, PolicyControllerAuthority
 
 
 class Workspace(Base, UUIDPk):

@@ -1,6 +1,6 @@
 """Synchronous cited preparations. No formal draft, model, worker or email admission."""
 from dataclasses import replace
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..api.errors import ApiError
 from ..api.lead_schemas import LeadScope, LeadPreparationInput, LeadPreparationView
-from ..db.buyers import BuyerSourceCheck
+from ..db.buyers import BuyerSourceCheck, Company, ProjectBuyer
 from ..db.icp import Project, IcpVersion, canonical_hash
 from ..db.ingestion import OfferDocument
 from ..db.lead_workflow import (
@@ -21,6 +21,7 @@ from .audit_service import append_audit
 from .icp_service import effective_offer_facts
 from .lead_evidence_service import (
     require_permission, personal_policy, save_private_payload, retained_payload, assert_active_project,
+    authorize_native_policy_use,
 )
 from .lead_review_service import review_observations, review_history
 from .lead_quality import reviewed_subjects, evaluate_lead_quality
@@ -114,15 +115,9 @@ async def _fact_context(session, scope, references, now):
                       "offer_revision": project.offer_revision, "documents": documents}, documents
 
 
-async def preparation_context(session, scope, data, now, *, case_view=None, subject_states=None):
-    from .lead_progress_service import get_lead_case
-    deadline = await personal_policy(session, scope, now, data.contact_id)
-    gate = await evaluate_current_policy(session, {
-        "workspace_id": scope.workspace_id, "project_id": scope.project_id, "company_id": scope.company_id,
-        **({"contact_point_id": data.contact_id} if data.contact_id else {}),
-    }, "draft_preparation", now)
-    if not gate["allowed"]:
-        raise ApiError(403, "POLICY_BLOCKED", "preparation purpose requires permission")
+async def preparation_context(session, scope, data, now, *, case_view=None, subject_states=None,
+                              action="preparation.read"):
+    deadline = now + timedelta(days=3650)
     for model, identity in ((Person, data.person_id), (ContactPoint, data.contact_id)):
         if identity is not None:
             entity = await session.scalar(select(model).where(
@@ -138,7 +133,23 @@ async def preparation_context(session, scope, data, now, *, case_view=None, subj
     facts, product, documents = await _fact_context(session, scope, data.product_fact_refs, now)
     if documents:
         deadline = min(deadline, *(datetime.fromisoformat(item["retention_until"]) for item in documents))
-    case = case_view or await get_lead_case(session, scope=scope, now=now, include_preparations=False)
+    case = case_view
+    if case is None:
+        # Only the name enters this context. Rebuilding the entire dossier here
+        # used to re-authorize every observation/review, then repeat that work
+        # immediately below. Keep current source/subject checks; avoid the
+        # unrelated full projection and its quadratic cost as people are added.
+        require_permission(scope, "getBuyer")
+        query = select(Company.display_name).join(ProjectBuyer,
+            (ProjectBuyer.company_id == Company.id) & (ProjectBuyer.workspace_id == Company.workspace_id)).where(
+            ProjectBuyer.workspace_id == scope.workspace_id, ProjectBuyer.project_id == scope.project_id,
+            Company.id == scope.company_id)
+        if scope.buyer_id is not None:
+            query = query.where(ProjectBuyer.id == scope.buyer_id)
+        names = list((await session.scalars(query)).all())
+        if len(names) != 1:
+            raise ApiError(404, "NOT_FOUND", "buyer not found")
+        case = {"company_name": names[0]}
     if not isinstance(case, dict):
         case = case.model_dump(mode="json")
     observations = await review_observations(session, scope, now)
@@ -160,6 +171,14 @@ async def preparation_context(session, scope, data, now, *, case_view=None, subj
     check_map = {row.id: row for row in company_checks}
     if any(identity not in check_map for identity in data.company_source_check_ids):
         raise ApiError(404, "NOT_FOUND", "company source check not found")
+    links = [source.model_dump(mode="json") for row in selected.values() for source in row.sources]
+    links.extend({**source, "kind": "company_source_check", "checked_on": check_map[identity].checked_on.isoformat()}
+                 for identity in data.company_source_check_ids for source in check_map[identity].sources)
+    proof = await authorize_native_policy_use(
+        session, scope, action=action, source_ids=tuple(UUID(item["id"]) for item in documents), sources=links,
+        contact_id=data.contact_id, now=now,
+        purposes=("account_research", "contact_research", "draft_preparation"))
+    deadline = min(deadline, proof.deadline)
     policies = list((await session.scalars(select(PolicyDecision).where(
         PolicyDecision.workspace_id == scope.workspace_id,
         PolicyDecision.subject_id.in_([scope.project_id, scope.company_id] + ([data.contact_id] if data.contact_id else [])),
@@ -180,6 +199,7 @@ async def preparation_context(session, scope, data, now, *, case_view=None, subj
             for row in company_checks],
         "selected_company_checks": [str(value) for value in data.company_source_check_ids],
         "policies": [{"id": str(row.id), "version": row.version, "expires_at": row.expires_at.isoformat()} for row in policies],
+        "policy_proof": proof.context_hash,
     }
     blockers = []
     if not facts:
@@ -190,17 +210,14 @@ async def preparation_context(session, scope, data, now, *, case_view=None, subj
             or not quality.direct_channel
             or set(data.observation_ids) != set(latest.observation_ids)):
         blockers.append("current_person_and_source_verified_channel_required")
-    links = [source.model_dump(mode="json") for row in selected.values() for source in row.sources]
-    links.extend({**source, "kind": "company_source_check", "checked_on": check_map[identity].checked_on.isoformat()}
-                 for identity in data.company_source_check_ids for source in check_map[identity].sources)
     return {"hash": canonical_hash(frame), "facts": facts, "source_references": links,
             "deadline": deadline, "blockers": blockers, "documents": documents, "case": case}
 
 
-async def validate_preparation_input(session, scope, data, now):
+async def validate_preparation_input(session, scope, data, now, *, action="preparation.create"):
     require_permission(scope, "editDraft")
     await assert_active_project(session, scope)
-    return await preparation_context(session, scope, data, now)
+    return await preparation_context(session, scope, data, now, action=action)
 
 
 def _template(data, context):
@@ -257,7 +274,7 @@ async def revise_preparation(
     previous = await _revision(session, scope, row)
     if data.previous_revision_id and data.previous_revision_id != previous.id:
         raise ApiError(412, "STALE_REVISION", "preparation revision changed")
-    context = await validate_preparation_input(session, scope, data, now)
+    context = await validate_preparation_input(session, scope, data, now, action="preparation.revise")
     row.current_revision += 1
     row.version += 1
     row.state = "editing"
@@ -267,6 +284,7 @@ async def revise_preparation(
 
 async def get_preparation(
     session: AsyncSession, *, scope: LeadScope, preparation_id: UUID, now: datetime, case_view=None, subject_states=None,
+    action="preparation.read",
 ):
     require_permission(scope, "getDraft")
     row, scope = await _row(session, scope, preparation_id)
@@ -277,7 +295,8 @@ async def get_preparation(
     if stored:
         try:
             content = LeadPreparationInput.model_validate(stored["input"])
-            context = await preparation_context(session, scope, content, now, case_view=case_view, subject_states=subject_states)
+            context = await preparation_context(session, scope, content, now, case_view=case_view,
+                                                subject_states=subject_states, action=action)
             facts, sources = context["facts"], context["source_references"]
             current = context["hash"] == revision.context_hash
             blockers = context["blockers"]
@@ -287,6 +306,16 @@ async def get_preparation(
             blockers = [error.code]
             if error.code == "POLICY_BLOCKED":
                 content, stored = None, None
+            else:
+                # A stale product fact/context is not by itself permission to
+                # return private content. Fail closed unless the current
+                # manual policy still authorizes this retained preparation.
+                try:
+                    candidate = LeadPreparationInput.model_validate(stored["input"])
+                    await preparation_context(session, scope, candidate, now, case_view=case_view,
+                                              subject_states=subject_states, action=action)
+                except ApiError:
+                    content, stored = None, None
     else:
         blockers = ["retained_preparation_unavailable"]
     proof = await session.scalar(select(LeadPreparationContentReview).where(
@@ -320,7 +349,7 @@ async def review_preparation(
 ):
     require_permission(scope, "approveDraft")
     row, scope = await _row(session, scope, preparation_id, lock=True)
-    view = await get_preparation(session, scope=scope, preparation_id=row.id, now=now)
+    view = await get_preparation(session, scope=scope, preparation_id=row.id, now=now, action="preparation.review")
     if (row.version != expected_version or row.state == "archived" or view["revision_id"] != str(revision_id)
             or view["context_hash"] != context_hash or not view["context_current"] or view["blockers"]
             or not view["content"] or not view["content"]["subject"].strip() or not view["content"]["body"].strip()):
@@ -343,7 +372,7 @@ async def change_preparation_state(session, *, scope, preparation_id, expected_v
     if row.version != expected_version or row.state == "archived":
         raise ApiError(412, "STALE_REVISION", "preparation changed")
     if not archive:
-        view = await get_preparation(session, scope=scope, preparation_id=row.id, now=now)
+        view = await get_preparation(session, scope=scope, preparation_id=row.id, now=now, action="preparation.request_review")
         if (not view["context_current"] or view["blockers"] or not view["content"]
                 or not view["content"]["subject"].strip() or not view["content"]["body"].strip()):
             raise ApiError(412, "STALE_REVISION", "complete cited content required")
@@ -399,14 +428,11 @@ async def list_preparation_revisions(session, *, scope, preparation_id, offset, 
     items = []
     for row in rows:
         _, stored = await retained_payload(session, scope, row.payload_id, now)
-        if await personal_policy(session, scope, now, row.contact_id, required=False) is None:
-            stored = None
-        gate = await evaluate_current_policy(session, {
-            "workspace_id": scope.workspace_id, "project_id": scope.project_id, "company_id": scope.company_id,
-            **({"contact_point_id": row.contact_id} if row.contact_id else {}),
-        }, "draft_preparation", now)
-        if not gate["allowed"]:
-            stored = None
+        if stored:
+            try:
+                await preparation_context(session, scope, LeadPreparationInput.model_validate(stored["input"]), now)
+            except ApiError:
+                stored = None
         items.append({"id": str(row.id), "preparation_id": str(root.id),
                       "revision_number": row.revision_number, "content_hash": row.content_hash,
                       "context_hash": row.context_hash, "created_at": row.created_at,

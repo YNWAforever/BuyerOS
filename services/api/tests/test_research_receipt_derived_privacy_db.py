@@ -114,6 +114,7 @@ def test_model_basis_payload_is_erased_only_when_dependent_on_search_source(deri
         with psycopg.connect(c['dsn']) as db:db.execute('DELETE FROM model_receipts WHERE id=%s',(ref,))
 
 def test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receipt_writes(derived_case,monkeypatch):
+    from tests.migration_guards import invoke_revision
     from alembic import command
     from alembic.config import Config
     from tests.conftest import ALEMBIC_INI,SERVICE_ROOT,runtime_role_dsn
@@ -121,7 +122,9 @@ def test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receip
     c=derived_case;cfg=Config(str(ALEMBIC_INI));cfg.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
     monkeypatch.setenv('BUYEROS_DATABASE_URL',c['dsn']);get_settings.cache_clear()
     try:
-        command.downgrade(cfg,'0045_c61_research_page_privacy')
+        with pytest.raises(RuntimeError,match='preserve controller policy history'):
+            command.downgrade(cfg,'0045_c61_research_page_privacy')
+        invoke_revision(c['dsn'],cfg,'0046_c61_derived_privacy')
         with psycopg.connect(c['dsn']) as db:
             assert db.execute('SELECT public.buyeros_search_receipts_writable(),public.buyeros_model_receipts_writable(),public.buyeros_contact_receipts_writable()').fetchone()==(False,False,False)
             assert db.execute('SELECT request_hash,response_hash,intent_key,runtime_epoch FROM search_receipts WHERE id=%s',(c['receipt'],)).fetchone()==c['receipt_metadata']
@@ -130,7 +133,8 @@ def test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receip
             assert db.execute('SELECT excerpt,translation FROM evidence WHERE id=%s',(c['derived']['evidence'],)).fetchone()==('Source expired',None)
             assert db.execute('SELECT state,remaining_hold FROM budget_reservations').fetchall()==c['hold']
     finally:
-        command.upgrade(cfg,'head');monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
+        invoke_revision(c['dsn'],cfg,'0056_policy_activation','_fences',('0056_policy_activation',))
+        monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert erase(c) is False
     with psycopg.connect(c['dsn']) as db:
         assert db.execute('SELECT count(*) FROM draft_revisions WHERE id=%s',(c['derived']['revision'],)).fetchone()==(1,)

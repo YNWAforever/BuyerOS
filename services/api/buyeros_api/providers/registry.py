@@ -118,9 +118,16 @@ class ProviderRegistration:
     model_route: ModelRoute | None = None
     model_id: str | None = None
     contact_scope: ContactLookupScope | None = None
+    policy_account_reference: str | None = None
 
     def __post_init__(self):
         ProviderName(self.capability.provider)
+        if self.policy_account_reference is not None:
+            import re
+            if (self.capability.service not in {"search", "model"}
+                or not isinstance(self.policy_account_reference, str)
+                or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}", self.policy_account_reference) is None):
+                raise ValueError("exact nonsecret reviewed research account reference required")
         if (self.verified_filters is not None or self.market_languages is not None) and not _verified_search_scope(self):
             raise ValueError('explicit bounded verified search filter/pair scope required')
         if (self.model_route is not None or self.model_id is not None) and not _verified_model_scope(self):
@@ -155,7 +162,17 @@ class ProviderRegistration:
                 'market_languages':{market:list(languages) for market,languages in scope.market_languages},
                 'nonbillable_status':scope.nonbillable_status,'status_evidence':list(scope.status_evidence),
                 'contact_type':scope.contact_type,'max_contacts':scope.max_contacts}
+        if self.policy_account_reference is not None:
+            value["policy_account_reference"] = self.policy_account_reference
         return value
+
+    @property
+    def policy_binding(self):
+        if self.policy_account_reference is None:
+            return None
+        from ..api.policy_activation_schemas import ResearchProviderBinding
+        return ResearchProviderBinding(provider_name=self.capability.provider,
+            account_reference=self.policy_account_reference, contract_sha256=self.contract_hash)
 
     @property
     def contract_hash(self) -> str:
@@ -224,7 +241,8 @@ class ProviderRegistry:
                 'price_version':cap.pricing_version,'verified_filters':sorted(item.verified_filters),
                 'markets':sorted(cap.markets),'languages':sorted(cap.languages),'roles':sorted(cap.roles),
                 'market_languages':{market:list(languages) for market,languages in item.market_languages},
-                'receipt_contract_hash':receipt_hash,'registry_contract_hash':item.contract_hash}
+                'receipt_contract_hash':receipt_hash,'registry_contract_hash':item.contract_hash,
+                **({'policy_binding':item.policy_binding.model_dump(mode='json')} if item.policy_binding is not None else {})}
 
     def model_run_configuration(self, *, market: str, language: str, environment: str) -> dict | None:
         """Read the reviewed native model configuration without constructing an adapter."""

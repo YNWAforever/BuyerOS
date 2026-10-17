@@ -1,5 +1,6 @@
 """Fictional browser prerequisites, restricted to the owned loopback fixture."""
 import asyncio
+import hashlib
 import json
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -33,7 +34,16 @@ def _guard(dsn):
 
 def reset_lead_workflow_fixture(dsn):
     _guard(dsn)
-    with psycopg.connect(dsn, autocommit=True) as db:
+    with psycopg.connect(dsn) as db:
+        # A canceled browser can leave an apply request finishing on the server.
+        # Serialize this exact fixture reset with that write, then delete its
+        # rows atomically. Never interleave DELETEs with a revision commit.
+        # Match apply_intent's row -> workspace-lock order, so an in-flight
+        # request waiting for policy authorization cannot deadlock the reset.
+        db.execute("SELECT id FROM lead_action_intents WHERE workspace_id=%s AND project_id=%s "
+                   "ORDER BY id FOR UPDATE",(WORKSPACE,PROJECT)).fetchall()
+        lock=int.from_bytes(hashlib.sha256(f"policy-gate:{WORKSPACE}".encode()).digest()[:8],"big",signed=True)
+        db.execute("SELECT pg_advisory_xact_lock(%s)",(lock,))
         for table in (
             "lead_preparation_evidence", "lead_preparation_content_reviews", "lead_preparation_revisions",
             "lead_preparations", "lead_review_evidence", "lead_reviews", "lead_observations", "lead_action_intents",
@@ -62,6 +72,10 @@ def reset_lead_workflow_fixture(dsn):
                    "WHERE workspace_id=%s", (WORKSPACE,))
         db.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s", (WORKSPACE,))
         db.execute("UPDATE workspace_preferences SET locale='en' WHERE workspace_id=%s", (WORKSPACE,))
+    from tests.policy_activation_fixtures import approve_native_fixture
+    approve_native_fixture(dsn, WORKSPACE, PROJECT, ADMIN,
+                           domains=tuple(f"buyer{index+1}.example.test" for index in range(24)),
+                           documents=(DOCUMENT,))
     asyncio.run(_seed_records(dsn))
 
 
@@ -98,17 +112,13 @@ def seed_lead_workflow_fixture(dsn):
                         "Fictional UK rice trade channel; manual source-review fixture.",
                         "Fixture only; no actual buyer, purchasing intent or deliverability is established.",
                         json.dumps(sources), ADMIN))
-        for purpose in ("account_research", "contact_research", "draft_preparation"):
-            db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,"
-                       "status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id)"
-                       "VALUES (%s,%s,'project',%s,%s,%s,'permitted','lead-browser-fixture','fictional fixture',"
-                       "'owned loopback only',ARRAY['GB'],now()+interval '90 days',90,%s)",
-                       (uuid.uuid4(), WORKSPACE, PROJECT, WORKSPACE, purpose, ADMIN))
     reset_lead_workflow_fixture(dsn)
 
 
 def apply_lead_fixture_scenario(dsn, scenario):
     _guard(dsn)
+    if scenario == "second_purchaser":
+        return asyncio.run(_seed_second_purchaser(dsn))
     with psycopg.connect(dsn) as db:
         if scenario == "expire_channel":
             db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' "
@@ -124,6 +134,45 @@ def apply_lead_fixture_scenario(dsn, scenario):
                                     "slide_count":2,"text_slide_count":0}), DOCUMENT))
         else:
             raise ValueError("unsupported fixture scenario")
+
+
+async def _seed_second_purchaser(dsn):
+    """One atomic synthetic prerequisite; ordinary services keep every gate."""
+    from sqlalchemy import select
+    from buyeros_api.db.models import Membership
+    from buyeros_api.db.lead_workflow import LeadCaseState
+    engine=create_async_engine(runtime_role_dsn(dsn).replace("postgresql://","postgresql+psycopg://"))
+    try:
+        async with tenant_session(engine,uuid.UUID(WORKSPACE)) as session:
+            member=await session.scalar(select(Membership).where(Membership.workspace_id==uuid.UUID(WORKSPACE),
+                Membership.user_id==uuid.UUID(ADMIN),Membership.active.is_(True)))
+            if member is None or "workspace_admin" not in member.roles:
+                raise ValueError("current synthetic fixture administrator required")
+            scope=LeadScope(uuid.UUID(WORKSPACE),uuid.UUID(PROJECT),uuid.UUID(BUYERS[0]),uuid.UUID(COMPANIES[0]),
+                uuid.UUID(ADMIN),member.version,frozenset(member.roles))
+            now=datetime.now(timezone.utc)
+            base={"stance":"supports","checked_at":now.isoformat(),
+                "rationale":"Independent official purchasing role and business channel.",
+                "sources":[{"title":"Official second purchaser","url":"https://buyer1.example.test/blair",
+                    "excerpt":"Blair Fixture buys rice and uses blair@buyer1.example.test.","source_kind":"official"}]}
+            employment=await append_observation(session,scope=scope,data=LeadObservationInput.model_validate({
+                **base,"claim":"employment","person":{"full_name":"Blair Fixture","role":"Rice Buyer"}}),now=now)
+            person=employment["person_id"]
+            procurement=await append_observation(session,scope=scope,data=LeadObservationInput.model_validate({
+                **base,"claim":"procurement_scope","person":{"person_id":person}}),now=now)
+            channel=await append_observation(session,scope=scope,data=LeadObservationInput.model_validate({
+                **base,"claim":"channel_ownership","person":{"person_id":person},
+                "channel":{"type":"business_email","value":"blair@buyer1.example.test","person_id":person}}),now=now)
+            state=await session.scalar(select(LeadCaseState).where(LeadCaseState.workspace_id==scope.workspace_id,
+                LeadCaseState.project_id==scope.project_id,LeadCaseState.buyer_id==scope.buyer_id))
+            review=await append_lead_review(session,scope=scope,expected_version=state.version,
+                data=LeadReviewInput(person_id=person,contact_id=channel["contact_id"],employment="accepted",
+                    procurement_scope="accepted",channel_ownership="accepted",
+                    observation_ids=[employment["id"],procurement["id"],channel["id"]],
+                    rationale=base["rationale"]),now=now)
+            return {"fixture_only":True,"person_id":person,"review_id":review["id"]}
+    finally:
+        await engine.dispose()
 
 
 async def _seed_records(dsn):
