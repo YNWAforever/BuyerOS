@@ -142,6 +142,22 @@ test('C61T-14 Tab traversal completes its bounded native cycle under slow fixtur
  await expect(target).toBeFocused();
  const proof=await input.verify(page);expect(proof?.trustedPointerEvents).toEqual([]);
  expect(proof?.actions.at(-1)?.tabs).toBe(40);
+ // A long settings form must permit ordinary backward navigation to the header,
+ // and ordinary forward wrap from the last control, within the same250 budget.
+ const fields=Array.from({length:300},(_,i)=>`<input aria-label="Field ${i}"/>`).join('');
+ await page.goto('data:text/html,'+encodeURIComponent('<style>:focus-visible{outline:2px solid blue}</style><button>Workspace overview</button><button>Project control</button>'+fields));
+ await page.keyboard.press('Tab');await page.keyboard.press('Tab');
+ await expect(page.getByRole('button',{name:'Project control',exact:true})).toBeFocused();
+ const overview=page.getByRole('button',{name:'Workspace overview',exact:true});
+ await input.activate(overview);await expect(overview).toBeFocused();
+ expect((await input.verify(page))?.actions.at(-1)?.tabs).toBe(1);
+ // Chromium includes the document/browser boundary in a native wrap.
+ await page.keyboard.press('Shift+Tab');
+ expect(await page.evaluate(()=>document.activeElement===document.body)).toBe(true);
+ await page.keyboard.press('Shift+Tab');
+ await expect(page.getByRole('textbox',{name:'Field 299',exact:true})).toBeFocused();
+ await input.activate(overview);await expect(overview).toBeFocused();
+ expect((await input.verify(page))?.actions.at(-1)?.tabs).toBe(2);
 });
 
 

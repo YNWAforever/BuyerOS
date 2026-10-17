@@ -70,3 +70,12 @@ local Cloudflare acceptance 包含實際 compiled handler、local Queue/Workflow
 同 run 的最後 API-admission case 顯示 plain seed 子程序沒有自己驗明 parent receipt。它現在必須取得明確 receipt，先獨立 `inspect_target` 再進入 `_setup`/首次 SQL；缺 proof 的純 RED/GREEN 驗證，以及實際 owned DB 子程序 readback 均通過（兩筆 fake unknown/accepted、hold0.6、cost0，沒有 provider submit）。
 
 最後本機完整 joined17/17、Unicode4/4、actual child probe1/1 與 C61 evidence controls163/163 通過，無失敗/錯誤/跳過。JUnit、命令、logs 與原檔在 private evidence `publish-01/ci-fix-03/`。這四個 source 補修不增加/刪除原 testcase IDs，不修改產品授權或 schema/migration SQL；完整12-job CI必須在更新後同一 head 重新通過，不能拼合舊 head 結果。
+
+
+## 長設定表單的原生鍵盤測試路徑
+
+`f10f9074` 的 CI run `39041513891` 在 audit140 中有一項英文桌面 task5 失敗：目前控制項位於長設定表單中，helper 固定向前 Tab，250 步內無法回到頁首 Overview。現在只由 DOM 的可用循序焦點順序選擇原生 Tab 或 Shift+Tab；仍由 Chromium 實際移動焦點與按 Enter，沒有注入 focus、滑鼠輸入、增加步數或延長 timeout。原有 focus-visible、至少 2px outline、零 trusted pointer 與不可到達控制項的 250 步拒絕均保留。
+
+同一原 testcase 補入 300 欄位的實測路徑：Project 向後一步到 Overview；頁尾向前經瀏覽器邊界兩步回 Overview。原慢速 40 次 Tab 及負向案例不變，audit inventory 仍為 140。新增路徑在舊 helper 重現 250 步失敗；Chromium probe 證明瀏覽器邊界會令 activeElement 為 BODY，不能誤稱 BODY 具有頁內焦點。最初兩次不準確的 wrap 斷言失敗、probe 及所有原始 logs/JUnit 保留，沒有覆寫。
+
+本機最新結果：無 DB protocol 2/2、完整原 `audit-keyboard-workbench.spec.ts` 6/6、TypeScript、兩檔 ESLint、C61 evidence 163/163，無失敗或跳過。完整6案使用新的 owned disposable DB、fixture Auth 與 compiled UI；啟動前清除繼承 DB/provider 設定，再由既有 allocator 檢查 Docker/context、container/image/label/port/mount 與 receipt。命令、原始結果及各次失敗在 private evidence `publish-01/ci-fix-04/`。這只是測試 helper 修正，不更改產品授權、保存行為或 migration；更新 head 的完整12-job CI另行驗證，不拼合舊 SHA 結果。
