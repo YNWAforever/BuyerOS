@@ -42,15 +42,20 @@ def run_case(admission_case,monkeypatch,request):
     from buyeros_api.providers import base
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     from buyeros_api.providers import registry
-    scope=ProviderRegistration(cap,lambda:None,('synthetic:run-search-owned-fixture',),frozenset({'market','language'}),(('US',('en',)),('HK',('zh-HK',))))
+    scope=ProviderRegistration(cap,lambda:None,('synthetic:run-search-owned-fixture',),frozenset({'market','language'}),(('US',('en',)),('HK',('zh-HK',))),
+                               policy_account_reference="owned-run-search-account")
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',registry.ProviderRegistry((scope,)))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    from tests.test_run_admission_integration_db import PROJECT_A,RESEARCH_FIXTURE_DOMAINS
+    approve_research_fixture(dsn,ws,PROJECT_A,domains=RESEARCH_FIXTURE_DOMAINS,search=scope.policy_binding)
     with psycopg.connect(dsn) as db:
         project,snapshot=db.execute('SELECT project_id,execution_snapshot FROM search_runs WHERE id=%s',(run,)).fetchone()
         # Explicit owned fixture overlay; default production registry remains empty.
         snapshot['capability'].update(provider=cap.provider,price_version=cap.pricing_version,
             receipt_contract_hash=ProviderRegistration(cap,lambda:None).contract_hash,registry_contract_hash=scope.contract_hash,
             market_languages={market:list(languages) for market,languages in scope.market_languages})
+        snapshot['capability']['policy_binding']=scope.policy_binding.model_dump(mode='json')
         db.execute('UPDATE search_runs SET execution_snapshot=%s::jsonb WHERE id=%s',(json.dumps(snapshot),run))
         db.execute("UPDATE outbox_events SET state='dispatched',fencing_generation=1 WHERE payload->>'run_id'=%s",(str(run),))
         outbox,key,payload=db.execute("SELECT id,intent_key,payload FROM outbox_events WHERE payload->>'run_id'=%s",(str(run),)).fetchone()
@@ -160,13 +165,17 @@ def test_run_request_lost_response_never_reprepares_or_resubmits(run_case):
 
 def test_live_admission_freezes_complete_receipt_contract(run_case):
     c=run_case
-    from tests.test_run_admission_integration_db import CAPABILITY
+    from tests.test_run_admission_integration_db import CAPABILITY,PROJECT_A,RESEARCH_FIXTURE_DOMAINS
     from buyeros_api.api.routes.runs import selected_run_capability
     contract=ProviderRegistration(c['cap'],lambda:None).contract_hash
     from buyeros_api.providers import registry
     scope=registry.DEFAULT_REGISTRY.search_run_capability(environment='production')
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(c['dsn'],c['workspace'],PROJECT_A,domains=RESEARCH_FIXTURE_DOMAINS,
+        search=scope['policy_binding'],model=scope['policy_binding'])
     caps={**CAPABILITY,'provider':c['cap'].provider,'price_version':c['cap'].pricing_version,'receipt_contract_hash':contract,
-          'registry_contract_hash':scope['registry_contract_hash'],'market_languages':scope['market_languages']}
+          'registry_contract_hash':scope['registry_contract_hash'],'market_languages':scope['market_languages'],
+          'policy_binding':scope['policy_binding']}
     c['api'].app.dependency_overrides[selected_run_capability]=lambda:(caps,'test')
     reply=_post(c['api'],key='c19-complete-contract');assert reply.status_code==202,reply.text
     with psycopg.connect(c['dsn']) as db:

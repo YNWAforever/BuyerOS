@@ -93,6 +93,9 @@ async def reserve_delivery_operation(session,*,operation_id:uuid.UUID,authorizat
         if (operation.capability!='delivery' or operation.intent_key!=intent.key or operation.input_hash!=intent.payload_digest
             or operation.provider_name!=authorization.provider_name or operation.account_reference!=authorization.account_reference):
             raise ApiError(409,'IDEMPOTENCY_CONFLICT','original delivery operation binding differs')
+        from .provider_policy_context import require_delivery_policy
+        await require_delivery_policy(session, prepared=prepared, authorization=authorization,
+                                      project_id=project_id, draft_id=bindings['draft_id'])
         existing=(await session.execute(select(BudgetReservation.id).where(
             BudgetReservation.workspace_id==intent.workspace_id,BudgetReservation.operation_id==operation.id))).scalar_one_or_none()
         if operation.status!='intent' and existing is None:

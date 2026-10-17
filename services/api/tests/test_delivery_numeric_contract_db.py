@@ -24,10 +24,15 @@ def test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_sh
     import pytest
     client,dsn,buyers=quote_case
     monkeypatch.setenv('BUYEROS_DATABASE_URL',dsn);get_settings.cache_clear()
+    from tests.migration_guards import invoke_revision
     try:
-        command.downgrade(ledger.config(),'0048_c61_delivery_ledger')
+        with pytest.raises(RuntimeError,match='preserve controller policy history'):
+            command.downgrade(ledger.config(),'0048_c61_delivery_ledger')
+        # Rehearse the exact money migration in place without deleting newer
+        # policy history or pretending the entire schema was downgraded.
+        invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money')
+        invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
         with monkeypatch.context() as context:
-            context.setattr(ledger,'HEAD','0048_c61_delivery_ledger')
             with ledger.ledger_case(quote_case) as data:
                 with ledger.tenant(dsn,str(data['args']['workspace_id'])) as db:
                     db.execute("UPDATE delivery_messages SET state='submitting' WHERE id=%s",(data['message'],))
@@ -43,17 +48,21 @@ def test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_sh
                 before=snapshot()
                 with psycopg.connect(dsn) as db:
                     assert db.execute("SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_name='delivery_liabilities' AND column_name='max_liability'").fetchone()==(18,6)
-                command.upgrade(ledger.config(),'head')
+                invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money','upgrade')
+                invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0055_lead_workflow',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
                     assert db.execute("SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_name='delivery_liabilities' AND column_name='max_liability'").fetchone()==(20,6)
-                with pytest.raises(RuntimeError,match='retain delivery history'):command.downgrade(ledger.config(),'0048_c61_delivery_ledger')
+                with pytest.raises(RuntimeError,match='retain delivery history'):
+                    invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money')
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0055_lead_workflow',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
                     assert str(db.execute('SELECT remaining_hold FROM budget_reservations WHERE id=%s',(data['reservation'],)).fetchone()[0])=='0.010000'
     finally:
         # Keep the session fixture at its declared head even if an assertion fails.
-        try:command.upgrade(ledger.config(),'head')
+        try:
+            invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money','upgrade')
+            invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
         finally:get_settings.cache_clear()

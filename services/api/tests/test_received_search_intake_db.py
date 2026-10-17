@@ -37,6 +37,8 @@ def received_case(admission_case,monkeypatch,request):
     api,dsn=admission_case;reply=_post(api,key='c19-received-source');assert reply.status_code==202,reply.text
     run=uuid.UUID(reply.json()['data']['id']);workspace=uuid.UUID(WORKSPACE_A);actor=uuid.uuid5(uuid.NAMESPACE_URL,OPERATOR)
     cap=replace(capability(),idempotency='verified',status='verified')
+    from buyeros_api.providers.registry import ProviderRegistration
+    binding=ProviderRegistration(cap,lambda:None,policy_account_reference='owned-received-intake-account').policy_binding
     from buyeros_api.providers import base
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     operation=uuid.uuid4();outbox=uuid.uuid4();intent=ProviderIntent('c19-intake:'+operation.hex,'search','US','en','company')
@@ -46,6 +48,7 @@ def received_case(admission_case,monkeypatch,request):
         # This is an explicitly synthetic prepared run contract. Admission's
         # real selector is still closed; no fixture capability is deployed.
         snapshot['capability'].update(provider=cap.provider,price_version=cap.pricing_version)
+        snapshot['capability']['policy_binding']=binding.model_dump(mode='json')
         db.execute("UPDATE search_runs SET execution_snapshot=%s::jsonb,status='running',stage='discovering' WHERE id=%s",(json.dumps(snapshot),run))
         db.execute("UPDATE outbox_events SET state='done' WHERE payload->>'run_id'=%s",(str(run),))
         db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
@@ -53,13 +56,18 @@ def received_case(admission_case,monkeypatch,request):
         payload={'operation_id':str(operation),'service':'search','market':'US','language':'en','role':'company','run_id':str(run),'query_id':query['id']}
         db.execute("INSERT INTO provider_operations(id,workspace_id,intent_key,capability,input_hash,status) VALUES(%s,%s,%s,'search',%s,'reserved')",(operation,workspace,intent.key,input_digest(intent)))
         db.execute("INSERT INTO outbox_events(id,workspace_id,intent_key,event_type,payload,state,fencing_generation,runtime_backend,runtime_epoch) VALUES(%s,%s,%s,'provider.external',%s::jsonb,'dispatched',1,%s,%s)",(outbox,workspace,intent.key,json.dumps(payload),backend,epoch))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(dsn,workspace,project,domains=('sensors.example.test','other.example.test'),
+                             search=binding,countries=('US',))
     from buyeros_api.services.budget_service import reserve_operation
     _run(dsn,lambda session:reserve_operation(session,operation,{'workspace_id':workspace,'project_id':project,'run_id':run,'category':'discovery'},cap.max_liability.amount,'USD',cap.pricing_version))
-    case={'dsn':dsn,'run':run,'workspace':workspace,'project':project,'actor':actor,'cap':cap,'operation':operation,'outbox':outbox,'intent':intent,'query':query,'calls':[]}
+    case={'dsn':dsn,'run':run,'workspace':workspace,'project':project,'actor':actor,'cap':cap,'binding':binding,
+          'operation':operation,'outbox':outbox,'intent':intent,'query':query,'calls':[]}
     async def receive():
         api_engine=create_async_engine(async_database_url(runtime_role_dsn(dsn)));worker_engine=create_async_engine(async_database_url(role_dsn(dsn,'buyeros_worker')))
         try:
-            api_store=PostgresSearchReceipts(api_engine,workspace,cap);store=PostgresSearchReceipts(worker_engine,workspace,cap)
+            api_store=PostgresSearchReceipts(api_engine,workspace,cap,policy_binding=binding)
+            store=PostgresSearchReceipts(worker_engine,workspace,cap,policy_binding=binding)
             request=SearchRequest(key=intent.key,query=query['query'],market=query['market'],language=query['language'],role='company',limit=10,project_id=project,actor_id=actor)
             case['ref']=uuid.UUID(await api_store.prepare(request,operation_id=operation,outbox_id=outbox))
             def response(req):
@@ -71,16 +79,20 @@ def received_case(admission_case,monkeypatch,request):
                 adapter=LiveSearchAdapter(capability=cap,receipts=store,client=BraveSearchClient(api_key='synthetic-offline-only',http=http,language_codes={'en':'en'},api_version='2026-10-01'))
                 assert await execute_external(worker_engine,workspace,operation,1,adapter,intent,environment='test')=='accepted'
         finally:await api_engine.dispose();await worker_engine.dispose()
-    asyncio.run(receive());assert len(case['calls'])==1
-    yield case
-    with psycopg.connect(dsn) as db:
-        db.execute('DELETE FROM receipt_source_bindings WHERE source_id IN(SELECT id FROM source_documents WHERE run_id=%s)',(run,))
-        db.execute('DELETE FROM raw_candidates WHERE run_id=%s',(run,))
-        db.execute('DELETE FROM source_documents WHERE run_id=%s',(run,))
-        db.execute('DELETE FROM search_receipts WHERE id=%s',(case['ref'],))
-        db.execute('DELETE FROM budget_reservation_allocations WHERE reservation_id IN(SELECT id FROM budget_reservations WHERE operation_id=%s)',(operation,))
-        db.execute('DELETE FROM budget_reservations WHERE operation_id=%s',(operation,))
-        db.execute('DELETE FROM provider_operations WHERE id=%s',(operation,))
+    try:
+        asyncio.run(receive());assert len(case['calls'])==1
+        yield case
+    finally:
+        # A prepare failure can precede case['ref']; clean the exact owned
+        # operation as well as its allocation before the parent account reset.
+        with psycopg.connect(dsn) as db:
+            db.execute('DELETE FROM receipt_source_bindings WHERE source_id IN(SELECT id FROM source_documents WHERE run_id=%s)',(run,))
+            db.execute('DELETE FROM raw_candidates WHERE run_id=%s',(run,))
+            db.execute('DELETE FROM source_documents WHERE run_id=%s',(run,))
+            db.execute('DELETE FROM search_receipts WHERE operation_id=%s',(operation,))
+            db.execute('DELETE FROM budget_reservation_allocations WHERE reservation_id IN(SELECT id FROM budget_reservations WHERE operation_id=%s)',(operation,))
+            db.execute('DELETE FROM budget_reservations WHERE operation_id=%s',(operation,))
+            db.execute('DELETE FROM provider_operations WHERE id=%s',(operation,))
 
 def consume(case,*,workspace=None,run=None):
     fn=intake()
@@ -175,6 +187,29 @@ def test_received_metadata_empty_or_duplicate_response_has_one_checkpoint(receiv
         assert db.execute('SELECT count(*) FROM source_documents WHERE run_id=%s',(c['run'],)).fetchone()==(min(returned,1),)
         assert db.execute("SELECT count(*) FROM run_events WHERE run_id=%s AND payload->>'receipt_id'=%s",(c['run'],str(c['ref']))).fetchone()==(1,)
 
+
+@pytest.mark.parametrize('received_case',['empty'],indirect=True)
+def test_empty_receipt_still_requires_exact_current_search_account_and_policy(received_case):
+    c=received_case
+    async def read():
+        engine=create_async_engine(async_database_url(runtime_role_dsn(c['dsn'])))
+        try:
+            right=PostgresSearchReceipts(engine,c['workspace'],c['cap'],policy_binding=c['binding'])
+            assert (await right.get(str(c['ref'])))['sources']==[]
+            wrong=PostgresSearchReceipts(engine,c['workspace'],c['cap'],
+                policy_binding=c['binding'].model_copy(update={'account_reference':'unapproved-account'}))
+            missing=PostgresSearchReceipts(engine,c['workspace'],c['cap'])
+            for denied in (wrong,missing):
+                with pytest.raises(ValueError,match='purpose policy'):
+                    await denied.get(str(c['ref']))
+            with psycopg.connect(c['dsn']) as db:
+                db.execute("UPDATE policy_decisions SET status='blocked',version=version+1 WHERE workspace_id=%s",(c['workspace'],))
+            with pytest.raises(ValueError,match='purpose policy'):
+                await right.get(str(c['ref']))
+        finally:
+            await engine.dispose()
+    asyncio.run(read())
+
 @pytest.mark.parametrize('received_case',['two'],indirect=True)
 def test_receipt_erasure_clears_all_intake_source_copies_atomically(received_case):
     c=received_case;consume(c)
@@ -249,18 +284,22 @@ def test_intake_migration_rollback_retains_tombstones_and_closes_writes(received
     from alembic.config import Config
     from tests.conftest import ALEMBIC_INI,SERVICE_ROOT
     from buyeros_api.settings import get_settings
+    from tests.migration_guards import invoke_revision
     config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
     with psycopg.connect(c['dsn']) as db:
         before=db.execute('SELECT request_hash,response_hash,intent_key FROM search_receipts WHERE id=%s',(c['ref'],)).fetchone()
     monkeypatch.setenv('BUYEROS_DATABASE_URL',c['dsn']);get_settings.cache_clear()
     try:
-        command.downgrade(config,'0043_c61_receipt_retention')
+        with pytest.raises(RuntimeError,match='preserve controller policy history'):
+            command.downgrade(config,'0043_c61_receipt_retention')
+        invoke_revision(c['dsn'],config,'0044_c61_search_intake')
         with psycopg.connect(c['dsn']) as db:
             assert db.execute('SELECT public.buyeros_search_receipts_writable(),public.buyeros_model_receipts_writable(),public.buyeros_contact_receipts_writable()').fetchone()==(False,False,False)
             assert db.execute('SELECT request_hash,response_hash,intent_key FROM search_receipts WHERE id=%s',(c['ref'],)).fetchone()==before
         with pytest.raises(ValueError):consume(c)
     finally:
-        command.upgrade(config,'head');monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
+        invoke_revision(c['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+        monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert consume(c)['source_count']==1
 
 def test_worker_cannot_use_api_intake_lock_or_prepare_receipts(received_case):

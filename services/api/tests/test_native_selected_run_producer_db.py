@@ -28,10 +28,15 @@ def test_real_selected_producer_and_native_registry_factory_share_original_scope
     holder={}
     def factory():
         factories.append('native-dispatch');return holder['adapter']
-    item=ProviderRegistration(cap,factory,('synthetic:actual-producer-fixture-only',),frozenset({'market','language'}),(('US',('en',)),))
+    item=ProviderRegistration(cap,factory,('synthetic:actual-producer-fixture-only',),frozenset({'market','language'}),(('US',('en',)),),
+                              policy_account_reference='owned-native-producer-account')
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry((item,)))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    from tests.test_run_admission_integration_db import PROJECT_A
+    approve_research_fixture(dsn,workspace,PROJECT_A,domains=('native-producer.example.test',),
+                             search=item.policy_binding,countries=('US',))
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED','true');monkeypatch.setenv('BUYEROS_CLOUDFLARE_EXECUTION_ENABLED','true');get_settings.cache_clear()
     api.app.dependency_overrides.pop(selected_run_capability)
     try:

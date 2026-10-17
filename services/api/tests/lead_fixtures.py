@@ -73,15 +73,8 @@ def lead_case(isolated_seeded):
                 "INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES (%s,%s,%s,%s)",
                 (bid, wid, pid, cid),
             )
-        for purpose in ("account_research", "contact_research", "draft_preparation"):
-            db.execute(
-                "INSERT INTO policy_decisions"
-                "(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,"
-                "policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id)"
-                "VALUES (%s,%s,'project',%s,%s,%s,'permitted','lead-fixture-v1','offline test',"
-                "'disposable fixture',ARRAY['GB'],%s,90,%s)",
-                (uuid.uuid4(), WORKSPACE, PROJECT, WORKSPACE, purpose, now + timedelta(days=90), ACTORS["workspace_admin"]),
-            )
+    from tests.policy_activation_fixtures import approve_native_fixture
+    approve_native_fixture(isolated_seeded, WORKSPACE, PROJECT, ACTORS["workspace_admin"])
     return {
         "dsn": isolated_seeded, "workspace_id": WORKSPACE, "project_id": PROJECT,
         "buyer_id": str(buyer), "company_id": str(company), "other_buyer_id": str(other_buyer),

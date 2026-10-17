@@ -10,7 +10,7 @@ from tests.test_lookup_quotes_db import quote_case,WORKSPACE_A
 from tests.test_api_tenant_isolation import WORKSPACE_B
 from tests.test_delivery_preparation_db import approved,prepare
 
-HEAD='0055_lead_workflow';PREVIOUS='0047_c61_legacy_source_privacy'
+HEAD='0056_policy_activation';PREVIOUS='0047_c61_legacy_source_privacy'
 TABLES=('delivery_messages','delivery_events','delivery_liabilities')
 
 def config():
@@ -91,7 +91,13 @@ def test_delivery_populated_rollback_refuses_and_retains_unknown_hold_and_canoni
             db.execute("UPDATE delivery_messages SET state='submitting' WHERE id=%s",(data['message'],));db.execute("UPDATE delivery_messages SET state='unknown' WHERE id=%s",(data['message'],))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',data['dsn']);get_settings.cache_clear()
         try:
-            with pytest.raises(Exception,match='retain delivery history'):command.downgrade(config(),PREVIOUS)
+            with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                command.downgrade(config(),PREVIOUS)
+            from tests.migration_guards import invoke_revision
+            with pytest.raises(RuntimeError,match='retain delivery history'):
+                invoke_revision(data['dsn'],config(),'0049_c61_delivery_money')
+            with pytest.raises(RuntimeError,match='retain delivery history'):
+                invoke_revision(data['dsn'],config(),'0048_c61_delivery_ledger')
             with psycopg.connect(data['dsn']) as db:
                 row=db.execute('SELECT state,draft_revision_id,approval_id,actor_id FROM delivery_messages WHERE id=%s',(data['message'],)).fetchone()
                 assert row==('unknown',data['args']['draft_revision_id'],data['args']['approval_id'],data['args']['actor_id'])

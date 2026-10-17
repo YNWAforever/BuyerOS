@@ -32,8 +32,14 @@ def search_case(api,seeded,monkeypatch):
         db.execute("INSERT INTO provider_operations(id,workspace_id,intent_key,capability,input_hash,status) VALUES (%s,%s,%s,'search',%s,'reserved')",(operation,workspace,intent.key,input_digest(intent)))
         backend,epoch=db.execute('SELECT backend,epoch FROM worker_runtime_control').fetchone()
         db.execute("INSERT INTO outbox_events(id,workspace_id,intent_key,event_type,payload,state,fencing_generation,runtime_backend,runtime_epoch) VALUES (%s,%s,%s,'provider.external',%s::jsonb,'dispatched',1,%s,%s)",(outbox,workspace,intent.key,json.dumps({'operation_id':str(operation),'service':'search','market':'US','language':'en','role':'company'}),backend,epoch))
-        db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) VALUES(%s,%s,'project',%s,%s,'account_research','permitted','c61-offline-fixture-only','offline-synthetic','fixture','{US}',now()+interval '1 day',1,%s)",(uuid.uuid4(),workspace,project,workspace,actor))
-    yield {'dsn':seeded,'cap':cap,'actor':actor,'workspace':workspace,'project':project,'operation':operation,'outbox':outbox,'intent':intent}
+    from buyeros_api.api.policy_activation_schemas import ResearchProviderBinding
+    from buyeros_api.providers.registry import ProviderRegistration
+    binding=ResearchProviderBinding(provider_name=cap.provider,account_reference='owned-search-account',
+        contract_sha256=ProviderRegistration(cap,lambda:None).contract_hash)
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(seeded,workspace,project,domains=('sensors.example.test','fixture.example.test'),
+                             search=binding)
+    yield {'dsn':seeded,'cap':cap,'binding':binding,'actor':actor,'workspace':workspace,'project':project,'operation':operation,'outbox':outbox,'intent':intent}
     with psycopg.connect(seeded) as db:
         if db.execute("SELECT to_regclass('public.search_receipts')").fetchone()[0]:db.execute('DELETE FROM search_receipts WHERE workspace_id=%s',(workspace,))
         db.execute('DELETE FROM outbox_events WHERE intent_key IN (%s,%s)',(intent.key,reconcile_intent_key(operation)))
@@ -45,7 +51,8 @@ async def stores(case):
     api_engine=create_async_engine(async_database_url(runtime_role_dsn(case['dsn'])));worker_engine=create_async_engine(async_database_url(role_dsn(case['dsn'],'buyeros_worker')))
     try:
         request=m.SearchRequest(key=case['intent'].key,query='industrial sensors',market='US',language='en',role='company',limit=20,project_id=case['project'],actor_id=case['actor'])
-        api_store=cls(api_engine,case['workspace'],case['cap']);worker_store=cls(worker_engine,case['workspace'],case['cap'])
+        api_store=cls(api_engine,case['workspace'],case['cap'],policy_binding=case['binding'])
+        worker_store=cls(worker_engine,case['workspace'],case['cap'],policy_binding=case['binding'])
         ref=await api_store.prepare(request,operation_id=case['operation'],outbox_id=case['outbox'])
         yield m,worker_engine,api_store,worker_store,ref
     finally:await api_engine.dispose();await worker_engine.dispose()
@@ -155,7 +162,12 @@ def test_receipt_rollback_retains_rows_and_reupgrade_preserves_hash(search_case,
             from buyeros_api.settings import get_settings
             monkeypatch.setenv('BUYEROS_DATABASE_URL',case['dsn']);get_settings.cache_clear()
             try:
-                command.downgrade(config,'0039_c61_user_identities')
+                with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                    command.downgrade(config,'0039_c61_user_identities')
+                from tests.migration_guards import invoke_revision
+                # Historical receipt downgrade retains rows; the current
+                # policy-history guard remains intact and independently tested.
+                invoke_revision(case['dsn'],config,'0040_c61_search_receipts')
                 assert await store.get(ref)==before
             finally:
                 command.upgrade(config,'head')

@@ -177,10 +177,14 @@ async def _materialize(session, workspace_id: uuid.UUID, job_id: uuid.UUID):
             or (await _fit_freshness(session, workspace_id=workspace_id,
                  fits=[fit], buyers_by_id={buyer.id: buyer})).get(fit.id) != "current"):
         return reject("review_or_evidence_changed")
+    from buyeros_api.services.provider_policy_context import addressed_context
+    recipient = (command.get("recipient_context") or {}).get("contact", {}).get("id")
+    context = await addressed_context(session, project_id=project.id, company_id=buyer.company_id,
+        sender_id=sender.id, recipient_id=uuid.UUID(recipient) if recipient else None)
     decision = await evaluate_current_policy(session, {
         "workspace_id": workspace_id, "project_id": project.id,
         "company_id": buyer.company_id,
-    }, "draft_preparation", datetime.now(timezone.utc))
+    }, "draft_preparation", datetime.now(timezone.utc), use_context=context)
     if not decision["allowed"]:
         return reject("policy_blocked")
     recipient_id = None

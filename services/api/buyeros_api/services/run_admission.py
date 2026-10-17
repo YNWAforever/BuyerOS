@@ -101,9 +101,12 @@ async def admit_run(session, actor_id: uuid.UUID, project_id: uuid.UUID, request
         plan = build_query_plan(icp.content, capabilities, limits)
     except (ValueError, TypeError) as exc:
         raise ApiError(422, "INVALID_REQUEST", str(exc)) from exc
+    from .research_policy_context import research_use, metadata_binding
+    binding = metadata_binding(capabilities)
     policy = await evaluate_current_policy(
         session, {"workspace_id": workspace_id, "project_id": project_id},
         "account_research", datetime.now(timezone.utc),
+        use_context=research_use(project_id, "research.search", binding=binding),
     )
     if not policy["allowed"]:
         raise ApiError(409, "POLICY_BLOCKED", "current account research policy is required")
@@ -133,6 +136,8 @@ async def admit_run(session, actor_id: uuid.UUID, project_id: uuid.UUID, request
     if capabilities.get('provider')!='fixture':
         snapshot['capability'].update(receipt_contract_hash=receipt_contract_hash,registry_contract_hash=registry_contract_hash,
             market_languages={market:list(languages) for market,languages in sorted(capabilities['market_languages'].items())})
+    if binding is not None:
+        snapshot["capability"]["policy_binding"] = binding.model_dump(mode="json")
     counters = {name: 0 for name in
                 ("rounds", "queries", "raw_results", "pages", "model_tokens", "in_flight")}
     run = SearchRun(workspace_id=workspace_id, project_id=project_id,

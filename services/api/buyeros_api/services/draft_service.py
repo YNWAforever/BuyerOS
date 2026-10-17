@@ -30,8 +30,14 @@ async def preparation_recipient_context(session, *, workspace_id, project_id, co
     purposes = ("draft_preparation", "outreach", "export_contacts")
     subject = {"workspace_id": workspace_id, "project_id": project_id,
                "company_id": company_id, "contact_point_id": contact.id}
+    from .provider_policy_context import addressed_context
+    from ..db.icp import Project
+    sender_id = await session.scalar(select(Project.active_sender_identity_version_id).where(Project.id == project_id))
     for purpose in purposes:
-        if not (await evaluate_current_policy(session, subject, purpose, now))["allowed"]:
+        context = await addressed_context(session, project_id=project_id, company_id=company_id,
+            sender_id=sender_id, recipient_id=contact.id,
+            action="delivery.review" if purpose == "outreach" else "draft.generate") if purpose != "export_contacts" else None
+        if not (await evaluate_current_policy(session, subject, purpose, now, use_context=context))["allowed"]:
             raise ApiError(403, "POLICY_BLOCKED", f"{purpose} is not permitted")
     scopes = [and_(PolicyDecision.subject_type == kind, PolicyDecision.subject_id == value)
               for kind, value in (("project", project_id), ("company", company_id),
@@ -129,15 +135,18 @@ async def admit_grounded_template(session, *, workspace_id, project_id, actor_id
             or (await _fit_freshness(session, workspace_id=workspace_id,
                                      fits=[fit], buyers_by_id={buyer.id: buyer})).get(fit.id) != "current"):
         raise ApiError(412, "STALE_REVISION", "current accepted evidence-backed buyer required")
-    decision = await evaluate_current_policy(session, {
-        "workspace_id": workspace_id, "project_id": project_id, "company_id": buyer.company_id,
-    }, "draft_preparation", datetime.now(timezone.utc))
-    if not decision["allowed"]:
-        raise ApiError(403, "POLICY_BLOCKED", "draft preparation is not permitted")
     recipient_context = None
     if request.recipient_contact_id is not None:
         recipient_context = await preparation_recipient_context(session, workspace_id=workspace_id,
             project_id=project_id, company_id=buyer.company_id, contact_id=request.recipient_contact_id)
+    from .provider_policy_context import addressed_context
+    context = await addressed_context(session, project_id=project_id, company_id=buyer.company_id,
+        sender_id=sender.id, recipient_id=request.recipient_contact_id)
+    decision = await evaluate_current_policy(session, {
+        "workspace_id": workspace_id, "project_id": project_id, "company_id": buyer.company_id,
+    }, "draft_preparation", datetime.now(timezone.utc), use_context=context)
+    if not decision["allowed"]:
+        raise ApiError(403, "POLICY_BLOCKED", "draft preparation is not permitted")
     selected_fact_ids = [str(value) for value in request.approved_offer_fact_ids]
     if len(set(selected_fact_ids)) != len(selected_fact_ids):
         raise ApiError(422, "INVALID_REQUEST", "duplicate offer fact")

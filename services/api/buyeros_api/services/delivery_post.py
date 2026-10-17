@@ -78,6 +78,9 @@ async def claim_delivery_post(session,*,execution:LocalExecution,claim:DeliveryS
             recipient_ref=message.recipient_ref, sender_identity_id=message.sender_identity_id,
             approval_id=message.approval_id, key=message.intent_key,
         )
+        from .provider_policy_context import require_delivery_policy
+        await require_delivery_policy(session, prepared=prepared, authorization=authorization,
+                                      project_id=message.project_id, draft_id=message.draft_id)
         if (prepared.intent != claim.prepared.intent
                 or dict(prepared.payload) != dict(claim.prepared.payload)):
             raise ApiError(409, "RETRY_UNSAFE", "original delivery payload cannot be replaced")

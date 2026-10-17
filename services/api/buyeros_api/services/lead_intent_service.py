@@ -119,15 +119,29 @@ async def _receipt(session, scope, row, now):
 async def _view(session, scope, row, now):
     scope = await intent_scope(session, scope, row)
     payload, content = await retained_payload(session, scope, row.payload_id, now)
-    allowed = (await personal_policy(session, scope, now, payload.contact_id if payload else None,
-                                     required=False) is not None) if personal_action(row.action) else True
+    body = content.get("payload", {}) if content else {}
+    allowed = content is not None
     if allowed and row.action.startswith("preparation."):
-        from .policy_service import evaluate_current_policy
-        gate = await evaluate_current_policy(session, {
-            "workspace_id": scope.workspace_id, "project_id": scope.project_id, "company_id": scope.company_id,
-            **({"contact_point_id": payload.contact_id} if payload and payload.contact_id else {}),
-        }, "draft_preparation", now)
-        allowed = gate["allowed"]
+        from ..api.lead_schemas import LeadPreparationInput
+        from .lead_preparation_service import preparation_context, _row, _revision
+        try:
+            cited = body
+            if row.action not in {"preparation.create", "preparation.revise"}:
+                target, _ = await _row(session, scope, row.target_id)
+                revision = await _revision(session, scope, target)
+                _, retained = await retained_payload(session, scope, revision.payload_id, now)
+                if not retained:
+                    raise ApiError(403, "POLICY_BLOCKED", "retained preparation required")
+                cited = retained["input"]
+            await preparation_context(session, scope, LeadPreparationInput.model_validate(cited), now)
+        except ApiError:
+            allowed = False
+    elif allowed and personal_action(row.action):
+        allowed = await personal_policy(
+            session, scope, now, payload.contact_id if payload else None, required=False,
+            sources=body.get("sources") if row.action == "observation.append" else None,
+            observation_ids=body.get("observation_ids"),
+        ) is not None
     if not allowed:
         content = None
     receipt = await _receipt(session, scope, row, now) if row.state == "applied" else None
@@ -151,7 +165,9 @@ async def prepare_intent(
     require_key(key)
     require_action(scope, data.action)
     await assert_active_project(session, scope)
-    deadline = (await personal_policy(session, scope, now)) if personal_action(data.action) else now + timedelta(days=LOCAL_CONFIGURATION_INTENT_DAYS)
+    # Personal branches below resolve their actual sources before authorizing.
+    # A source-free blanket gate cannot represent the approved manual scope.
+    deadline = now + timedelta(days=LOCAL_CONFIGURATION_INTENT_DAYS)
     body = data.model_dump(mode="json")
     fingerprint = canonical_hash({"scope": [str(scope.workspace_id), str(scope.project_id),
                                           str(scope.buyer_id), str(scope.company_id)], "body": body})
@@ -183,7 +199,7 @@ async def prepare_intent(
             from .lead_preparation_service import validate_preparation_input, _row
             if data.target_id is not None:
                 await _row(session, scope, data.target_id)
-            context = await validate_preparation_input(session, scope, data.payload, now)
+            context = await validate_preparation_input(session, scope, data.payload, now, action=data.action)
             deadline = context["deadline"]
             offer_document_ids = [item["id"] for item in context["documents"]]
             person_id, contact_id = data.payload.person_id, data.payload.contact_id
@@ -191,7 +207,8 @@ async def prepare_intent(
             from .lead_preparation_service import _row, _revision, get_preparation
             target, _ = await _row(session, scope, data.target_id)
             revision = await _revision(session, scope, target)
-            current = await get_preparation(session, scope=scope, preparation_id=target.id, now=now)
+            current = await get_preparation(session, scope=scope, preparation_id=target.id, now=now,
+                action="preparation.read" if data.action == "preparation.archive" else data.action)
             private, retained = await retained_payload(session, scope, revision.payload_id, now)
             if current["redacted"] or not retained or private is None:
                 raise ApiError(403, "POLICY_BLOCKED", "current retained preparation required")

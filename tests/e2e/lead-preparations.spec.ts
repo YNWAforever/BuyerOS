@@ -1,12 +1,50 @@
-import {expect,test,type Page} from '@playwright/test';
+import {expect,test as base,type Page,type Locator} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {apiBase,bearer,leadBuyer,resetLead,signInLead,entry} from './fixtures/lead-workflow';
 
-test.beforeEach(async({request})=>resetLead(request));
+// Disposable data provisioning has its own bounded fixture budget. The actual
+// reload/recovery/save journeys retain the original 30s test and 5s assertions.
+const test=base.extend<{leadFixture:void}>({
+  leadFixture:[async({request},use)=>{
+    await resetLead(request);
+    await use(undefined);
+  },{auto:true,timeout:30_000}],
+});
+const timings=new WeakMap<Page,object[]>();
+test.beforeEach(async({page})=>{
+  const rows:object[]=[];timings.set(page,rows);
+  page.on('requestfinished',request=>{
+    const url=new URL(request.url());
+    if(url.hostname!=='127.0.0.1'&&url.hostname!=='localhost')return;
+    rows.push({method:request.method(),path:url.pathname,timing:request.timing()});
+  });
+});
+test.afterEach(async({page},info)=>{
+  if(info.status!==info.expectedStatus){
+    const path=info.outputPath('local-http-timings.json');
+    await writeFile(path,JSON.stringify(timings.get(page)??[],null,2),'utf8');
+    await info.attach('local-http-timings',{path,contentType:'application/json'});
+  }
+});
+async function acknowledgedAction(page:Page,panel:Locator,button:string,
+  action:'preparation.create'|'preparation.revise'|'preparation.review'){
+  const staged=page.waitForResponse(response=>response.status()===201&&
+    response.request().method()==='POST'&&response.url()===`${apiBase}/lead-intents`&&
+    response.request().postDataJSON()?.action===action);
+  const ack=page.waitForResponse(response=>response.status()===200&&
+    response.request().method()==='POST'&&response.url().startsWith(`${apiBase}/lead-intents/`)&&
+    response.url().endsWith('/acknowledgements'));
+  await panel.getByRole('button',{name:button,exact:true}).click();
+  const original=(await (await staged).json()).data;
+  const confirmed=await ack;
+  expect(confirmed.url()).toBe(`${apiBase}/lead-intents/${original.id}/acknowledgements`);
+  expect(confirmed.status()).toBe(200);
+}
 async function create(page:Page){
   await signInLead(page,'/app/outreach');
   const panel=page.getByRole('region',{name:'Lead preparations',exact:true});
   await panel.getByLabel('Preparation company').selectOption(leadBuyer);
-  await panel.getByRole('button',{name:'Create cited preparation',exact:true}).click();
+  await acknowledgedAction(page,panel,'Create cited preparation','preparation.create');
   await expect(panel.getByLabel('Preparation body')).toHaveValue(/Thai jasmine rice/);
   await expect(panel.getByRole('link',{name:'Fixture product.pptx',exact:true})).toHaveAttribute('href',/document=e3600000/);
   return panel;
@@ -18,7 +56,7 @@ test('public_channel_preparation_is_reviewable_but_unsendable',async({page,reque
   const panel=await create(page);
   await panel.getByLabel('Content review reason').fill('Checked this exact content and its current sources.');
   await panel.getByLabel('I reviewed this exact preparation content.').check();
-  await panel.getByRole('button',{name:'Mark content reviewed',exact:true}).click();
+  await acknowledgedAction(page,panel,'Mark content reviewed','preparation.review');
   await expect(panel.getByText('Preparation state: reviewed',{exact:true})).toBeVisible();
   await expect(panel.getByText('Sending: disabled',{exact:true})).toBeVisible();
   expect(await panel.getByRole('button',{name:/send|export/i}).count()).toBe(0);
@@ -31,10 +69,10 @@ test('material_change_or_expiry_invalidates_content_review',async({page,request}
   const panel=await create(page);
   await panel.getByLabel('Content review reason').fill('Checked exact current references.');
   await panel.getByLabel('I reviewed this exact preparation content.').check();
-  await panel.getByRole('button',{name:'Mark content reviewed',exact:true}).click();
+  await acknowledgedAction(page,panel,'Mark content reviewed','preparation.review');
   await expect(panel.getByText('Preparation state: reviewed',{exact:true})).toBeVisible();
   await panel.getByLabel('Preparation subject').fill('Changed business proposal');
-  await panel.getByRole('button',{name:'Save preparation revision',exact:true}).click();
+  await acknowledgedAction(page,panel,'Save preparation revision','preparation.revise');
   await expect(panel.getByText('Preparation state: editing',{exact:true})).toBeVisible();
   const changed=await request.post('http://127.0.0.1:8000/fixture/lead-scenario',{data:{scenario:'expire_channel'}});
   expect(changed.ok(),await changed.text()).toBe(true);
@@ -43,9 +81,10 @@ test('material_change_or_expiry_invalidates_content_review',async({page,request}
   await expect(panel.getByText('Source evidence is unavailable or expired.',{exact:true})).toBeVisible();
 });
 test('preparation_reload_restores_revision_and_original_intent',async({page,request})=>{
-  const panel=await create(page);let submissions=0;
+  const panel=await create(page);let submissions=0,lostIntentId='';
   await page.route('**/lead-intents/*/apply',async route=>{
-    submissions++;const result=await route.fetch();
+    submissions++;if(submissions===1)lostIntentId=route.request().url().split('/').at(-2)!;
+    const result=await route.fetch();
     await route.fulfill(submissions===1?{status:503,contentType:'application/json',body:'{"code":"TEMPORARY_UNAVAILABLE","message":"Lost reply","retryable":true,"request_id":"fixture"}'}:{response:result});
   });
   await panel.getByLabel('Preparation subject').fill('Retained exact revision');
@@ -54,42 +93,28 @@ test('preparation_reload_restores_revision_and_original_intent',async({page,requ
   await page.reload();await signInLead(page,'/app/outreach');
   const restored=page.getByRole('region',{name:'Lead preparations',exact:true});
   await restored.getByLabel('Preparation company').selectOption(leadBuyer);
+  const recoveredAck=page.waitForResponse(response=>response.status()===200&&
+    response.url()===`${apiBase}/lead-intents/${lostIntentId}/acknowledgements`);
   await restored.getByRole('button',{name:'Read original operation',exact:true}).first().click();
+  expect((await recoveredAck).status()).toBe(200);
   await expect(restored.getByLabel('Preparation subject')).toHaveValue('Retained exact revision');
   expect(submissions).toBe(1);
   const stored=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0];
   expect(stored.revision_number).toBe(2);
   await restored.getByRole('button',{name:'Load revision history',exact:true}).click();
   await expect(restored.getByText('Historical revision 1',{exact:true})).toBeVisible();
-  async function append(action:string,payload:object,version?:number){
-    const staged=await request.post(`${apiBase}/lead-intents`,{headers:{...bearer,'Idempotency-Key':crypto.randomUUID()},
-      data:{action,buyer_id:leadBuyer,payload,...(version?{expected_version:version}:{})}});
-    expect(staged.status(),await staged.text()).toBe(201);const intent=(await staged.json()).data;
-    const applied=await request.post(`${apiBase}/lead-intents/${intent.id}/apply`,{
-      headers:{...bearer,'Idempotency-Key':intent.submission_key,...(version?{'If-Match':`"${version}"`}:{})},data:{}});
-    expect(applied.ok(),await applied.text()).toBe(true);return (await applied.json()).data.resource_id as string;
-  }
-  const observation={stance:'supports',checked_at:new Date().toISOString(),rationale:'Official fixture identifies the rice buyer.',
-    sources:[{title:'Official second purchaser',url:'https://buyer1.example.test/blair',excerpt:'Blair Fixture buys rice and uses blair@buyer1.example.test.',source_kind:'official'}]};
-  const employment=await append('observation.append',{...observation,claim:'employment',person:{full_name:'Blair Fixture',role:'Rice Buyer'}});
-  const evidence=async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-evidence`,{headers:bearer})).json()).data.items);
-  const other=(await evidence()).find((row:{id:string})=>row.id===employment).person_id as string;
-  const procurement=await append('observation.append',{...observation,claim:'procurement_scope',person:{person_id:other}});
-  const channel=await append('observation.append',{...observation,claim:'channel_ownership',person:{person_id:other},
-    channel:{type:'business_email',value:'blair@buyer1.example.test',person_id:other}});
-  const contact=(await evidence()).find((row:{id:string})=>row.id===channel).contact_id as string;
-  const current=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-workflow`,{headers:bearer})).json()).data;
-  const otherReview=await append('lead.review',{person_id:other,contact_id:contact,employment:'accepted',
-    procurement_scope:'accepted',channel_ownership:'accepted',observation_ids:[employment,procurement,channel],
-    rationale:'Independent official purchasing role and business channel.'},current.version);
+  const seeded=await request.post('http://127.0.0.1:8000/fixture/lead-scenario',{data:{scenario:'second_purchaser'}});
+  expect(seeded.ok(),await seeded.text()).toBe(true);
+  const prerequisite=await seeded.json();expect(prerequisite.fixture_only).toBe(true);
+  const other=prerequisite.person_id as string,otherReview=prerequisite.review_id as string;
   await restored.getByRole('button',{name:'Refresh preparations',exact:true}).click();
   await restored.getByLabel('Preparation subject').fill('Original purchaser still intended');
-  await restored.getByRole('button',{name:'Save preparation revision',exact:true}).click();
+  await acknowledgedAction(page,restored,'Save preparation revision','preparation.revise');
   await expect(restored.getByText('Preparation saved.',{exact:true})).toBeVisible();
   const saved=(await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0];
   expect(saved.content.person_id).toBe(stored.content.person_id);
   await restored.getByLabel('Preparation purchasing review').selectOption(otherReview);
-  await restored.getByRole('button',{name:'Save preparation revision',exact:true}).click();
+  await acknowledgedAction(page,restored,'Save preparation revision','preparation.revise');
   await expect.poll(async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0].content.person_id)).toBe(other);
 });
 test('missing_product_fact_or_extraction_caveat_is_visible',async({page,request})=>{
@@ -110,9 +135,10 @@ test('missing_product_fact_or_extraction_caveat_is_visible',async({page,request}
 test('committed_write_retains_original_handle_when_readback_and_history_are_rate_limited',async({page,request})=>{
   const panel=await create(page);
   const before=await (await request.get('http://127.0.0.1:8000/fixture/lead-counts')).json();
-  let committed=false,applies=0,readbackLimited=false,historyLimited=false;
+  let committed=false,applies=0,readbackLimited=false,historyLimited=false,intentId='';
   await page.route('**/lead-intents/*/apply',async route=>{
-    applies++;const response=await route.fetch();expect(response.status()).toBe(200);
+    applies++;intentId=route.request().url().split('/').at(-2)!;
+    const response=await route.fetch();expect(response.status()).toBe(200);
     committed=true;await route.fulfill({response});
   });
   const limited={status:429,contentType:'application/json',headers:{'Retry-After':'1'},
@@ -133,7 +159,10 @@ test('committed_write_retains_original_handle_when_readback_and_history_are_rate
   await expect(panel.getByText('Content review saved.',{exact:true})).toHaveCount(0);
   const canonical=async()=>((await (await request.get(`${apiBase}/buyers/${leadBuyer}/lead-preparations`,{headers:bearer})).json()).data.items[0]);
   const stored=await canonical();expect(stored.state).toBe('reviewed');expect(stored.version).toBe(2);
+  const recoveredAck=page.waitForResponse(response=>response.status()===200&&
+    response.url()===`${apiBase}/lead-intents/${intentId}/acknowledgements`);
   await panel.getByRole('button',{name:'Read original operation',exact:true}).click();
+  expect((await recoveredAck).status()).toBe(200);
   await expect(panel.getByText('Preparation state: reviewed',{exact:true})).toBeVisible();
   await expect(panel.getByRole('button',{name:'Read original operation',exact:true})).toHaveCount(0);
   expect(applies).toBe(1);expect((await canonical()).version).toBe(stored.version);

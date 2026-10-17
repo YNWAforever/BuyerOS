@@ -14,6 +14,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from buyeros_api.db.icp import canonical_hash
 from buyeros_api.services.budget_service import _period
 from buyeros_worker.discovery_runner import DiscoveryBatch, execute_discovery, execute_discovery_reconcile
+from tests.controlled_policy_fixtures import api_fixture_helpers, fixture_research_binding
+
+SEARCH_POLICY_BINDING = fixture_research_binding("search")
 
 WS_A = "18181818-1818-4818-8818-181818181818"
 PROJECT_A = "a1800000-0000-4800-8800-000000000018"
@@ -34,6 +37,7 @@ class SearchFixture:
     price_version = "fixture-price-v1"
     quoted_upper_bound = Decimal("0.100000")
     retention_seconds = 86400
+    policy_binding = SEARCH_POLICY_BINDING
 
     def __init__(self, dsn, *, timeout=False):
         self.dsn = dsn
@@ -75,7 +79,9 @@ def discovery_case(migrated, worker_database_url, request):
     """Own one T18/T19 fixture namespace and clean it even on setup failure."""
     def cleanup():
         with psycopg.connect(migrated, autocommit=True) as db:
-            for table in ("evidence", "human_reviews", "fit_assessments", "company_aliases",
+            for table in ("policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities",
+                          "audit_events", "idempotency_records",
+                          "evidence", "human_reviews", "fit_assessments", "company_aliases",
                           "raw_candidates", "project_buyers", "companies", "source_documents",
                           "cost_events", "budget_reservation_allocations", "budget_reservations",
                           "budget_accounts", "provider_operations", "run_events", "outbox_events",
@@ -86,6 +92,9 @@ def discovery_case(migrated, worker_database_url, request):
             db.execute("DELETE FROM projects WHERE workspace_id=%s", (WS_A,))
             db.execute("DELETE FROM memberships WHERE user_id=%s", (ACTOR_ID,))
             db.execute("DELETE FROM users WHERE id=%s", (ACTOR_ID,))
+            controller = uuid.uuid5(uuid.NAMESPACE_URL, f"owned-policy-controller:{WS_A}:{PROJECT_A}")
+            db.execute("DELETE FROM memberships WHERE workspace_id=%s AND user_id=%s", (WS_A, controller))
+            db.execute("DELETE FROM users WHERE id=%s", (controller,))
             db.execute("DELETE FROM workspaces WHERE id=%s", (WS_A,))
     request.addfinalizer(cleanup)
 
@@ -119,11 +128,6 @@ def discovery_case(migrated, worker_database_url, request):
                    "VALUES (%s,%s,%s,1,%s::jsonb,%s,1,now(),%s)",
                    (ICP_A, WS_A, PROJECT_A, json.dumps(content), canonical_hash(content), ACTOR_ID))
         db.execute("UPDATE projects SET active_icp_version_id=%s WHERE id=%s", (ICP_A, PROJECT_A))
-        db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,"
-                   "purpose,status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) "
-                   "VALUES (%s,%s,'project',%s,%s,'account_research','permitted','fixture-v1','fixture','fixture',"
-                   "'{US}',now()+interval '1 day',1,%s)",
-                   (uuid.uuid4(), WS_A, PROJECT_A, WS_A, ACTOR_ID))
         db.execute("INSERT INTO search_runs(id,workspace_id,project_id,icp_version_id,status,limits,"
                    "target_companies,max_cost,execution_snapshot,usage_counters) "
                    "VALUES (%s,%s,%s,%s,'queued',%s::jsonb,24,2,%s::jsonb,'{}'::jsonb)",
@@ -141,6 +145,8 @@ def discovery_case(migrated, worker_database_url, request):
         db.execute("INSERT INTO outbox_events(id,workspace_id,intent_key,event_type,payload,state,fencing_generation) "
                    "VALUES (%s,%s,%s,'run.discover',%s::jsonb,'dispatched',1)",
                    (uuid.uuid4(), WS_A, INTENT, json.dumps({"run_id": RUN_ID})))
+    api_fixture_helpers().approve_research_fixture(migrated, WS_A, PROJECT_A,
+        domains=("example.org",), search=SEARCH_POLICY_BINDING, transaction_role=True)
     return migrated, worker_database_url
 
 

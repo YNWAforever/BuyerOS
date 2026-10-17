@@ -152,11 +152,16 @@ class PostgresSearchReceipts:
     actor, policy, frozen tariff, reservation and runtime/outbox fence. A crash
     after claim remains unknown and cannot reacquire a submission right.
     """
-    def __init__(self,engine,workspace_id:uuid.UUID,capability:ProviderCapability):
+    def __init__(self,engine,workspace_id:uuid.UUID,capability:ProviderCapability,*,policy_binding=None):
         from .registry import ProviderRegistration
         if engine is None or not isinstance(workspace_id,uuid.UUID):raise ValueError('runtime tenant engine required')
         if capability.provider not in LIVE_SEARCH_PROVIDERS or capability.service!='search' or capability.max_liability is None:raise ValueError('bounded search contract required')
         self.engine,self.workspace_id,self.capability=engine,workspace_id,capability
+        from ..api.policy_activation_schemas import ResearchProviderBinding
+        from ..services.research_policy_context import selected_binding
+        if policy_binding is not None and not isinstance(policy_binding, ResearchProviderBinding):
+            raise ValueError('private reviewed search policy binding required')
+        self.policy_binding=policy_binding if policy_binding is not None else selected_binding(capability)
         self.contract_hash=ProviderRegistration(capability,lambda:None).contract_hash
 
     async def _require_schema(self,session):
@@ -223,7 +228,10 @@ class PostgresSearchReceipts:
             or reservation.remaining_hold<bound.amount or member is None or not permission_for_roles(member.roles,'startRun')
             or project is None or project.status!='active'):
             raise ValueError('current search actor, hold, payload or fence unavailable')
-        policy=await evaluate_current_policy(session,{'workspace_id':self.workspace_id,'project_id':request.project_id},'account_research',datetime.now(timezone.utc))
+        from ..services.research_policy_context import research_use
+        policy=await evaluate_current_policy(session,{'workspace_id':self.workspace_id,'project_id':request.project_id},
+            'account_research',datetime.now(timezone.utc),
+            use_context=research_use(request.project_id,'research.search',binding=self.policy_binding))
         if not policy['allowed']:raise ValueError('current account research policy unavailable')
         return outbox
 
@@ -303,5 +311,7 @@ class PostgresSearchReceipts:
             if saved is not None and saved['state']=='received':
                 from ..services.receipt_retention import require_current_receipt_read
                 request=saved['request']
-                await require_current_receipt_read(session,workspace_id=self.workspace_id,actor_id=request.actor_id,project_id=request.project_id)
+                await require_current_receipt_read(session,workspace_id=self.workspace_id,actor_id=request.actor_id,
+                    project_id=request.project_id,source_urls=[item.get('source_url') for item in saved['sources']],
+                    empty_search_binding=self.policy_binding if not saved['sources'] else None)
             return saved

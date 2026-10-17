@@ -10519,6 +10519,380 @@ paths:
       - workspace_admin
       security:
       - BearerAuth: []
+  /v1/workspaces/{workspace_id}/policy-controller-authorities:
+    get:
+      operationId: listPolicyControllerAuthorities
+      summary: listPolicyControllerAuthorities
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      responses:
+        '200':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorityPageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Read-only.
+      x-implementation-status: LOCAL_UNRELEASED
+  /v1/workspaces/{workspace_id}/policy-activation-requests:
+    post:
+      operationId: submitPolicyActivationRequest
+      summary: submitPolicyActivationRequest
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationViewResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Original actor/workspace operation key and canonical locator.
+      x-implementation-status: LOCAL_UNRELEASED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationSubmit'
+    get:
+      operationId: listPolicyActivationRequests
+      summary: listPolicyActivationRequests
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: project_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: client_request_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationPageResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Read-only.
+      x-implementation-status: LOCAL_UNRELEASED
+  /v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}:
+    get:
+      operationId: getPolicyActivationRequest
+      summary: getPolicyActivationRequest
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationViewResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Read-only.
+      x-implementation-status: LOCAL_UNRELEASED
+  /v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/decisions:
+    post:
+      operationId: decidePolicyActivationRequest
+      summary: decidePolicyActivationRequest
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationViewResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Original actor/workspace operation key and canonical locator.
+      x-implementation-status: LOCAL_UNRELEASED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationDecision'
+  /v1/workspaces/{workspace_id}/policy-activation-requests/{request_id}/withdrawals:
+    post:
+      operationId: withdrawPolicyActivationRequest
+      summary: withdrawPolicyActivationRequest
+      tags:
+      - BO-009
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Canonical policy result and immutable operation receipt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivationViewResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '412':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-permitted-roles:
+      - workspace_admin
+      x-cost: none
+      x-policy: Current designated controller approval for exact manual or provider terms; independent dispatch and budget gates remain required.
+      x-idempotency: Original actor/workspace operation key and canonical locator.
+      x-implementation-status: LOCAL_UNRELEASED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationWithdrawal'
 components:
   securitySchemes:
     BearerAuth:
@@ -18496,6 +18870,613 @@ components:
       - limit
       - total
       title: LeadReviewPage
+    PolicyDeletionPlan:
+      additionalProperties: false
+      properties:
+        method:
+          const: redact_private_payload
+          title: Method
+          type: string
+        audit:
+          const: retain_non_content
+          title: Audit
+          type: string
+        backup:
+          const: expiry_and_replay
+          title: Backup
+          type: string
+        reference:
+          maxLength: 1000
+          minLength: 3
+          title: Reference
+          type: string
+      required:
+      - method
+      - audit
+      - backup
+      - reference
+      title: PolicyDeletionPlan
+      type: object
+    PolicySourceScope:
+      additionalProperties: false
+      properties:
+        domains:
+          default: []
+          items:
+            type: string
+          maxItems: 100
+          title: Domains
+          type: array
+        document_ids:
+          default: []
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Document Ids
+          type: array
+      title: PolicySourceScope
+      type: object
+    ProviderPolicyScope:
+      additionalProperties: false
+      properties:
+        provider_name:
+          pattern: ^[A-Za-z0-9_-]{1,64}$
+          title: Provider Name
+          type: string
+        account_reference:
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$
+          title: Account Reference
+          type: string
+        contract_sha256:
+          pattern: ^[0-9a-f]{64}$
+          title: Contract Sha256
+          type: string
+        sender_identity_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          default: null
+          title: Sender Identity Id
+        recipient_refs:
+          default: []
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Recipient Refs
+          type: array
+        allow_unaddressed_drafts:
+          default: false
+          title: Allow Unaddressed Drafts
+          type: boolean
+      required:
+      - provider_name
+      - account_reference
+      - contract_sha256
+      title: ProviderPolicyScope
+      type: object
+    ResearchPolicyScope:
+      additionalProperties: false
+      properties:
+        search:
+          anyOf:
+          - $ref: '#/components/schemas/ResearchProviderBinding'
+          - type: 'null'
+          default: null
+        model:
+          anyOf:
+          - $ref: '#/components/schemas/ResearchProviderBinding'
+          - type: 'null'
+          default: null
+      title: ResearchPolicyScope
+      type: object
+    ResearchProviderBinding:
+      additionalProperties: false
+      properties:
+        provider_name:
+          pattern: ^[A-Za-z0-9_-]{1,64}$
+          title: Provider Name
+          type: string
+        account_reference:
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$
+          title: Account Reference
+          type: string
+        contract_sha256:
+          pattern: ^[0-9a-f]{64}$
+          title: Contract Sha256
+          type: string
+      required:
+      - provider_name
+      - account_reference
+      - contract_sha256
+      title: ResearchProviderBinding
+      type: object
+    PolicyTerms:
+      additionalProperties: false
+      properties:
+        workspace_id:
+          format: uuid
+          title: Workspace Id
+          type: string
+        controller_scope_id:
+          format: uuid
+          title: Controller Scope Id
+          type: string
+        project_id:
+          format: uuid
+          title: Project Id
+          type: string
+        purpose:
+          enum:
+          - account_research
+          - contact_research
+          - draft_preparation
+          - outreach
+          title: Purpose
+          type: string
+        template_version:
+          enum:
+          - manual-native.v1
+          - provider-native.v1
+          - provider-research.v1
+          title: Template Version
+          type: string
+        provider_scope:
+          anyOf:
+          - $ref: '#/components/schemas/ProviderPolicyScope'
+          - type: 'null'
+        research_scope:
+          anyOf:
+          - $ref: '#/components/schemas/ResearchPolicyScope'
+          - type: 'null'
+        allowed_data_categories:
+          items:
+            type: string
+          maxItems: 20
+          minItems: 1
+          title: Allowed Data Categories
+          type: array
+        allowed_sources:
+          $ref: '#/components/schemas/PolicySourceScope'
+        allowed_actions:
+          items:
+            type: string
+          maxItems: 20
+          minItems: 1
+          title: Allowed Actions
+          type: array
+        valid_from:
+          format: date-time
+          title: Valid From
+          type: string
+        expires_at:
+          format: date-time
+          title: Expires At
+          type: string
+        retention_days:
+          maximum: 3650
+          minimum: 1
+          title: Retention Days
+          type: integer
+        deletion_plan:
+          $ref: '#/components/schemas/PolicyDeletionPlan'
+        countries:
+          items:
+            type: string
+          maxItems: 20
+          minItems: 1
+          title: Countries
+          type: array
+        policy_version:
+          maxLength: 64
+          minLength: 1
+          title: Policy Version
+          type: string
+        basis_reference:
+          maxLength: 1000
+          minLength: 3
+          title: Basis Reference
+          type: string
+        provenance:
+          maxLength: 1000
+          minLength: 3
+          title: Provenance
+          type: string
+        owner_evidence_reference:
+          maxLength: 1000
+          minLength: 3
+          title: Owner Evidence Reference
+          type: string
+        owner_evidence_sha256:
+          pattern: ^[0-9a-f]{64}$
+          title: Owner Evidence Sha256
+          type: string
+      required:
+      - workspace_id
+      - controller_scope_id
+      - project_id
+      - purpose
+      - template_version
+      - allowed_data_categories
+      - allowed_sources
+      - allowed_actions
+      - valid_from
+      - expires_at
+      - retention_days
+      - deletion_plan
+      - countries
+      - policy_version
+      - basis_reference
+      - provenance
+      - owner_evidence_reference
+      - owner_evidence_sha256
+      title: PolicyTerms
+      type: object
+    ActivationSubmit:
+      additionalProperties: false
+      properties:
+        client_request_id:
+          format: uuid
+          title: Client Request Id
+          type: string
+        authority_id:
+          format: uuid
+          title: Authority Id
+          type: string
+        authority_version:
+          minimum: 1
+          title: Authority Version
+          type: integer
+        expected_policy_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Expected Policy Id
+        expected_policy_version:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          title: Expected Policy Version
+        terms:
+          $ref: '#/components/schemas/PolicyTerms'
+        request_deadline:
+          format: date-time
+          title: Request Deadline
+          type: string
+      required:
+      - client_request_id
+      - authority_id
+      - authority_version
+      - expected_policy_id
+      - expected_policy_version
+      - terms
+      - request_deadline
+      title: ActivationSubmit
+      type: object
+    ActivationDecision:
+      additionalProperties: false
+      properties:
+        action:
+          enum:
+          - approve
+          - reject
+          title: Action
+          type: string
+        terms_hash:
+          pattern: ^[0-9a-f]{64}$
+          title: Terms Hash
+          type: string
+        expected_policy_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Expected Policy Id
+        expected_policy_version:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          title: Expected Policy Version
+        reason:
+          maxLength: 2000
+          minLength: 3
+          title: Reason
+          type: string
+        expected_request_state:
+          const: submitted
+          default: submitted
+          title: Expected Request State
+          type: string
+      required:
+      - action
+      - terms_hash
+      - expected_policy_id
+      - expected_policy_version
+      - reason
+      title: ActivationDecision
+      type: object
+    ActivationWithdrawal:
+      additionalProperties: false
+      properties:
+        terms_hash:
+          pattern: ^[0-9a-f]{64}$
+          title: Terms Hash
+          type: string
+        reason:
+          maxLength: 2000
+          minLength: 3
+          title: Reason
+          type: string
+      required:
+      - terms_hash
+      - reason
+      title: ActivationWithdrawal
+      type: object
+    ActivationReceipt:
+      additionalProperties: false
+      properties:
+        request_id:
+          format: uuid
+          title: Request Id
+          type: string
+        resolution_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          default: null
+          title: Resolution Id
+        decision_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          default: null
+          title: Decision Id
+        terms_hash:
+          title: Terms Hash
+          type: string
+        outcome:
+          enum:
+          - submitted
+          - approved
+          - rejected
+          - withdrawn
+          title: Outcome
+          type: string
+        policy_version:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Policy Version
+      required:
+      - request_id
+      - terms_hash
+      - outcome
+      title: ActivationReceipt
+      type: object
+    ActivationView:
+      additionalProperties: false
+      properties:
+        id:
+          format: uuid
+          title: Id
+          type: string
+        project_id:
+          format: uuid
+          title: Project Id
+          type: string
+        client_request_id:
+          format: uuid
+          title: Client Request Id
+          type: string
+        requester_id:
+          format: uuid
+          title: Requester Id
+          type: string
+        authority_id:
+          format: uuid
+          title: Authority Id
+          type: string
+        authority_version:
+          title: Authority Version
+          type: integer
+        terms:
+          $ref: '#/components/schemas/PolicyTerms'
+        terms_hash:
+          title: Terms Hash
+          type: string
+        request_deadline:
+          format: date-time
+          title: Request Deadline
+          type: string
+        request_state:
+          title: Request State
+          type: string
+        effective_status:
+          title: Effective Status
+          type: string
+        receipt:
+          $ref: '#/components/schemas/ActivationReceipt'
+      required:
+      - id
+      - project_id
+      - client_request_id
+      - requester_id
+      - authority_id
+      - authority_version
+      - terms
+      - terms_hash
+      - request_deadline
+      - request_state
+      - effective_status
+      - receipt
+      title: ActivationView
+      type: object
+    ActivationPage:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ActivationView'
+          title: Items
+          type: array
+        offset:
+          minimum: 0
+          title: Offset
+          type: integer
+        limit:
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+        total:
+          minimum: 0
+          title: Total
+          type: integer
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: ActivationPage
+      type: object
+    AuthoritySummary:
+      additionalProperties: false
+      properties:
+        id:
+          format: uuid
+          title: Id
+          type: string
+        version:
+          title: Version
+          type: integer
+        project_id:
+          format: uuid
+          title: Project Id
+          type: string
+        approver_user_id:
+          format: uuid
+          title: Approver User Id
+          type: string
+        purposes:
+          items:
+            type: string
+          title: Purposes
+          type: array
+        allowed_actions:
+          items:
+            type: string
+          title: Allowed Actions
+          type: array
+        valid_from:
+          format: date-time
+          title: Valid From
+          type: string
+        expires_at:
+          format: date-time
+          title: Expires At
+          type: string
+        eligible:
+          title: Eligible
+          type: boolean
+      required:
+      - id
+      - version
+      - project_id
+      - approver_user_id
+      - purposes
+      - allowed_actions
+      - valid_from
+      - expires_at
+      - eligible
+      title: AuthoritySummary
+      type: object
+    AuthorityPage:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AuthoritySummary'
+          title: Items
+          type: array
+        offset:
+          minimum: 0
+          title: Offset
+          type: integer
+        limit:
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+        total:
+          minimum: 0
+          title: Total
+          type: integer
+      required:
+      - items
+      - offset
+      - limit
+      - total
+      title: AuthorityPage
+      type: object
+    ActivationViewResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      - request_id
+      - data_mode
+      properties:
+        data:
+          $ref: '#/components/schemas/ActivationView'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+    ActivationPageResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      - request_id
+      - data_mode
+      properties:
+        data:
+          $ref: '#/components/schemas/ActivationPage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
+    AuthorityPageResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      - request_id
+      - data_mode
+      properties:
+        data:
+          $ref: '#/components/schemas/AuthorityPage'
+        request_id:
+          type: string
+          format: uuid
+        data_mode:
+          type: string
+          enum:
+          - live
 x-plan-status: PROPOSED
 x-contract-owner: BO-003; serialize changes with BO-005 schema owner
 x-pilot-constraints:

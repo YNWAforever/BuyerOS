@@ -145,14 +145,24 @@ def test_snapshot_owner_and_expiry_are_checked_before_export(quote_case):
 
 def test_contact_export_requires_valid_current_contact_and_expires(quote_case):
     api, dsn, buyers = quote_case
+    from tests.test_draft_persistence_db import _prepare
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from tests.test_api_projects_db import ADMIN
+    _prepare(api, dsn, buyers[0][0])
     contact_id = uuid.uuid4()
     with psycopg.connect(dsn, autocommit=True) as db:
-        for purpose in ("export_accounts", "export_contacts", "outreach"):
+        for purpose in ("export_accounts", "export_contacts"):
             _permit(db, purpose)
         db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,"
-                   "validity,checked_at,quarantined) VALUES (%s,%s,%s,'business_email',"
-                   "'contact@fixture.example','provider_marked_valid',now(),false)",
+                   "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
+                   "'contact@fixture.example','provider_marked_valid',now(),false,now()+interval '1 day')",
                    (contact_id, WORKSPACE_A, buyers[0][1]))
+        sender = db.execute("SELECT active_sender_identity_version_id FROM projects WHERE id=%s", (PROJECT,)).fetchone()[0]
+        domain = db.execute("SELECT domain FROM companies WHERE id=%s", (buyers[0][1],)).fetchone()[0]
+    approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="outreach", domains=(domain,), actions=["delivery.review"],
+        scope={"provider_name": "resend", "account_reference": "owned-export-fixture",
+               "contract_sha256": "b" * 64, "sender_identity_id": str(sender), "recipient_refs": [str(contact_id)]})
     body = _buyer_body(buyers)
     body.update({"purpose": "export_contacts", "include_contact_data": True})
     path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/exports"
@@ -164,6 +174,15 @@ def test_contact_export_requires_valid_current_contact_and_expires(quote_case):
     content_path = f"/v1/workspaces/{WORKSPACE_A}/exports/{job['id']}/content"
     content = api.get(content_path, headers=_h(OPERATOR))
     assert content.status_code == 200 and "contact@fixture.example" in content.text
+    # A retained, provider-marked channel does not acquire the first channel's
+    # exact owner-approved recipient scope.
+    with psycopg.connect(dsn) as db:
+        db.execute("INSERT INTO contact_points(id,workspace_id,company_id,type,normalized_value,"
+                   "validity,checked_at,quarantined,retention_expires_at) VALUES (%s,%s,%s,'business_email',"
+                   "'unapproved@fixture.example','provider_marked_valid',now(),false,now()+interval '1 day')",
+                   (uuid.uuid4(), WORKSPACE_A, buyers[0][1]))
+    content = api.get(content_path, headers=_h(OPERATOR))
+    assert content.status_code == 200 and "unapproved@fixture.example" not in content.text
     replay = api.post(path, json=body, headers=_h(OPERATOR, key="contact-export-001"))
     assert replay.status_code == 202 and replay.json()["data"]["id"] == job["id"]
     changed = api.post(path, json={**body, "include_contact_data": False, "purpose": "export_accounts"},
@@ -185,6 +204,26 @@ def test_contact_export_requires_valid_current_contact_and_expires(quote_case):
     status = api.get(f"/v1/workspaces/{WORKSPACE_A}/exports/{job['id']}",
                      headers=_h(OPERATOR))
     assert status.json()["data"]["status"] == "expired"
+
+
+def test_exact_contact_export_is_revoked_with_current_controller_membership(quote_case):
+    from tests.test_api_projects_db import ADMIN
+    api, dsn, buyers = quote_case
+    _, contact_id = _addressed_case(api, dsn, buyers)
+    with psycopg.connect(dsn) as db:
+        _permit(db, "export_accounts")
+    path = f"/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT}/exports"
+    body = {**_buyer_body(buyers), "purpose": "export_contacts", "include_contact_data": True}
+    created = api.post(path, json=body, headers=_h(OPERATOR, key="export-owned-provider-revoke"))
+    assert created.status_code == 202, created.text
+    content_path = f"/v1/workspaces/{WORKSPACE_A}/exports/{created.json()['data']['id']}/content"
+    content = api.get(content_path, headers=_h(OPERATOR))
+    assert content.status_code == 200 and contact_id in content.text
+    with psycopg.connect(dsn) as db:
+        db.execute("UPDATE memberships SET active=false,version=version+1 WHERE workspace_id=%s AND user_id=%s",
+                   (WORKSPACE_A, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)))
+    denied = api.get(content_path, headers=_h(OPERATOR))
+    assert (denied.status_code, denied.json()["code"]) == (403, "POLICY_BLOCKED")
 
 
 def test_content_authorizer_rechecks_membership_under_current_lock(quote_case):

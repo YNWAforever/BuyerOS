@@ -100,6 +100,9 @@ async def claim_delivery_submission(session, *, execution: LocalExecution,
             recipient_ref=message.recipient_ref, sender_identity_id=message.sender_identity_id,
             approval_id=message.approval_id, key=message.intent_key,
         )
+        from .provider_policy_context import require_delivery_policy
+        await require_delivery_policy(session, prepared=prepared, authorization=authorization,
+                                      project_id=message.project_id, draft_id=message.draft_id)
         if prepared.intent.payload_digest != message.payload_digest:
             raise ApiError(412, "STALE_REVISION", "original delivery payload differs")
         # The original metadata was read before policy locks. Expire that

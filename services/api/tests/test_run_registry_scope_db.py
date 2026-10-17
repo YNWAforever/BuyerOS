@@ -21,7 +21,8 @@ from tests.conftest import runtime_role_dsn
 def selected(monkeypatch,cap):
     calls=[]
     item=ProviderRegistration(cap,lambda:calls.append('factory-must-not-run'),
-        ('synthetic:scope-proof-only',),frozenset({'market','language'}),(('US',('en',)),))
+        ('synthetic:scope-proof-only',),frozenset({'market','language'}),(('US',('en',)),),
+        policy_account_reference='owned-scope-account')
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',frozenset({'brave-search'}))
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry((item,)))
@@ -32,7 +33,11 @@ def frozen_scope(c,monkeypatch):
     with psycopg.connect(c['dsn']) as db:
         snapshot=db.execute('SELECT execution_snapshot FROM search_runs WHERE id=%s',(c['run'],)).fetchone()[0]
         # Explicit owned fixture overlay; never changes a production row.
-        snapshot['capability'].update(registry_contract_hash=item.contract_hash,market_languages={'US':['en']})
+        snapshot['capability'].update(registry_contract_hash=item.contract_hash,market_languages={'US':['en']},
+                                      policy_binding=item.policy_binding.model_dump(mode='json'))
+        from tests.policy_activation_fixtures import approve_research_fixture
+        approve_research_fixture(c['dsn'],c['workspace'],c['project'],domains=('example.org','fixture.invalid','fixture.example','sensors.example.test'),
+            search=item.policy_binding)
         db.execute('UPDATE search_runs SET execution_snapshot=%s::jsonb WHERE id=%s',(json.dumps(snapshot),c['run']))
     return item,calls
 
@@ -62,6 +67,9 @@ def test_real_admission_freezes_registry_hash_and_explicit_pairs(admission_case,
     api,dsn=admission_case
     cap=capability(provider='brave-search',service='search',markets=frozenset({'US'}),languages=frozenset({'en'}),roles=frozenset({'company','distributor'}))
     item,calls=selected(monkeypatch,cap)
+    from tests.policy_activation_fixtures import approve_research_fixture
+    from tests.test_run_admission_integration_db import PROJECT_A,WORKSPACE_A,RESEARCH_FIXTURE_DOMAINS
+    approve_research_fixture(dsn,WORKSPACE_A,PROJECT_A,domains=RESEARCH_FIXTURE_DOMAINS,search=item.policy_binding)
     api.app.dependency_overrides.pop(selected_run_capability)
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED','true');get_settings.cache_clear()
     try:

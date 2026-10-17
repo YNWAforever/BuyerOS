@@ -10,6 +10,8 @@ from ..deps import load_membership, permission_for_roles, tenant_scoped
 from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
 from ..schemas import PolicyWrite, SuppressionCreate, SuppressionRemove
+from ..policy_activation_schemas import ActivationSubmit, ActivationDecision, ActivationWithdrawal, ActivationPage
+from ...services import policy_activation_service as activation
 from ...db.buyers import Company
 from ...db.icp import canonical_hash
 from ...services.audit_service import append_audit
@@ -35,6 +37,98 @@ def _key(value):
 def _controller(workspace_id, controller_scope_id):
     if controller_scope_id != workspace_id:
         raise ApiError(422, "INVALID_REQUEST", "controller scope is not verified for this workspace")
+
+
+async def _activation_actor(session, principal, workspace_id, operation):
+    member = await _member(session, principal, workspace_id, operation)
+    # The service refreshes membership/version under its mutation lock.
+    return activation.PolicyActor(workspace_id, member["user_id"], frozenset(member["roles"]), 0)
+
+
+@router.get("/policy-controller-authorities")
+async def list_policy_controller_authorities(
+    workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
+    offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=100),
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "listPolicyControllerAuthorities")
+        result = await activation.list_authorities(
+            session, actor=actor, project_id=project_id, offset=offset, limit=limit, now=datetime.now(timezone.utc))
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
+
+
+@router.post("/policy-activation-requests", status_code=201)
+async def submit_policy_activation_request(
+    workspace_id: uuid.UUID, payload: ActivationSubmit, request: Request,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "submitPolicyActivationRequest")
+        result = await activation.submit_activation(
+            session, actor=actor, data=payload, key=_key(idempotency_key), now=datetime.now(timezone.utc))
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
+
+
+@router.get("/policy-activation-requests")
+async def list_policy_activation_requests(
+    workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
+    client_request_id: uuid.UUID | None = None,
+    offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=100),
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "listPolicyActivationRequests")
+        now = datetime.now(timezone.utc)
+        if client_request_id is not None:
+            item = await activation.find_activation(session, actor=actor, project_id=project_id,
+                                                    client_request_id=client_request_id, now=now)
+            result = ActivationPage(items=(item,) if item else (), offset=0, limit=limit, total=1 if item else 0)
+        else:
+            result = await activation.list_activations(
+                session, actor=actor, project_id=project_id, offset=offset, limit=limit, now=now)
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
+
+
+@router.get("/policy-activation-requests/{request_id}")
+async def get_policy_activation_request(
+    workspace_id: uuid.UUID, request_id: uuid.UUID, request: Request,
+    principal: Principal = Depends(get_principal),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "getPolicyActivationRequest")
+        result = await activation.get_activation(
+            session, actor=actor, request_id=request_id, now=datetime.now(timezone.utc))
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
+
+
+@router.post("/policy-activation-requests/{request_id}/decisions")
+async def decide_policy_activation_request(
+    workspace_id: uuid.UUID, request_id: uuid.UUID, payload: ActivationDecision, request: Request,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "decidePolicyActivationRequest")
+        result = await activation.decide_activation(
+            session, actor=actor, request_id=request_id, data=payload, key=_key(idempotency_key),
+            now=datetime.now(timezone.utc))
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
+
+
+@router.post("/policy-activation-requests/{request_id}/withdrawals")
+async def withdraw_policy_activation_request(
+    workspace_id: uuid.UUID, request_id: uuid.UUID, payload: ActivationWithdrawal, request: Request,
+    principal: Principal = Depends(get_principal),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
+    async with tenant_scoped(workspace_id) as session:
+        actor = await _activation_actor(session, principal, workspace_id, "withdrawPolicyActivationRequest")
+        result = await activation.withdraw_activation(
+            session, actor=actor, request_id=request_id, data=payload, key=_key(idempotency_key),
+            now=datetime.now(timezone.utc))
+    return envelope(result.model_dump(mode="json"), request.state.request_id)
 
 
 @router.get("/policy-decisions")
@@ -72,7 +166,7 @@ async def record_policy_decision(workspace_id: uuid.UUID, payload: PolicyWrite, 
         prior = (await session.execute(select(PolicyDecision).where(PolicyDecision.workspace_id == workspace_id,
             PolicyDecision.controller_scope_id == workspace_id, PolicyDecision.subject_type == payload.subject_type,
             PolicyDecision.subject_id == payload.subject_id, PolicyDecision.purpose == payload.purpose)
-            .order_by(PolicyDecision.created_at.desc(), PolicyDecision.id.desc()).limit(1))).scalar_one_or_none()
+            .order_by(PolicyDecision.version.desc(), PolicyDecision.created_at.desc(), PolicyDecision.id.desc()).limit(1))).scalar_one_or_none()
         item = PolicyDecision(workspace_id=workspace_id, subject_type=payload.subject_type, subject_id=payload.subject_id,
             controller_scope_id=workspace_id, purpose=payload.purpose, status=payload.status,
             policy_version=payload.policy_version, basis_reference=payload.basis_reference, provenance=payload.provenance,

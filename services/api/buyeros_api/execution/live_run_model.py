@@ -65,8 +65,8 @@ class NativeReceivedFitRunner(LiveFitDomainRunner):
         super().__init__(*args,**kwargs)
         self.original_operation,self.original_request,self.original_ref=original_operation,original_request,original_ref
 
-    async def _model_basis(self,session,state,*,lock_buyer=False):
-        result=await super()._model_basis(session,state,lock_buyer=lock_buyer)
+    async def _model_basis(self,session,state,*,lock_buyer=False,policy_action="research.read"):
+        result=await super()._model_basis(session,state,lock_buyer=lock_buyer,policy_action=policy_action)
         await _require_original_received(session,self.receipts,self.original_operation,self.original_request,self.original_ref)
         return result
 

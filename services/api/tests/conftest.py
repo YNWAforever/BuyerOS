@@ -167,6 +167,16 @@ def seeded(migrated):
     import psycopg
 
     with psycopg.connect(migrated, autocommit=True) as conn:
+        # Current controlled policy history holds FKs to decisions/members.
+        # Clear only this shared fixture's derived append-only rows before its
+        # usual reset; production never uses this harness.
+        if conn.execute("SELECT to_regclass('public.policy_activation_resolutions')").fetchone()[0]:
+            for table in ("policy_activation_resolutions", "policy_activation_requests",
+                          "policy_controller_authorities", "idempotency_records", "policy_decisions"):
+                if conn.execute("SELECT to_regclass(%s)", ("public." + table,)).fetchone()[0]:
+                    conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
+                                 ("11111111-1111-4111-8111-111111111111",
+                                  "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM workspace_preferences WHERE workspace_id IN (%s, %s)",
@@ -181,6 +191,10 @@ def seeded(migrated):
             conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
                          ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM offer_documents WHERE workspace_id IN (%s, %s)",
+                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+        # A failing test may leave members before its teardown; workspace
+        # deletion must not cascade the whole shared-fixture session.
+        conn.execute("DELETE FROM memberships WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM projects WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
@@ -315,3 +329,11 @@ def isolated_api(isolated_seeded,monkeypatch):
 def isolated_quote_case(isolated_api,isolated_seeded):
     from tests.test_lookup_quotes_db import quote_case
     yield from quote_case.__wrapped__(isolated_api,isolated_seeded)
+
+
+@pytest.fixture
+def native_model_registration(monkeypatch):
+    # Resolve the model before the page license is approved. A later policy
+    # replacement correctly invalidates the old page's frozen permission.
+    from tests.test_run_model_admission_db import build_model_registration
+    return build_model_registration(monkeypatch)

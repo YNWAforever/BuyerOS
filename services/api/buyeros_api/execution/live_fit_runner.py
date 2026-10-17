@@ -19,16 +19,26 @@ class LiveFitDomainRunner(FitDomainRunner):
     async def fit(self,state):
         self._check_state(state)
         if self.dispatch is None:raise ValueError('verified model admission unavailable')
-        basis=await self.model_basis(state)
+        from ..services.policy_service import evaluate_current_policy
+        from ..services.research_policy_context import research_use, adapter_binding, evidence_urls
+        from datetime import datetime, timezone
+        async with tenant_session(self.engine,self.workspace_id) as session:
+            basis,_=await self._model_basis(session,state)
+            urls=await evidence_urls(session,project_id=basis['project_id'],
+                source_ids=[item['source_id'] for item in basis['evidence']])
+            use=research_use(basis['project_id'],'research.model',binding=adapter_binding(self.receipts),urls=urls)
+            policy=await evaluate_current_policy(session,{'workspace_id':self.workspace_id,
+                'project_id':basis['project_id']},'account_research',datetime.now(timezone.utc),use_context=use)
+            if not policy['allowed']:raise ValueError('exact current model processing permission required')
         # The code-owned C19 dispatcher must use execute_external and the frozen
         # reservation/operation/outbox receipt. No provider is selected here.
         ref=await self.dispatch(state,basis)
         if not isinstance(ref,str) or str(uuid.UUID(ref))!=ref:raise ValueError('durable model proposal reference required')
         return {'proposal_id':ref}
 
-    async def _model_basis(self,session,state,*,lock_buyer=False):
+    async def _model_basis(self,session,state,*,lock_buyer=False,policy_action="research.read"):
         self._check_state(state)
-        digest,requirements,current,buyer=await self._basis(session,lock_buyer=lock_buyer)
+        digest,requirements,current,buyer=await self._basis(session,lock_buyer=lock_buyer,policy_action=policy_action)
         if digest!=state['basis_hash']:raise ValueError('fit basis changed')
         run=(await session.execute(select(SearchRun).where(SearchRun.id==self.run_id))).scalar_one()
         project=(await session.execute(select(Project).where(Project.id==buyer.project_id))).scalar_one()
@@ -90,7 +100,7 @@ class LiveFitDomainRunner(FitDomainRunner):
             return await super().persist(state)
         if state.get('verified') is not True:raise ValueError('unverified model cannot persist')
         async with tenant_session(self.engine,self.workspace_id) as session:
-            basis,buyer=await self._model_basis(session,state,lock_buyer=True)
+            basis,buyer=await self._model_basis(session,state,lock_buyer=True,policy_action="research.persist")
             details,response_hash=await self._receipt_details(state,basis)
             assessment_id=uuid.uuid5(uuid.NAMESPACE_URL,f"live-model-v1:{self.run_id}:{self.buyer_id}:{state['basis_hash']}:{response_hash}")
             existing=(await session.execute(select(FitAssessment).where(FitAssessment.id==assessment_id))).scalar_one_or_none()

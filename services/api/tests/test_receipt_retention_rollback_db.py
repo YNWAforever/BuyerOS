@@ -26,14 +26,19 @@ def test_unknown_redacted_payload_and_hash_survive_downgrade_and_reupgrade(conta
         saved=await store.get(ref);assert saved['state']=='redacted'
         config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',case['dsn']);get_settings.cache_clear()
+        from tests.migration_guards import invoke_revision
         try:
-            command.downgrade(config,'0042_c61_contact_receipts');assert await store.get(ref)==saved
+            with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                command.downgrade(config,'0042_c61_contact_receipts')
+            invoke_revision(case['dsn'],config,'0043_c61_receipt_retention')
+            assert await store.get(ref)==saved
             from buyeros_api.services.worker_recovery import set_execution_runtime
             with psycopg.connect(case['dsn']) as db:epoch=db.execute('SELECT epoch FROM worker_runtime_control WHERE singleton=1').fetchone()[0]
             paused=set_execution_runtime(case['dsn'],expected_epoch=epoch,backend='celery',enabled=False,reason='owned rollback dry run')
             assert paused['epoch']==epoch and paused['enabled'] is False and paused['applied'] is False
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
         finally:
-            command.upgrade(config,'head');monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
+            invoke_revision(case['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+            monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved and not (await store.claim(intent))[1] and held(case)[1]==0
     asyncio.run(expiring_engines(case,exercise))

@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
 
-HEAD = "0055_lead_workflow"
+HEAD = "0056_policy_activation"
 
 
 def _config():
@@ -55,6 +55,9 @@ def test_0030_retained_outcome_refuses_downgrade(isolated_quote_case, monkeypatc
                     uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)))
     monkeypatch.setenv("BUYEROS_DATABASE_URL", dsn)
     get_settings.cache_clear()
-    with pytest.raises(RuntimeError, match="retained manual outcome history"):
+    with pytest.raises(RuntimeError, match="preserve controller policy history"):
         command.downgrade(_config(), "0029_export_authorization")
+    from tests.migration_guards import invoke_revision
+    with pytest.raises(RuntimeError, match="retained manual outcome history"):
+        invoke_revision(dsn, _config(), "0030_manual_outcome_provenance")
     assert _head(dsn) == HEAD

@@ -69,21 +69,25 @@ def _gate(subject, purpose):
 
     async def run():
         async with tenant_scoped(uuid.UUID(WORKSPACE_A)) as session:
-            return await evaluate_current_policy(session, subject, purpose, datetime.now(timezone.utc))
+            from sqlalchemy import text
+            from buyeros_api.api.policy_activation_schemas import PolicyUseContext,MANUAL_DATA
+            domain=await session.scalar(text("SELECT domain FROM companies WHERE id=:id"),{"id":subject.get("company_id")})
+            context=PolicyUseContext(project_id=uuid.UUID(PROJECT_A),action="lead.review",
+                source_domains=(domain or "policy.example",),data_categories=MANUAL_DATA)
+            return await evaluate_current_policy(session, subject, purpose, datetime.now(timezone.utc),use_context=context)
     return asyncio.run(run())
 
 
 def _fixture_permit(seeded, company_id, *, purpose="contact_research", expires=None):
-    decision_id = str(uuid.uuid4())
-    with psycopg.connect(seeded, autocommit=True) as conn:
-        conn.execute(
-            "INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,"
-            "policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id,version) "
-            "VALUES (%s,%s,'company',%s,%s,%s,'permitted','fixture-only','fixture-approved-basis',"
-            "'fixture-only',ARRAY['HK'],%s,30,%s,1)",
-            (decision_id, WORKSPACE_A, company_id, WORKSPACE_A, purpose, expires or _expiry(), str(uuid.uuid5(uuid.NAMESPACE_URL, ADMIN))),
-        )
-    return decision_id
+    from tests.policy_activation_fixtures import approve_native_fixture
+    with psycopg.connect(seeded) as conn:
+        domain=conn.execute("SELECT domain FROM companies WHERE id=%s",(company_id,)).fetchone()[0]
+    approve_native_fixture(seeded,WORKSPACE_A,PROJECT_A,uuid.uuid5(uuid.NAMESPACE_URL,ADMIN),
+        domains=(domain or "policy.example",),purposes=(purpose,),countries=("HK",),
+        actions=("lead.review",),terms_overrides={"expires_at":expires} if expires else None)
+    with psycopg.connect(seeded) as conn:
+        return str(conn.execute("SELECT id FROM policy_decisions WHERE subject_id=%s AND purpose=%s "
+            "ORDER BY created_at DESC,id DESC LIMIT 1",(PROJECT_A,purpose)).fetchone()[0])
 
 
 def test_current_gate_keeps_acceptance_validity_and_each_purpose_separate(api, seeded):
@@ -98,11 +102,11 @@ def test_current_gate_keeps_acceptance_validity_and_each_purpose_separate(api, s
                "project_id": PROJECT_A, "company_id": company_id, "contact_point_id": contact_id,
                "normalized_domain": "policy.example"}
     assert _gate(subject, "contact_research") == {"status": "unknown", "allowed": False, "reason_codes": ["policy_unknown"]}
-    _fixture_permit(seeded, company_id)  # Test-only owner fixture; the HTTP permit path stays blocked.
+    decision_id=_fixture_permit(seeded, company_id)  # Real controlled fixture; direct HTTP permit stays blocked.
     assert _gate(subject, "contact_research")["allowed"] is True
     assert _gate(subject, "outreach")["status"] == "unknown"
     with psycopg.connect(seeded, autocommit=True) as conn:
-        conn.execute("UPDATE policy_decisions SET expires_at=now()-interval '1 second' WHERE subject_id=%s", (company_id,))
+        conn.execute("UPDATE policy_decisions SET expires_at=now()-interval '1 second' WHERE id=%s", (decision_id,))
     assert _gate(subject, "contact_research")["status"] == "unknown"
     with psycopg.connect(seeded, autocommit=True) as conn:
         conn.execute("DELETE FROM contact_points WHERE id=%s", (contact_id,))
@@ -187,7 +191,7 @@ def test_policy_gate_uses_latest_each_scope_and_most_restrictive_result(api, see
     assert _gate(subject, "contact_research") == {
         "status": "blocked", "allowed": False, "reason_codes": ["policy_blocked"]}
     with psycopg.connect(seeded, autocommit=True) as conn:
-        conn.execute("DELETE FROM policy_decisions WHERE workspace_id=%s AND subject_type='project' AND subject_id=%s",
+        conn.execute("DELETE FROM policy_decisions WHERE workspace_id=%s AND subject_type='project' AND subject_id=%s AND status='blocked'",
                      (WORKSPACE_A, PROJECT_A))
     assert _gate(subject, "contact_research")["status"] == "permitted"
     body = {"subject_type": "company", "subject_id": company_id, "controller_scope_id": WORKSPACE_A,
@@ -239,4 +243,4 @@ def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(isolated_migrat
         assert conn.execute("SELECT count(*) FROM information_schema.columns WHERE table_name='policy_decisions' AND column_name='subject_id'").fetchone()[0] == 0
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0055_lead_workflow"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0056_policy_activation"

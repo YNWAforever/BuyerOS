@@ -58,7 +58,7 @@ def cold_cutover(monkeypatch,tmp_path):
     try:
         source,source_dsn=_start_container();target,target_dsn=_start_container()
         monkeypatch.setenv('BUYEROS_DATABASE_URL',source_dsn);get_settings.cache_clear()
-        config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'));command.upgrade(config,'0039_c61_user_identities')
+        config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'));command.upgrade(config,'head')
         with psycopg.connect(source_dsn) as db:
             db.execute("ALTER ROLE buyeros_api LOGIN PASSWORD 'test-only'")
             db.execute("ALTER ROLE buyeros_worker LOGIN PASSWORD 'test-only'")
@@ -95,13 +95,19 @@ def cold_cutover(monkeypatch,tmp_path):
         before=snapshot(source_dsn,[legacy,new_user],workspace)
         assert before['ledger_and_unknown']['budget_reservations']['count']==1 and before['ledger_and_unknown']['provider_operations']['count']==1
         mark('expand_and_map',snapshot=before)
-        command.downgrade(config,'0038_c61_workspace_directory');assert snapshot(source_dsn,[legacy,new_user],workspace)==before
-        command.upgrade(config,'0039_c61_user_identities');assert snapshot(source_dsn,[legacy,new_user],workspace)==before
-        mark('schema_rollback_and_reupgrade_preserve_all_rows',snapshot=before)
+        import pytest
+        with pytest.raises(RuntimeError,match='preserve controller policy history'):
+            command.downgrade(config,'0038_c61_workspace_directory')
+        from tests.migration_guards import invoke_revision
+        invoke_revision(source_dsn,config,'0039_c61_user_identities')
+        assert snapshot(source_dsn,[legacy,new_user],workspace)==before
+        invoke_revision(source_dsn,config,'0039_c61_user_identities','upgrade')
+        assert snapshot(source_dsn,[legacy,new_user],workspace)==before
+        mark('current_policy_blocks_schema_rollback_historical_identity_revision_preserves_rows',snapshot=before)
         # Keep the historical identity rollback proof; current retention needs its expanded schema.
         command.upgrade(config,'head')
         with psycopg.connect(source_dsn) as db:
-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0055_lead_workflow',)
+            assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
         expanded=snapshot(source_dsn,[legacy,new_user],workspace)
         assert {k:v for k,v in expanded.items() if k!='historical_fks'}=={k:v for k,v in before.items() if k!='historical_fks'}
         for user,prior in before['historical_fks'].items():
@@ -112,10 +118,13 @@ def cold_cutover(monkeypatch,tmp_path):
             expected_added|={str(('lead_action_intents','actor_id'))}|{str((table,'recorded_by_user_id')) for table in (
                 'lead_observations','lead_reviews','lead_preparation_revisions','lead_preparation_content_reviews',
                 'pilot_cost_events','pilot_credit_observations','pilot_reconciliations')}
-            assert added==expected_added, (sorted(added),sorted(expected_added))
-            assert all(current[k]==hashlib.sha256(json.dumps([]).encode()).hexdigest() for k in added)
+            # The current execution rehearsal now starts at the current schema.
+            # Original 0038->HEAD expansion remains independently covered by
+            # test_identity_migration_db, including its exact FK/hold assertions.
+            assert added==set(), sorted(added)
+            assert expected_added <= set(current), sorted(expected_added-set(current))
         before=expanded
-        mark('current_receipt_privacy_schema_before_backup',schema='0055_lead_workflow',snapshot=before)
+        mark('current_receipt_privacy_schema_before_backup',schema='0056_policy_activation',snapshot=before)
         dump=_docker_binary(['exec',source,'pg_dump','-U',DB_USER,'-d',DB_NAME,'--format=custom','--no-owner'])
         mark('older_backup',bytes=len(dump),sha256=hashlib.sha256(dump).hexdigest())
         policy='c61-offline-retention-v1'

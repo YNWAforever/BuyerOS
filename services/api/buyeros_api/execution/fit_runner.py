@@ -38,7 +38,8 @@ class FitDomainRunner:
                 state["workflow_version"] != "fit-v1"):
             raise ValueError("fit checkpoint scope mismatch")
 
-    async def _basis(self, session, *, lock_buyer: bool = False) -> tuple[str, list, list, ProjectBuyer]:
+    async def _basis(self, session, *, lock_buyer: bool = False,
+                     policy_action: str = "research.read") -> tuple[str, list, list, ProjectBuyer]:
         now = datetime.now(timezone.utc)
         run_query = select(SearchRun).where(
             SearchRun.workspace_id == self.workspace_id, SearchRun.id == self.run_id,
@@ -79,9 +80,11 @@ class FitDomainRunner:
         ))).scalar_one_or_none()
         if membership is None or not permission_for_roles(membership.roles, "startRun"):
             raise ValueError("fit actor was revoked")
+        from ..services.research_policy_context import evidence_urls, research_use
+        urls = await evidence_urls(session, project_id=run.project_id, run_id=run.id, company_id=buyer.company_id)
         policy = await evaluate_current_policy(session, {
             "workspace_id": self.workspace_id, "project_id": run.project_id,
-        }, "account_research", now)
+        }, "account_research", now, use_context=research_use(run.project_id, policy_action, urls=urls))
         if not policy["allowed"]:
             raise ValueError("fit policy is not current")
         requirements = (icp.content or {}).get("requirements")
@@ -176,7 +179,8 @@ class FitDomainRunner:
         if state.get("verified") is not True:
             raise ValueError("unverified fit cannot persist")
         async with tenant_session(self.engine, self.workspace_id) as session:
-            basis_hash, requirements, evidence, buyer = await self._basis(session, lock_buyer=True)
+            basis_hash, requirements, evidence, buyer = await self._basis(session, lock_buyer=True,
+                                                                         policy_action="research.persist")
             if basis_hash != state["basis_hash"]:
                 raise ValueError("fit basis changed before persistence")
             details = evaluate_evidence_fit(requirements, requirement_claims(evidence))

@@ -15,6 +15,7 @@ from tests.test_api_projects_db import ADMIN, OPERATOR, REVIEWER, WORKSPACE_A, _
 
 PROJECT = "a0000000-0000-4000-8000-000000000001"
 ICP = "d0000000-0000-4000-8000-000000000021"
+FIXTURE_VERIFIED_AT = datetime.now(timezone.utc)
 
 
 def _capability(price="0.300000", version="fixture-price-v1"):
@@ -24,7 +25,7 @@ def _capability(price="0.300000", version="fixture-price-v1"):
         roles=frozenset({"Procurement manager"}), auth_model="fixture",
         pricing_version=version, max_liability=Money(Decimal(price)),
         idempotency="verified", status="verified", callback="unsupported", cancel="unsupported",
-        retention="fixture-only", verified_at=datetime.now(timezone.utc),
+        retention="fixture-only", verified_at=FIXTURE_VERIFIED_AT,
         source_urls=("https://fixture.invalid/capability",),
     )
 
@@ -40,14 +41,6 @@ def quote_case(api, seeded):
              str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))),
         )
         db.execute("UPDATE projects SET active_icp_version_id=%s WHERE id=%s", (ICP, PROJECT))
-        db.execute(
-            "INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,"
-            "policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) "
-            "VALUES (%s,%s,'project',%s,%s,'contact_research','permitted','fixture-v1','fixture','fixture',"
-            "'{US}',now()+interval '1 day',1,%s)",
-            (str(uuid.uuid4()), WORKSPACE_A, PROJECT, WORKSPACE_A,
-             str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))),
-        )
         buyers = []
         for number in (1, 2):
             company, buyer, fit, source, evidence = (str(uuid.uuid4()) for _ in range(5))
@@ -88,7 +81,16 @@ def quote_case(api, seeded):
             (str(uuid.uuid4()), WORKSPACE_A, "b" * 64, buyers[1][1], WORKSPACE_A,
              str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER))),
         )
-    api.app.dependency_overrides[selected_contact_quote_capability] = lambda: (_capability(), "test")
+    # Registry hash includes verified_at. Reuse one immutable reviewed fixture
+    # capability instead of inventing a different contract on every request.
+    fixture_capability = _capability()
+    api.app.dependency_overrides[selected_contact_quote_capability] = lambda: (fixture_capability, "test")
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from buyeros_api.providers.registry import ProviderRegistration
+    approve_provider_fixture(seeded, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+        purpose="contact_research", domains=("fixture1.example", "fixture2.example"),
+        scope={"provider_name": "fixture", "account_reference": "fixture-test",
+               "contract_sha256": ProviderRegistration(fixture_capability, lambda: None).contract_hash})
     try:
         yield api, seeded, buyers
     finally:
@@ -98,6 +100,7 @@ def quote_case(api, seeded):
                           "provider_callback_routes", "provider_events", "outbox_events", "async_jobs",
                           "provider_operations", "enrichment_jobs",
                           "budget_reservation_allocations", "cost_events", "budget_reservations", "enrichment_quotes",
+                          "policy_activation_resolutions", "policy_activation_requests", "policy_controller_authorities",
                           "suppressions", "policy_decisions", "human_reviews",
                           "fit_assessments", "evidence", "source_documents", "contact_points", "search_runs", "project_buyers", "companies"):
                 db.execute(f"DELETE FROM {table} WHERE workspace_id=%s", (WORKSPACE_A,))
@@ -181,8 +184,14 @@ def test_quote_expiry_actor_scope_and_price_version_require_a_fresh_quote(quote_
         assert client.get(path, headers=_h(subject=ADMIN)).status_code == 200
         assert client.post(path + "/cancel", headers=_h(
             subject=other, key="quote-other-cancel", **{"If-Match": '"1"'}), json={"reason":"No longer needed"}).status_code == 403
-        client.app.dependency_overrides[selected_contact_quote_capability] = lambda: (_capability(
-            price="0.400000", version="fixture-price-v2"), "test")
+        updated_capability = _capability(price="0.400000", version="fixture-price-v2")
+        client.app.dependency_overrides[selected_contact_quote_capability] = lambda: (updated_capability, "test")
+        from tests.policy_activation_fixtures import approve_provider_fixture
+        from buyeros_api.providers.registry import ProviderRegistration
+        approve_provider_fixture(dsn, WORKSPACE_A, PROJECT, uuid.uuid5(uuid.NAMESPACE_URL, ADMIN),
+            purpose="contact_research", domains=("fixture1.example", "fixture2.example"),
+            scope={"provider_name": "fixture", "account_reference": "fixture-test",
+                   "contract_sha256": ProviderRegistration(updated_capability, lambda: None).contract_hash})
         changed = _post(client, _body(buyers), key="quote-price-new").json()["data"]
         assert changed["id"] != original["id"]
         assert changed["pricing_version"] == "fixture-price-v2"
@@ -211,7 +220,8 @@ def test_quote_rechecks_profile_policy_and_actual_eligible_ceiling(quote_case):
     assert set(both["eligible_buyer_ids"]) == {buyer for buyer, _ in buyers}
     assert both["max_cost"]["amount"] == "0.600000"
     with psycopg.connect(dsn, autocommit=True) as db:
-        db.execute("DELETE FROM policy_decisions WHERE workspace_id=%s", (WORKSPACE_A,))
+        # Preserve immutable approval history while making no permit current.
+        db.execute("UPDATE policy_decisions SET expires_at=now()-interval '1 second' WHERE workspace_id=%s", (WORKSPACE_A,))
     unknown = _post(client, _body(buyers), key="quote-policy-unknown").json()["data"]
     assert unknown["eligible_buyer_ids"] == []
     assert unknown["max_cost"]["amount"] == "0.000000"

@@ -57,9 +57,20 @@ class LeadWorkflowCIRegistration(unittest.TestCase):
             ("source", "Verify original buyer source checks", "playwright.buyer.config.ts"),
         ]:
             block = self.block(name)
-            commands = [shlex.split(line.strip()) for line in block.splitlines() if line.strip().startswith(("pnpm ", "python "))]
+            commands = [shlex.split(line.strip()) for line in block.splitlines()
+                        if line.strip().startswith(("pnpm ", "python ", "services/api/.venv/bin/python "))]
             browser = [cmd for cmd in commands if cmd[:4] == ["pnpm", "exec", "playwright", "test"]]
-            self.assertEqual(len(browser), 2)
+            if key == "lead":
+                # The exact same config is executed through the verified owned
+                # runner. Discovery and the 19-case JUnit identity join remain.
+                self.assertEqual(len(browser), 1)
+                owned = [cmd for cmd in commands if "--run-suite" in cmd]
+                self.assertEqual(len(owned), 1)
+                self.assertEqual(owned[0][:2], ["services/api/.venv/bin/python",
+                                               "services/api/tools/create_policy_test_target.py"])
+                self.assertEqual(owned[0][owned[0].index("--run-suite") + 1], "native-browser")
+            else:
+                self.assertEqual(len(browser), 2)
             self.assertTrue(all(config in cmd for cmd in browser))
             self.assertEqual(sum("--list" in cmd for cmd in browser), 1)
             guards = [cmd for cmd in commands if cmd[:2] == ["python", "scripts/check-required-tests.py"]]

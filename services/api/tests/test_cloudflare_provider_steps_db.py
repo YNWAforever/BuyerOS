@@ -15,6 +15,9 @@ from tests.test_cloudflare_local_steps_db import seed_project
 LIMITS = {'query_rounds': 3, 'max_queries_per_run': 12, 'max_results': 300,
           'max_pages': 200, 'max_page_bytes': 2097152, 'max_duration_seconds': 1800,
           'max_model_tokens': 100000, 'provider_concurrency': 4}
+from buyeros_api.api.policy_activation_schemas import ResearchProviderBinding
+RESEARCH_BINDING = ResearchProviderBinding(provider_name='fixture',account_reference='owned-cloudflare-search',contract_sha256='c'*64)
+CONTACT_VERIFIED_AT = datetime.now(timezone.utc)
 
 
 def provider_module():
@@ -37,6 +40,7 @@ def seed_research(dsn, epoch, *, query_count=1):
     snapshot = {'actor_id': str(actor), 'offer_revision': 1, 'icp_content_hash': canonical_hash(content),
                 'capability': {'provider': 'fixture', 'price_version': 'fixture-price-v1', 'verified_filters': ['market', 'language'], 'markets': ['HK'], 'languages': ['en']},
                 'query_plan': {'schema': 'query-plan.v1', 'queries': queries, 'rationale_summary': 'Fictional test only'}}
+    snapshot['capability']['policy_binding']=RESEARCH_BINDING.model_dump(mode='json')
     start, end, period = _period(None)
     with psycopg.connect(dsn, autocommit=True) as db:
         db.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,content,content_hash,basis_offer_revision,approved_at,approved_by) VALUES(%s,%s,%s,1,%s::jsonb,%s,1,now(),%s)",
@@ -52,11 +56,15 @@ def seed_research(dsn, epoch, *, query_count=1):
             db.execute("INSERT INTO budget_accounts(id,workspace_id,scope,scope_id,category,currency,period,period_start,period_end,approved_limit,settled_spend) VALUES(%s,%s,%s,%s,%s,'USD',%s,%s,%s,2,0)",
                        (uuid.uuid4(), envelope.workspace_id, scope, scope_id, category, period, start, end))
         db.execute("UPDATE outbox_events SET payload=%s::jsonb WHERE id=%s", (json.dumps({'run_id': str(run)}), envelope.outbox_id))
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(dsn,envelope.workspace_id,project,domains=('fixture.invalid',),
+                             search=RESEARCH_BINDING,transaction_role=True,countries=('HK',))
     return {'envelope': envelope, 'run': run, 'actor': actor, 'project': project, 'icp': icp, 'dsn': dsn}
 
 
 class SearchFixture:
     test_only = True
+    policy_binding = RESEARCH_BINDING
     provider = 'fixture'
     price_version = 'fixture-price-v1'
     quoted_upper_bound = Decimal('0.100000')
@@ -115,7 +123,7 @@ def seed_contact(dsn, epoch, count=3):
     resolved = [{'buyer_id': str(b), 'company_id': str(c), 'buyer_version': 1, 'eligible': True} for b, c, _ in buyers]
     with psycopg.connect(dsn, autocommit=True) as db:
         for b, c, _ in buyers:
-            db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) VALUES(%s,%s,'Fictional','Fictional')", (c, envelope.workspace_id))
+            db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name,domain) VALUES(%s,%s,'Fictional','Fictional','contact.example.test')", (c, envelope.workspace_id))
             db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) VALUES(%s,%s,%s,%s)", (b, envelope.workspace_id, project, c))
         db.execute("INSERT INTO policy_decisions(id,workspace_id,subject_type,subject_id,controller_scope_id,purpose,status,policy_version,basis_reference,provenance,countries,expires_at,retention_days,decision_author_id) VALUES(%s,%s,'project',%s,%s,'contact_research','permitted','fictional','fixture','fixture','{HK}',now()+interval '1 day',1,%s)", (uuid.uuid4(), envelope.workspace_id, project, envelope.workspace_id, actor))
     async def reserve():
@@ -136,12 +144,19 @@ def seed_contact(dsn, epoch, count=3):
         for b, _, op in buyers:
             db.execute("INSERT INTO provider_operations(id,workspace_id,job_id,buyer_id,intent_key,capability,input_hash,status) VALUES(%s,%s,%s,%s,%s,'contact',%s,'intent')", (op, envelope.workspace_id, job, b, f'contact:{job}:{b}', quote_hash({'quote_hash': 'b'*64, 'buyer_id': str(b), 'roles': ['Procurement manager'], 'contact_type': 'business_email'})))
         db.execute("UPDATE outbox_events SET intent_key=%s,payload=%s::jsonb WHERE id=%s", (f'contact.lookup:{job}', json.dumps({'workspace_id': str(envelope.workspace_id), 'job_id': str(job)}), envelope.outbox_id))
-    return {'envelope': envelope, 'project': project, 'actor': actor, 'job': job, 'quote': quote, 'dsn': dsn}
+    case={'envelope': envelope, 'project': project, 'actor': actor, 'job': job, 'quote': quote, 'dsn': dsn}
+    from tests.policy_activation_fixtures import approve_provider_fixture
+    from buyeros_api.providers.registry import ProviderRegistration
+    approve_provider_fixture(dsn,envelope.workspace_id,project,actor,purpose='contact_research',
+        domains=('contact.example.test',),transaction_role=True,
+        scope={'provider_name':'fixture','account_reference':'fixture-test',
+               'contract_sha256':ProviderRegistration(contact_adapter(case).capability,lambda:None).contract_hash})
+    return case
 
 
 def contact_adapter(case):
     from buyeros_api.providers.base import FixtureProviderAdapter, Money, ProviderCapability
-    capability = ProviderCapability(provider='fixture', adapter_version='contact-fixture-v1', service='contact', markets=frozenset({'HK'}), languages=frozenset({'en'}), roles=frozenset({'Procurement manager'}), auth_model='fixture', pricing_version='fixture-price-v1', max_liability=Money(Decimal('0.300000')), idempotency='verified', status='verified', callback='unsupported', cancel='unsupported', retention='fixture-only', verified_at=datetime.now(timezone.utc), source_urls=('https://fixture.invalid/capability',))
+    capability = ProviderCapability(provider='fixture', adapter_version='contact-fixture-v1', service='contact', markets=frozenset({'HK'}), languages=frozenset({'en'}), roles=frozenset({'Procurement manager'}), auth_model='fixture', pricing_version='fixture-price-v1', max_liability=Money(Decimal('0.300000')), idempotency='verified', status='verified', callback='unsupported', cancel='unsupported', retention='fixture-only', verified_at=CONTACT_VERIFIED_AT, source_urls=('https://fixture.invalid/capability',))
     class ContactFixture(FixtureProviderAdapter):
         async def submit(self, intent):
             with psycopg.connect(case['dsn'], autocommit=True) as db:

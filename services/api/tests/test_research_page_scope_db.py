@@ -1,5 +1,6 @@
 """C19 source permission comes from current server rows; every page is synthetic."""
 import asyncio,importlib,uuid
+from datetime import datetime,timedelta,timezone
 from dataclasses import FrozenInstanceError
 import psycopg,pytest
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -28,9 +29,13 @@ def page_case(run_case):
                 return await ingest_received_search(session,workspace_id=c['workspace'],run_id=c['run'],receipt_id=a.receipt_id,capability=c['cap'])
         finally:await engine.dispose()
     asyncio.run(intake())
+    from tests.policy_activation_fixtures import approve_selected_research_fixture
+    approve_selected_research_fixture(c['dsn'],c['workspace'],c['project'],domains=('sensors.example.test',),
+        terms_overrides={'basis_reference':URL,'provenance':'synthetic exact-source licensing review',
+                         'expires_at':(datetime.now(timezone.utc)+timedelta(hours=2)).isoformat(),'retention_days':1})
     with psycopg.connect(c['dsn']) as db:
         raw,source=db.execute("SELECT id,(raw_payload->>'source_document_id')::uuid FROM raw_candidates WHERE run_id=%s",(c['run'],)).fetchone()
-        policy,version=db.execute("UPDATE policy_decisions SET basis_reference=%s,provenance='synthetic exact-source licensing review',expires_at=now()+interval '2 hours',retention_days=1 WHERE subject_id=%s AND purpose='account_research' RETURNING id,version",(URL,c['project'])).fetchone()
+        policy,version=db.execute("SELECT id,version FROM policy_decisions WHERE subject_id=%s AND purpose='account_research' ORDER BY created_at DESC,id DESC LIMIT 1",(c['project'],)).fetchone()
     c.update(raw=raw,source=source,receipt=a.receipt_id,policy=policy,policy_version=version)
     return c
 
@@ -43,6 +48,19 @@ def call_scope(c,*,raw=None):
                 return await fn(session,workspace_id=c['workspace'],run_id=c['run'],raw_candidate_id=raw or c['raw'],capability=c['cap'])
         finally:await engine.dispose()
     return asyncio.run(exercise())
+
+
+def test_exact_source_license_without_fetch_action_cannot_authorize_page(page_case):
+    from tests.policy_activation_fixtures import approve_selected_research_fixture
+    from buyeros_api.providers import registry
+    c=page_case
+    search=registry.DEFAULT_REGISTRY.registration('search').policy_binding
+    from tests.policy_activation_fixtures import approve_research_fixture
+    approve_research_fixture(c['dsn'],c['workspace'],c['project'],domains=('sensors.example.test',),search=search,
+        actions=('research.search','research.read','research.persist'),
+        terms_overrides={'basis_reference':URL,'retention_days':1})
+    with pytest.raises(ValueError,match='fetch'):
+        call_scope(c)
 
 def test_exact_source_scope_is_immutable_current_and_does_not_retrieve_or_promote(page_case):
     c=page_case;s=call_scope(c)

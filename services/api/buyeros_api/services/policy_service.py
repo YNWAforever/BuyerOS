@@ -10,6 +10,10 @@ from ..api.errors import ApiError
 from ..db.buyers import Company
 from ..db.icp import Project
 from ..db.policy import PURPOSES, PolicyDecision, Suppression
+from .policy_activation_read import latest_head as latest_policy_head
+from .policy_activation_read import resolve_approved_policy_terms
+from .policy_activation_terms import match_policy_use
+from ..api.policy_activation_schemas import PolicyUseContext
 from ..db.runs import ContactPoint
 
 _RANK = {"permitted": 0, "requires_review": 1, "blocked": 2}
@@ -106,12 +110,14 @@ def suppression_data(item: Suppression) -> dict:
     return data
 
 
-async def evaluate_current_policy(session, subject: dict, purpose: str, now: datetime) -> dict:
+async def evaluate_current_policy(session, subject: dict, purpose: str, now: datetime,
+                                  *, use_context: PolicyUseContext | None = None) -> dict:
     """Mutation authorization retains its existing workspace lock."""
-    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=True)
+    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=True,use_context=use_context)
 
 
-async def evaluate_current_policy_readonly(session, subject: dict, purpose: str, now: datetime) -> dict:
+async def evaluate_current_policy_readonly(session, subject: dict, purpose: str, now: datetime,
+                                           *, use_context: PolicyUseContext | None = None) -> dict:
     """Current DB read snapshot; never usable to authorize an unlocked mutation.
 
     A receipt read can be nested in a parent fit/policy mutation transaction.
@@ -121,10 +127,11 @@ async def evaluate_current_policy_readonly(session, subject: dict, purpose: str,
     """
     if (await session.execute(text("SELECT current_setting('transaction_read_only')"))).scalar_one()!='on':
         raise ValueError('read-only current policy transaction required')
-    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=False)
+    return await _evaluate_current_policy(session,subject,purpose,now,lock_workspace=False,use_context=use_context)
 
 
-async def _evaluate_current_policy(session, subject: dict, purpose: str, now: datetime, *, lock_workspace: bool) -> dict:
+async def _evaluate_current_policy(session, subject: dict, purpose: str, now: datetime, *,
+                                   lock_workspace: bool, use_context: PolicyUseContext | None = None) -> dict:
     """Synchronous current gate. Caller supplies server-resolved IDs in a tenant-scoped transaction."""
     if purpose not in PURPOSES or now.tzinfo is None:
         raise ValueError("purpose and timezone-aware now are required")
@@ -133,6 +140,9 @@ async def _evaluate_current_policy(session, subject: dict, purpose: str, now: da
     if controller_id != workspace_id:
         return {"status": "unknown", "allowed": False, "reason_codes": ["controller_scope_unverified"]}
     if lock_workspace:await policy_workspace_lock(session, workspace_id)
+    # A request may have waited behind a revoke/approval transaction. Its
+    # arrival timestamp must not keep an expired grant alive after that wait.
+    now = max(now, datetime.now(timezone.utc))
     domain = None
     if subject.get("company_id"):
         company = (await session.execute(select(Company).where(
@@ -159,12 +169,28 @@ async def _evaluate_current_policy(session, subject: dict, purpose: str, now: da
                                      PolicyDecision.controller_scope_id == controller_id,
                                      PolicyDecision.purpose == purpose, or_(*conditions))
         .distinct(PolicyDecision.subject_type, PolicyDecision.subject_id)
-        .order_by(PolicyDecision.subject_type, PolicyDecision.subject_id, PolicyDecision.created_at.desc(), PolicyDecision.id.desc())
+        .order_by(PolicyDecision.subject_type, PolicyDecision.subject_id, PolicyDecision.version.desc(),
+                  PolicyDecision.created_at.desc(), PolicyDecision.id.desc())
     )).scalars().all()
-    active = [row.status for row in rows if row.expires_at > now]
+    active, unproven = [], False
+    for row in rows:
+        if row.expires_at <= now:
+            continue
+        if row.status == "permitted" and purpose in {"account_research", "contact_research", "draft_preparation", "outreach"}:
+            # Every controlled operation needs a canonical use context. A
+            # provider grant cannot be inferred from a manual permit or flag.
+            # Deny absent context before touching the proof projection.
+            if use_context is None:
+                unproven = True
+                continue
+            terms = await resolve_approved_policy_terms(session, row, now)
+            if terms is None or not match_policy_use(terms, use_context, now):
+                unproven = True
+                continue
+        active.append(row.status)
     expired = any(row.expires_at <= now for row in rows)
     status = effective_decision([{"purpose": purpose, "status": value} for value in active], purpose)
-    if expired and status == "permitted":status = "unknown"
+    if (expired or unproven) and status == "permitted":status = "unknown"
     suppressions = []
     if purpose in {"contact_research", "draft_preparation", "outreach", "export_contacts"}:
         suppress_conditions = []

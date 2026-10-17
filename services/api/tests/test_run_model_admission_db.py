@@ -39,21 +39,36 @@ def port():
     assert callable(getattr(module,'queue_run_model',None)) and callable(getattr(module,'prepare_run_model',None))
     return module
 
-@pytest.fixture
-def model_case(native_basis_case,monkeypatch):
-    c=native_basis_case
+def build_model_registration(monkeypatch):
     monkeypatch.setattr(base,'SELECTED_LIVE_PROVIDERS',base.SELECTED_LIVE_PROVIDERS|{'openai-responses'})
     cap=ProviderCapability(provider='openai-responses',adapter_version='c61-local-model-v1',service='model',markets=frozenset({'US'}),languages=frozenset({'en'}),roles=frozenset({'company'}),auth_model='server-key',pricing_version='local-model-price-v1',max_liability=Money(Decimal('0.100000'),'USD'),idempotency='verified',status='verified',callback='unsupported',cancel='unsupported',retention='fixture-only',verified_at=datetime.now(timezone.utc),source_urls=('https://developers.openai.com/api/reference/responses/overview',))
     route=ModelRoute('c61-local-prompt-v1',frozenset(),1000,500,30,0,'c61-local-route-v1')
     from buyeros_api.providers import registry
     from buyeros_api.providers.registry import ProviderRegistration,ProviderRegistry
-    scope=ProviderRegistration(cap,lambda:None,('synthetic:owned-native-model-fixture-only',),model_route=route,model_id='local-owned-model-v1')
+    scope=ProviderRegistration(cap,lambda:None,('synthetic:owned-native-model-fixture-only',),model_route=route,model_id='local-owned-model-v1',
+                               policy_account_reference='owned-native-model-account')
     others=tuple(item for item in registry.DEFAULT_REGISTRY.registrations if item.capability.service!='model')
     monkeypatch.setattr(registry,'SELECTED_LIVE_PROVIDERS',registry.SELECTED_LIVE_PROVIDERS|{'openai-responses'})
     monkeypatch.setattr(registry,'DEFAULT_REGISTRY',ProviderRegistry(others+(scope,)))
+    return scope
+
+
+from tests.test_research_page_scope_db import page_case as _page_case
+
+
+@pytest.fixture
+def page_case(run_case,native_model_registration):
+    return _page_case.__wrapped__(run_case)
+
+
+@pytest.fixture
+def model_case(native_basis_case,native_model_registration):
+    c=native_basis_case
+    scope=native_model_registration
+    cap,route=scope.capability,scope.model_route
     with psycopg.connect(c['dsn']) as db:
         before=db.execute('SELECT usage_counters,version FROM search_runs WHERE id=%s',(c['run'],)).fetchone()
-    try:yield {**c,'model_cap':cap,'route':route,'before':before}
+    try:yield {**c,'model_cap':cap,'route':route,'before':before,'registration':scope}
     finally:
         with psycopg.connect(c['dsn']) as db:
             ids=[x[0] for x in db.execute("SELECT id FROM provider_operations WHERE workspace_id=%s AND intent_key LIKE 'run-model:%%'",(c['workspace'],))]

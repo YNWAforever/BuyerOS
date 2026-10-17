@@ -41,7 +41,7 @@ def test_0035_empty_round_trip_default_off_and_limited_api_privileges(monkeypatc
             assert db.execute("SELECT to_regclass('worker_runtime_probe')").fetchone()[0] is None
         command.upgrade(config(), 'head')
         with psycopg.connect(dsn) as db:
-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0055_lead_workflow'
+            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0056_policy_activation'
     finally:
         get_settings.cache_clear()
         _docker('rm', '-f', name)
@@ -53,10 +53,13 @@ def test_populated_rollback_preserves_unknown_holds(migrated, worker_runtime):
     call_worker(lambda engine: maintenance(engine, worker_runtime[1], probe_id=uuid.uuid4()))
     with psycopg.connect(migrated) as db:
         before = db.execute('SELECT state,remaining_hold FROM budget_reservations WHERE operation_id=%s', (case['job'],)).fetchone()
-    with pytest.raises(RuntimeError, match='retained operational recovery/probe evidence'):
+    with pytest.raises(RuntimeError, match='preserve controller policy history'):
         command.downgrade(config(), '0034_worker_execution')
+    from tests.migration_guards import invoke_revision
+    with pytest.raises(RuntimeError, match='retained operational recovery/probe evidence'):
+        invoke_revision(migrated,config(),'0035_worker_recovery_probe')
     with psycopg.connect(migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0055_lead_workflow'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0056_policy_activation'
         assert db.execute('SELECT state,remaining_hold FROM budget_reservations WHERE operation_id=%s', (case['job'],)).fetchone() == before
         assert db.execute("SELECT status FROM provider_operations WHERE job_id=%s", (case['job'],)).fetchone()[0] == 'submitting'
         assert db.execute('SELECT count(*) FROM cost_events WHERE workspace_id=%s', (case['envelope'].workspace_id,)).fetchone()[0] == 0
