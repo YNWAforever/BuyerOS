@@ -90,3 +90,27 @@ local Cloudflare acceptance 包含實際 compiled handler、local Queue/Workflow
 同一原 opt-in testcase 增加可重現的退出時序及權限拒絕控制，再執行原本未攔截的真實程序清理。舊 helper 的 RED 與新 helper 的 GREEN 均在 digest 固定的本機 Python3.12.15 Linux 容器完成，無 DB、無網絡、唯讀來源；獨立 harness 直接執行該原 test 函式的 AST，避免 import benchmark 頂層 DB 模組，不將其當成完整 sustained pytest suite。實際 SIGINT 可產生預期 KeyboardInterrupt 輸出；GREEN exit0，cooperative receipt及所有原斷言均成立。
 
 既有 mixed/cleanup 純工具65/65亦通過，語法及diff檢查通過；原 sustained case IDs仍為2，default worker469 inventory不新增或刪除。此修正沒有產品、schema、API或provider行為變更。完整新的同 head12-job CI仍須重新執行，包含原30分鐘窗口、Linux broker、bulk及admission，不能拼合舊 run。
+
+
+## Policy decision exact retry 在 authority 失效後的重播
+
+Reviewed finding 指出 `decide_activation()` 在 idempotency replay 前先檢查 authority expiry／revocation／supersession，令已完成的 exact decision retry 錯誤回 403。修正只把 temporal authority check 移到 completed idempotency replay 之後；`_admin(..., mutation=True)` 的 current membership 檢查仍最先執行，new key 仍需 current designated controller，changed body 仍由同一 idempotency key 回 409。Replay response 保持原 receipt，而 current view 分別返回 `expired`／`revoked`。
+
+新增 regression：
+
+- `test_completed_approval_replays_after_authority_stops_being_current[expired|revoked|superseded]`
+- `test_changed_decision_body_still_conflicts_after_authority_revocation`
+- `test_new_decision_key_remains_denied_after_authority_revocation`
+
+每個 case 以全新、exactly identified 的 owned disposable Postgres target 執行，啟動前清除繼承 DB／provider 設定；沒有 production fallback。原始 RED 為 10 passed／4 failed，失敗全部正是 authority check 先行（new-key guard 原本已正確）。修正後完整 decisions suite 為 14/14，完整 policy activation API group 為 81/81，沒有 failure／error／skip。兩個 owned target 都已精準清理，`docker ps` 無本輪 prefix 殘留。
+
+新增5案後完整 API discovery 由2,978增至2,983；已同步 `.github/workflows/buyeros-ci.yml` 兩個 API gates及 `test_pytest_required_discovery.py`，由原始 discover-only output核實2983個唯一 case，5個新 test IDs全部存在。Policy CI registration及discovery gate unittest合共25/25 pass；Python syntax及`git diff --check`通過。
+
+本機 source hashes：
+
+- `policy_activation_service.py`: `904076f986a72dde105d06da1471cedbb27887d24da5d4d736c75caa97b78782`
+- `test_policy_activation_decisions_db.py`: `12b968e54f893fffd7b6209487bd5f34d2bd6d9c2aafd8e7ffa0770a590e376f`
+- `buyeros-ci.yml`: `cff33a1bc94d148e10371aefd2dbacd1fc06781e4d4f0674c3108d7b385460b1`
+- `test_pytest_required_discovery.py`: `180b2753625838a961c5a66792b2dd6b1ecc82103efde279b62985f36e6042fc`
+
+原始 RED/GREEN logs、JUnit、before-images及target receipts在 private evidence `publish-02-p2-exact-retry/`。這仍是 fixture/local 證據；更新 head 的完整12-job CI另行驗證。沒有啟動 provider、付費 research、enrichment、寄信或外部 outreach。

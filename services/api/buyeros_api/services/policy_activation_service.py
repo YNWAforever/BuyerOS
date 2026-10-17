@@ -282,14 +282,6 @@ async def decide_activation(session, *, actor: PolicyActor, request_id: UUID,
     data = ActivationDecision.model_validate(data.model_dump(mode="json"))
     row = await _request(session, actor, request_id)
     now = server_time(now)
-    authority = (await session.scalars(select(PolicyControllerAuthority).where(
-        PolicyControllerAuthority.workspace_id == row.workspace_id,
-        PolicyControllerAuthority.project_id == row.project_id,
-        PolicyControllerAuthority.id == row.authority_id,
-        PolicyControllerAuthority.version == row.authority_version))).one_or_none()
-    if (not await authority_eligible(session, authority, now)
-        or authority.approver_user_id != actor.user_id):
-        raise ApiError(403, "PERMISSION_DENIED", "current designated controller reviewer required")
     if data.terms_hash != row.terms_hash:
         raise ApiError(412, "STALE_REVISION", "exact application content hash required")
     if (data.expected_policy_id != row.expected_policy_id
@@ -302,8 +294,21 @@ async def decide_activation(session, *, actor: PolicyActor, request_id: UUID,
         operation_id="decidePolicyActivationRequest", key=key, body=data.model_dump(mode="json"),
         target={"request_id": str(row.id)})
     if idempotency.replay and idempotency.response is not None:
+        # Completed decisions are historical receipts. Replay them even when
+        # the authority that authorized the original decision is no longer
+        # current; the view still exposes the current effective status.
         view = await build_activation_view(session, row, now)
         return view.model_copy(update={"receipt": ActivationReceipt.model_validate(idempotency.response)})
+    authority = (await session.scalars(select(PolicyControllerAuthority).where(
+        PolicyControllerAuthority.workspace_id == row.workspace_id,
+        PolicyControllerAuthority.project_id == row.project_id,
+        PolicyControllerAuthority.id == row.authority_id,
+        PolicyControllerAuthority.version == row.authority_version))).one_or_none()
+    # A new decision, including a new key for an already decided request,
+    # still requires the current designated controller.
+    if (not await authority_eligible(session, authority, now)
+        or authority.approver_user_id != actor.user_id):
+        raise ApiError(403, "PERMISSION_DENIED", "current designated controller reviewer required")
     await policy_workspace_lock(session, actor.workspace_id)
     now = server_time(now)
     prior_resolution = await _resolution(session, row)
