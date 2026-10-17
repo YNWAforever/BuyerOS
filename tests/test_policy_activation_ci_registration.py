@@ -45,6 +45,29 @@ class PolicyActivationCiRegistration(unittest.TestCase):
         commands = [shlex.split(line) for line in block.splitlines() if line.strip()]
         run = next(c for c in commands if "--run-suite" in c)
         self.assertEqual(run[run.index("--run-suite") + 1], "policy-browser")
+        inline = [c[2] for c in commands if c[:2] == ["python", "-c"]]
+        self.assertEqual(len(inline), 1, "copy the original current-parent discovery, never regenerate after execution")
+        check = next(c for c in commands if "--playwright-discovery" in c and "--junit" in c)
+        discovery = check[check.index("--playwright-discovery") + 1]
+        self.assertTrue(discovery.startswith("artifacts/lead-workflow/"))
+        with tempfile.TemporaryDirectory(prefix="policy-original-discovery-") as folder:
+            directory = Path(folder) / "artifacts/lead-workflow"
+            directory.mkdir(parents=True)
+            prefix = "policy-ci-" + "a"*32
+            (directory / "policy-browser.target.json").write_text(__import__("json").dumps({"run_id": prefix}))
+            source = directory / (prefix + "-12345678.target.policy-discovery.json")
+            source.write_bytes(b"actual-original-before-execution")
+            __import__("os").utime(source, (1000, 1000))
+            (directory / ("policy-ci-" + "b"*32 + "-12345678.target.policy-discovery.json")).write_bytes(b"foreign-run")
+            copied = subprocess.run([sys.executable, "-c", inline[0]], cwd=folder, capture_output=True)
+            self.assertEqual(copied.returncode, 0, copied.stderr)
+            destination = Path(folder) / discovery
+            self.assertEqual(destination.read_bytes(), source.read_bytes())
+            self.assertEqual(destination.stat().st_mtime, source.stat().st_mtime)
+            destination.unlink()
+            (directory / (prefix + "-87654321.target.policy-discovery.json")).write_bytes(b"ambiguous-current-run")
+            self.assertNotEqual(subprocess.run([sys.executable, "-c", inline[0]], cwd=folder, capture_output=True).returncode, 0)
+            self.assertFalse(destination.exists())
         self.assertTrue(any("--expected-count" in c and c[c.index("--expected-count") + 1] == "8" for c in commands))
         native = self.step("browser-continuity", "Verify native lead workflow without provider activation")
         self.assertIn("--expected-count 19", native)

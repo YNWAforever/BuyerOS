@@ -552,15 +552,8 @@ def main() -> None:
             from buyeros_api.api.routes.quotes import selected_contact_quote_capability
             from buyeros_api.providers.base import Money, ProviderCapability
 
-            quote_capability = ProviderCapability(
-                provider="fixture", adapter_version="contact-fixture-v1", service="contact",
-                markets=frozenset({"US"}), languages=frozenset({"en"}),
-                roles=frozenset({"Procurement manager"}), auth_model="fixture",
-                pricing_version="fixture-price-v1", max_liability=Money(Decimal("0.300000")),
-                idempotency="verified", status="verified", callback="unsupported", cancel="unsupported",
-                retention="fixture-only", verified_at=datetime.now(timezone.utc),
-                source_urls=("https://fixture.invalid/capability",),
-            )
+            from tools.seed_legacy_policy_fixture import browser_contact_capability
+            quote_capability = browser_contact_capability()
             app.dependency_overrides[selected_contact_quote_capability] = lambda: (quote_capability, "test")
 
             @app.get("/fixture/quote-counts", include_in_schema=False)

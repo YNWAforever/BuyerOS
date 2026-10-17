@@ -44,3 +44,20 @@ PR #26 初始 head `30851d46407806cc6c6d28f5c5bd6f7473a2bb07` 的 run `390304365
 補修後新增本機證據：完整 worker **469/469**；PG18 proof **38/38**；原 MVP journey **4/4**；原 audit research-intent/reground/template-copy **8/8**；最終 ownership/inventory/registration **41/41**；發布控制/registration **192/192**，均無 failure/error/skip。C61 evidence checker 163 及 Playwright discovery guard 16 亦通過。MVP 與 audit 使用各自新建的合成 owned DB；audit 的 compiled frontend 使用既有 Windows/Linux Docker harness，不能視為正常公司 Auth 或正式 UAT。
 
 audit 第一次補測是 1 pass/7 fail，原始 logs、JUnit、traces 和 UI context 全部保留；修正指定渠道 proof 與明確 domain 後，第二次同 8 案完整通過。最初缺少 Vercel build 的失敗亦保留。這些結果存於上述 private evidence 的 `publish-01/ci-fix-01/`，沒有覆寫原始失敗。完整 API 2,978 與完整 12-job exact-head CI 以本 PR 的新 head run 另行核實，不以本段局部補測代替。
+
+
+## 完整 CI 發現的後續邊界補修
+
+- 初始完整 API run 的結果為 2,974 pass/4 fail；四項都是獨立 benchmark 的無 DB collection 子程序誤繼承父 CI `PYTEST_PLUGINS`/target receipt。子程序現在清除這些外來上下文；獨立 benchmark 仍先拒絕所有可供 client/migrator 使用的繼承 endpoint，包括 `BUYEROS_DATABASE_MIGRATION_URL`。collection 沒有 observations 仍拒絕，沒有把 collect 當執行。
+- Cloudflare 的 101-row fixture 會超過 100-domain 契約上限。申請現在只列有來源證據的公司 domain 與實際來源 domain；不擴大上限或任意截取前 100 項。既有 fake lookup 正向案例只在 `BUYEROS_E2E_SEED_QUOTES` 的 owned fixture 中，經指定 owner 批准 `fixture-test` 的精確 contract。quote 與 adapter 共用同一 immutable fake capability metadata，實際 provider/寄信保持停用。
+- Native19 與 policy8 在 run `39033264452` 都實際通過，但 guard 找不到舊 discovery 路徑。現在從 runner 已於執行前保存的原檔，按當前 parent run ID 唯一選取，保留 bytes/mtime 複製至 artifact；缺失、歧義或覆寫均拒絕。沒有在執行後重新產生 discovery。
+- broker fixture 的 review timestamp 原先每個程序均不同，令正確的精確 contract gate 回 `policy_blocked`。同一份公開 fictional review packet 現在用固定 UTC 日期；獨立程序 hash 比對已保留 RED（不同）及 GREEN（相同）。正常 runtime 的 hash、expiry、permission、hold、epoch 與禁止重送核對均未改動。
+- 繁中 390px Settings 的長 designation UUID/select/history 造成水平溢位。只新增政策面板專屬 class 與 min-width/wrapping 規則；原 U06 搜尋、失敗重試及 viewport 斷言保持不變並已通過。
+
+這組補修後，本機完整 worker 469/469 通過、原 case IDs 全部保留；完整 quality-tools 41/41、101-company/24/57 DB regression、原手機 U06 1/1、完整 local Cloudflare Queue/Workflow acceptance 7/7、TypeScript、panel lint、release/registration 192/192 通過。API 亦在先核實的全新 owned target 完整 discovery 2,978，與原 inventory 一項不差；這是 discovery，完整執行仍以新 head CI 為準。
+
+local Cloudflare acceptance 包含實際 compiled handler、local Queue/Workflow、101-row restart、fake unknown lookup hold 與角色拒絕，source fingerprint `03a9994d593ed1e9bbfa5127aebdaaaad71132b58e7a66ca360a5e0b0f42ab0e` 前後一致。之後只增加 benchmark migration-endpoint 的拒絕/negative assertion 及本文件。沒有公司正常 Auth 或正式 UAT 證據。
+
+另有一輪額外 Windows opt-in broker probe 未取得完整 JUnit：lease 完成，redelivery/unknown 在 worker restart 後未出現第二次工作事件，accepted 未有終態回執，wrapper 到 600 秒上限。它不計入 469 或通過結果。原事件、logs、跨程序 hash 證據與 exact PG/broker 停止資料均保留，未重送或更改 hold；所需 Linux broker4 將在完整 12-job CI 重新核實。較早 Docker 中斷的 local Cloudflare run 沒有完結回執，獨立標為 interrupted，其 exact DB 已保留停止；後來的全新 target 7/7 不能回填該中斷歷史。
+
+所有新/舊 tracked JUnit/PNG 測試產物均先留證據，再恢復原 tracked 版本；沒有把新輸出當成原報告或提交 fixture 產物。今輪仍不 merge/deploy、不改正式 DB/權限/憑證、不得提交真實 24/57 或啟用真實付費/寄信。

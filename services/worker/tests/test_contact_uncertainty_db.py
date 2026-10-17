@@ -18,7 +18,8 @@ from buyeros_worker.tasks import execute_intent_sync
 from tests.conftest import PROJECT_A, WS_A, reset_tenant, seed_outbox
 from tests.controlled_policy_fixtures import api_fixture_helpers
 
-CONTACT_FIXTURE_REVIEWED_AT = datetime.now(timezone.utc)
+# One fictional review packet must retain its exact hash across worker restarts.
+CONTACT_FIXTURE_REVIEWED_AT = datetime(2026, 10, 17, tzinfo=timezone.utc)
 
 
 @pytest.fixture

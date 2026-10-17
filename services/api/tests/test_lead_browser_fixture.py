@@ -63,7 +63,23 @@ def test_owned_browser_seed_and_reset_preserve_24_companies_and_57_links(isolate
     from tools.serve_e2e_fixture import seed
     from tools.seed_lead_workflow_fixture import seed_lead_workflow_fixture, reset_lead_workflow_fixture, PROJECT
     monkeypatch.setenv("BUYEROS_E2E_SEED_BUYERS", "1")
+    monkeypatch.setenv("BUYEROS_E2E_BUYER_COUNT", "101")
+    monkeypatch.setenv("BUYEROS_E2E_SEED_QUOTES", "1")
+    from tools.seed_legacy_policy_fixture import seed_legacy_policy_fixture, browser_contact_capability
+    from buyeros_api.providers.registry import ProviderRegistration
     seed(isolated_migrated)
+    seed_legacy_policy_fixture(isolated_migrated)
+    with psycopg.connect(isolated_migrated) as db:
+        terms = [row[0] for row in db.execute("SELECT terms FROM policy_activation_requests WHERE project_id=%s",
+            ("e1000000-0000-4000-8000-000000000001",)).fetchall()]
+        research = next(item for item in terms if item["purpose"] == "account_research")
+        domains = research["allowed_sources"]["domains"]
+        assert len(domains) <= 100 and "example.test" in domains and "fixture-01.example.test" in domains
+        assert "fixture-101.example.test" not in domains, "a list row alone is not source processing approval"
+        contact = next(item for item in terms if item["purpose"] == "contact_research")
+        assert contact["allowed_actions"] == ["contact.enrich"]
+        assert contact["provider_scope"]["account_reference"] == "fixture-test"
+        assert contact["provider_scope"]["contract_sha256"] == ProviderRegistration(browser_contact_capability(),lambda:None).contract_hash
     seed_lead_workflow_fixture(isolated_migrated)
     with psycopg.connect(isolated_migrated) as db:
         companies = db.execute("SELECT id,company_id FROM project_buyers WHERE project_id=%s ORDER BY id", (PROJECT,)).fetchall()

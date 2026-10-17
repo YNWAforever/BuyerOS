@@ -382,3 +382,9 @@ body{line-height:1.45}.main-shell .muted{color:#6c798c}.main-shell p{color:#6574
 /* Native manual queue cards stack their evidence and wrap actions at narrow widths. */
 .live-workspace .lead-queue-item{display:block;min-width:0;overflow-wrap:anywhere}
 .live-workspace .lead-queue-item>.inline{flex-wrap:wrap}
+
+/* Long policy references retain readable controls within narrow workspaces. */
+.live-policy-activation{min-width:0;overflow-wrap:anywhere}
+.live-policy-activation .settings-grid>div{min-width:0}
+.live-policy-activation select{width:100%;min-width:0}
+.live-policy-activation button{max-width:100%;white-space:normal;overflow-wrap:anywhere}

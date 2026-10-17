@@ -225,7 +225,7 @@ function PolicyActivationForm({roles, t}: Props) {
     ['ownerHash', 'Owner evidence SHA-256'], ['countries', 'Country codes'],
     ['deletionRef', 'Deletion arrangement reference'],
   ] as const;
-  return <section className="panel" role="region" aria-label={t('Controlled purpose activation')}>
+  return <section className="panel live-policy-activation" role="region" aria-label={t('Controlled purpose activation')}>
     <h2>{t('Controlled purpose activation')}</h2>
     <p>{t('Manual Native processing only. Policy approval does not authorize paid research, enrichment or external sending.')}</p>
     {!admin ? <p>{t('Your role cannot view policy records. Ask a workspace administrator.')}</p> : <>

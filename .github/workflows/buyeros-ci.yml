@@ -977,9 +977,9 @@ jobs:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: test-results/policy-activation.xml
         run: |
           services/api/.venv/bin/python services/api/tools/create_policy_test_target.py --receipt artifacts/lead-workflow/policy-browser.target.json --run-suite policy-browser
-          python scripts/check-required-tests.py --playwright-discovery test-results/policy-activation-discovery.json --expected-count 8 --expected-file policy-activation.spec.ts --junit test-results/policy-activation.xml
+          python -c "import json,pathlib,shutil; root=pathlib.Path('artifacts/lead-workflow'); parent=json.loads((root/'policy-browser.target.json').read_text()); original=list(root.glob(parent['run_id']+'-*.target.policy-discovery.json')); target=root/'policy-activation-discovery.json'; assert len(original)==1 and not target.exists(), 'missing ambiguous or overwritten original current-parent discovery'; shutil.copy2(original[0],target)"
+          python scripts/check-required-tests.py --playwright-discovery artifacts/lead-workflow/policy-activation-discovery.json --expected-count 8 --expected-file policy-activation.spec.ts --junit test-results/policy-activation.xml
           cp test-results/policy-activation.xml artifacts/lead-workflow/policy-activation.xml
-          cp test-results/policy-activation-discovery.json artifacts/lead-workflow/policy-activation-discovery.json
       - name: Clean exact controlled policy browser parent
         if: ${{ always() && hashFiles('artifacts/lead-workflow/policy-browser.target.json') != '' }}
         run: services/api/.venv/bin/python services/api/tools/create_policy_test_target.py --cleanup --receipt artifacts/lead-workflow/policy-browser.target.json
