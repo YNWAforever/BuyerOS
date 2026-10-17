@@ -33,3 +33,14 @@
 付費 research、聯絡資料 enrichment、delivery/send、自動 outreach 的實際設定維持停用；用途批准不代表發送內容或收件人已獲批准。沒有真實 24 家/57 個來源提交。
 
 上述為本機結果，不能代替遠端同 head 完整 CI、部署或公司帳戶 UAT。使用者本次只批准 commit/push/PR 與 exact-head CI；不 merge、不部署、不改正式 DB/權限。
+
+
+## PR 發布階段的 CI 接線補修
+
+PR #26 初始 head `30851d46407806cc6c6d28f5c5bd6f7473a2bb07` 的 run `39030436538` 揭示兩類舊接線：inventory guard 仍要求 API 2,852；legacy worker、capacity、PG18 及 browser fixture 未向新政策 proof 登記 owned target，或仍只新增 raw `permitted`。這些拒絕是受控閘門的預期行為，沒有改為放行。
+
+補修只改 CI 與合成測試工具：legacy allocator 在建立前核對本機 Docker engine，在 SQL 前核對新 container ID、獨立 image、label、loopback port、mount、DB 與 fixture issuer；跨程序傳遞 exact receipt，再獨立 inspect。worker/smoke/zoom 不再繼承未經此 gate 證明的服務 DSN。每個申請仍使用真正的 designation/request/approval；渠道在新增後明列 contact ID、active sender 與公司/來源 domains，只授予 fake search/read、contact.read、template generation、內部 delivery.review；不授予 send 或 enrichment。沒有修改產品授權或測試原斷言。
+
+補修後新增本機證據：完整 worker **469/469**；PG18 proof **38/38**；原 MVP journey **4/4**；原 audit research-intent/reground/template-copy **8/8**；最終 ownership/inventory/registration **41/41**；發布控制/registration **192/192**，均無 failure/error/skip。C61 evidence checker 163 及 Playwright discovery guard 16 亦通過。MVP 與 audit 使用各自新建的合成 owned DB；audit 的 compiled frontend 使用既有 Windows/Linux Docker harness，不能視為正常公司 Auth 或正式 UAT。
+
+audit 第一次補測是 1 pass/7 fail，原始 logs、JUnit、traces 和 UI context 全部保留；修正指定渠道 proof 與明確 domain 後，第二次同 8 案完整通過。最初缺少 Vercel build 的失敗亦保留。這些結果存於上述 private evidence 的 `publish-01/ci-fix-01/`，沒有覆寫原始失敗。完整 API 2,978 與完整 12-job exact-head CI 以本 PR 的新 head run 另行核實，不以本段局部補測代替。

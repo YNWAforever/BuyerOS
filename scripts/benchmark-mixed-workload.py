@@ -41,7 +41,10 @@ def owned_runtime(env,folder):
         name,dsn=_start_container(); own('postgres',name)
         broker=own('valkey',_valkey_container())
         mapping=subprocess.check_output(['docker','port',broker['id'],'6379'],text=True,timeout=20).strip().splitlines()[0]
-        child_env=dict(env,BUYEROS_TEST_DATABASE_URL=dsn,BUYEROS_MIXED_BROKER_URL='redis://127.0.0.1:'+mapping.rsplit(':',1)[1]+'/0')
+        from tests.controlled_policy_fixtures import owned_policy_gate
+        child_env=dict(env,BUYEROS_TEST_DATABASE_URL=dsn,
+                       BUYEROS_POLICY_TARGET_RECEIPT=str(owned_policy_gate().fixture_receipt(dsn)),
+                       BUYEROS_MIXED_BROKER_URL='redis://127.0.0.1:'+mapping.rsplit(':',1)[1]+'/0')
         with (folder/'owned-targets.json').open('x',encoding='utf-8') as file:
             json.dump(dict(owner_pid=os.getpid(),targets=targets),file,indent=2)
         yield child_env

@@ -50,7 +50,7 @@ def test_gate_rejects_endpoint_and_auth_drift(change):
         gate(receipt, meta, {**env, **change})
 
 
-def test_owned_gate_requires_independent_labels_image_and_loopback_mapping():
+def test_owned_gate_requires_independent_labels_image_and_loopback_mapping(monkeypatch, tmp_path):
     gate = validator()
     receipt, meta, env = target()
     assert gate(receipt, meta, env).database == "buyeros_test_policy"
@@ -62,6 +62,38 @@ def test_owned_gate_requires_independent_labels_image_and_loopback_mapping():
     ]:
         with pytest.raises(ValueError):
             gate(receipt, {**meta, **change}, env)
+    # Existing legacy fixtures must enter the same identity gate before SQL.
+    from tests import policy_activation_target as module
+    import json
+    monkeypatch.setattr(module, "_VERIFIED_ENDPOINTS", set())
+    monkeypatch.setenv("BUYEROS_POLICY_FIXTURE_EVIDENCE", str(tmp_path))
+    monkeypatch.delenv("DOCKER_HOST", raising=False)
+    raw = {"Id": receipt["container_id"], "Image": receipt["image_id"],
+           "Config": {"Labels": meta["labels"]}, "NetworkSettings": {"Ports": meta["ports"]},
+           "Mounts": [], "State": {"Running": True}}
+    def command(argv, **kwargs):
+        if argv == ["docker", "context", "show"]: return "desktop-linux"
+        if argv[:3] == ["docker", "context", "inspect"]: return meta["docker_endpoint"]
+        if argv[:3] == ["docker", "image", "inspect"]: return receipt["image_id"]
+        if argv[:2] == ["docker", "inspect"]: return json.dumps([raw])
+        raise AssertionError("unexpected metadata command")
+    monkeypatch.setattr(module.subprocess, "check_output", command)
+    dsn = "postgresql://fixture@127.0.0.1:62481/buyeros_test_policy"
+    for changes in ({"Config": {"Labels": {}}}, {"Image": "sha256:" + "f"*64},
+                    {"Mounts": [{"Type": "bind"}]}):
+        original = dict(raw); raw.update(changes)
+        with pytest.raises(ValueError):
+            module.register_created_fixture(receipt["container_id"], dsn,
+                run_id=receipt["run_id"], image="fixture-image")
+        assert not module._VERIFIED_ENDPOINTS
+        raw.clear(); raw.update(original)
+    module.register_created_fixture(receipt["container_id"], dsn,
+        run_id=receipt["run_id"], image="fixture-image")
+    module.assert_owned_test_dsn(dsn)
+    saved = json.loads(module.fixture_receipt(dsn).read_text())
+    assert saved["container_id"] == receipt["container_id"] and saved["database"] == "buyeros_test_policy"
+
+
 def test_owned_allocator_covers_worker_conftest_alias_before_fixture_setup():
     from types import SimpleNamespace
     from pathlib import Path

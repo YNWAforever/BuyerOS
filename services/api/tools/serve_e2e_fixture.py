@@ -451,6 +451,9 @@ def main() -> None:
         config.set_main_option("script_location", str(service_root / "alembic"))
         command.upgrade(config, "head")
         seed(owner_dsn)
+        if any(os.environ.get(flag) == "1" for flag in ("BUYEROS_E2E_SEED_BUYERS", "BUYEROS_E2E_SEED_RUNS")):
+            from tools.seed_legacy_policy_fixture import seed_legacy_policy_fixture
+            seed_legacy_policy_fixture(owner_dsn)
         if os.environ.get("BUYEROS_E2E_POLICY_ACTIVATION") == "1":
             from tools.seed_policy_activation_fixture import seed_policy_fixture, reset_policy_fixture, policy_counts
             seed_policy_fixture(owner_dsn)
@@ -577,11 +580,15 @@ def main() -> None:
         if os.environ.get("BUYEROS_E2E_SEED_RUNS") == "1":
             from buyeros_api.api.routes.runs import selected_run_capability
             from buyeros_api.api.routes.health import capabilities_payload
+            from buyeros_api.db.icp import canonical_hash
             app.dependency_overrides[selected_run_capability] = lambda: ({
                 "service":"search", "provider":"fixture", "verified":True,
                 "price_version":"fixture-price-v1", "verified_filters":["market","language"],
                 "markets":["US"], "languages":["en"], "roles":["distributor"],
-                "market_languages":{"US":["en"]}}, "test")
+                "market_languages":{"US":["en"]},
+                "policy_binding": {"provider_name":"fixture", "account_reference":"owned-research-account",
+                    "contract_sha256": canonical_hash(
+                        {"schema":"owned-research-fixture.v1", "service":"search", "provider":"fixture"}).removeprefix("sha256:")}}, "test")
             # Only this owned fictional app admits via a test-only contract.
             # Its UI availability must describe that contract, not production
             # registry activation. No provider or production switch is enabled.

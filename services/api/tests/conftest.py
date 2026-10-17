@@ -81,13 +81,15 @@ def _docker(*args: str) -> subprocess.CompletedProcess:
 
 
 def _start_container() -> tuple[str, str]:
+    from tests.policy_activation_target import local_docker_context
+    local_docker_context()  # Refuse a remote engine before creating any target.
     import psycopg
 
     last_error = "disposable postgres did not start"
     for attempt in range(2):
         name = f"buyeros-test-{uuid.uuid4().hex[:8]}"
         created = _docker(
-            "run", "-d", "--name", name,
+            "run", "-d", "--name", name, "--label", "buyeros.policy.run=" + name,
             "-e", f"POSTGRES_PASSWORD={DB_PASSWORD}",
             "-e", f"POSTGRES_USER={DB_USER}",
             "-e", f"POSTGRES_DB={DB_NAME}",
@@ -104,6 +106,7 @@ def _start_container() -> tuple[str, str]:
         # port forwards. Require both signals, with a bounded retry under load.
         deadline = time.time() + 120
         ready_inside = False
+        identity_verified = False
         while time.time() < deadline:
             if not ready_inside:
                 ready_inside = "accepting connections" in _docker(
@@ -113,6 +116,10 @@ def _start_container() -> tuple[str, str]:
             if ready_inside and mapping:
                 port = mapping[0].rsplit(":", 1)[1]
                 dsn = f"postgresql://{DB_USER}:{DB_PASSWORD}@127.0.0.1:{port}/{DB_NAME}"
+                if not identity_verified:
+                    from tests.policy_activation_target import register_created_fixture
+                    register_created_fixture(created.stdout.strip(), dsn, run_id=name, image=POSTGRES_IMAGE)
+                    identity_verified = True
                 try:
                     with psycopg.connect(dsn, connect_timeout=2):
                         return name, dsn

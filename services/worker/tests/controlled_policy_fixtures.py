@@ -5,10 +5,22 @@ import sys
 from types import ModuleType
 
 
-def api_fixture_helpers():
+def owned_policy_gate():
     gate = sys.modules.get("_buyeros_owned_policy_gate")
     if gate is None:
-        raise ValueError("worker controller fixtures require the verified owned runner")
+        import importlib.util
+        path = Path(__file__).resolve().parents[2] / "api/tests/policy_activation_target.py"
+        spec = importlib.util.spec_from_file_location("_buyeros_owned_policy_gate", path)
+        gate = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = gate
+        spec.loader.exec_module(gate)
+    return gate
+
+
+def api_fixture_helpers():
+    # Loading the gate is not authorization; every fixture operation still
+    # requires an independently verified endpoint registered before SQL.
+    gate = owned_policy_gate()
     package = "_buyeros_owned_api_test_support"
     if package not in sys.modules:
         module = ModuleType(package)

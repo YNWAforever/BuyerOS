@@ -40,7 +40,10 @@ def owner_dsn() -> str:
     host, port = mapping.rsplit(":", 1)
     if host != "127.0.0.1" or not port.isdecimal():
         raise RuntimeError("refusing non-loopback database port")
-    return f"postgresql://buyeros:buyeros@127.0.0.1:{port}/buyeros_test_api"
+    dsn = f"postgresql://buyeros:buyeros@127.0.0.1:{port}/buyeros_test_api"
+    from tests.controlled_policy_fixtures import owned_policy_gate
+    owned_policy_gate().register_created_fixture(info["Id"], dsn, run_id=name, image=info["Config"]["Image"])
+    return dsn
 
 
 def prepare_browser_runtime(dsn: str) -> str:

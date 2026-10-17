@@ -117,5 +117,51 @@ def main():
                               "contact_id":str(contact), "fixture_existing_contact":True}))
 
 
+    # After committing prerequisite rows, use the actual controlled workflow.
+    # These are fictional owner designations, never direct permitted writes.
+    from tests.controlled_policy_fixtures import api_fixture_helpers, fixture_research_binding
+    helpers = api_fixture_helpers()
+    dsn = owner_dsn()
+    controller = helpers.ensure_fixture_controller(dsn, WORKSPACE, project)
+    domains = ("fixture.example.test",)
+    if mode == "prepare":
+        from buyeros_api.services import policy_activation_bootstrap as bootstrap
+        from buyeros_api.api.policy_activation_schemas import MANUAL_ACTIONS
+        now = datetime.now(timezone.utc)
+        with psycopg.connect(dsn) as db:
+            membership_version = db.execute("SELECT version FROM memberships WHERE workspace_id=%s AND user_id=%s",
+                                            (WORKSPACE, controller)).fetchone()[0]
+        case = {"dsn": dsn, "workspace": WORKSPACE, "project": project,
+                "actors": {"owner": controller}, "membership_version": membership_version, "now": now}
+        manifest = bootstrap.AuthorityManifest.model_validate({**helpers.manifest_body(case),
+            "purposes": ["account_research", "contact_research", "draft_preparation", "outreach"],
+            "allowed_actions": sorted(MANUAL_ACTIONS | {"research.search", "research.read", "research.persist",
+                                      "research.fetch", "contact.read", "draft.generate", "delivery.review"})})
+        authorization = bootstrap.BootstrapAuthorization(manifest_sha256=bootstrap.manifest_digest(manifest),
+            target_sha256=manifest.target_sha256, source_sha=manifest.source_sha,
+            approval_reference="fixture://owned-browser-designation", approval_evidence_sha256="b"*64)
+        async def designate(session):
+            execution = await bootstrap.verify_bootstrap_execution(session, manifest, authorization)
+            return await bootstrap.apply_authority_manifest(session, manifest, execution, now)
+        helpers.owner_run(case, designate)
+        helpers.approve_research_fixture(dsn, WORKSPACE, project, domains=domains,
+            search=fixture_research_binding("search"), transaction_role=True, countries=("US",))
+    else:
+        from buyeros_api.db.icp import canonical_hash
+        with psycopg.connect(dsn) as db:
+            sender = db.execute("SELECT active_sender_identity_version_id FROM projects WHERE workspace_id=%s AND id=%s",
+                                (WORKSPACE, project)).fetchone()[0]
+        scope = {"provider_name": "fixture", "account_reference": "owned-browser-account",
+                 "contract_sha256": canonical_hash({"schema": "owned-browser-template.v1"}).removeprefix("sha256:"),
+                 "recipient_refs": [str(contact)]}
+        helpers.approve_provider_fixture(dsn, WORKSPACE, project, controller, purpose="contact_research",
+            domains=domains, actions=["contact.read"], scope=scope, transaction_role=True)
+        scope = {**scope, "sender_identity_id": str(sender)}
+        helpers.approve_provider_fixture(dsn, WORKSPACE, project, controller, purpose="draft_preparation",
+            domains=domains, scope=scope, transaction_role=True)
+        helpers.approve_provider_fixture(dsn, WORKSPACE, project, controller, purpose="outreach",
+            domains=domains, actions=["delivery.review"], scope=scope, transaction_role=True)
+
+
 if __name__ == "__main__":
     main()

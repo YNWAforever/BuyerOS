@@ -21,6 +21,8 @@ class BrowserSearchFixture:
     price_version = "fixture-price-v1"
     quoted_upper_bound = Decimal("0.100000")
     retention_seconds = 86400
+    from tests.controlled_policy_fixtures import fixture_research_binding
+    policy_binding = fixture_research_binding("search")
 
     def __init__(self):
         self.accepted = {}

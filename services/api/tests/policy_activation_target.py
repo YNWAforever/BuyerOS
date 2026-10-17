@@ -141,3 +141,59 @@ def owned_cluster_factory(parent_receipt_path: Path, *, database_name: str | Non
         return name, dsn
     start.created = created
     return start
+
+
+_FIXTURE_RECEIPTS = {}
+
+
+def local_docker_context():
+    assert_local_docker_environment()
+    def command(args):
+        return subprocess.check_output(args, text=True, encoding="utf-8").strip()
+    context = command(["docker", "context", "show"])
+    endpoint = command(["docker", "context", "inspect", context, "--format", "{{.Endpoints.docker.Host}}"])
+    if endpoint not in LOCAL_ENGINES:
+        raise ValueError("Docker transport must be an explicitly local engine")
+    return context, endpoint
+
+
+def register_created_fixture(container_id: str, dsn: str, *, run_id: str, image: str) -> OwnedTarget:
+    """Register an exact legacy-owned allocation before its first SQL client.
+
+    The allocator supplies its fresh id/label and independently selected image.
+    This never adopts an inherited DSN or trusts a loopback name as ownership.
+    """
+    import tempfile
+    context, endpoint = local_docker_context()
+    def command(args):
+        return subprocess.check_output(args, text=True, encoding="utf-8").strip()
+    image_id = command(["docker", "image", "inspect", image, "--format", "{{.Id}}"])
+    raw = json.loads(command(["docker", "inspect", container_id]))[0]
+    parsed = urlsplit(dsn)
+    if parsed.scheme != "postgresql" or parsed.query or parsed.fragment:
+        raise ValueError("explicit owned test URL required")
+    receipt = {"run_id": run_id, "container_id": container_id, "image_id": image_id,
+               "docker_context": context, "owns_entire_container": True,
+               "host": parsed.hostname, "port": parsed.port, "database": parsed.path.lstrip("/"),
+               "auth_issuer": FIXTURE_ISSUER}
+    meta = {"id": raw["Id"], "image_id": raw["Image"], "labels": raw["Config"].get("Labels", {}),
+            "ports": raw["NetworkSettings"]["Ports"], "mounts": raw.get("Mounts", []),
+            "running": raw["State"]["Running"], "docker_context": context, "docker_endpoint": endpoint}
+    env = {"host": parsed.hostname, "port": parsed.port, "database": parsed.path.lstrip("/"),
+           "auth_issuer": FIXTURE_ISSUER}
+    result = assert_owned_target(receipt, meta, env)
+    folder = Path(os.environ.get("BUYEROS_POLICY_FIXTURE_EVIDENCE") or
+                  tempfile.mkdtemp(prefix="buyeros-fixture-identity-"))
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / (container_id + ".target.json")
+    with path.open("x", encoding="utf-8") as output:
+        json.dump(receipt, output, indent=2)
+    _FIXTURE_RECEIPTS[(result.host, result.port, result.database)] = path
+    _VERIFIED_ENDPOINTS.add((result.host, result.port))
+    return result
+
+
+def fixture_receipt(dsn: str) -> Path:
+    assert_owned_test_dsn(dsn)
+    parsed = urlsplit(dsn)
+    return _FIXTURE_RECEIPTS[(parsed.hostname, parsed.port, parsed.path.lstrip("/"))]
