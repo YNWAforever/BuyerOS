@@ -61,3 +61,12 @@ local Cloudflare acceptance 包含實際 compiled handler、local Queue/Workflow
 另有一輪額外 Windows opt-in broker probe 未取得完整 JUnit：lease 完成，redelivery/unknown 在 worker restart 後未出現第二次工作事件，accepted 未有終態回執，wrapper 到 600 秒上限。它不計入 469 或通過結果。原事件、logs、跨程序 hash 證據與 exact PG/broker 停止資料均保留，未重送或更改 hold；所需 Linux broker4 將在完整 12-job CI 重新核實。較早 Docker 中斷的 local Cloudflare run 沒有完結回執，獨立標為 interrupted，其 exact DB 已保留停止；後來的全新 target 7/7 不能回填該中斷歷史。
 
 所有新/舊 tracked JUnit/PNG 測試產物均先留證據，再恢復原 tracked 版本；沒有把新輸出當成原報告或提交 fixture 產物。今輪仍不 merge/deploy、不改正式 DB/權限/憑證、不得提交真實 24/57 或啟用真實付費/寄信。
+
+
+## Joined workflow 與獨立 admission 子程序的最後接線
+
+`0f42f7f3` 的 CI 已通過完整 audit140、Native19/policy8、Cloudflare7、worker469、30分鐘 workload2、Linux broker4 及 bulk3。後續 joined17 有8項失敗：四項唯讀 readback 仍硬編碼0055，其餘四項專用 unknown-search journal adapter 未帶明確 binding。現在 readback 嚴格要求已批准實作的 `0056_policy_activation`，沒有改為接受任意版本；專用 adapter 與正常 fixture 使用同一 typed fake research binding，driver 重用已核實 container/label/image/port 的 owner gate。原 journal exclusive-create、intent/status key、原 hold、成功列不重播及精確 export/readback 斷言均保留。
+
+同 run 的最後 API-admission case 顯示 plain seed 子程序沒有自己驗明 parent receipt。它現在必須取得明確 receipt，先獨立 `inspect_target` 再進入 `_setup`/首次 SQL；缺 proof 的純 RED/GREEN 驗證，以及實際 owned DB 子程序 readback 均通過（兩筆 fake unknown/accepted、hold0.6、cost0，沒有 provider submit）。
+
+最後本機完整 joined17/17、Unicode4/4、actual child probe1/1 與 C61 evidence controls163/163 通過，無失敗/錯誤/跳過。JUnit、命令、logs 與原檔在 private evidence `publish-01/ci-fix-03/`。這四個 source 補修不增加/刪除原 testcase IDs，不修改產品授權或 schema/migration SQL；完整12-job CI必須在更新後同一 head 重新通過，不能拼合舊 head 結果。
