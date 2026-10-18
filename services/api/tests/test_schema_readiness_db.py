@@ -162,3 +162,103 @@ def test_unsafe_or_unproven_runtime_is_not_ready(readiness_db,change):
             if change=='rls_disabled': owner.execute('ALTER TABLE public.memberships DISABLE ROW LEVEL SECURITY')
             else: owner.execute("ALTER ROLE buyeros_api IN DATABASE "+urlsplit(readiness_db).path[1:]+" SET search_path=pg_catalog")
     assert inspect(readiness_db,data).compatible is False
+
+
+def test_legacy_volatile_function_remains_incompatible(readiness_db):
+    signature = 'public.buyeros_redact_lead_subject(uuid,text,uuid)'
+    result = inspect(readiness_db, contract(readiness_db, required_functions=[signature]))
+    assert not result.compatible
+    assert 'function_contract_mismatch:' + signature in result.blockers
+
+
+@pytest.mark.parametrize('signature,volatility,compatible', [
+    ('public.buyeros_workspace_directory(uuid,bigint,integer)', 's', True),
+    ('public.buyeros_workspace_directory(uuid,bigint,integer)', 'v', False),
+    ('public.buyeros_redact_lead_subject(uuid,text,uuid)', 'v', True),
+    ('public.buyeros_redact_lead_subject(uuid,text,uuid)', 's', False),
+    ('public.buyeros_expire_due_lead_payloads(uuid,integer)', 'v', True),
+])
+def test_explicit_function_volatility_matches_catalog(readiness_db, signature, volatility, compatible):
+    data = contract(readiness_db, required_functions=[{'signature': signature, 'volatility': volatility}])
+    result = inspect(readiness_db, data)
+    assert result.compatible is compatible
+    assert ('function_contract_mismatch:' + signature in result.blockers) is (not compatible)
+
+
+def test_mixed_function_contract_preserves_wire_shape_and_binds_volatility(readiness_db):
+    legacy = 'public.buyeros_workspace_directory(uuid,bigint,integer)'
+    volatile = 'public.buyeros_redact_lead_subject(uuid,text,uuid)'
+    requirements = [legacy, {'signature': volatile, 'volatility': 'v'}]
+    data = contract(readiness_db, required_functions=requirements)
+    from buyeros_api.services.schema_readiness import SchemaContract
+    parsed = SchemaContract.model_validate(data)
+    assert parsed.model_dump(mode='json')['required_functions'] == [
+        legacy, {'signature': volatile, 'volatility': 'v'},
+    ]
+    good = inspect(readiness_db, parsed.model_dump(mode='json'))
+    assert good.compatible
+    changed = contract(readiness_db, required_functions=[legacy, {'signature': volatile, 'volatility': 's'}])
+    bad = inspect(readiness_db, changed)
+    assert not bad.compatible
+    assert good.contract_sha256 != bad.contract_sha256
+
+
+@pytest.mark.parametrize('unsafe,blocker', [
+    ('missing', 'function_missing_or_denied:public.buyeros_absent(uuid,text,uuid)'),
+    ('execute_denied', 'function_missing_or_denied:public.buyeros_redact_lead_subject(uuid,text,uuid)'),
+    ('not_definer', 'function_contract_mismatch:public.buyeros_redact_lead_subject(uuid,text,uuid)'),
+    ('unsafe_search_path', 'function_contract_mismatch:public.buyeros_redact_lead_subject(uuid,text,uuid)'),
+    ('wrong_target', 'target_unproven_or_mismatched'),
+    ('rls_disabled', 'rls_not_forced:public.memberships'),
+])
+def test_explicit_volatile_function_does_not_bypass_security(readiness_db, unsafe, blocker):
+    signature = 'public.buyeros_redact_lead_subject(uuid,text,uuid)'
+    data = contract(readiness_db, required_functions=[{'signature': signature, 'volatility': 'v'}])
+    if unsafe == 'missing':
+        data['required_functions'][0]['signature'] = 'public.buyeros_absent(uuid,text,uuid)'
+    elif unsafe == 'wrong_target':
+        data['target_receipt']['endpoint_sha256'] = 'd' * 64
+    else:
+        with psycopg.connect(readiness_db) as owner:
+            if unsafe == 'execute_denied':
+                owner.execute('REVOKE EXECUTE ON FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) FROM buyeros_api')
+            elif unsafe == 'not_definer':
+                owner.execute('ALTER FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) SECURITY INVOKER')
+            elif unsafe == 'unsafe_search_path':
+                owner.execute('ALTER FUNCTION public.buyeros_redact_lead_subject(uuid,text,uuid) SET search_path=public,pg_catalog')
+            elif unsafe == 'rls_disabled':
+                owner.execute('ALTER TABLE public.memberships DISABLE ROW LEVEL SECURITY')
+    result = inspect(readiness_db, data)
+    assert not result.compatible
+    assert blocker in result.blockers
+
+
+def test_explicit_volatile_probe_only_reads_metadata(readiness_db):
+    statements = []
+    data = contract(readiness_db, required_functions=[
+        {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)', 'volatility': 'v'},
+        {'signature': 'public.buyeros_expire_due_lead_payloads(uuid,integer)', 'volatility': 'v'},
+    ])
+    result = inspect(readiness_db, data, statements=statements)
+    assert result.compatible
+    assert all(statement.lstrip().upper().startswith(('SELECT', 'SET TRANSACTION')) for statement in statements)
+    assert not any('SELECT PUBLIC.BUYEROS_REDACT' in statement.upper()
+                   or 'SELECT PUBLIC.BUYEROS_EXPIRE' in statement.upper() for statement in statements)
+
+
+@pytest.mark.parametrize('requirement', [
+    {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)', 'volatility': 'i'},
+    {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)', 'volatility': 'V'},
+    {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)', 'volatility': True},
+    {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)'},
+    {'volatility': 'v'},
+    {'signature': 'public.buyeros_redact_lead_subject(uuid,text,uuid)', 'volatility': 'v', 'skip_security': True},
+    {'signature': 'public.fn(); DROP TABLE public.users;', 'volatility': 'v'},
+])
+def test_explicit_function_contract_rejects_unsafe_input(requirement):
+    from pydantic import ValidationError
+    from buyeros_api.services.schema_readiness import SchemaContract
+    data = contract('postgresql://fixture@127.0.0.1:5432/buyeros_test_contract',
+                    required_functions=[requirement])
+    with pytest.raises(ValidationError):
+        SchemaContract.model_validate(data)
