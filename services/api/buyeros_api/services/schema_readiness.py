@@ -32,6 +32,11 @@ class RequiredPrivilege(ClosedModel):
     privilege: Literal['SELECT'] = 'SELECT'
 
 
+class RequiredFunction(ClosedModel):
+    signature: str
+    volatility: Literal['s', 'v']
+
+
 class SchemaContract(ClosedModel):
     contract_version: Literal['buyeros.schema-contract.v1']
     source_sha: str = Field(pattern=r'^[0-9a-f]{40}$')
@@ -39,7 +44,7 @@ class SchemaContract(ClosedModel):
     # Explicitly reviewed additive heads; unknown future heads remain blocked.
     compatible_heads: list[str] = Field(min_length=1, max_length=100)
     required_relations: dict[str, list[str]] = Field(min_length=1, max_length=100)
-    required_functions: list[str] = Field(min_length=1, max_length=100)
+    required_functions: list[str | RequiredFunction] = Field(min_length=1, max_length=100)
     required_privileges: list[RequiredPrivilege] = Field(min_length=1, max_length=100)
     required_rls: list[str] = Field(min_length=1, max_length=100)
     runtime_role_policy: RuntimeRolePolicy
@@ -60,7 +65,8 @@ class SchemaContract(ClosedModel):
             raise ValueError('invalid relation contract')
         if any(not relation.fullmatch(name) for name in self.required_rls):
             raise ValueError('invalid RLS contract')
-        if any(not function.fullmatch(name) for name in self.required_functions):
+        if any(not function.fullmatch(name if isinstance(name, str) else name.signature)
+               for name in self.required_functions):
             raise ValueError('invalid function contract')
         if any(not column.fullmatch(c) for p in self.required_privileges for c in p.columns):
             raise ValueError('invalid privilege contract')
@@ -150,13 +156,16 @@ async def inspect_schema(connection: AsyncConnection, expected: SchemaContract) 
                 for col in requirement.columns:
                     allowed=allowed and col in actual and bool(await scalar("SELECT has_column_privilege(current_user,:oid,:col,'SELECT')",{'oid':oid,'col':col}))
             check('privilege_missing:'+requirement.relation+':'+requirement.privilege,allowed)
-        for signature in expected.required_functions:
+        for requirement in expected.required_functions:
+            # Legacy string contracts retain their original STABLE requirement.
+            signature = requirement if isinstance(requirement, str) else requirement.signature
+            volatility = 's' if isinstance(requirement, str) else requirement.volatility
             oid=await scalar('SELECT to_regprocedure(:signature)::oid',{'signature':signature})
             allowed=bool(oid) and await scalar("SELECT has_function_privilege(current_user,:oid,'EXECUTE')",{'oid':oid})
             check('function_missing_or_denied:'+signature,allowed)
             if oid:
                 definition=(await connection.execute(text('SELECT prosecdef,proconfig,provolatile FROM pg_catalog.pg_proc WHERE oid=:oid'),{'oid':oid})).one()
-                check('function_contract_mismatch:'+signature, definition[0] and 'search_path=pg_catalog, public' in (definition[1] or []) and definition[2]=='s')
+                check('function_contract_mismatch:'+signature, definition[0] and 'search_path=pg_catalog, public' in (definition[1] or []) and definition[2]==volatility)
         for name in expected.required_rls:
             state=(await connection.execute(text('SELECT relrowsecurity,relforcerowsecurity FROM pg_catalog.pg_class WHERE oid=to_regclass(:name)'),{'name':name})).one_or_none()
             check('rls_not_forced:'+name,state is not None and state[0] and state[1])
