@@ -289,7 +289,7 @@ export function LiveWorkspace() {
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized&&projectKnown&&pathname==='/app'&&<><LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/><PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/></>}
-    {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
+    {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
     {authorized&&projectKnown&&pathname==='/app/settings'&&<PilotBudgetPanel key={`pilot-budget-${snapshot.identity}`} locale={locale} isAdmin={canArchive&&projectActive}/>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}

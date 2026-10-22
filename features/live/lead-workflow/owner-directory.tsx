@@ -12,7 +12,7 @@ export function useOwnerDirectory(ownMembershipId:string|null,enabled:boolean){
  const {client,session}=useWorkspaceSession(),scope=useSessionSnapshot();
  const [search,setSearch]=useState(''),[query,setQuery]=useState(''),[offset,setOffset]=useState(0),[retry,setRetry]=useState(0);
  const [result,setResult]=useState<{key:string;items:Member[];total:number}|null>(null),[failure,setFailure]=useState<{key:string;message:string}|null>(null);
- const [known,setKnown]=useState<Member[]>([]);
+ const [known,setKnown]=useState<{identity:string;items:Member[]}|null>(null);
  const sequence=useRef(0),key=JSON.stringify([scope.identity,query,offset,retry]);
  useEffect(()=>{const timer=setTimeout(()=>{setQuery(search.trim());setOffset(0);},250);return()=>clearTimeout(timer);},[search]);
  useEffect(()=>{
@@ -29,14 +29,15 @@ export function useOwnerDirectory(ownMembershipId:string|null,enabled:boolean){
      }
      if(current()){
        setResult({key,items:page.items,total:page.total});setFailure(null);
-       setKnown(previous=>[...new Map([...previous,...page.items,...ownMember].map(row=>[row.user_id,row])).values()].slice(-200));
+       setKnown(previous=>({identity,items:[...new Map([...(previous?.identity===identity?previous.items:[]),...page.items,...ownMember].map(row=>[row.user_id,row])).values()].slice(-200)}));
      }
    })().catch(cause=>{if(current()&&!(cause instanceof LiveCancelled))setFailure({key,message:describeLiveError(cause)});});
    return()=>own.abort();
  },[enabled,client,session,scope.identity,ownMembershipId,query,offset,retry,key]);
- const ownUserId=known.find(row=>row.membership_id===ownMembershipId)?.user_id??null;
- return {search,setSearch,items:result?.key===key?result.items:[],total:result?.key===key?result.total:0,offset,
+ const members=enabled&&known?.identity===scope.identity?known.items:[];
+ const ownUserId=members.find(row=>row.membership_id===ownMembershipId)?.user_id??null;
+ return {search,setSearch,items:enabled&&result?.key===key?result.items:[],total:enabled&&result?.key===key?result.total:0,offset,
    more:()=>setOffset(value=>value+20),retry:()=>setRetry(value=>value+1),
-   error:failure?.key===key?failure.message:'',loading:enabled&&result?.key!==key&&failure?.key!==key,
-   ownUserId,name:(id:string)=>{const member=known.find(row=>row.user_id===id);return member&&member.display_name!==member.user_id?member.display_name:null;}};
+   error:enabled&&failure?.key===key?failure.message:'',loading:enabled&&result?.key!==key&&failure?.key!==key,
+   ownUserId,name:(id:string)=>{const member=members.find(row=>row.user_id===id);return member&&member.display_name!==member.user_id?member.display_name:null;}};
 }

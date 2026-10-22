@@ -951,6 +951,18 @@ jobs:
           mkdir -p artifacts/ci-t30/continuity
           cp artifacts/c61/research-discovery.json artifacts/ci-t30/continuity/discovery.json
           cp -r test-results/. artifacts/ci-t30/continuity/
+      - name: Verify T21 owner directory role and scope boundaries
+        run: |
+          mkdir -p artifacts/t21
+          node --test --test-timeout=180000 --test-reporter=junit --test-reporter-destination=artifacts/t21/owner-directory.xml tests/owner-directory-access.test.mjs
+          python scripts/check-required-tests.py --junit artifacts/t21/owner-directory.xml
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/t21/owner-directory.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==5 and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'missing duplicate or nonpassing owner directory execution'"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: buyeros-t21-owner-directory
+          path: artifacts/t21/owner-directory.xml
+          if-no-files-found: error
       - name: Verify native workbench discovery before execution
         run: |
           mkdir -p test-results

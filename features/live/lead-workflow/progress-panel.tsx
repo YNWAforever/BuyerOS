@@ -16,13 +16,13 @@ const metrics=[
   ['qualified_person','qualified_people_companies','Purchasing people',6],['direct_channel','direct_channel_companies','Direct channels',4],
   ['reviewed_preparation','reviewed_preparation_companies','Reviewed preparations',4],
 ] as const;
-export function LeadProgressPanel({mode,locale,canEdit=false,onNavigate,ownMembershipId=null}:{
-  mode:'overview'|'queue';locale:LeadLocale;canEdit?:boolean;onNavigate?:(path:string)=>void;ownMembershipId?:string|null;
+export function LeadProgressPanel({mode,locale,canEdit=false,canAssign=false,onNavigate,ownMembershipId=null}:{
+  mode:'overview'|'queue';locale:LeadLocale;canEdit?:boolean;canAssign?:boolean;onNavigate?:(path:string)=>void;ownMembershipId?:string|null;
 }){
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),params=useSearchParams();
   const criterion=params.get('lead_qualifies')??'',stage=params.get('lead_stage')??'';
   const owner=params.get('lead_owner')??'',due=params.get('lead_due')??'';
-  const directory=useOwnerDirectory(ownMembershipId,mode==='queue');
+  const directory=useOwnerDirectory(ownMembershipId,mode==='queue'&&canAssign);
   const queryKey=JSON.stringify([criterion,stage,owner,due]);
   const [projection,setProjection]=useState<{query:string;offset:number;value:LeadProgressPage}|null>(null);
   const [error,setError]=useState(''),[loading,setLoading]=useState(false);
@@ -80,7 +80,7 @@ export function LeadProgressPanel({mode,locale,canEdit=false,onNavigate,ownMembe
         <label>{t('Work stage')}<select aria-label={t('Work stage')} value={stage} onChange={e=>filter({lead_stage:e.target.value})}>
           <option value="">{t('All stages')}</option>{stages.map(value=><option key={value} value={value}>{t(value)}</option>)}
         </select></label>
-        <label>{t('Find owner')}<input type="search" aria-label={t('Find owner')} value={directory.search} maxLength={200} onChange={e=>directory.setSearch(e.target.value)}/></label>
+        {canAssign&&<label>{t('Find owner')}<input type="search" aria-label={t('Find owner')} value={directory.search} maxLength={200} onChange={e=>directory.setSearch(e.target.value)}/></label>}
         {directory.loading&&<p role="status">{t('Loading members…')}</p>}
         {directory.error&&<p role="alert">{directory.error} <button onClick={directory.retry}>{t('Retry members')}</button></p>}
         <label>{t('Owner')}<select aria-label={t('Owner')} value={owner} onChange={e=>filter({lead_owner:e.target.value})}>
