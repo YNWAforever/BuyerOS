@@ -132,7 +132,7 @@ jobs:
           BUYEROS_UI_ALLOWED_ORIGIN: http://127.0.0.1:5197
         run: |
           mkdir -p artifacts/t21
-          python -c "import unittest; s=unittest.defaultTestLoader.discover('tests',pattern='test_t21_public_inventory.py'); assert s.countTestCases()==6; r=unittest.TextTestRunner(verbosity=2).run(s); assert r.testsRun==6 and r.wasSuccessful() and not r.skipped"
+          python -c "import unittest; s=unittest.defaultTestLoader.discover('tests',pattern='test_t21_public_inventory.py'); assert s.countTestCases()==7; r=unittest.TextTestRunner(verbosity=2).run(s); assert r.testsRun==7 and r.wasSuccessful() and not r.skipped"
           pnpm exec playwright test --config playwright.t21-public.config.ts --list --reporter=json > artifacts/t21/public-discovery.json
           T21_JUNIT_FILE=artifacts/t21/public.xml T21_RESULT_FILE=artifacts/t21/public.json pnpm exec playwright test --config playwright.t21-public.config.ts
           python scripts/check-required-tests.py --playwright-discovery artifacts/t21/public-discovery.json --expected-count 12 --expected-file public-ui-audit.spec.mjs --junit artifacts/t21/public.xml

@@ -22,6 +22,12 @@ class PublicInventory(unittest.TestCase):
  def test_navigation_protocol_controls_are_executed_with_exact_fourteen_case_report(self):
   import shlex
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text()
+  inventory_count=unittest.defaultTestLoader.discover(str(ROOT/'tests'),pattern='test_t21_public_inventory.py').countTestCases()
+  inventory_commands=[shlex.split(line.strip()) for line in workflow.splitlines() if line.strip().startswith('python -c ') and "pattern='test_t21_public_inventory.py'" in line]
+  self.assertEqual(len(inventory_commands),1)
+  inventory_guard=inventory_commands[0][2]
+  self.assertIn(f'assert s.countTestCases()=={inventory_count};',inventory_guard)
+  self.assertIn(f'assert r.testsRun=={inventory_count} and r.wasSuccessful() and not r.skipped',inventory_guard)
   marker='      - name: Verify T21 traversal and synthetic protocol controls'+chr(10)
   self.assertEqual(workflow.count(marker),1)
   before,after=workflow.split(marker)
