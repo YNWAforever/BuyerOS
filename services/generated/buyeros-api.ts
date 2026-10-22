@@ -10478,6 +10478,7 @@ export interface operations {
             query?: {
                 priority?: boolean | null;
                 stage?: ("find_person" | "verify_employment" | "verify_procurement" | "verify_channel" | "refresh_evidence" | "review_preparation" | "complete") | null;
+                owner_unassigned?: boolean | null;
                 owner_user_id?: string | null;
                 due_before?: string | null;
                 qualifies_for?: ("company_card" | "priority_company" | "qualified_person" | "direct_channel" | "reviewed_preparation") | null;

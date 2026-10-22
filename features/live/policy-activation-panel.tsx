@@ -1,4 +1,6 @@
 'use client';
+import {PolicyTermsSummary} from './policy-terms-summary';
+import {useOwnerDirectory} from './lead-workflow/owner-directory';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {useSessionSnapshot, useWorkspaceSession} from '@/features/providers/workspace-session';
 import {createOperationClient, type WriteContext} from '@/services/live/operations';
@@ -49,6 +51,7 @@ export function PolicyActivationPanel(props: Props) {
 function PolicyActivationForm({roles, t}: Props) {
   const {session, client} = useWorkspaceSession(), snapshot = useSessionSnapshot();
   const admin = roles.includes('workspace_admin');
+  const directory=useOwnerDirectory(null,admin);
   const {workspace, project} = snapshot.scope;
   const [authorities, setAuthorities] = useState<Authority[]>([]), [history, setHistory] = useState<ActivationView[]>([]);
   const [policies, setPolicies] = useState<Policy[]>([]), [selected, setSelected] = useState<ActivationView | null>(null);
@@ -247,7 +250,7 @@ function PolicyActivationForm({roles, t}: Props) {
           <label>{t('Controller designation')} <select value={authorityId} onChange={event => setAuthorityId(event.target.value)}>
             <option value="">{t('Select designation')}</option>
             {authorities.map(item => <option key={item.id} value={item.id} disabled={!item.eligible}>
-              {item.approver_user_id} · v{item.version} · {item.expires_at}
+              {directory.name(item.approver_user_id)||t('Unavailable member')} · v{item.version} · {item.expires_at}
             </option>)}
           </select></label>
           {!authorities.some(item => item.eligible) && <p role="status">{t('No current controller designation. Ask the data owner.')}</p>}
@@ -278,8 +281,8 @@ function PolicyActivationForm({roles, t}: Props) {
       </div> : <div>
         <p data-testid="policy-current-state">{t('Application outcome')}: {t(selected.request_state)} ·
           {t('Current project purpose policy')}: {t(selected.effective_status)}</p>
-        <p>{t('Terms hash')}: <code>{selected.terms_hash}</code></p>
-        <details open><summary>{t('Exact canonical policy terms')}</summary>
+        <PolicyTermsSummary terms={selected.terms} approver={directory.name(authorities.find(item=>item.id===selected.authority_id)?.approver_user_id??'')} t={t}/>
+        <details><summary>{t('Exact canonical policy terms')}</summary><p>{t('Terms hash')}: <code>{selected.terms_hash}</code></p>
           <pre style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>{JSON.stringify(selected.terms, null, 2)}</pre>
         </details>
         {selected.request_state === 'submitted' && <>

@@ -62,7 +62,10 @@ async function submit(page: Page) {
   await panel(page).getByRole('button', {name: 'Submit policy application', exact: true}).click();
   const r = await response; expect(r.status()).toBe(201);
   const result = (await r.json()).data;
+  const details=panel(page).locator('details');
+  await details.getByText('Exact canonical policy terms',{exact:true}).click();
   await expect(panel(page).getByText(result.terms_hash, {exact: true})).toBeVisible();
+  await details.getByText('Exact canonical policy terms',{exact:true}).click();
   return result;
 }
 async function approve(page: Page) {
@@ -181,7 +184,11 @@ test('relogin_reads_same_request_and_current_effective_state', async ({page, bro
     await signIn(next);
     await panel(next).getByRole('button', {name: `Inspect ${original.id}`, exact: true}).click();
     await expect(panel(next).getByTestId('policy-current-state')).toContainText('approved');
+    const details=panel(next).locator('details');
+    await expect(details).not.toHaveAttribute('open','');
+    await details.getByText('Exact canonical policy terms',{exact:true}).click();
     await expect(panel(next).getByText(original.terms_hash, {exact: true})).toBeVisible();
+    expect(JSON.parse((await details.locator('pre').textContent())!)).toEqual(original.terms);
   } finally {await context.close();}
 });
 test('viewer_and_foreign_workspace_cannot_activate', async ({page, request}) => {
@@ -190,4 +197,20 @@ test('viewer_and_foreign_workspace_cannot_activate', async ({page, request}) => 
   const foreign = await request.get(`${api}/v1/workspaces/22222222-2222-4222-8222-222222222222/policy-controller-authorities?project_id=${project}`,
     {headers: {Authorization: 'Bearer fixture-admin'}});
   expect(foreign.status()).toBe(404);
+});
+
+
+test('N21-ACCESS-04 summary agrees with exact pending terms and details start collapsed',async({page})=>{
+ await signIn(page);const view=await submit(page);
+ const p=panel(page),summary=p.getByTestId('policy-business-summary');
+ await expect(summary).toContainText('contact_research');
+ await expect(summary).toContainText('GB');
+ await expect(summary).toContainText('rice.example.test');
+ await expect(summary).toContainText('preparation.read');
+ await expect(summary).toContainText('7');
+ await expect(p.locator('details')).not.toHaveAttribute('open','');
+ await p.getByText('Exact canonical policy terms',{exact:true}).click();
+ const canonical=await p.locator('details pre').textContent();
+ expect(JSON.parse(canonical!)).toEqual(view.terms);
+ await expect(p).toContainText('Policy approval does not authorize paid research, enrichment or external sending.');
 });

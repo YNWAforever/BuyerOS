@@ -156,7 +156,7 @@ await check('compiled layout preserves runtime provider selection and closed Neo
   BUYEROS_NEON_AUTH_URL:'https://fixture.neon.tech/auth',BUYEROS_NEON_EXPECTED_AUTH_URL:'https://fixture.neon.tech/auth',
   BUYEROS_PUBLIC_ORIGIN:'https://buyeros.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://buyeros.test',
   BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2)});
- assert.deepEqual(neon,{provider:'neon',config:{authPath:'/api/auth'}});
+ assert.deepEqual(neon,{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://fixture.neon.tech',socialInitPath:'/auth/sign-in/social/init'}});
  assert.equal(JSON.stringify(neon).includes('synthetic-runtime'),false);
 });
 console.log(`${n} live auth checks passed including compiled public runtime`);

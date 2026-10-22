@@ -68,9 +68,9 @@ class PolicyActivationCiRegistration(unittest.TestCase):
             (directory / (prefix + "-87654321.target.policy-discovery.json")).write_bytes(b"ambiguous-current-run")
             self.assertNotEqual(subprocess.run([sys.executable, "-c", inline[0]], cwd=folder, capture_output=True).returncode, 0)
             self.assertFalse(destination.exists())
-        self.assertTrue(any("--expected-count" in c and c[c.index("--expected-count") + 1] == "8" for c in commands))
+        self.assertTrue(any("--expected-count" in c and c[c.index("--expected-count") + 1] == "9" for c in commands))
         native = self.step("browser-continuity", "Verify native lead workflow without provider activation")
-        self.assertIn("--expected-count 19", native)
+        self.assertIn("--expected-count 46", native)
         self.assertIn("--run-suite native-browser", native)
         self.assertEqual(len(self.jobs), 12)
 

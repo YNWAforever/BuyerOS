@@ -1,9 +1,11 @@
+import {fulfillSyntheticRedirect,closeSyntheticRedirectServer} from './synthetic-oidc-redirect.mjs';
 // Fake OIDC identity for the isolated HTTP/PostgreSQL workbench fixture only.
-import {expect,type Page} from '@playwright/test';
+import {expect,test,type Page} from '@playwright/test';
 import {webcrypto} from 'node:crypto';
 import {runOwnedFixtureProcess} from './owned-fixture-process';
 import {resolve} from 'node:path';
 import {createJourneyInput,observeWorkspaceLocale} from './journey-input';
+test.afterAll(closeSyntheticRedirectServer);
 export const workspace='e0000000-0000-4000-8000-000000000001';
 export const project='e1000000-0000-4000-8000-000000000001';
 
@@ -25,7 +27,7 @@ export async function signInWorkbench(page:Page,waitForProject=true,actor:'revie
   const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'workbench-fixture',use:'sig'};
   const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');let nonce='';
   await page.route('https://oidc.buyeros.test/authorize**',async route=>{const q=new URL(route.request().url()).searchParams;
-    nonce=q.get('nonce')||'';await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=workbench-fixture&state=${q.get('state')}`},body:''});});
+    nonce=q.get('nonce')||'';await fulfillSyntheticRedirect(page,route,`http://localhost:5173/auth/callback?code=workbench-fixture&state=${q.get('state')}`);});
   await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
     const unsigned=`${encode({alg:'RS256',kid:'workbench-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',
       aud:'fixture-public-client',sub:`fixture-${actor}`,nonce,exp:Math.floor(Date.now()/1000)+900})}`;

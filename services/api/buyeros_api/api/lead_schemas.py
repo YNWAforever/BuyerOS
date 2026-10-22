@@ -319,11 +319,18 @@ LeadCriterion = Literal[
 
 
 class LeadFilters(LeadStrict):
+    owner_unassigned: bool | None = None
     priority: bool | None = None
     stage: LeadStage | None = None
     owner_user_id: UUID | None = None
     due_before: date | None = None
     qualifies_for: LeadCriterion | None = None
+
+    @model_validator(mode="after")
+    def owner_filter_is_unambiguous(self):
+        if self.owner_unassigned and self.owner_user_id is not None:
+            raise ValueError("choose one owner filter")
+        return self
 
 
 class LeadProgressQuery(LeadFilters):

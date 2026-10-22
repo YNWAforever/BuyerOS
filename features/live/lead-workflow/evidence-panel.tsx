@@ -34,7 +34,7 @@ export function LeadEvidencePanel({buyerId,locale,canEdit,onChanged=()=>{}}:{
   const operation=useLeadOperation(buyerId,actions,readback,locale);
   useEffect(()=>{let active=true;void Promise.resolve().then(refresh).catch(cause=>{if(active&&!(cause instanceof LiveCancelled))setError(describeLiveError(cause));});return()=>{active=false;};},[refresh,snapshot.identity]);
   const people=new Map((rows??[]).filter(row=>row.person_id&&row.person).map(row=>[row.person_id!,row.person!]));
-  const disabled=operation.busy||operation.unknown||operation.pending.length>0;
+  const disabled=operation.busy||operation.historyBlocked||operation.unknown||operation.pending.length>0;
   async function save(event:React.FormEvent){
     event.preventDefault();
     const selected=person==='new'?{full_name:name,role:role||null}:person?{person_id:person}:null;

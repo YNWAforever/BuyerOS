@@ -1,6 +1,10 @@
 import {normalizeReturnPath, type AuthAdapter} from './auth';
 
-export interface PublicNeonConfig {authPath: string;}
+export interface PublicNeonConfig {
+  authPath: string;
+  socialInitOrigin: string;
+  socialInitPath: string;
+}
 export interface NeonChannel {
   postMessage(event: {type: 'logout' | 'invalidated'}): void;
   subscribe(listener: (event: unknown) => void): () => void;
@@ -16,6 +20,15 @@ export interface NeonEnvironment {
 }
 const transactionKey = 'buyeros-neon-return', invalidatedKey='buyeros-neon-invalidated';
 class InvalidatedSession extends Error {}
+class NeonRequestFailure extends Error {
+  constructor(readonly status:number,readonly requestId:string|null){super('Neon session unavailable');}
+}
+/** Allow-listed diagnostics only; never surface a provider body, URL, token, code or OAuth state. */
+export function neonSignInDiagnostic(error:unknown):{category:string;http_status:number|null;request_id:string|null}{
+  if(error instanceof NeonRequestFailure)return {category:'service_response',http_status:error.status,request_id:error.requestId};
+  return {category:error instanceof Error&&error.message==='Invalid Google redirect'?'redirect_validation':'session_or_transport',http_status:null,request_id:null};
+}
+
 function browserChannel(): NeonChannel | undefined {
   if (typeof BroadcastChannel === 'undefined') {
     // Older browsers share only an invalidation event. No token or draft data enters localStorage.
@@ -41,6 +54,18 @@ function metadata(token: unknown, expectedSubject: string, now: number): {token:
   // Browser metadata is never authorization. The API verifies signature/trust and current DB mapping/roles.
   return {token, expires: exp * 1000};
 }
+function trustedSocialInit(config: PublicNeonConfig): {origin: string; path: string} {
+  let origin: URL;
+  try {origin=new URL(config.socialInitOrigin);} catch {throw new Error('Invalid Google redirect');}
+  const segments=config.socialInitPath.slice(1).split('/');
+  if(origin.protocol!=='https:'||origin.origin!==config.socialInitOrigin||origin.pathname!=='/'
+    ||origin.search||origin.hash||origin.username||origin.password||origin.port
+    ||!config.socialInitPath.startsWith('/')||config.socialInitPath.startsWith('//')
+    ||config.socialInitPath.endsWith('/')||/[\\?#%\s\u0000-\u001f\u007f]/.test(config.socialInitPath)
+    ||segments.some(segment=>!segment||segment==='.'||segment==='..'))
+    throw new Error('Invalid Google redirect');
+  return {origin:config.socialInitOrigin,path:config.socialInitPath};
+}
 
 /** Cookie transport to the unpatched server SDK. JWTs stay in this instance's memory.
  * The pinned browser SDK broadcasts sessionData (including token); this boundary intentionally
@@ -48,6 +73,7 @@ function metadata(token: unknown, expectedSubject: string, now: number): {token:
  */
 export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonEnvironment): AuthAdapter {
   if (config.authPath !== '/api/auth') throw new Error('Same-origin Neon auth path required');
+  const socialInit=trustedSocialInit(config);
   const env = provided ?? {location: window.location, storage: window.sessionStorage, fetch: window.fetch.bind(window), crypto: window.crypto, now: Date.now, channel: browserChannel()};
   let token = '', subject = '', accountEmail = '', expires = 0, generation = 0, blocked = env.storage.getItem(invalidatedKey)==='1', returnPath = '/app';
   let renewal: Promise<string> | null = null, initialization: Promise<void> | null = null;
@@ -66,7 +92,11 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
   async function request(path: string, body?: Record<string, unknown>): Promise<unknown> {
     const response = await env.fetch(config.authPath + path, {method: body ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store', redirect: 'error',
       headers: {Accept: 'application/json', ...(body ? {'Content-Type': 'application/json'} : {})}, body: body ? JSON.stringify(body) : undefined});
-    if (!response.ok) throw new Error('Neon session unavailable');
+    if (!response.ok) {
+      const candidate=response.headers.get('x-request-id');
+      const requestId=candidate&&/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(candidate)?candidate:null;
+      throw new NeonRequestFailure(response.status,requestId);
+    }
     const text = await response.text();
     if (new TextEncoder().encode(text).byteLength > 128_000) throw new Error('Invalid session response');
     return JSON.parse(text);
@@ -132,11 +162,25 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
     async signInGoogle() {
       const callbackURL = callbackUrl();
       const result = await request('/sign-in/social', {provider: 'google', callbackURL, disableRedirect: true});
-      const url = new URL((result as {url?: string} | null)?.url ?? '');
-      if (url.protocol !== 'https:' || url.hostname !== 'accounts.google.com' || url.username || url.password || url.port) throw new Error('Invalid Google redirect');
+      let url: URL, raw: string;
+      try {
+        raw=(result as {url?: string} | null)?.url ?? '';
+        if(!raw)throw new Error('Invalid Google redirect');url=new URL(raw);
+      } catch {throw new Error('Invalid Google redirect');}
+      if (url.protocol !== 'https:' || url.username || url.password || url.port || url.hash) throw new Error('Invalid Google redirect');
+      const google = url.hostname === 'accounts.google.com';
+      if (!google) {
+        const tokens = url.searchParams.getAll('token'), keys = [...url.searchParams.keys()];
+        const prefix=`${socialInit.origin}${socialInit.path}?token=`, rawToken=raw.startsWith(prefix)?raw.slice(prefix.length):'';
+        if(!raw.startsWith(prefix)||!rawToken||rawToken.includes('&')||url.origin !== socialInit.origin
+          ||url.pathname !== socialInit.path||keys.length !== 1||keys[0] !== 'token'
+          ||tokens.length !== 1||!tokens[0]||/[\s\u0000-\u001f\u007f]/.test(tokens[0])) throw new Error('Invalid Google redirect');
+      }
       // Keep the provider's state, PKCE and consent request, but let the user choose their account.
-      const prompts = url.searchParams.getAll('prompt').flatMap(value => value.split(/\s+/)).filter(value => value && value !== 'none');
-      url.searchParams.set('prompt', [...new Set([...prompts, 'select_account'])].join(' '));
+      if (google) {
+        const prompts = url.searchParams.getAll('prompt').flatMap(value => value.split(/\s+/)).filter(value => value && value !== 'none');
+        url.searchParams.set('prompt', [...new Set([...prompts, 'select_account'])].join(' '));
+      }
       env.location.assign(url.href);
     },
     async completeCallback() {

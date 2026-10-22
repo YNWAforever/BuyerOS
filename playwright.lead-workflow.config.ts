@@ -5,7 +5,7 @@ const servers=Array.isArray(buyer.webServer)?buyer.webServer:buyer.webServer?[bu
 export default defineConfig({
   ...buyer,
   globalTeardown:process.env.BUYEROS_POLICY_TARGET_RECEIPT?undefined:buyer.globalTeardown,
-  testMatch:['lead-evidence.spec.ts','lead-preparations.spec.ts','lead-workflow.spec.ts','pilot-budget.spec.ts'],
+  testMatch:['lead-evidence.spec.ts','lead-preparations.spec.ts','lead-workflow.spec.ts','pilot-budget.spec.ts','t21-daily.spec.ts','t21-scale.spec.ts'],
   workers:1,
   reporter:[['line'],['junit',{outputFile:'test-results/lead-workflow.xml'}]],
   use:{...buyer.use,timezoneId:'Asia/Hong_Kong'},

@@ -1,0 +1,578 @@
+{
+  "updated_at": "2026-10-21T22:55:38.752486+00:00",
+  "historical": [
+    {
+      "finding_id": "F01",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F02",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "未登入gate可切換語言；新版auth form未翻譯為新增F28；零membership情境未重驗。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F03",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F04",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F05",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F06",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F07",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F08",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F09",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F10",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F11",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F12",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F13",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "仍存在：CURRENT_STATUS停於10月11日；本次code-only確認。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F14",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F15",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F16",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F17",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F18",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F19",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "舊DraftEditor有guard原始碼；新的preparation另有F30風險，不混為同一功能已修好。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F20",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "已觀察到Neon自有登入頁，舊Auth0畫面不再適用；Google登入失敗，因此Neon切換完整驗收仍未完成。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F21",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "本輪登入受阻；未重驗authenticated行為，保留未結案。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F22",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "保留10月11日特定版本差距已結案；今次repo/live SHA未知，不能把歷史結案延伸為今日同版。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F23",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "無成功登入，未取得workspace response；不能說42P01仍存在，亦不能關閉。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    },
+    {
+      "finding_id": "F24",
+      "baseline_date": "2026-10-11",
+      "current_date": "2026-10-21",
+      "current_assessment": "main CI成功；目前CLI deployment無source SHA；無法確認同版runtime acceptance，保留待驗。",
+      "new_evidence": "E21-01;E21-02;E21-03"
+    }
+  ],
+  "audit_findings": [
+    {
+      "finding_id": "F25",
+      "priority": "P1",
+      "title": "登入頁重複殼層，真正表單落在首屏以外",
+      "evidence_status": "verified",
+      "actual": "RootLayout 同時渲染 Workspace 與 children；登入 gate 佔100vh，auth form 在其後。1440×900與390×844均重現。",
+      "impact": "新用戶按登入後看到近似相同畫面，難以發現真正登入表單。",
+      "code_location": "app/layout.tsx:40",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/app/layout.tsx",
+      "recommendation": "將 auth route 與 workspace shell 分開；共用單一有品牌的 AuthLayout；一個 main／h1，表單與主CTA在首屏。",
+      "case_ids": "N21-AUTH-02;N21-AUTH-03",
+      "evidence_ids": "E21-01;E21-03",
+      "root_cause_confidence": "Live結構與main程式碼模式相符；正式部署SHA未確認。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "Auth 與 business layout 分離；單一 landmark／首屏表單。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F26",
+      "priority": "P1",
+      "title": "Google 登入在進入帳戶選擇前失敗",
+      "evidence_status": "live-only",
+      "actual": "一次Google按鈕操作只出現generic failure，未到Google chooser。",
+      "impact": "Google登入路徑本次不可用，登入後八個業務模組無法驗收。",
+      "code_location": "app/auth/sign-in/page.tsx:8;services/live/neon-auth.ts:118",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/app/auth/sign-in/page.tsx",
+      "recommendation": "先以request correlation／sanitized server logs定位social response、callback、origin與SDK整合；按證據修復，保留正常OAuth安全邊界。",
+      "case_ids": "N21-AUTH-05;N21-AUTH-11",
+      "evidence_ids": "E21-01",
+      "root_cause_confidence": "失敗已重現；沒有HTTP response，根因未知。",
+      "status": "待開始",
+      "local_disposition": "CONTRACT_REPAIR_ONLY_REAL_AUTH_BLOCKED",
+      "current_notes": "已重現並修正 exact trusted branch social-init contract；部署中的 Google 失敗根因與正常公司登入仍不能由 mock 關閉。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\auth-final-5-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\sdk-final-9-r2.xml"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F27",
+      "priority": "P1",
+      "title": "Start again 滑鼠與鍵盤導航均失效",
+      "evidence_status": "live-only",
+      "actual": "點擊及Enter後URL仍在auth/sign-in；console有vinext prefetch與Link transition TypeError；直接開/app正常。",
+      "impact": "登入失敗後建議的復原動作亦無效。",
+      "code_location": "app/auth/sign-in/page.tsx:16",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/app/auth/sign-in/page.tsx",
+      "recommendation": "隔離驗證實際部署的Link/router與build產物；修復恢復連結；以hard navigation作有限回復方案須驗證return transaction處理。",
+      "case_ids": "N21-AUTH-08;N21-AUTH-09;N21-AUTH-10",
+      "evidence_ids": "E21-01",
+      "root_cause_confidence": "導航失敗高信心；框架根因待查，不把console關聯當定論。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "Start again 使用經測試的 native recovery；同專案導航另修正 render/history commit 的完成次序。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\auth-final-5-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\thin-final-chromium-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F28",
+      "priority": "P2",
+      "title": "Neon 表單及失敗訊息未跟隨繁中語言",
+      "evidence_status": "verified",
+      "actual": "zh-HK gate之下仍全英文Sign in／Email／Password／錯誤／Start again；表單文案硬編碼。",
+      "impact": "登入支援語言不一致，錯誤處理難理解。",
+      "code_location": "app/auth/sign-in/page.tsx:6",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/app/auth/sign-in/page.tsx",
+      "recommendation": "沿用共用locale；所有欄位、busy、錯誤與恢復動作中英一致，語言切換不清空Email。",
+      "case_ids": "N21-AUTH-04",
+      "evidence_ids": "E21-01;E21-03",
+      "root_cause_confidence": "直接DOM與硬編碼對應。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "共用 English/zh-HK locale；/app及直接auth頁在hydration完成才啟用選擇，保留輸入並提供可讀錯誤。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\auth-final-5-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F29",
+      "priority": "P2",
+      "title": "真正登入表單缺少共用控制項樣式",
+      "evidence_status": "verified",
+      "actual": "桌面兩個提交按鈕高20.30px；恢復連結16px且貼近Google；表單是main-shell，未套live-workspace控制樣式。",
+      "impact": "觸控及視覺層級不足，原本漂亮的登入卡與實際表單品質落差大。",
+      "code_location": "app/auth/sign-in/page.tsx:9;app/globals.css:270",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/app/auth/sign-in/page.tsx",
+      "recommendation": "抽出共用AuthField／AuthButton，主按鈕建議44px以上；清楚間距、focus ring、busy文字及可操作錯誤。",
+      "case_ids": "N21-AUTH-02;N21-AUTH-03;N21-UAT-02",
+      "evidence_ids": "E21-01;E21-03",
+      "root_cause_confidence": "尺寸已量度；不單憑高度宣稱完整WCAG不合規。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "共用控制樣式、busy／double-submit guard、44px 目標。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F30",
+      "priority": "P1",
+      "title": "新版準備內容存在未儲存文字被重設風險",
+      "evidence_status": "code-only",
+      "actual": "dirty只阻止review；公司切換改key卸載，版本select直接show()，Refresh preparations呼叫readback→show()覆寫subject/body。未見navigation guard註冊。",
+      "impact": "員工撰寫內容可因一般切換／刷新丟失；舊DraftEditor守衛不能代替新PreparationEditor。",
+      "code_location": "features/live/lead-workflow/preparations-panel.tsx:39-44,113-116,157-158,204",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/features/live/lead-workflow/preparations-panel.tsx",
+      "recommendation": "將prepare編輯加入統一Save／Discard／Cancel守衛；scope切換、版本、pagination、refresh、關閉頁面均覆蓋；unknown save繼續使用原intent。",
+      "case_ids": "N21-PREP-02;N21-PREP-03;N21-PREP-04;N21-PREP-05",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "可確認程式路徑；正式站資料損失未實測。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "所有 preparation destructive transitions 需決定；unknown 沿原 intent；保留 exact target ID。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\audit-risk-final-r3.json",
+        ".superpowers\\t21-20261022\\evidence\\sdk-final-9-r2.xml"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F31",
+      "priority": "P2",
+      "title": "外展公司選單要讀取全部公司才可用",
+      "evidence_status": "code-only",
+      "actual": "每頁100筆迴圈讀到total才setCompanies；單一原生select，無公司搜尋；載入／空白狀態不區分，失敗後沒有該清單獨立retry。",
+      "impact": "大project進入Drafts需多次序列讀取；找公司與故障復原效率差。",
+      "code_location": "features/live/lead-workflow/preparations-panel.tsx:19-43",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/features/live/lead-workflow/preparations-panel.tsx",
+      "recommendation": "使用有界server search／paged combobox，按buyer deep link直接取單筆；分開loading／empty／error，提供僅重試該讀取。",
+      "case_ids": "N21-PREP-06;N21-PREP-07;N21-PERF-02",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "程式碼可確認O(N/100)讀取模式；沒有實測延遲。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "page24、snapshot cap1000、query max200；deep-link direct read；獨立 retry／stale-query fence。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F32",
+      "priority": "P2",
+      "title": "買家列表缺少即場判斷公司身份與來源的資料",
+      "evidence_status": "code-only",
+      "actual": "row主要顯示name、fit、review、note與Details，沒有domain、market或source freshness摘要。",
+      "impact": "同名公司與批量覆核要頻繁開Details，易選錯買家。",
+      "code_location": "features/live/buyer-results.tsx:185-194",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/features/live/buyer-results.tsx",
+      "recommendation": "保持簡潔row，但加入domain／market、最關鍵fit理由、來源數／更新日；可展開證據；不要把所有技術欄位塞回列表。",
+      "case_ids": "N21-BUYER-01;N21-BUYER-07",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "目前row內容確定；真人效率影響須UAT量度。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "顯示實際 domain／fit rationale／來源數／fit freshness；無 authoritative market 時明示 Unknown。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F33",
+      "priority": "P2",
+      "title": "每日Lead queue以UUID篩選及顯示責任人",
+      "evidence_status": "code-only",
+      "actual": "Owner user ID是自由文字輸入；row顯示owner_user_id，需員工知道內部ID。",
+      "impact": "主管難快速找同事工作與分派。",
+      "code_location": "features/live/lead-workflow/progress-panel.tsx:80-90",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/features/live/lead-workflow/progress-panel.tsx",
+      "recommendation": "沿用可搜尋成員目錄，顯示姓名／角色，預設全部／我的／未分派；ID放technical details。",
+      "case_ids": "N21-WORK-05;N21-OPS-01",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "UI原始碼確認；正式使用性未測。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "受限目錄姓名及重名區分；Mine/Unassigned；denied/503 保留恢復 controls，不擴權。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F34",
+      "priority": "P2",
+      "title": "政策審核介面以原始JSON／hash作主要閱讀內容",
+      "evidence_status": "code-only",
+      "actual": "Exact canonical policy terms預設展開JSON，designation與history用user ID／request ID。",
+      "impact": "管理員難理解實際同意的範圍、到期與後果。",
+      "code_location": "features/live/policy-activation-panel.tsx:247-303",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/features/live/policy-activation-panel.tsx",
+      "recommendation": "先呈現可讀目的、地區、資料類別、允許動作、有效期及責任人摘要；原JSON/hash折疊作核對；approval仍綁exact hash。",
+      "case_ids": "N21-ACCESS-04",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "原始碼確認；不可藉簡化UI削弱server authority。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "canonical business summary 在先，exact JSON/hash 折疊；原 authority／revision/hash 檢查保留。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\policy-final-9-r2.json",
+        ".superpowers\\t21-20261022\\evidence\\api-final-1-api-full.xml"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    },
+    {
+      "finding_id": "F13",
+      "priority": "P2",
+      "title": "Current status仍停留10月11日，與近期PR不一致",
+      "evidence_status": "code-only",
+      "actual": "CURRENT_STATUS仍以cbbe0e93為current，說新candidate未deploy；main已有PR19-27。",
+      "impact": "團隊無法從文件辨認已寫碼／已部署／已啟用／已驗收。",
+      "code_location": "docs/buyeros/CURRENT_STATUS.md:1-5",
+      "source_url": "https://github.com/YNWAforever/BuyerOS/blob/c529dc8523a1d82da91243aaf33ea680a574277f/docs/buyeros/CURRENT_STATUS.md",
+      "recommendation": "建立單一版本狀態表，列source、CI、deployment、schema、activation、runtime acceptance與證據日期。",
+      "case_ids": "N21-OPS-05",
+      "evidence_ids": "E21-03",
+      "root_cause_confidence": "main最新文件與GitHub提交直接比對；不推定production SHA。",
+      "status": "待開始",
+      "local_disposition": "SOURCE_FIXED_LOCAL_VERIFIED",
+      "current_notes": "新增可對照來源／dirty candidate／CI／artifact／runtime 的本輪狀態；尚未發佈到 main／正式站。",
+      "current_evidence": [
+        ".superpowers\\t21-20261022\\evidence\\verification-commands-frontend-final-5.json",
+        ".superpowers\\t21-20261022\\evidence\\verification-commands-controls-final-5.json"
+      ],
+      "production_disposition": "UNVERIFIED_NOT_DEPLOYED",
+      "updated_at": "2026-10-21T22:55:38.752486+00:00"
+    }
+  ],
+  "new_local_findings": [
+    {
+      "finding_id": "F35",
+      "scope": "local baseline recovery defect; not a production observation",
+      "title": "Lost stage receipt plus unavailable history lacked a read-only recovery entry",
+      "resolution": "Refresh original operations; keep original durable intent; never blindly stage another revision",
+      "evidence": [
+        "stage-back-red.log",
+        "native-final-46-r2.json"
+      ],
+      "status": "LOCAL_VERIFIED"
+    },
+    {
+      "finding_id": "F36",
+      "scope": "local baseline fail-closed contract; not a production observation",
+      "title": "Unknown initial operation history could admit a new write",
+      "resolution": "Gate new writes until successful original-history read; clean readers may still navigate",
+      "evidence": [
+        "initial-history-red.log",
+        "native-final-46-r2.json"
+      ],
+      "status": "LOCAL_VERIFIED"
+    },
+    {
+      "finding_id": "F37",
+      "scope": "local forced-expiry observation; not a production observation",
+      "title": "Forced session expiry cleared unsubmitted preparation text without explaining its non-retention",
+      "resolution": "Generic in-memory flag and translated notice; protected content still clears, no preparation text/IDs retained",
+      "evidence": [
+        "expiry-policy-red-1.log",
+        "expiry-notice-unit-green.log",
+        "native-final-46-r2.json"
+      ],
+      "status": "LOCAL_VERIFIED"
+    },
+    {
+      "finding_id": "F38",
+      "scope": "local emitted SSR and Firefox/WebKit public automation; not a production observation",
+      "title": "Language select accepted a native change before hydration, losing it on sign-in",
+      "resolution": "Delay app select until client bootstrap ready and direct auth select until hydration; original public12 assertions unchanged",
+      "evidence": [
+        "auth-locale-hydration-direct-red.log",
+        "public-final-firefox.log",
+        "public-final-webkit.log",
+        "public-final-firefox-r2.json",
+        "public-final-webkit-r2.json"
+      ],
+      "status": "LOCAL_VERIFIED"
+    }
+  ],
+  "development_regressions": [
+    {
+      "id": "D21-01",
+      "title": "Queued Save→Archive retained an old version",
+      "status": "FIXED",
+      "red": "review-red-1.log",
+      "green": "review-green-2.log"
+    },
+    {
+      "id": "D21-02",
+      "title": "Mine error hid its own retry/filter controls",
+      "status": "FIXED",
+      "red": "review-red-1.log",
+      "green": "review-green-2.log"
+    },
+    {
+      "id": "D21-03",
+      "title": "Paged readback could archive a substituted preparation",
+      "status": "FIXED",
+      "red": "target-identity-red-2.log",
+      "green": "target-identity-green-1.log",
+      "review": "same reviewer follow-up found no remaining actionable issue"
+    },
+    {
+      "id": "D21-04",
+      "title": "Multi-guard consent reset Discard suppression before logout",
+      "status": "FIXED",
+      "red": "neon-sdk-browser-final.log",
+      "green": "neon-sdk-browser-review-green-1.log"
+    },
+    {
+      "id": "D21-05",
+      "title": "Opening page stuck because render snapshot preceded browser history commit",
+      "status": "FIXED",
+      "red": "thin-journey-navigation-diagnostic.log",
+      "green": "thin-journey-4.log",
+      "note": "temporary path-only instrumentation removed"
+    },
+    {
+      "id": "D21-06",
+      "title": "WebKit canceled early traversal replay arrived at a different history key",
+      "status": "FIXED_LOCAL",
+      "red": "webkit-legacy-strategy-red.log",
+      "green": "webkit-legacy-strategy-browser.json",
+      "final": "history-final-webkit-r2.json",
+      "resolution": "Known WebKit selects existing guarded restore-before-decision strategy; synchronize actual native commit; exact early replay checks remain for other engines"
+    },
+    {
+      "id": "D21-07",
+      "scope": "test harness, not product Auth",
+      "title": "Concurrent synthetic OIDC initialization could create two loopback TLS listeners",
+      "status": "FIXED_LOCAL",
+      "red": "webkit-listener-concurrency-red.log",
+      "green": "webkit-protocol-green-2.log",
+      "resolution": "Shared initialization promise; actual loopback HTTPS302 instead of WebKit route.fulfill302; test-only certificate stays in pipe/memory"
+    },
+    {
+      "id": "D21-08",
+      "scope": "test harness",
+      "title": "Policy suite accidentally loaded the role-resetting lead fixture and retained a pre-summary visible-hash assumption",
+      "red": "policy-final-9.log",
+      "green": "policy-final-9-r2.json",
+      "status": "LOCAL_VERIFIED",
+      "resolution": "Policy mode selects only policy seed; explicit collapsed/open canonical/hash assertions retained and strengthened"
+    },
+    {
+      "id": "D21-09",
+      "scope": "test harness",
+      "title": "Old scale transport only advertised large totals on24 repeated rows",
+      "before": "scale-before-materialized-registry.ts",
+      "green": "native-final-46-r2.json",
+      "status": "LOCAL_VERIFIED",
+      "resolution": "Actually materialize100/1000/10000 distinct deterministic browser-memory company records; search/paginate; selected IDs remain within real owned fixture records"
+    },
+    {
+      "id": "D21-10",
+      "scope": "test harness",
+      "title": "Risk config inherited addressed-approval contact seed conflicting with template's retained recipient; scenarios shared a DB",
+      "red": "audit-risk-final.log",
+      "green": "audit-risk-final-r3.json",
+      "status": "LOCAL_VERIFIED",
+      "resolution": "Each full family runs in its own verified owned target; template/reground mode loads its own prerequisites. No contact ID/value overwrite; complete92-ID union checked against fresh discovery and prior92 execution"
+    },
+    {
+      "id": "D21-11",
+      "scope": "test harness",
+      "title": "Empty membership test held an automatic bootstrap reread before the manual retry was possible",
+      "red": "audit-risk-final.log",
+      "green": "audit-risk-final-r3-workspace.json",
+      "status": "LOCAL_VERIFIED",
+      "resolution": "Wait for ready empty state, then hold exactly one explicit recheck; actual keyboard event; require exactly one added request before and after settle. Product access checks unchanged"
+    },
+    {
+      "id": "D21-12",
+      "scope": "local orchestration",
+      "title": "Risk aggregate rejected an older79-case discovery before allocating a target",
+      "red": "audit-risk-final-r2.log",
+      "green": "audit-risk-final-discovery.command.json",
+      "status": "LOCAL_INVENTORY_VERIFIED",
+      "resolution": "Preserve the older file; fresh unfiltered92 IDs equal prior full92 executed IDs. Never shrink the denominator or backfill a PASS receipt"
+    }
+  ],
+  "rule": "F01–F24 and original F13/F25–F34 snapshots retained; local/fixture fixes never close unknown production runtime findings"
+}

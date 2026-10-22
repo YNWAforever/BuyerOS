@@ -488,7 +488,7 @@ def main() -> None:
             from fastapi import Body
             @app.post("/fixture/lead-scenario", include_in_schema=False)
             def lead_fixture_scenario(scenario: str = Body(embed=True)):
-                if scenario not in {"expire_channel", "product_caveat", "second_purchaser"}:
+                if scenario not in {"expire_channel", "product_caveat", "second_purchaser", "t21_named_members"}:
                     raise ApiError(422, "INVALID_REQUEST", "unsupported fixture scenario")
                 result=apply_lead_fixture_scenario(owner_dsn, scenario)
                 return result or {"fixture_only": True}

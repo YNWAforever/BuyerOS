@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useLayoutEffect,useEffect,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {readDraftApproval} from '@/services/live/work-queue';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
@@ -153,7 +153,9 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     let proceeded=false;await performTransition(async()=>{await proceed();proceeded=true;});return proceeded;
   };
   useEffect(()=>session.subscribeBeforeClear(()=>retainBuffer.current()),[session]);
-  useEffect(()=>session.registerTransitionGuard(proceed=>transitionHandler.current(proceed)),[session]);
+  const blocksHistory=useRef(false);
+  useLayoutEffect(()=>{blocksHistory.current=unsaved;if(!unsaved)suppressRecovery.current=false;},[unsaved]);
+  useEffect(()=>session.registerTransitionGuard(proceed=>transitionHandler.current(proceed),()=>blocksHistory.current),[session]);
   function restoreBuffer(opened:Draft){
     const current=session.current();if(!current.actor||!current.workspace||!current.project)return;
     const buffer=draftRecovery.find({actor:current.actor,workspace:current.workspace,project:current.project,draftId:opened.id});if(!buffer)return;
@@ -236,7 +238,15 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     setDraft(opened);setSubject(opened.subject);setBody(opened.body);setDraftLanguage(opened.language==='zh-HK'?'zh-HK':'en');
     setApprovalConfirmed(false);setStaleDiff([]);setConflict(null);replaceQuery({draft:opened.id});
   }
-  function decide(value:DirtyDecision){if(value==='discard'){suppressRecovery.current=true;forgetBuffer();}const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);}
+  function decide(value:DirtyDecision){
+    if(value==='discard'){
+      suppressRecovery.current=true;forgetBuffer();
+      // All editor guards consent before the real transition runs. Clear this
+      // buffer as part of explicit discard so the later logout cannot retain it.
+      if(draft){setSubject(draft.subject);setBody(draft.body);setDraftLanguage(draft.language==='zh-HK'?'zh-HK':'en');}
+    }
+    const resolve=choice.current;choice.current=null;setChoosing(false);resolve?.(value);
+  }
   function choose():Promise<DirtyDecision>{setChoosing(true);return new Promise(resolve=>{choice.current=resolve;});}
   function forgetBuffer(){if(draft&&scope.actor&&scope.workspace&&scope.project)draftRecovery.forget({actor:scope.actor,workspace:scope.workspace,project:scope.project,draftId:draft.id});}
   async function persistRevision(identity:string){
@@ -262,7 +272,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
           try{const latest=await getDraft(client,session,draft.id);guard();setConflict(latest);}catch {/* Preserve local buffer if comparison is unavailable. */}
         }
       }
-    }finally{suppressRecovery.current=false;transition.current=false;if(session.isCurrent(identity))setBusy(false);}
+    }finally{transition.current=false;if(session.isCurrent(identity))setBusy(false);}
   }
   async function refreshJob(){
     if(!job)return;

@@ -53,7 +53,7 @@ export function LeadCasePanel({buyerId,locale,canEdit,canAssign=false,onChanged=
       if(!(cause instanceof LiveCancelled))setError(describeLiveError(cause));
     });
   },[contextVersion,refresh]);
-  const disabled=operation.busy||operation.unknown||operation.pending.length>0;
+  const disabled=operation.busy||operation.historyBlocked||operation.unknown||operation.pending.length>0;
   const people=new Map(observations.filter(row=>row.person_id&&row.person&&!row.redacted).map(row=>[row.person_id!,row.person!]));
   const channels=new Map(observations.filter(row=>row.contact_id&&row.channel&&!row.redacted).map(row=>[row.contact_id!,row.channel!]));
   const superseded=new Set(observations.map(row=>row.supersedes_id).filter(Boolean));

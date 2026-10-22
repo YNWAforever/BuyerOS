@@ -1,5 +1,6 @@
 """Exercise registered CI guards with native inventories; synthetic reports test guards only."""
 import importlib.util
+import json
 from pathlib import Path
 import re
 import shlex
@@ -11,8 +12,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 # Retain all original 17 browser IDs and both post-commit readback/acknowledgment regressions.
-EXPECTED = {"lead-evidence.spec.ts": 5, "lead-preparations.spec.ts": 6,
-            "lead-workflow.spec.ts": 4, "pilot-budget.spec.ts": 4}
+EXPECTED = {"lead-evidence.spec.ts": 5, "lead-preparations.spec.ts": 21,
+            "lead-workflow.spec.ts": 4, "pilot-budget.spec.ts": 4,
+            "t21-daily.spec.ts":9,"t21-scale.spec.ts":3}
 
 
 class LeadWorkflowCIRegistration(unittest.TestCase):
@@ -47,6 +49,9 @@ class LeadWorkflowCIRegistration(unittest.TestCase):
         names = self.checker._built_playwright_names(self.inventories["lead"].read_bytes(), "lead")
         actual = {file: sum(name.startswith(file + "::") for name in names) for file in EXPECTED}
         self.assertEqual(actual, EXPECTED)
+        original=set(json.loads((ROOT/"tests/fixtures/t21-original-native-inventory.json").read_text()))
+        self.assertEqual(len(original),19)
+        self.assertLessEqual(original,names,"all original Native tests must remain discoverable")
         source = self.checker._built_playwright_names(self.inventories["source"].read_bytes(), "source")
         self.assertEqual(len(source), 5)
         self.assertEqual({name.split("::")[0] for name in source}, {"buyer-source-checks.spec.ts"})
@@ -62,7 +67,7 @@ class LeadWorkflowCIRegistration(unittest.TestCase):
             browser = [cmd for cmd in commands if cmd[:4] == ["pnpm", "exec", "playwright", "test"]]
             if key == "lead":
                 # The exact same config is executed through the verified owned
-                # runner. Discovery and the 19-case JUnit identity join remain.
+                # runner. Discovery and the 46-case JUnit identity join remain.
                 self.assertEqual(len(browser), 1)
                 owned = [cmd for cmd in commands if "--run-suite" in cmd]
                 self.assertEqual(len(owned), 1)

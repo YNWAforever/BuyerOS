@@ -179,6 +179,11 @@ test('T29 manual locale remains usable while preference loads and saves with its
 
 test('T29 operations resolves a failed profile lookup without a permanent spinner',async({page})=>{
   test.setTimeout(120_000);
+  const directoryRequests:string[]=[];
+  page.on('request',request=>{
+    const url=new URL(request.url());
+    if(url.origin===browserApiOrigin&&url.pathname===`/v1/workspaces/${workspace}/eligible-assignees`)directoryRequests.push(request.method());
+  });
   await signIn(page);
   await expect(page.locator('header select')).toBeEnabled({timeout:30_000});
   await page.locator('header select').selectOption('en');
@@ -204,7 +209,10 @@ test('T29 operations resolves a failed profile lookup without a permanent spinne
   await expect(workQueue).toContainText('Profile approval: Unavailable',{timeout:30_000});
   await expect(workQueue).toContainText('Failed jobs: Unavailable',{timeout:30_000});
   await expect(workQueue).not.toContainText('Loading');
+  await expect(page.getByRole('searchbox',{name:'Find owner',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('alert')).toHaveCount(1);
   await expect(page.getByRole('alert')).toContainText(`Request ID: ${requestId}`);
+  expect(directoryRequests).toEqual([]);
 });
 
 

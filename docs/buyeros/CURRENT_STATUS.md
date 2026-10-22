@@ -1,76 +1,60 @@
-# BuyerOS current repair status — 2026-10-11
+# BuyerOS current status — T21 local candidate
 
-Current implementation/evidence: [execution report](evidence/2026-10-11/execution-report.zh-HK.md), [source/test/deploy/activation/live fields](evidence/2026-10-11/current.json), and [task selection](evidence/2026-10-11/task-selection.json). G0/GN/GA/GS remain NOT ACCEPTED. PR #12 is merged; current main and production source were rechecked as cbbe0e93b0132ae07ff0d87f6cc57f871f13200e. The new candidate is not deployed. F21 is historical unknown; F23 is the separate 42P01 incident. No production mutation was executed.
+Updated: 2026-10-21T22:55:38.922028+00:00. 本文件描述此專用 worktree；新候選仍未提交／推送／部署。
 
-The following October 6–9 entries are preserved historical evidence; references to a draft PR or tasks that can start describe that earlier snapshot.
+## 版本與證據層
 
----
-# BuyerOS C61 execution status
+| 層級 | 已核實狀態 |
+|---|---|
+| Audit / GitHub main | `c529dc8523a1d82da91243aaf33ea680a574277f`；GitHub ref 與原 main CI run 已唯讀重新核對 |
+| 原 checkout | `3f10f419`；保留其既有檔案、未追蹤資料、備份及 .gitignore |
+| 本機候選 | `codex/t21-workflow-20261022`，base 加未提交 diff；完整指紋見 version-matrix.json |
+| 現有 main CI | Run 39111507046 / c529 main 成功；不是新 diff 的 CI |
+| 新候選 CI | NOT_RUN：尚未 commit／push |
+| 正式 alias | dpl_DcRxZFpfV6zHYbQyP6rmkxWQvJbc / CLI / READY；未返回 gitSource，正式 source/API/worker/schema 仍 unknown |
+| 公司 Google / human UAT | NOT_RUN；fixture／CI 不替代正常身份與人工驗收 |
 
-Execution date: 2026-10-07 Asia/Hong_Kong. Original audit date: 2026-10-06.
-Draft PR #12: https://github.com/YNWAforever/BuyerOS/pull/12 . Published head is
-22f11ab; later local commits are reviewable follow-ups awaiting PR synchronization.
-The original audit, 114 outcomes and task columns remain preserved. New outcomes
-use execution fields; fixture evidence does not close a production finding.
+## 本機變更
 
-C61-01: input hashes, HEAD/worktrees and Q drift comparison verified locally.
-C61-02: selective Q integration retained; required Q PG suite 64/64, 45 Node
-cases and full built 96/96 at 53bb6cf pass. Initial PR CI exposed a cold JWKS
-race and document preference observer issue. Focused RED then 51 auth/DB cases,
-4 observer units and the fresh full 96-case built suite pass. Earlier interrupted,
-stale, empty and ENOSPC runs remain unsuccessful. JWT trust was not widened.
-Latest hosted CI and integrated complete browser run remain pending.
+- 單一雙語 auth surface；exact trusted social-init contract；native recovery 與去敏 support correlation。
+- Preparation/Draft 多 editor transition guards、原 intent recovery、history/unload 保護；queued action 固定原 preparation ID。
+- 研究轉頁修正 render snapshot／history commit 的次序；慢轉頁時先移除舊 editor。
+- 公司搜尋有界分頁／獨立 retry；買家 domain／fit／來源摘要明示 Unknown；受限成員目錄姓名與 Mine／Unassigned。
+- Canonical policy business summary，exact JSON/hash 折疊；原 authority／version/hash refusal 不變。
+- 強制 expiry 清除保護資料並明示未提交 preparation 不保留；只新增一般 in-memory boolean，沒有文字儲存。
 
-C61-03: bounded staff reconciliation CLI defaults to read-only, supports existing
-canonical users only and requires current DB admin authority and exact versions.
-36 focused required cases pass. Actual staff accounts and role readback are pending.
-C61-04: sanitized diagnostics and Alembic logging compatibility pass 22 focused
-cases. The historical Oct2 OperationalError root is unconfirmed; C61-05 remains
-blocked on historical evidence. No pool/cold-start explanation is inferred.
-C61-06: migration 0038 restricted directory, canonical resolver and rollback
-payload pass 39 required cases and actual runtime-role warm benchmark. SQL stays
-4 per sample across W=1/10/100/1000. Production migration-owner eligibility,
-index/lock review, deployment and directory performance readback are pending.
-The complete follow-up API suite is 863/863 with fresh JUnit and zero fail/error/
-skip at 92d19d0. Git API/migration tree equality connects it to the integrated
-source; this does not certify later C61-21 edits or the entire repository tree.
+## 本機測試
 
-C61-07: current public Neon SDK/production contract ADR prepared; six offline
-peer SDK cases reviewed. Target Neon project/branch, real email/Google login,
-JWT trust and portable runtime acceptance are pending. C61-08/09 can start locally.
-C61-15: closed provider registry and immutable activation contract are implemented.
-40 API registry cases and 5 durable worker safety cases pass. No provider selected,
-verified account contract or credential configured; activation/spend stay zero.
-C61-16: existing 33 search/fetch/ingestion safety cases verified; live adapters
-and market/language account acceptance still need implementation/evidence.
+| Proof | 狀態 |
+|---|---|
+| N | PASS — `.superpowers\t21-20261022\evidence\native-final-46-r2.json` |
+| P | PASS — `.superpowers\t21-20261022\evidence\public-final-chromium-r2.json` |
+| A | PASS — `.superpowers\t21-20261022\evidence\auth-final-5-r2.json` |
+| S | PASS — `.superpowers\t21-20261022\evidence\sdk-final-9-r2.xml` |
+| POL | PASS — `.superpowers\t21-20261022\evidence\policy-final-9-r2.json` |
+| L | PASS — `.superpowers\t21-20261022\evidence\thin-final-chromium-r2.json` |
+| R | PASS — `.superpowers\t21-20261022\evidence\audit-risk-final-r3.json` |
+| PF | PASS — `.superpowers\t21-20261022\evidence\public-final-firefox-r2.json` |
+| PW | PASS — `.superpowers\t21-20261022\evidence\public-final-webkit-r2.json` |
+| LF | PASS — `.superpowers\t21-20261022\evidence\thin-final-firefox-r2.json` |
+| LW | PASS — `.superpowers\t21-20261022\evidence\thin-final-webkit-r2.json` |
+| HF | PASS — `.superpowers\t21-20261022\evidence\history-final-firefox-r2.json` |
+| HW | PASS — `.superpowers\t21-20261022\evidence\history-final-webkit-r2.json` |
+| API | PASS — `.superpowers\t21-20261022\evidence\api-final-1-api-full.xml` |
+| W | PASS — `.superpowers\t21-20261022\evidence\worker-final-1-worker-full.xml` |
+| FE | PASS — `.superpowers\t21-20261022\evidence\verification-commands-frontend-final-5.json` |
+| CTRL | PASS — `.superpowers\t21-20261022\evidence\verification-commands-controls-final-5.json` |
 
-C61-21: typed scoped six-card summary, pending-approval draft filtering and
-private durable receipt pages are integrated. 54 API/contract, 5 frontend units
-and 24 fresh built cases pass with zero fail/error/skip; all six A/B en/zh-HK390
-cards equal actual filtered API totals. Current membership/project/actor
-predicates and read-only repeatable snapshots isolate receipt pages. Dirty
-drafts and exact Unicode approval/export still pass. Errors remain unavailable.
-The first built 22-pass/2-unsuccessful run is retained; both locator defects
-were corrected without weakening counts or increasing timeouts. Same-version
-real account/provider, production readback and human acceptance remain pending.
-C61-22: readable source cards, exact read-only keyboard selection and workflow
-are integrated. Native Chromium readonly caret failure was reproduced independently;
-grapheme keyboard movement fixes actual [1,3] DOM selection -> [1,2] server emoji
-citation. 22 core + 15 fresh built draft/dirty/retry/Unicode/approval/export cases
-pass, zero fail/error/skip, with source hashes and exact export artifacts. Human
-screen reader/zoom and real-source semantic/readback acceptance are pending.
+完整命令／計數及原始證據見 [local-proof-summary.json](continuation-20261021/local-proof-summary.json)。
+原先 frontend251、thin-journey-4及第一輪final的成功／失敗保留為歷史；最終結果以 frontend-final-5／Native46-r2／journey-r2／risk-r3 為準。R2以後只改risk fixture config，完整frontend/controls及risk92已重跑；產品runtime及artifact相同。跨引擎自動化不代替實體 Safari／正常公司身份驗收。
 
-Research admission still returns honest 503. Native delivery stays protected 403.
-Real provider, built preview with real auth/provider, production readback and human
-UAT have separate gates. Unowned dirty Neon worktree and user branches are untouched.
+## 驗收缺口與發布邊界
 
-Release A (research + approved export): NOT ACCEPTED.
-Neon-only: NOT ACCEPTED.
-Native send (C61-20/30): NOT ACCEPTED.
+- [全部72個 N21 案例](continuation-20261021/CASE_RESULTS.zh-HK.md) 分清 PASS_LOCAL、PARTIAL、BLOCKED；不代表72個人工案例全部執行。
+- [Task ledger](continuation-20261021/task-ledger.json)／[Finding ledger](continuation-20261021/finding-ledger.json) 保留歷史 F01–F24 及原 F13/F25–F34。
+- 真實 Google／branch JWT／FIMMICK membership、同版受控 hosted 環境、正式 provenance 仍需獨立確認；不沿用 admin/mock 代替。
+- 人工 goldset、真人 usability、screen reader／zoom、實體 Safari/mobile、field LCP/INP/CLS 尚缺，不能宣稱 world-class／完整 WCAG 或正式就緒。
+- 本輪沒有 migration/grant/Auth/Secret/安全設定變更，沒有提交24/57；付費 provider、enrichment、真實寄送及正式/rehearsal worker 維持停用。
+- 後續 commit／push／PR、部署／正式前置、公司 UAT 寫入須各按明確授權處理；保留 Native worktree 與所有證據。
 
-Next local work: finish C61-23 maintenance/expiry acceptance; C61-08/09
-and live adapter source remain independent ready tasks. C61-05 depends on actual
-historical root evidence. Production/auth/provider spend/send need their specific
-authority and same-version verified payloads. Rollback remains per task source
-commit; 0038 rollback removes only directory function/index after route rollback,
-preserving canonical IDs, FKs, existing memberships, audit, revisions and holds.
+歷史 CURRENT_STATUS 原文已保存於此 worktree evidence/CURRENT_STATUS.before-T21.md，Git parent 亦保留原版本。

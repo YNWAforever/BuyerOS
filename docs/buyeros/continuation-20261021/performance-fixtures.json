@@ -1,0 +1,87 @@
+{
+  "recorded_at": "2026-10-21T22:22:01.498574+00:00",
+  "run_id": "native-final-46-r2",
+  "source_input_tree_sha256": "0b23d1e3d3000470ba6ed15e5abc80f36703cb257e164360d25977715ea66054",
+  "conditions": "Chromium / one worker / deterministic browser-memory registry /100ms added per transport request / n10 per volume",
+  "limitations": "Not real DB capacity, field Web Vitals, paid provider latency or10000 business writes",
+  "measurements": [
+    {
+      "volume": 100,
+      "materialized_companies": 100,
+      "distinct_company_ids": 100,
+      "latency_ms": 100,
+      "n": 10,
+      "samples_ms": [
+        20.871199999994133,
+        23.78130000003148,
+        19.283700000029057,
+        828.4111000000266,
+        829.2621999999974,
+        845.5582000000286,
+        873.8988000000245,
+        846.4376000000047,
+        861.3489999999874,
+        840.2135000000126
+      ],
+      "p50_ms": 829.2621999999974,
+      "p95_ms": 873.8988000000245,
+      "initial_requests": 2,
+      "page_bound": 24,
+      "snapshot_cap": 1000,
+      "layer": "materialized deterministic browser-memory registry and synthetic transport; not DB capacity or field measurement",
+      "report_attachment": "00707638a35e3bbdb089-8bffe107134c2ddc393b::fixed-latency-selection"
+    },
+    {
+      "volume": 1000,
+      "materialized_companies": 1000,
+      "distinct_company_ids": 1000,
+      "latency_ms": 100,
+      "n": 10,
+      "samples_ms": [
+        23.926800000015646,
+        850.3963000000222,
+        851.6954999999725,
+        840.9063000000315,
+        847.9207999999635,
+        832.3986999999615,
+        836.5284000000102,
+        849.7799000000232,
+        860.4226999999955,
+        863.5188999999664
+      ],
+      "p50_ms": 847.9207999999635,
+      "p95_ms": 863.5188999999664,
+      "initial_requests": 2,
+      "page_bound": 24,
+      "snapshot_cap": 1000,
+      "layer": "materialized deterministic browser-memory registry and synthetic transport; not DB capacity or field measurement",
+      "report_attachment": "00707638a35e3bbdb089-cff4c6da4d02b39d06cc::fixed-latency-selection"
+    },
+    {
+      "volume": 10000,
+      "materialized_companies": 10000,
+      "distinct_company_ids": 10000,
+      "latency_ms": 100,
+      "n": 10,
+      "samples_ms": [
+        20.331300000019837,
+        823.3864000000176,
+        850.7136999999639,
+        843.3647999999812,
+        833.7049000000115,
+        837.7255000000005,
+        843.5905000000494,
+        861.3752000000095,
+        860.8616000000038,
+        843.9299000000465
+      ],
+      "p50_ms": 843.3647999999812,
+      "p95_ms": 861.3752000000095,
+      "initial_requests": 2,
+      "page_bound": 24,
+      "snapshot_cap": 1000,
+      "layer": "materialized deterministic browser-memory registry and synthetic transport; not DB capacity or field measurement",
+      "report_attachment": "00707638a35e3bbdb089-7b2bc64588e3063d61ec::fixed-latency-selection"
+    }
+  ]
+}

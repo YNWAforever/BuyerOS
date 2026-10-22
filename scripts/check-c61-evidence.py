@@ -371,7 +371,10 @@ def _built_playwright_names(raw, group):
         for spec in suite.get('specs',[]):
             if not isinstance(spec,dict) or not isinstance(spec.get('title'),str) or not spec['title'] or not isinstance(spec.get('id'),str) or not spec['id']: raise ValueError('native built spec identity required')
             definition=spec.get('file')
-            if not isinstance(definition,str) or not re.fullmatch(r'(?:[\w.-]+/)*[\w.-]+\.ts',definition) or '..' in Path(definition).parts: raise ValueError('native built definition file required')
+            if not isinstance(definition,str) or not (
+                re.fullmatch(r'(?:[\w.-]+/)*[\w.-]+\.ts',definition) or
+                group=='ci-required' and re.fullmatch(r'(?:[\w.-]+/)*public-ui-audit\.spec\.mjs',definition)
+            ) or '..' in Path(definition).parts: raise ValueError('native built definition file required')
             tests=spec.get('tests')
             if not isinstance(tests,list) or len(tests)!=1 or not isinstance(tests[0],dict) or tests[0].get('results')!=[]: raise ValueError('native list must have one unexecuted project per spec')
             names.append(registration+'::'+' › '.join(parents+[spec['title']]));ids.append(spec['id'])
@@ -379,7 +382,10 @@ def _built_playwright_names(raw, group):
             if not isinstance(child,dict) or not isinstance(child.get('title'),str) or not child['title']: raise ValueError('native built nested suite title required')
             visit(child,registration,parents+[child['title']])
     for suite in report['suites']:
-        if not isinstance(suite,dict) or not isinstance(suite.get('file'),str) or not re.fullmatch(r'[\w-]+\.spec\.ts',suite['file']): raise ValueError('native built registration spec file required')
+        if not isinstance(suite,dict) or not isinstance(suite.get('file'),str) or not (
+            re.fullmatch(r'[\w-]+\.spec\.ts',suite['file']) or
+            group=='ci-required' and suite['file']=='public-ui-audit.spec.mjs'
+        ): raise ValueError('native built registration spec file required')
         visit(suite,suite['file'],[])
     if not names or len(names)!=len(set(names)) or len(ids)!=len(set(ids)): raise ValueError('positive unique native built spec names and ids required')
     files={n.split('::',1)[0] for n in names}

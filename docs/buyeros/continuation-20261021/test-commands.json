@@ -1,0 +1,584 @@
+{
+  "recorded_at": "2026-10-21T22:55:39.159178+00:00",
+  "cwd": "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS",
+  "commands": [
+    {
+      "name": "node-all",
+      "argv": [
+        "node",
+        "--test",
+        "tests\\api-types-generation.test.mjs",
+        "tests\\approval-fingerprint.test.mjs",
+        "tests\\audit-access-denial.test.mjs",
+        "tests\\audit-auth-render.test.mjs",
+        "tests\\audit-bulk-confirmation.test.mjs",
+        "tests\\audit-bulk-manifests.test.mjs",
+        "tests\\audit-delivery-history.test.mjs",
+        "tests\\audit-document-chunk-transport.test.mjs",
+        "tests\\audit-draft-grounding.test.mjs",
+        "tests\\audit-draft-guard.test.mjs",
+        "tests\\audit-fixture-process.test.mjs",
+        "tests\\audit-job-query.test.mjs",
+        "tests\\audit-member-contract.test.mjs",
+        "tests\\audit-offer-intake.test.mjs",
+        "tests\\audit-preference-navigation.test.mjs",
+        "tests\\audit-preference-observer.test.mjs",
+        "tests\\audit-profile-loading.test.mjs",
+        "tests\\audit-profile-read.test.mjs",
+        "tests\\audit-profile-save-transport.test.mjs",
+        "tests\\audit-research-intent.test.mjs",
+        "tests\\audit-selection-read.test.mjs",
+        "tests\\bulk-expiry.test.mjs",
+        "tests\\draft-grounding-controls.test.mjs",
+        "tests\\e2e-fixture-cleanup.test.mjs",
+        "tests\\lead-intents.test.mjs",
+        "tests\\neon-auth-boundary.test.mjs",
+        "tests\\neon-auth-built.test.mjs",
+        "tests\\neon-production-config.test.mjs",
+        "tests\\neon-security-proxy.test.mjs",
+        "tests\\neon-session.test.mjs",
+        "tests\\research-candidate-client.test.mjs",
+        "tests\\t21-history-replay.test.mjs",
+        "tests\\t21-navigation.test.mjs",
+        "tests\\t21-oidc-redirect-concurrency.test.mjs",
+        "tests\\t21-oidc-redirect.test.mjs",
+        "tests\\t21-session.test.mjs",
+        "tests\\text-selection-offsets.test.mjs",
+        "tests\\vercel-render.test.mjs",
+        "tests\\vercel-services.test.mjs",
+        "tests\\work-queue.test.mjs",
+        "tests\\worker-gateway.test.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 35.48,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-node-all.log"
+    },
+    {
+      "name": "node-server-sdk",
+      "argv": [
+        "node",
+        "--conditions=react-server",
+        "--test",
+        "tests/neon-auth-server-production.test.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.73,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-node-server-sdk.log"
+    },
+    {
+      "name": "domain-checks",
+      "argv": [
+        "node",
+        "tests/domain-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.29,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-domain-checks.log"
+    },
+    {
+      "name": "live-adapter-checks",
+      "argv": [
+        "node",
+        "tests/live-adapter-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.39,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-adapter-checks.log"
+    },
+    {
+      "name": "buyer-import-checks",
+      "argv": [
+        "node",
+        "tests/buyer-import-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.33,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-buyer-import-checks.log"
+    },
+    {
+      "name": "document-upload-checks",
+      "argv": [
+        "node",
+        "tests/document-upload-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.92,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-document-upload-checks.log"
+    },
+    {
+      "name": "live-auth-checks",
+      "argv": [
+        "node",
+        "tests/live-auth-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.51,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-auth-checks.log"
+    },
+    {
+      "name": "live-runs-checks",
+      "argv": [
+        "node",
+        "tests/live-runs-checks.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.38,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-runs-checks.log"
+    },
+    {
+      "name": "policy-client",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.policy-activation.config.ts"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.65,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-policy-client.log"
+    },
+    {
+      "name": "final-typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 5.98,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-final-typecheck.log"
+    },
+    {
+      "name": "final-lint",
+      "argv": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        ".",
+        "--ignore-pattern",
+        "dist",
+        "--ignore-pattern",
+        ".next",
+        "--ignore-pattern",
+        ".vercel"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 22.6,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-final-lint.log"
+    },
+    {
+      "name": "portable-build",
+      "argv": [
+        "node",
+        "scripts/run-framework.mjs",
+        "build"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 17.03,
+      "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-portable-build.log"
+    },
+    {
+      "name": "api-full",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_api.py",
+        "api-final-1-api-full",
+        "api",
+        "tests",
+        "-q",
+        "--junitxml=../../.superpowers/t21-20261022/evidence/api-final-1-api-full.xml"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2880.7,
+      "log": ".superpowers\\t21-20261022\\evidence\\api-final-1-api-full.log"
+    },
+    {
+      "name": "worker-full",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_api.py",
+        "worker-final-1-worker-full",
+        "worker",
+        "tests",
+        "-q",
+        "--junitxml=../../.superpowers/t21-20261022/evidence/worker-final-1-worker-full.xml"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 108.44,
+      "log": ".superpowers\\t21-20261022\\evidence\\worker-final-1-worker-full.log"
+    },
+    {
+      "name": "release-controls",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_release_readiness.py",
+        "tests/test_candidate_promotion.py",
+        "tests/test_runtime_bundle.py",
+        "tests/test_runtime_bundle_workflow.py",
+        "tests/test_promotion_transport.py",
+        "tests/test_workspace_runtime_observations.py",
+        "tests/test_runtime_observation_packet.py",
+        "tests/test_runtime_observation_workflow.py",
+        "-q",
+        "--junitxml=.superpowers/t21-20261022/evidence/controls-final-5-release-controls.xml"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.7,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-release-controls.log"
+    },
+    {
+      "name": "controls-test_c61allevidence",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_c61*evidence.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 7.01,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_c61allevidence.log"
+    },
+    {
+      "name": "controls-test_pytest_required_discovery",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_pytest_required_discovery.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.37,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_pytest_required_discovery.log"
+    },
+    {
+      "name": "controls-test_playwright_required_discovery",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_playwright_required_discovery.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.99,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_playwright_required_discovery.log"
+    },
+    {
+      "name": "controls-test_t21_public_inventory",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_t21_public_inventory.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.2,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_t21_public_inventory.log"
+    },
+    {
+      "name": "controls-test_lead_workflow_ci_registration",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_lead_workflow_ci_registration.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.17,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_lead_workflow_ci_registration.log"
+    },
+    {
+      "name": "controls-test_policy_activation_ci_registration",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_policy_activation_ci_registration.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.53,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_policy_activation_ci_registration.log"
+    },
+    {
+      "name": "api-types-check",
+      "argv": [
+        "node",
+        "scripts/generate-api-types.mjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.78,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-api-types-check.log"
+    },
+    {
+      "name": "operation-routes-check",
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "scripts/generate-operation-routes.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.86,
+      "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-operation-routes-check.log"
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.t21-public.config.ts",
+        "--browser",
+        "firefox"
+      ],
+      "mode": "public",
+      "exit_code": 0,
+      "elapsed_seconds": 12.76
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.t21-public.config.ts",
+        "--browser",
+        "webkit"
+      ],
+      "mode": "public",
+      "exit_code": 0,
+      "elapsed_seconds": 13.35
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_native.py",
+        "policy-final-9-r2"
+      ],
+      "mode": "policy",
+      "exit_code": 0,
+      "elapsed_seconds": 31.74
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_native.py",
+        "native-final-46-r2"
+      ],
+      "mode": "native",
+      "exit_code": 0,
+      "elapsed_seconds": 315.87
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.t21-public.config.ts"
+      ],
+      "mode": "public",
+      "exit_code": 0,
+      "elapsed_seconds": 5.56
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.t21-auth.config.ts"
+      ],
+      "mode": "auth",
+      "exit_code": 0,
+      "elapsed_seconds": 3.55
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.neon-runtime-built.config.ts"
+      ],
+      "mode": "sdk",
+      "exit_code": 0,
+      "elapsed_seconds": 7.88
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_thin_journey.py",
+        "thin-final-chromium-r2"
+      ],
+      "mode": "journey",
+      "exit_code": 0,
+      "elapsed_seconds": 60.15
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_thin_journey.py",
+        "thin-final-firefox-r2",
+        "--browser",
+        "firefox"
+      ],
+      "mode": "journey",
+      "exit_code": 0,
+      "elapsed_seconds": 64.73
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_thin_journey.py",
+        "thin-final-webkit-r2",
+        "--browser",
+        "webkit"
+      ],
+      "mode": "journey",
+      "exit_code": 0,
+      "elapsed_seconds": 79.06
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_native.py",
+        "history-final-firefox-r2",
+        "--browser",
+        "firefox",
+        "--grep",
+        "browser Back and native reload|in-document Back Discard|approved slow route"
+      ],
+      "mode": "native",
+      "exit_code": 0,
+      "elapsed_seconds": 40.12
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_native.py",
+        "history-final-webkit-r2",
+        "--browser",
+        "webkit",
+        "--grep",
+        "browser Back and native reload|in-document Back Discard|approved slow route"
+      ],
+      "mode": "native",
+      "exit_code": 0,
+      "elapsed_seconds": 45.7
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        "C:\\Users\\laich\\Documents\\BuyerOS\\.superpowers\\t21-20261022\\run_risk_isolated_families.py",
+        "audit-risk-final-r3"
+      ],
+      "mode": "risk",
+      "exit_code": 0,
+      "elapsed_seconds": 883.91
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_risk.py",
+        "audit-risk-final-r3-reground",
+        "tests/e2e/audit-draft-reground.spec.ts"
+      ],
+      "mode": "risk",
+      "exit_code": 0,
+      "elapsed_seconds": 88.04
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_risk.py",
+        "audit-risk-final-r3-template",
+        "tests/e2e/audit-template-copy.spec.ts"
+      ],
+      "mode": "risk",
+      "exit_code": 0,
+      "elapsed_seconds": 50.64
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_risk.py",
+        "audit-risk-final-r3-workspace",
+        "tests/e2e/audit-workspace-recovery.spec.ts"
+      ],
+      "mode": "risk",
+      "exit_code": 0,
+      "elapsed_seconds": 59.66
+    },
+    {
+      "argv": [
+        "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+        ".superpowers/t21-20261022/run_risk.py",
+        "audit-risk-final-r3-core",
+        "tests/e2e/audit-draft-dirty.spec.ts",
+        "tests/e2e/audit-research-intent.spec.ts",
+        "tests/e2e/audit-native-run-progress.spec.ts",
+        "tests/e2e/audit-research-admission.spec.ts",
+        "tests/e2e/audit-reviewed-list-order.spec.ts",
+        "tests/e2e/audit-candidate-review.spec.ts",
+        "tests/e2e/audit-bulk-confirmation.spec.ts",
+        "tests/e2e/audit-auth-entry.spec.ts",
+        "tests/e2e/work-queue-counts.spec.ts",
+        "tests/e2e/audit-access-revocation.spec.ts",
+        "tests/e2e/audit-daily-ux.spec.ts",
+        "tests/e2e/audit-operations.spec.ts"
+      ],
+      "mode": "risk",
+      "exit_code": 0,
+      "elapsed_seconds": 682.67
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-reporter=junit",
+        "--test-reporter-destination=C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\.superpowers\\t21-20261022\\evidence\\navigation-ci-final-14-frozen.xml",
+        "tests/t21-navigation.test.mjs",
+        "tests/t21-history-replay.test.mjs",
+        "tests/t21-oidc-redirect.test.mjs",
+        "tests/t21-oidc-redirect-concurrency.test.mjs"
+      ],
+      "exit_code": 0,
+      "cases": 14,
+      "elapsed_seconds": 0.58,
+      "kind": "LOCAL_EXACT_CI_COMMAND_NOT_GITHUB_ACTIONS",
+      "external_provider_calls": 0
+    }
+  ]
+}

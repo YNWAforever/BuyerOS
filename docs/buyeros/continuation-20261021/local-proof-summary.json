@@ -1,0 +1,545 @@
+{
+  "updated_at": "2026-10-21T22:55:38.653317+00:00",
+  "final": true,
+  "proofs": {
+    "N": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json",
+      "expected_count": 46,
+      "stats": {
+        "startTime": "2026-10-21T22:14:27.755Z",
+        "duration": 307243.403,
+        "expected": 46,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "P": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json",
+      "expected_count": 12,
+      "stats": {
+        "startTime": "2026-10-21T22:19:36.656Z",
+        "duration": 5108.058,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "A": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\auth-final-5-r2.json",
+      "expected_count": 5,
+      "stats": {
+        "startTime": "2026-10-21T22:19:42.977Z",
+        "duration": 3073.0950000000003,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "S": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\sdk-final-9-r2.xml",
+      "expected_count": 9,
+      "stats": {
+        "executed": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "POL": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\policy-final-9-r2.json",
+      "expected_count": 9,
+      "stats": {
+        "startTime": "2026-10-21T22:13:54.891Z",
+        "duration": 23391.314000000002,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "L": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\thin-final-chromium-r2.json",
+      "expected_count": 1,
+      "stats": {
+        "startTime": "2026-10-21T22:20:00.252Z",
+        "duration": 49888.896,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "R": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\audit-risk-final-r3.json",
+      "expected_count": 92,
+      "stats": {
+        "startTime": "2026-10-21T22:36:51.591Z",
+        "duration": 840486.135,
+        "expected": 92,
+        "unexpected": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-risk-final-before-inputs.json"
+    },
+    "PF": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\public-final-firefox-r2.json",
+      "expected_count": 12,
+      "stats": {
+        "startTime": "2026-10-21T22:13:20.148Z",
+        "duration": 12298.315999999999,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "PW": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\public-final-webkit-r2.json",
+      "expected_count": 12,
+      "stats": {
+        "startTime": "2026-10-21T22:13:33.541Z",
+        "duration": 12909.917,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "LF": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\thin-final-firefox-r2.json",
+      "expected_count": 1,
+      "stats": {
+        "startTime": "2026-10-21T22:21:01.187Z",
+        "duration": 54727.911,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "LW": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\thin-final-webkit-r2.json",
+      "expected_count": 1,
+      "stats": {
+        "startTime": "2026-10-21T22:22:06.366Z",
+        "duration": 68978.052,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "HF": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\history-final-firefox-r2.json",
+      "expected_count": 3,
+      "stats": {
+        "startTime": "2026-10-21T22:23:28.788Z",
+        "duration": 31843.029000000002,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "HW": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\history-final-webkit-r2.json",
+      "expected_count": 3,
+      "stats": {
+        "startTime": "2026-10-21T22:24:09.789Z",
+        "duration": 37422.138,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-r2-final-before-browser-inputs.json"
+    },
+    "API": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\api-final-1-api-full.xml",
+      "expected_count": 3005,
+      "stats": {
+        "executed": 3005,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-final-before-inputs.json"
+    },
+    "W": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\worker-final-1-worker-full.xml",
+      "expected_count": 469,
+      "stats": {
+        "executed": 469,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-final-before-inputs.json"
+    },
+    "FE": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\verification-commands-frontend-final-5.json",
+      "commands": [
+        {
+          "name": "node-all",
+          "argv": [
+            "node",
+            "--test",
+            "tests\\api-types-generation.test.mjs",
+            "tests\\approval-fingerprint.test.mjs",
+            "tests\\audit-access-denial.test.mjs",
+            "tests\\audit-auth-render.test.mjs",
+            "tests\\audit-bulk-confirmation.test.mjs",
+            "tests\\audit-bulk-manifests.test.mjs",
+            "tests\\audit-delivery-history.test.mjs",
+            "tests\\audit-document-chunk-transport.test.mjs",
+            "tests\\audit-draft-grounding.test.mjs",
+            "tests\\audit-draft-guard.test.mjs",
+            "tests\\audit-fixture-process.test.mjs",
+            "tests\\audit-job-query.test.mjs",
+            "tests\\audit-member-contract.test.mjs",
+            "tests\\audit-offer-intake.test.mjs",
+            "tests\\audit-preference-navigation.test.mjs",
+            "tests\\audit-preference-observer.test.mjs",
+            "tests\\audit-profile-loading.test.mjs",
+            "tests\\audit-profile-read.test.mjs",
+            "tests\\audit-profile-save-transport.test.mjs",
+            "tests\\audit-research-intent.test.mjs",
+            "tests\\audit-selection-read.test.mjs",
+            "tests\\bulk-expiry.test.mjs",
+            "tests\\draft-grounding-controls.test.mjs",
+            "tests\\e2e-fixture-cleanup.test.mjs",
+            "tests\\lead-intents.test.mjs",
+            "tests\\neon-auth-boundary.test.mjs",
+            "tests\\neon-auth-built.test.mjs",
+            "tests\\neon-production-config.test.mjs",
+            "tests\\neon-security-proxy.test.mjs",
+            "tests\\neon-session.test.mjs",
+            "tests\\research-candidate-client.test.mjs",
+            "tests\\t21-history-replay.test.mjs",
+            "tests\\t21-navigation.test.mjs",
+            "tests\\t21-oidc-redirect-concurrency.test.mjs",
+            "tests\\t21-oidc-redirect.test.mjs",
+            "tests\\t21-session.test.mjs",
+            "tests\\text-selection-offsets.test.mjs",
+            "tests\\vercel-render.test.mjs",
+            "tests\\vercel-services.test.mjs",
+            "tests\\work-queue.test.mjs",
+            "tests\\worker-gateway.test.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 35.48,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-node-all.log"
+        },
+        {
+          "name": "node-server-sdk",
+          "argv": [
+            "node",
+            "--conditions=react-server",
+            "--test",
+            "tests/neon-auth-server-production.test.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.73,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-node-server-sdk.log"
+        },
+        {
+          "name": "domain-checks",
+          "argv": [
+            "node",
+            "tests/domain-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.29,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-domain-checks.log"
+        },
+        {
+          "name": "live-adapter-checks",
+          "argv": [
+            "node",
+            "tests/live-adapter-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.39,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-adapter-checks.log"
+        },
+        {
+          "name": "buyer-import-checks",
+          "argv": [
+            "node",
+            "tests/buyer-import-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.33,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-buyer-import-checks.log"
+        },
+        {
+          "name": "document-upload-checks",
+          "argv": [
+            "node",
+            "tests/document-upload-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.92,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-document-upload-checks.log"
+        },
+        {
+          "name": "live-auth-checks",
+          "argv": [
+            "node",
+            "tests/live-auth-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.51,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-auth-checks.log"
+        },
+        {
+          "name": "live-runs-checks",
+          "argv": [
+            "node",
+            "tests/live-runs-checks.mjs"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 3.38,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-live-runs-checks.log"
+        },
+        {
+          "name": "policy-client",
+          "argv": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "--config",
+            "vitest.policy-activation.config.ts"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.65,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-policy-client.log"
+        },
+        {
+          "name": "final-typecheck",
+          "argv": [
+            "node",
+            "node_modules/typescript/bin/tsc",
+            "--noEmit"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 5.98,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-final-typecheck.log"
+        },
+        {
+          "name": "final-lint",
+          "argv": [
+            "node",
+            "node_modules/eslint/bin/eslint.js",
+            ".",
+            "--ignore-pattern",
+            "dist",
+            "--ignore-pattern",
+            ".next",
+            "--ignore-pattern",
+            ".vercel"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 22.6,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-final-lint.log"
+        },
+        {
+          "name": "portable-build",
+          "argv": [
+            "node",
+            "scripts/run-framework.mjs",
+            "build"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 17.03,
+          "log": ".superpowers\\t21-20261022\\evidence\\frontend-final-5-portable-build.log"
+        }
+      ],
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-risk-final-before-inputs.json",
+      "scope_note": "Full frontend on the frozen candidate; earlier green manifests remain historical."
+    },
+    "CTRL": {
+      "status": "PASS",
+      "path": ".superpowers\\t21-20261022\\evidence\\verification-commands-controls-final-5.json",
+      "commands": [
+        {
+          "name": "release-controls",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "pytest",
+            "tests/test_release_readiness.py",
+            "tests/test_candidate_promotion.py",
+            "tests/test_runtime_bundle.py",
+            "tests/test_runtime_bundle_workflow.py",
+            "tests/test_promotion_transport.py",
+            "tests/test_workspace_runtime_observations.py",
+            "tests/test_runtime_observation_packet.py",
+            "tests/test_runtime_observation_workflow.py",
+            "-q",
+            "--junitxml=.superpowers/t21-20261022/evidence/controls-final-5-release-controls.xml"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 3.7,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-release-controls.log"
+        },
+        {
+          "name": "controls-test_c61allevidence",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_c61*evidence.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 7.01,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_c61allevidence.log"
+        },
+        {
+          "name": "controls-test_pytest_required_discovery",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_pytest_required_discovery.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 3.37,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_pytest_required_discovery.log"
+        },
+        {
+          "name": "controls-test_playwright_required_discovery",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_playwright_required_discovery.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 2.99,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_playwright_required_discovery.log"
+        },
+        {
+          "name": "controls-test_t21_public_inventory",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_t21_public_inventory.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.2,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_t21_public_inventory.log"
+        },
+        {
+          "name": "controls-test_lead_workflow_ci_registration",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_lead_workflow_ci_registration.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 3.17,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_lead_workflow_ci_registration.log"
+        },
+        {
+          "name": "controls-test_policy_activation_ci_registration",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-p",
+            "test_policy_activation_ci_registration.py",
+            "-v"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 1.53,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-controls-test_policy_activation_ci_registration.log"
+        },
+        {
+          "name": "api-types-check",
+          "argv": [
+            "node",
+            "scripts/generate-api-types.mjs",
+            "--check"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.78,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-api-types-check.log"
+        },
+        {
+          "name": "operation-routes-check",
+          "argv": [
+            "C:\\Users\\laich\\.codex\\worktrees\\buyeros-t21-20261022\\BuyerOS\\services\\api\\.venv\\Scripts\\python.exe",
+            "scripts/generate-operation-routes.py",
+            "--check"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.86,
+          "log": ".superpowers\\t21-20261022\\evidence\\controls-final-5-operation-routes-check.log"
+        }
+      ],
+      "input_capture": ".superpowers/t21-20261022/evidence/candidate-risk-final-before-inputs.json"
+    }
+  }
+}

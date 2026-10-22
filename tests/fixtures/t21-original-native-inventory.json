@@ -1,0 +1,21 @@
+[
+  "lead-evidence.spec.ts::company_person_channel_have_separate_statuses",
+  "lead-evidence.spec.ts::unknown_save_survives_reload_and_company_switch",
+  "lead-evidence.spec.ts::duplicate_apply_and_stale_edit_do_not_duplicate_or_overwrite",
+  "lead-evidence.spec.ts::viewer_and_revoked_actor_cannot_edit_or_replay",
+  "lead-evidence.spec.ts::source_checks_and_research_fit_remain_unchanged",
+  "lead-preparations.spec.ts::public_channel_preparation_is_reviewable_but_unsendable",
+  "lead-preparations.spec.ts::material_change_or_expiry_invalidates_content_review",
+  "lead-preparations.spec.ts::preparation_reload_restores_revision_and_original_intent",
+  "lead-preparations.spec.ts::missing_product_fact_or_extraction_caveat_is_visible",
+  "lead-preparations.spec.ts::committed_write_retains_original_handle_when_readback_and_history_are_rate_limited",
+  "lead-preparations.spec.ts::acknowledged_write_is_not_recovered_after_history_refresh_failure",
+  "lead-workflow.spec.ts::six_pages_preserve_project_and_progress_after_reload",
+  "lead-workflow.spec.ts::metrics_and_filtered_results_count_distinct_companies",
+  "lead-workflow.spec.ts::read_failure_is_unavailable_not_zero",
+  "lead-workflow.spec.ts::followup_due_date_never_starts_a_job",
+  "pilot-budget.spec.ts::monthly_policy_and_disabled_activation_are_separate",
+  "pilot-budget.spec.ts::unknown_spend_and_shared_provider_usage_require_reconciliation",
+  "pilot-budget.spec.ts::prepaid_settlement_and_correction_are_not_double_counted",
+  "pilot-budget.spec.ts::utc_rollover_keeps_unknown_holds_and_local_display"
+]

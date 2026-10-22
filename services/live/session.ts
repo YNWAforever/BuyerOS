@@ -16,8 +16,10 @@ export class SessionScope {
   private currentToken: string | undefined;
   private listeners = new Set<() => void>();
   private clearListeners = new Set<() => void>();
-  private transitionGuard: ((proceed: () => Promise<void>) => Promise<boolean>) | null = null;
+  private transitionGuards = new Set<(proceed: () => Promise<void>) => Promise<boolean>>();
+  private transitionPredicates = new Map<(proceed:()=>Promise<void>)=>Promise<boolean>,()=>boolean>();
   private transitioning = false;
+  private clearedPreparationEdits = false;
   private snapshot: ScopeSnapshot;
 
   constructor(initial: {mode: DataMode; actor?: string; workspace?: string | null; project?: string | null}) {
@@ -35,17 +37,32 @@ export class SessionScope {
   subscribeBeforeClear(listener: () => void): () => void {
     this.clearListeners.add(listener); return () => {this.clearListeners.delete(listener);};
   }
-  registerTransitionGuard(handler: (proceed: () => Promise<void>) => Promise<boolean>): () => void {
-    this.transitionGuard = handler;
-    return () => {if (this.transitionGuard === handler) this.transitionGuard = null;};
+  registerTransitionGuard(handler: (proceed: () => Promise<void>) => Promise<boolean>,blocking:()=>boolean=()=>true): () => void {
+    this.transitionGuards.add(handler);this.transitionPredicates.set(handler,blocking);
+    return () => {this.transitionGuards.delete(handler);this.transitionPredicates.delete(handler);};
   }
+  hasBlockingTransitionGuards():boolean {
+    for(const blocking of this.transitionPredicates.values()){try{if(blocking())return true;}catch{return true;}}
+    return false;
+  }
+  hasTransitionGuards():boolean {return this.transitionGuards.size>0;}
   async transition(proceed: () => Promise<void>): Promise<boolean> {
     if (this.transitioning) return false;
     const identity = this.identity(); this.transitioning = true;
     const guarded = async () => {if (!this.isCurrent(identity)) throw new LiveCancelled('scope changed'); await proceed();};
-    try {if (this.transitionGuard) return await this.transitionGuard(guarded); await guarded(); return true;}
+    try {
+      // Every mounted editor must consent before the actual navigation. A later
+      // cancellation may leave an earlier save complete, never a partial navigation.
+      for (const handler of [...this.transitionGuards]) {
+        if (!await handler(async()=>{if(!this.isCurrent(identity))throw new LiveCancelled('scope changed');})) return false;
+      }
+      await guarded(); return true;
+    }
     finally {this.transitioning = false;}
   }
+  // Generic, in-memory notice only. Never retain preparation text or scope IDs.
+  markPreparationEditsCleared(): void { this.clearedPreparationEdits = true; }
+  preparationEditsWereCleared(): boolean { return this.clearedPreparationEdits; }
   getSnapshot = (): ScopeSnapshot => this.snapshot;
   current(): Scope { return {...this.scope}; }
   identity(): string { return `${this.generation}:${scopeKey(this.scope)}`; }
@@ -65,6 +82,7 @@ export class SessionScope {
     if (this.currentToken === token) return;
     if (!token) for (const listener of this.clearListeners) {try {listener();} catch {/* Security clearing cannot be prevented by a buffer/storage failure. */}}
     this.currentToken = token;
+    if (token) this.clearedPreparationEdits = false;
     if (!token) this.next({actor: '', workspace: null, project: null});
     else this.publish();
   }
