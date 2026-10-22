@@ -45,7 +45,7 @@ export function PilotBudgetPanel({locale,isAdmin,summary=false}:{locale:LeadLoca
     }).catch(cause=>{if(active&&!(cause instanceof LiveCancelled)){setData(null);setError(describeLiveError(cause));}});
     return()=>{active=false;};
   },[refresh,snapshot.identity]);
-  const disabled=loading||operation.busy||operation.unknown||operation.pending.length>0;
+  const disabled=loading||operation.busy||operation.historyBlocked||operation.unknown||operation.pending.length>0;
   const hasProof=Boolean(title.trim()&&safeLeadUrl(url)&&reason.trim().length>=3);
   const source=[{title,url}];
   async function write(input:LeadIntentInput){await operation.run(input,'Budget record saved.');}

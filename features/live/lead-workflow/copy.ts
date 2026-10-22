@@ -1,6 +1,22 @@
 import {liveZh} from '../locale';
 export type LeadLocale='en'|'zh-HK';
 const zh:Record<string,string>={
+  'Checking original operations…':'正在核對原來操作…','Refresh original operations':'重新讀取原來操作',
+  'Original operation history loaded. Read or continue the existing operation.':'已讀取原來操作紀錄，請查明或繼續原有操作。',
+  'Your current member identity is unavailable.':'目前無法核實你的成員身分。',
+  'Leaving does not cancel or undo the original operation. Recover it before editing again.':'離開不會取消或撤回原來操作，請先查明原結果再編輯。',
+
+  'Search companies':'搜尋公司','Loading companies…':'正在載入公司…','Retry companies':'重試載入公司',
+  'No companies yet.':'尚無公司。','Selected company':'已選公司','Selected company unavailable.':'無法讀取已選公司。',
+  'Results are limited to 1,000 companies. Refine the search to find another company.':'結果上限為 1,000 間公司，請縮小搜尋以找其他公司。',
+  'Previous companies':'上一頁公司','Next companies':'下一頁公司','Find owner':'搜尋負責人',
+  'All owners':'所有負責人','Mine':'我的','Unassigned':'未分派','Unavailable member':'成員資料不可用',
+  'Loading members…':'正在讀取成員…','Retry members':'重試載入成員','More members':'更多成員',
+
+  'Unsaved preparation changes':'未儲存的準備內容','Save your changes, discard them, or stay with this preparation.':'請儲存更改、明確捨棄，或保留目前準備內容。',
+  'Save':'儲存','Discard':'捨棄','Cancel':'取消',
+  'Unsaved preparation text stays in this tab only. Session expiry clears it; save a confirmed revision before signing out.':'未儲存的準備文字只保留於此分頁；登入過期會清除文字，登出前請先確認版本已儲存。',
+
   'Preparation purchasing review':'準備稿採購人複核版本','No purchasing person selected':'尚未選擇採購人物',
   'Saved state change reason':'已保存狀態變更理由',
   'Purchasing review history':'採購複核歷史','Load purchasing review history':'讀取採購複核歷史',

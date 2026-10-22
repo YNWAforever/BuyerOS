@@ -160,6 +160,7 @@ async def get_lead_progress(
         (filters.priority is None or row.priority == filters.priority)
         and (filters.stage is None or row.stage == filters.stage)
         and (filters.owner_user_id is None or row.owner_user_id == filters.owner_user_id)
+        and (filters.owner_unassigned is None or not filters.owner_unassigned or row.owner_user_id is None)
         and (filters.due_before is None or (row.due_on is not None and row.due_on <= filters.due_before))
         and (filters.qualifies_for is None or qualifies(row, filters.qualifies_for))
     )]

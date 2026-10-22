@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-10-21T22:55:39.159178+00:00",
+  "source_input_tree_sha256": "b4d2d92053314fd712cc655e116fedd22496a959b3669b6f590a59345cbceb33",
+  "artifact_tree_sha256": "e4595d50f291ce3e9ada3d9ee890718bbd27d7ae07d64695634677264b8553af",
+  "runtime_source_and_artifact_unchanged_during_final_browsers": true,
+  "final_risk_before_after_inputs_identical": true,
+  "test_config_delta_after_r2": [
+    "playwright.t21-risk.config.ts"
+  ],
+  "api": {
+    "cases": 3005,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "worker": {
+    "cases": 469,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_controls": {
+    "cases": 183,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "navigation_protocol": {
+    "cases": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "native": 46,
+  "policy_browser": 9,
+  "public_per_engine": 12,
+  "synthetic_auth": 5,
+  "sdk": 9,
+  "same_project_journey_per_engine": 1,
+  "extra_history_firefox": 3,
+  "extra_history_webkit": 3,
+  "risk_browser": 92,
+  "node_all": 265,
+  "server_sdk": 3,
+  "policy_client": 11,
+  "case_dispositions": {
+    "PASS_LOCAL": 49,
+    "BLOCKED": 7,
+    "PARTIAL": 16
+  },
+  "candidate_ci": "NOT_RUN_NO_COMMIT_OR_PUSH",
+  "production_and_company_uat": "NOT_RUN"
+}

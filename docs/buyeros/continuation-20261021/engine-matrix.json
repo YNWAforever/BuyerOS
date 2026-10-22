@@ -1,0 +1,77 @@
+[
+  {
+    "engine": "Chromium",
+    "results": {
+      "public": {
+        "run_id": "public-final-chromium-r2",
+        "cases": 12,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\public-final-chromium-r2.json"
+      },
+      "same_project_journey": {
+        "run_id": "thin-final-chromium-r2",
+        "cases": 1,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\thin-final-chromium-r2.json"
+      },
+      "history_scope": {
+        "run_id": "native-final-46-r2",
+        "cases": 46,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\native-final-46-r2.json"
+      }
+    },
+    "normal_company_uat": "NOT_RUN",
+    "physical_device": "NOT_RUN"
+  },
+  {
+    "engine": "Firefox",
+    "results": {
+      "public": {
+        "run_id": "public-final-firefox-r2",
+        "cases": 12,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\public-final-firefox-r2.json"
+      },
+      "same_project_journey": {
+        "run_id": "thin-final-firefox-r2",
+        "cases": 1,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\thin-final-firefox-r2.json"
+      },
+      "history_scope": {
+        "run_id": "history-final-firefox-r2",
+        "cases": 3,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\history-final-firefox-r2.json"
+      }
+    },
+    "normal_company_uat": "NOT_RUN",
+    "physical_device": "NOT_RUN"
+  },
+  {
+    "engine": "WebKit",
+    "results": {
+      "public": {
+        "run_id": "public-final-webkit-r2",
+        "cases": 12,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\public-final-webkit-r2.json"
+      },
+      "same_project_journey": {
+        "run_id": "thin-final-webkit-r2",
+        "cases": 1,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\thin-final-webkit-r2.json"
+      },
+      "history_scope": {
+        "run_id": "history-final-webkit-r2",
+        "cases": 3,
+        "status": "PASS_LOCAL",
+        "evidence": ".superpowers\\t21-20261022\\evidence\\history-final-webkit-r2.json"
+      }
+    },
+    "normal_company_uat": "NOT_RUN",
+    "physical_device": "NOT_RUN"
+  }
+]

@@ -70,6 +70,9 @@ def reset_lead_workflow_fixture(dsn):
                    "WHEN user_id='e0000000-0000-4000-8000-000000000006'::uuid THEN ARRAY['viewer'] "
                    "ELSE ARRAY['operator'] END "
                    "WHERE workspace_id=%s", (WORKSPACE,))
+        db.execute("UPDATE project_buyers SET owner_user_id=NULL,version=1 "
+                   "WHERE workspace_id=%s AND project_id=%s AND id=ANY(%s::uuid[])",
+                   (WORKSPACE,PROJECT,BUYERS))
         db.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s", (WORKSPACE,))
         db.execute("UPDATE workspace_preferences SET locale='en' WHERE workspace_id=%s", (WORKSPACE,))
     from tests.policy_activation_fixtures import approve_native_fixture
@@ -124,6 +127,21 @@ def apply_lead_fixture_scenario(dsn, scenario):
             db.execute("UPDATE contact_points SET retention_expires_at=now()-interval '1 second' "
                        "WHERE workspace_id=%s AND company_id=ANY(%s::uuid[])",
                        (WORKSPACE, COMPANIES))
+        elif scenario == "t21_named_members":
+            # Only the verified disposable E2E workspace and its existing actors.
+            names = {
+                ADMIN: "Fixture Alex Chan",
+                "e0000000-0000-4000-8000-000000000004": "Fixture Alex Chan",
+                "e0000000-0000-4000-8000-000000000006": "Fixture Blair Lee",
+            }
+            for actor, name in names.items():
+                db.execute("UPDATE users SET display_name=%s WHERE id=%s AND EXISTS "
+                           "(SELECT 1 FROM memberships WHERE user_id=users.id AND workspace_id=%s)",
+                           (name, actor, WORKSPACE))
+            for buyer, actor in [(BUYERS[0], ADMIN), (BUYERS[1], "e0000000-0000-4000-8000-000000000004")]:
+                db.execute("UPDATE project_buyers SET owner_user_id=%s,version=version+1 "
+                           "WHERE id=%s AND workspace_id=%s AND project_id=%s",
+                           (actor,buyer,WORKSPACE,PROJECT))
         elif scenario == "product_caveat":
             content = db.execute("SELECT content FROM icp_versions WHERE id=%s", (ICP,)).fetchone()[0]
             content["offer_facts"] = []

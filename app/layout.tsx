@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Workspace from "@/features/workspace";
 import { DataModeProvider } from "@/features/providers/data-mode";
 import { WorkspaceSessionProvider } from "@/features/providers/workspace-session";
 import { resolveMode } from "@/services/live/mode";
@@ -38,7 +37,7 @@ export default function RootLayout({
             BUYEROS_AUTH0_CLIENT_ID: process.env.BUYEROS_AUTH0_CLIENT_ID,
             BUYEROS_AUTH0_AUDIENCE: process.env.BUYEROS_AUTH0_AUDIENCE,
           })}>
-            <Workspace mode={mode} />{children}
+            {children}
           </WorkspaceSessionProvider>
         </DataModeProvider>
       </body>

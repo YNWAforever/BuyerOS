@@ -186,7 +186,11 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
       </div>
       {page.items.length?page.items.map(buyer=><div className="activity live-buyer-row" key={buyer.id}>
         <input type="checkbox" aria-label={t('Select {buyer}').replace('{buyer}',buyer.name)} checked={allFiltered?!excluded.includes(buyer.id):buyer.id in selected} onChange={()=>toggle(buyer.id,buyer.version)}/>
-        <div><b>{buyer.name}</b><p><span className={`pill ${toneFor(buyer.fitVerdict)}`}>{t(buyer.fitVerdict||'Fit not assessed')}</span> · <span className={`pill ${toneFor(buyer.reviewStatus)}`}>{t(buyer.reviewStatus||'Not reviewed')}</span> · {buyer.note||t('No note')}</p></div>
+        <div><b>{buyer.name}</b>
+          <p>{buyer.domain||t('Domain unknown')} · {t('Market')}: {t('Unknown')}</p>
+          <p>{t('Fit reason')}: {buyer.fitRationale||t('Unknown')}</p>
+          <p>{t('Sources')}: {buyer.evidenceCount} · {t('Fit evidence freshness')}: {buyer.fitFreshness?t(buyer.fitFreshness):t('Unknown')}</p>
+          <p><span className={`pill ${toneFor(buyer.fitVerdict)}`}>{t(buyer.fitVerdict||'Fit not assessed')}</span> · <span className={`pill ${toneFor(buyer.reviewStatus)}`}>{t(buyer.reviewStatus||'Not reviewed')}</span> · {buyer.note||t('No note')}</p></div>
         <button type="button" data-buyer-id={buyer.id} onClick={event=>{lastDetailTrigger.current=event.currentTarget;setDetailId(buyer.id);}}>{t('Details')}</button>
         {onManualOutcome&&<button type="button" onClick={()=>onManualOutcome(buyer.id,buyer.name)}>{t('Log outcome')}</button>}
       </div>):<p>{t('No buyers in this snapshot.')}</p>}

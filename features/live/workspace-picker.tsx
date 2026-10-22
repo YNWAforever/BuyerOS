@@ -1,5 +1,7 @@
 'use client';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect,useLayoutEffect, useRef, useState,useSyncExternalStore} from 'react';
+import {flushSync} from 'react-dom';
+import {navigationSnapshot,serverNavigationSnapshot,subscribeNavigation,startNavigation,completeNavigationAt} from '@/services/live/navigation-state';
 import {usePathname, useRouter} from 'next/navigation';
 import {useWorkspaceSession, useSessionSnapshot} from '@/features/providers/workspace-session';
 import {toWorkspaces, toProjects, toIcpVersions, type LiveWorkspace, type LiveProject} from '@/services/live/mapping';
@@ -51,6 +53,44 @@ export function LiveWorkspace() {
   const accessChecking=accessCheck===snapshot.identity;
   const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
   const [projectRefresh, setProjectRefresh] = useState(0);
+  const opening=useSyncExternalStore(subscribeNavigation,navigationSnapshot,serverNavigationSnapshot);
+  useLayoutEffect(()=>{
+    if(opening)completeNavigationAt(pathname,window.location.pathname);
+  },[opening,pathname]);
+
+  const beginNavigation=(href:string)=>{
+    const target=new URL(href,window.location.origin);
+    if(target.origin===window.location.origin&&target.pathname!==pathname)flushSync(()=>startNavigation(href));
+  };
+  const beginRef=useRef(beginNavigation);
+  useEffect(()=>{beginRef.current=beginNavigation;});
+  useEffect(()=>{
+    const start=(event:Event)=>{
+      const href=(event as CustomEvent<{href?:unknown}>).detail?.href;
+      if(typeof href==='string')beginRef.current(href);
+    };
+    window.addEventListener('buyeros:navigationstart',start);
+    return()=>window.removeEventListener('buyeros:navigationstart',start);
+  },[]);
+
+  const signInMain=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    if(!snapshot.authenticated&&authBootstrap.kind==='ready')signInMain.current?.focus();
+  },[snapshot.authenticated,authBootstrap.kind]);
+  useEffect(()=>{
+    const restoreScope=()=>{
+      const current=session.current();
+      if(current.workspace===requested('workspace')&&current.project===requested('project'))return;
+      // A URL is not membership authority. Clear the prior scope immediately,
+      // then let the existing current-membership/project loaders validate it.
+      session.next({workspace:null,project:null});setSelectionError('');setProjects({kind:'loading'});
+      setWorkspaceRefresh(value=>value+1);
+    };
+    window.addEventListener('popstate',restoreScope);
+    window.addEventListener('buyeros:location',restoreScope);
+    return()=>{window.removeEventListener('popstate',restoreScope);window.removeEventListener('buyeros:location',restoreScope);};
+  },[session]);
+
   const [locale, setLocale] = useState<'en'|'zh-HK'>('en');
   const [prefVersion,setPrefVersion]=useState(1),[localeSaving,setLocaleSaving]=useState(false),[localeError,setLocaleError]=useState('');
   const [localeReadyFor,setLocaleReadyFor]=useState<string|null>(null);
@@ -106,7 +146,10 @@ export function LiveWorkspace() {
     checkingAccess.current=true;
     setWorkspaceRefresh(value=>value+1);
   }),[client,session]);
-  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+  // Bootstrap becomes ready only after client hydration. A native select
+  // changed before React attaches its handler otherwise loses the user's
+  // language choice when the sign-in route opens (notably Firefox/WebKit).
+  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||authBootstrap.kind==='initializing'}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
   async function copyDiagnostics(){
     const identity=session.identity();
     const message=workspaces.kind==='error'?workspaces.message:accessError;
@@ -195,20 +238,28 @@ export function LiveWorkspace() {
     session.next({project:info.projectId});
     setProjects({kind:'loading'});
     setProjectRefresh(value=>value+1);
+    beginNavigation(`/app?${new URLSearchParams({workspace:workspace!,project:info.projectId,profile:info.icpVersionId})}`);
     router.push(`/app?${new URLSearchParams({workspace:workspace!,project:info.projectId,profile:info.icpVersionId})}`);
   }
   function navigate(path:string) {
     const params = new URLSearchParams(); if (workspace) params.set('workspace',workspace); if (project) params.set('project',project); if (project && requested('profile')) params.set('profile',requested('profile')!);
     const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
-    void session.transition(async()=>{if(mayLeaveOffer())router.push(target.pathname+target.search);}).catch(()=>{});
+    void session.transition(async()=>{if(mayLeaveOffer()){beginNavigation(target.pathname+target.search);router.push(target.pathname+target.search);}}).catch(()=>{});
   }
-  const signInFrame=(body:React.ReactNode)=><main className="main-shell live-workspace live-signin">
+  const signInFrame=(body:React.ReactNode)=><main ref={signInMain} tabIndex={-1} className="main-shell live-workspace live-signin">
     <header className="live-signin-top">{languagePicker}</header>
     <section className="panel live-signin-card"><LiveBrand/>{body}</section>
     <p className="live-signin-note"><ShieldCheck size={14} aria-hidden="true"/>{t('Private workspace. Sign-in is required for every visitor.')}</p>
   </main>;
   if (!auth || authBootstrap.kind==='initializing') return signInFrame(<div role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</div>);
-  if (!snapshot.authenticated) return signInFrame(<><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{authError&&<p role="alert">{authError}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
+  if (!snapshot.authenticated) return signInFrame(<><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{session.preparationEditsWereCleared()&&<p role="alert">{t('Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.')}</p>}{authError&&<p role="alert">{authError}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
+  if(opening&&opening.id===navigationSnapshot()?.id&&pathname!==opening.path)return <main className="main-shell live-workspace" aria-busy="true">
+    <section className="panel" role="status"><h1>{t('Opening page…')}</h1>
+      <p>{t('Your previous edits were saved or explicitly discarded before navigation.')}</p>
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Native recovery cannot re-open the editable old route while an RSC request remains pending. */}
+      <a href={opening.href}>{t('Reload the requested page')}</a>
+    </section>
+  </main>;
   const workspaceName=workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.name:undefined;
   const projectName=projects.kind==='ready'?projects.items.find(item=>item.id===project)?.name:undefined;
   return <LiveFrame t={t} pathname={pathname}
@@ -238,7 +289,7 @@ export function LiveWorkspace() {
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized&&projectKnown&&pathname==='/app'&&<><LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/><PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/></>}
-    {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
+    {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
     {authorized&&projectKnown&&pathname==='/app/settings'&&<PilotBudgetPanel key={`pilot-budget-${snapshot.identity}`} locale={locale} isAdmin={canArchive&&projectActive}/>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}

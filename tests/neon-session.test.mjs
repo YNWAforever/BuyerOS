@@ -4,7 +4,9 @@ import {loadModule} from './ts-loader.mjs';
 const {createLiveClient,LiveCancelled}=await loadModule('services/live/client.ts');
 const {SessionScope}=await loadModule('services/live/session.ts');
 const {normalizeReturnPath}=await loadModule('services/live/auth.ts');
-const adapter=async env=>(await loadModule('services/live/neon-auth.ts')).createNeonAuthAdapter({authPath:'/api/auth'},env);
+const trustedSocialInitOrigin='https://ep-owned.neonauth.us-east-2.aws.neon.tech';
+const trustedSocialInitPath='/neondb/auth/sign-in/social/init';
+const adapter=async env=>(await loadModule('services/live/neon-auth.ts')).createNeonAuthAdapter({authPath:'/api/auth',socialInitOrigin:trustedSocialInitOrigin,socialInitPath:trustedSocialInitPath},env);
 const deferred=()=>{let resolve;return {promise:new Promise(r=>resolve=r),resolve};};
 const jwt=(sub='neon-user',exp=2000)=>['eyJhbGciOiJFZERTQSJ9',Buffer.from(JSON.stringify({sub,exp})).toString('base64url'),'synthetic-signature'].join('.');
 function environment(){
@@ -168,7 +170,7 @@ test('C11 recovery capacity or storage failure keeps every dirty buffer in memor
 test('C11 explicit public provider config cannot reveal secrets or fall back from invalid Neon to Auth0',async()=>{
  const {loadPublicAuth}=await loadModule('lib/auth/public-auth.ts'),url='https://ep-owned.neonauth.us-east-2.aws.neon.tech/neondb/auth';
  const env={NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',BUYEROS_NEON_ENVIRONMENT:'preview',BUYEROS_NEON_AUTH_URL:url,BUYEROS_NEON_EXPECTED_AUTH_URL:url,BUYEROS_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_COOKIE_SECRET:'PRIVATE_CANARY_DO_NOT_SERIALIZE_'.repeat(2),BUYEROS_AUTH0_ISSUER:'https://legacy.example.test/',BUYEROS_AUTH0_CLIENT_ID:'legacy',BUYEROS_AUTH0_AUDIENCE:'legacy'};
- assert.deepEqual(loadPublicAuth(env),{provider:'neon',config:{authPath:'/api/auth'}});
+ assert.deepEqual(loadPublicAuth(env),{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://ep-owned.neonauth.us-east-2.aws.neon.tech',socialInitPath:'/neondb/auth/sign-in/social/init'}});
  for(const wrong of [{BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'},{BUYEROS_NEON_EXPECTED_AUTH_URL:'https://other.neon.tech/auth'},{BUYEROS_AUTH_PROVIDER:'unknown'}]){const value=loadPublicAuth({...env,...wrong});assert.equal(value.provider,'unavailable');assert.doesNotMatch(JSON.stringify(value),/PRIVATE_CANARY|legacy/);}
  assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:undefined}).provider,'auth0');
 });
@@ -240,5 +242,66 @@ test('Google sign-in always offers account selection and preserves the provider 
   redirect.searchParams.delete('prompt');providerUrl.searchParams.delete('prompt');
   assert.equal(redirect.href,providerUrl.href);
   assert.equal(h.entries.get('buyeros-neon-return'),JSON.stringify(tx));
+ }
+});
+
+test('Google sign-in accepts the exact trusted branch social-init URL without changing its opaque token',async()=>{
+ const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+ const returned=`${trustedSocialInitOrigin}${trustedSocialInitPath}?token=synthetic-opaque-token`;
+ h.env.fetch=async(url,init)=>{
+  assert.equal(url,'/api/auth/sign-in/social');
+  assert.equal(JSON.parse(init.body).provider,'google');
+  return Response.json({redirect:false,url:returned});
+ };
+ await auth.signInGoogle();
+ assert.equal(h.env.location.href,returned);
+});
+
+test('Google sign-in rejects untrusted social-init redirects before navigation',async()=>{
+ const base=`${trustedSocialInitOrigin}${trustedSocialInitPath}`;
+ const candidates=[
+  `https://ep-other.neonauth.us-east-2.aws.neon.tech${trustedSocialInitPath}?token=synthetic`,
+  `https://ep-owned.neonauth.us-east-2.aws.neon.tech.evil.test${trustedSocialInitPath}?token=synthetic`,
+  `http://ep-owned.neonauth.us-east-2.aws.neon.tech${trustedSocialInitPath}?token=synthetic`,
+  `https://synthetic-user@ep-owned.neonauth.us-east-2.aws.neon.tech${trustedSocialInitPath}?token=synthetic`,
+  `https://ep-owned.neonauth.us-east-2.aws.neon.tech:8443${trustedSocialInitPath}?token=synthetic`,
+  `${base}/extra?token=synthetic`,
+  `${base}/?token=synthetic`,
+  `${base}?token=synthetic#fragment`,
+  `${base}/%2e%2e/init?token=synthetic`,
+  `${base}?token=`,
+  `${base}?token=%20%20`,
+  `${base}?token=opaque${String.fromCharCode(32)}value`,
+  `${base}?token=first&token=second`,
+  `${base}?token=opaque${String.fromCharCode(0)}value`,
+  `${base}?token=opaque&extra=synthetic`,
+  `${base}?%74oken=synthetic`,
+  'https://accounts.google.com/o/oauth2/v2/auth?state=synthetic#fragment',
+  'http://accounts.google.com/o/oauth2/v2/auth?state=synthetic',
+  'https://synthetic-user@accounts.google.com/o/oauth2/v2/auth?state=synthetic',
+  'https://accounts.google.com:8443/o/oauth2/v2/auth?state=synthetic',
+ ];
+ for(const returned of candidates){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+  const before=h.env.location.href;
+  h.env.fetch=async()=>Response.json({url:returned});
+  await assert.rejects(auth.signInGoogle(),error=>{
+   assert.equal(error.message,'Invalid Google redirect');
+   assert.doesNotMatch(error.message,/synthetic|first|second/);
+   return true;
+  },`accepted synthetic redirect ${returned}`);
+  assert.equal(h.env.location.href,before);
+ }
+});
+
+test('T21-01 failed social transport exposes only a bounded category, status and UUID correlation',async()=>{
+ const {neonSignInDiagnostic}=await loadModule('services/live/neon-auth.ts');
+ for(const requestId of ['12345678-1234-4234-8234-123456789abc','synthetic-opaque-header-not-a-correlation']){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+  h.env.fetch=async()=>Response.json({message:'synthetic-private-response-must-not-be-shown'},{status:503,headers:{'x-request-id':requestId}});
+  let captured;try{await auth.signInGoogle();}catch(error){captured=error;}
+  assert.deepEqual(neonSignInDiagnostic(captured),{category:'service_response',http_status:503,
+   request_id:requestId.startsWith('1234')?requestId:null});
+  assert.doesNotMatch(JSON.stringify(neonSignInDiagnostic(captured)),/opaque|private-response/);
  }
 });

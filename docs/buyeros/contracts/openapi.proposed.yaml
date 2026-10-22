@@ -10018,6 +10018,14 @@ paths:
             type: string
           - type: 'null'
           title: Stage
+      - name: owner_unassigned
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Owner Unassigned
       - name: owner_user_id
         in: query
         required: false

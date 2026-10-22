@@ -1,5 +1,25 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.':'登入時效已結束，本頁的準備內容更改已清除。已提交的儲存仍可能完成，請重新登入後先讀取原操作，再決定是否重試。',
+  'Unsubmitted preparation edits are not retained after session expiry. Save your preparation before your session ends.':'登入時效結束後不會保留未提交的準備內容更改，請在到期前儲存。',
+  'Preparation readback did not match the original target.':'準備內容讀回與原來目標不符；請核對原操作。',
+  'Your current member identity is unavailable.':'目前無法核實你的成員身分。',
+
+  'Opening page…':'正在開啟頁面…','Your previous edits were saved or explicitly discarded before navigation.':'換頁前的更改已儲存或由你明確捨棄。',
+  'Reload the requested page':'重新載入目的頁面',
+
+  'Domain unknown':'網域未知',
+  'Market':'市場',
+  'Fit reason':'匹配理由',
+  'Fit evidence freshness':'匹配證據時效',
+  'Policy summary':'政策摘要',
+  'Regions':'地區',
+  'Data categories':'資料類型',
+  'Permitted actions':'允許動作',
+  'Provided documents':'提供文件數目',
+  'Responsible approver':'負責審批人',
+  'Unavailable member':'成員資料不可用',
+  'Policy approval does not authorize paid research, enrichment or external sending.':'政策批准不代表授權付費研究、聯絡資料增補或對外寄送。',
   'Controlled purpose activation':'用途政策受控啟用',
   'Manual Native processing only. Policy approval does not authorize paid research, enrichment or external sending.':'只涵蓋人工 Native 處理。政策批准不代表授權付費研究、聯絡資料增補或對外寄送。',
   'Controller designation':'資料擁有人指定資格',

@@ -4,9 +4,11 @@ import {useRouter} from 'next/navigation';
 import type {AuthAdapter} from '@/services/live/auth';
 import {completeSessionCallback} from '@/services/live/auth-session';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
+import {useAuthLocale} from '@/features/live/auth-locale';
 
 export default function AuthCallbackPage() {
   const {auth, session, authBootstrap} = useWorkspaceSession();
+  const {t,picker}=useAuthLocale();
   const router = useRouter();
   const [error, setError] = useState('');
   const completion=useRef<{auth:AuthAdapter;promise:Promise<string>}|null>(null),activeAuth=useRef<AuthAdapter|null>(null);
@@ -23,5 +25,7 @@ export default function AuthCallbackPage() {
   }, [auth, router, session]);
   const configurationError=authBootstrap.kind==='configuration_error';
   const message = error || (configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');
-  return <main className="main-shell"><section className="panel" role={error || configurationError ? 'alert' : 'status'}>{message}</section></main>;
+  return <main className="main-shell"><section className="panel" role={error || configurationError ? 'alert' : 'status'}>{t(message)}</section>{error&&<>
+    {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Native recovery abandons the failed callback transaction. */}
+    <a href="/app">{t('Start again')}</a></>}{picker}</main>;
 }

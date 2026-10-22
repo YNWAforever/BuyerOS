@@ -11,6 +11,8 @@ export function LeadLink({href,children,onNavigate}:{href:string;children:ReactN
     if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
     event.preventDefault();
     if(onNavigate)onNavigate(href);
-    else void session.transition(async()=>router.push(href)).catch(()=>{});
+    else void session.transition(async()=>{
+      window.dispatchEvent(new CustomEvent('buyeros:navigationstart',{detail:{href}}));router.push(href);
+    }).catch(()=>{});
   }}>{children}</Link>;
 }

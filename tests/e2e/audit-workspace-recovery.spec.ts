@@ -36,21 +36,31 @@ for(const failure of ['missing','denied']) test(`N11-03 N11-14 ${failure} clipbo
   expect(errors).toEqual([]);
 });
 test('N11-04 empty membership keeps retry disabled while one read is pending',async({page})=>{
-  let reads=0;let release:()=>void=()=>{};const held=new Promise<void>(resolve=>{release=resolve;});
+  let reads=0,baseline=0,holdRetry=false;let release:()=>void=()=>{};const held=new Promise<void>(resolve=>{release=resolve;});
   await page.route(url,async route=>{
-    reads++;if(reads>1)await held;
+    reads++;if(holdRetry)await held;
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data_mode:'live',request_id:requestId,
       data:{items:[],offset:0,limit:100,total:0}})});
   });
   try {
     await signInWorkbench(page,false);
-    const retry=page.getByRole('button',{name:'Check access again',exact:true});await retry.click();
+    // Routing/scope validation can cancel an initial access read. Establish the
+    // ready empty state first; this case measures exactly one *manual* recheck,
+    // not the number of bootstrap requests.
+    await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
+    const retry=page.getByRole('button',{name:'Check access again',exact:true});
+    await expect(retry).toBeEnabled();baseline=reads;expect(baseline).toBeGreaterThanOrEqual(1);
+    holdRetry=true;await retry.click();
     await expect(retry).toBeDisabled();await expect(page.getByRole('status').filter({hasText:'Checking access…'})).toBeVisible();
-    await expect.poll(()=>reads).toBe(2);await retry.press('Enter');expect(reads).toBe(2);
+    await expect.poll(()=>reads).toBe(baseline+1);
+    // Send the user's actual key; Locator.press waits for a disabled target
+    // to become enabled, which is intentionally held until this finally block.
+    await page.keyboard.press('Enter');expect(reads).toBe(baseline+1);
   } finally {release();}
   await expect(page.getByRole('button',{name:'Check access again',exact:true})).toBeEnabled();
   await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
   await expect(page.getByText(/Last checked:/)).toBeVisible();
+  expect(reads).toBe(baseline+1); // Also reject a late duplicate after the held read settles.
 });
 
 const projectsUrl=`http://localhost:5173/v1/workspaces/${workspace}/projects?**`;

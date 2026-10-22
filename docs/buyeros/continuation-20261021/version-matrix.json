@@ -1,0 +1,53 @@
+{
+  "updated_at": "2026-10-21T22:55:38.922028+00:00",
+  "audit_source_sha": "c529dc8523a1d82da91243aaf33ea680a574277f",
+  "github_main_sha": "c529dc8523a1d82da91243aaf33ea680a574277f",
+  "metadata_snapshot": "../../../.superpowers/t21-20261022/evidence/version-metadata-refresh.json",
+  "original_checkout_head": "3f10f4191a4c22653afffeee4218f1bd91c38581",
+  "candidate": {
+    "branch": "codex/t21-workflow-20261022",
+    "head": "c529dc8523a1d82da91243aaf33ea680a574277f",
+    "uncommitted": true,
+    "source_label": "base plus uncommitted diff; never report as unchanged c529 source",
+    "input_tree_sha256": "b4d2d92053314fd712cc655e116fedd22496a959b3669b6f590a59345cbceb33",
+    "artifact_tree_sha256": "e4595d50f291ce3e9ada3d9ee890718bbd27d7ae07d64695634677264b8553af",
+    "artifact_file_count": 2243,
+    "artifact_internal_link_count": 24,
+    "artifact_link_closure_verified": true,
+    "artifact_status": "LATEST_SOURCE_CAPTURED"
+  },
+  "production": {
+    "alias": "buyer-os-nu.vercel.app",
+    "deployment_id": "dpl_DcRxZFpfV6zHYbQyP6rmkxWQvJbc",
+    "source": "cli",
+    "state": "READY",
+    "git_sha": null,
+    "api_sha": null,
+    "worker_sha": null,
+    "schema": null,
+    "provenance": "UNRESOLVED_EVEN_WITH_GIT_REPO_INFO_REQUEST",
+    "normal_company_uat": "NOT_RUN",
+    "historical_schema_note": "Earlier record was 0054; not re-read or treated as current in this T21 run"
+  },
+  "local": {
+    "ui": "emitted Vercel function and frozen assets",
+    "auth": "synthetic protocol / test Principal, not company Google",
+    "schema_target": "0056_policy_activation in independently verified owned disposable PG16 E2E fixtures",
+    "paid_provider_calls": 0,
+    "real_outbound_messages": 0,
+    "real_24_57_submitted": false,
+    "verification": "REQUIRED_LOCAL_PROOFS_PASSED"
+  },
+  "ci": {
+    "existing_main_run_id": 39111507046,
+    "source_sha": "c529dc8523a1d82da91243aaf33ea680a574277f",
+    "main_conclusion": "success",
+    "jobs_success_recorded": 12,
+    "candidate_ci": "NOT_RUN_NO_COMMIT_OR_PUSH",
+    "job_count_changed": false
+  },
+  "normal_company_and_human_uat": {
+    "status": "BLOCKED",
+    "reason": "No same-candidate hosted/normal-company identity acceptance and no human participants/goldset/field data"
+  }
+}

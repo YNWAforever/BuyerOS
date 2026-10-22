@@ -1,0 +1,140 @@
+[
+  {
+    "name": "public-final-firefox-r2",
+    "mode": "public",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:13:19.4016980+08:00",
+      "available_ram_gib": 5,
+      "commit_headroom_gib": 10.13,
+      "c_drive_free_gib": 38.04
+    }
+  },
+  {
+    "name": "public-final-webkit-r2",
+    "mode": "public",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:13:32.8204834+08:00",
+      "available_ram_gib": 5.01,
+      "commit_headroom_gib": 10.13,
+      "c_drive_free_gib": 38.02
+    }
+  },
+  {
+    "name": "policy-final-9-r2",
+    "mode": "policy",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:13:46.7947586+08:00",
+      "available_ram_gib": 5.04,
+      "commit_headroom_gib": 10.17,
+      "c_drive_free_gib": 38.02
+    }
+  },
+  {
+    "name": "native-final-46-r2",
+    "mode": "native",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:14:19.3424572+08:00",
+      "available_ram_gib": 4.8,
+      "commit_headroom_gib": 10.07,
+      "c_drive_free_gib": 38.02
+    }
+  },
+  {
+    "name": "public-final-chromium-r2",
+    "mode": "public",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:19:35.9300174+08:00",
+      "available_ram_gib": 4.85,
+      "commit_headroom_gib": 10.06,
+      "c_drive_free_gib": 37.94
+    }
+  },
+  {
+    "name": "auth-final-5-r2",
+    "mode": "auth",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:19:42.2025749+08:00",
+      "available_ram_gib": 4.83,
+      "commit_headroom_gib": 10.03,
+      "c_drive_free_gib": 37.94
+    }
+  },
+  {
+    "name": "sdk-final-9-r2",
+    "mode": "sdk",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:19:46.3904184+08:00",
+      "available_ram_gib": 4.83,
+      "commit_headroom_gib": 10.06,
+      "c_drive_free_gib": 37.94
+    }
+  },
+  {
+    "name": "thin-final-chromium-r2",
+    "mode": "journey",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:19:54.8945653+08:00",
+      "available_ram_gib": 4.85,
+      "commit_headroom_gib": 10.08,
+      "c_drive_free_gib": 37.94
+    }
+  },
+  {
+    "name": "thin-final-firefox-r2",
+    "mode": "journey",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:20:55.6785360+08:00",
+      "available_ram_gib": 4.81,
+      "commit_headroom_gib": 9.97,
+      "c_drive_free_gib": 37.93
+    }
+  },
+  {
+    "name": "thin-final-webkit-r2",
+    "mode": "journey",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:22:01.0792957+08:00",
+      "available_ram_gib": 4.64,
+      "commit_headroom_gib": 9.91,
+      "c_drive_free_gib": 37.94
+    }
+  },
+  {
+    "name": "history-final-firefox-r2",
+    "mode": "native",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:23:20.8332407+08:00",
+      "available_ram_gib": 4.45,
+      "commit_headroom_gib": 9.79,
+      "c_drive_free_gib": 37.93
+    }
+  },
+  {
+    "name": "history-final-webkit-r2",
+    "mode": "native",
+    "exit_code": 0,
+    "resource": {
+      "timestamp": "2026-10-22T06:24:01.7193385+08:00",
+      "available_ram_gib": 4.34,
+      "commit_headroom_gib": 9.72,
+      "c_drive_free_gib": 37.93
+    }
+  },
+  {
+    "name": "audit-risk-final-r3",
+    "mode": "risk",
+    "exit_code": 0,
+    "supersedes_failed_attempt": "audit-risk-final-r2 (discovery preflight, no fixture started)"
+  }
+]
