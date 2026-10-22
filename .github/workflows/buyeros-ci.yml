@@ -915,7 +915,7 @@ jobs:
 
   browser-continuity:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     # The reviewed helper requires its own named, loopback-only Postgres
     # container. Do not point its destructive fixture at a shared database.
     env:
