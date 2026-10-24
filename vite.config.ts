@@ -53,6 +53,10 @@ export default defineConfig(async () => {
   const cloudflare = vercelTarget ? null : (await import("@cloudflare/vite-plugin")).cloudflare;
 
   return {
+    // The app uses Zod 3 while the auth SDK's Better Auth dependency uses Zod 4.
+    // One optimized bare `zod` entry collapses those resolutions in dev and
+    // crashes even the disabled auth route (.meta is a Zod 4 API).
+    optimizeDeps: { exclude: ["zod"] },
     // Nitro's CSS import resolver treats Tailwind's bare package import as a
     // relative file in this build; target the package's exported stylesheet.
     ...(vercelTarget ? { resolve: { alias: [

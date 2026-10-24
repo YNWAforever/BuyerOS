@@ -1,0 +1,37 @@
+.marketing-shell { margin: 0; background: #f6f8fa; color: #0b1f2a; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.65; }
+.marketing-shell * { box-sizing: border-box; }
+.marketing-shell a { color: inherit; text-underline-offset: .3em; }
+.marketing-shell a:focus-visible, .marketing-shell main:focus-visible { outline: 3px solid #0e766e; outline-offset: 5px; }
+.marketing-shell h1, .marketing-shell h2, .marketing-shell h3, .marketing-shell p { margin: 0; }
+.marketing-header, .marketing-shell main, .marketing-footer { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+.marketing-header { min-height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #ccd7dc; }
+.marketing-brand { font-size: 25px; font-weight: 750; text-decoration: none; letter-spacing: -.04em; }
+.marketing-header nav { display: flex; align-items: center; gap: 24px; }
+.marketing-header nav a { padding-block: 12px; }
+.marketing-skip { position: absolute; top: 12px; left: 24px; transform: translateY(-200%); padding: 12px 20px; background: white; z-index: 2; }
+.marketing-skip:focus { transform: translateY(0); }
+.marketing-hero { padding: 88px 0 80px; max-width: 920px; }
+.marketing-eyebrow { color: #0e766e; font-size: 14px; font-weight: 650; letter-spacing: .06em; }
+.marketing-hero h1 { font-size: clamp(34px, 5vw, 64px); line-height: 1.2; letter-spacing: -.04em; margin-top: 20px; text-wrap: balance; }
+.marketing-intro { max-width: 720px; margin-top: 28px !important; color: #435969; font-size: clamp(18px, 2vw, 22px); }
+.marketing-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin-top: 32px; }
+.marketing-primary { background: #0e766e; color: white !important; padding: 14px 26px; border-radius: 6px; font-weight: 650; text-decoration: none; }
+.marketing-workflow { padding: 48px 0 64px; border-top: 1px solid #ccd7dc; scroll-margin-top: 24px; }
+.marketing-shell h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.35; letter-spacing: -.025em; }
+.marketing-workflow ol { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.marketing-workflow li { border: 1px solid #ccd7dc; border-radius: 10px; background: white; padding: 28px; }
+.marketing-step { color: #0e766e; font-size: 14px; font-weight: 650; }
+.marketing-workflow h3 { font-size: 21px; line-height: 1.4; margin-top: 16px; }
+.marketing-workflow p { color: #435969; margin-top: 12px; }
+.marketing-demo { padding: 40px; border: 1px solid #b6cfcb; border-radius: 10px; background: #eaf3f1; scroll-margin-top: 24px; }
+.marketing-demo p { margin-top: 16px; max-width: 760px; color: #435969; }
+.marketing-footer { padding-block: 36px; color: #435969; font-size: 14px; }
+@media (max-width: 767px) {
+  .marketing-header, .marketing-shell main, .marketing-footer { width: calc(100% - 40px); }
+  .marketing-header { min-height: 76px; gap: 12px; }
+  .marketing-header nav { gap: 18px; font-size: 14px; }
+  .marketing-hero { padding: 56px 0; }
+  .marketing-workflow { padding: 36px 0; }
+  .marketing-workflow ol { grid-template-columns: 1fr; }
+  .marketing-workflow li, .marketing-demo { padding: 24px; }
+}

@@ -11,7 +11,7 @@ const entry = process.env.BUYEROS_VERCEL_FUNCTION_ENTRY
 process.env.NODE_ENV = 'production';
 const {default: handler} = await import(entry.href);
 
-for (const path of ['/', '/app', '/auth/sign-in', '/auth/callback']) {
+for (const path of ['/', '/zh-HK', '/en', '/app', '/auth/sign-in', '/auth/callback']) {
   test(`the built Vercel function renders ${path} without a workspace import failure`, async () => {
     let response = await handler.fetch(new Request(`https://app.test${path}`, {
       headers: {Accept: 'text/html'},
@@ -19,15 +19,19 @@ for (const path of ['/', '/app', '/auth/sign-in', '/auth/callback']) {
     if (path === '/') {
       assert.equal(response.status, 307, 'root redirects to the canonical business layout');
       const location = new URL(response.headers.get('location'), 'https://app.test');
-      assert.equal(location.href, 'https://app.test/app', 'root redirect stays at the exact app origin and path');
+      assert.equal(location.href, 'https://app.test/zh-HK', 'root redirect stays at the exact public origin and default language');
       response = await handler.fetch(new Request(location, {headers: {Accept: 'text/html'}}), {waitUntil() {}});
     }
     const html = await response.text();
     assert.equal(response.status, 200, `${path} initial HTML status`);
     assert.match(response.headers.get('content-type') ?? '', /^text\/html/);
     assert.equal(html.includes('id="__next_error__"'), false, 'SSR error shell');
-    assert.match(html, /FIMMICK BuyerOS/);
-    if(path!=='/auth/callback'){
+    if (['/', '/zh-HK', '/en'].includes(path)) {
+      assert.match(html, /marketing-shell/);
+      assert.match(html, path === '/en' ? /<html lang="en"/ : /<html lang="zh-HK"/);
+      assert.doesNotMatch(html, /WorkspaceSessionProvider|DataModeProvider/);
+    } else assert.match(html, /FIMMICK BuyerOS/);
+    if(['/app', '/auth/sign-in'].includes(path)){
       const localeControl=html.match(/<select\b[^>]*aria-label="Language"[^>]*>/)?.[0];
       assert.ok(localeControl,'initial app HTML exposes the language choice');
       assert.match(localeControl,/\bdisabled(?:=|[ >])/,
