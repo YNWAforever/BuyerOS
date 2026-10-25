@@ -3,8 +3,14 @@ import type {ReactNode} from 'react';
 import {siteCopy, type Locale, type PageId} from './content';
 import {publicPath, otherLocale} from './routes';
 import {publishing} from './publishing';
-import {MarketingEvents} from './events';
 import './marketing.css';
+
+function MarketingClicks() {
+  // Runs with the document, before hydration, so a click is recorded even when
+  // the dev runtime has not finished loading the client bundle.
+  const code = `(function(){if(window.__buyerosMarketingClick)window.removeEventListener('click',window.__buyerosMarketingClick,true);window.__buyerosMarketingClick=function(event){var node=event.target&&event.target.closest&&event.target.closest('[data-marketing-event]');if(!node)return;var name=node.getAttribute('data-marketing-event');if(name!=='cta_click'&&name!=='locale_change')return;var root=document.querySelector('[data-marketing-path]');window.dispatchEvent(new CustomEvent('buyeros:marketing',{detail:{name:name,locale:root?root.getAttribute('data-marketing-locale'):document.documentElement.lang,path:root?root.getAttribute('data-marketing-path'):location.pathname,position:(node.getAttribute('data-position')||'link').slice(0,40)}}));};window.addEventListener('click',window.__buyerosMarketingClick,true);})();`;
+  return <script dangerouslySetInnerHTML={{__html: code}} />;
+}
 
 export function Arrow({diagonal = false}: {diagonal?: boolean}) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d={diagonal ? 'M6 18 18 6M6 6h12v12' : 'M4 12h15m-6-6 6 6-6 6'} /></svg>;
@@ -22,9 +28,9 @@ export function SiteShell({locale, page, children}: {locale: Locale; page: PageI
   const copy = siteCopy[locale], alternate = otherLocale(locale);
   const navigation: PageId[] = ['features', 'how-it-works', 'pricing', 'faq'];
   return <>
-    <MarketingEvents locale={locale} page={page} />
+    <MarketingClicks />
     <a className="marketing-skip" href="#content">{copy.common.skip}</a>
-    <header className="m-site-header">
+    <header className="m-site-header" data-marketing-locale={locale} data-marketing-path={publicPath(locale, page)}>
       <div className="m-container m-nav-row">
         <a className="m-brand" href={publicPath(locale)}><span className="m-brand-symbol" aria-hidden="true">b<span>·</span></span>BuyerOS</a>
         <nav className="m-desktop-nav" aria-label={copy.common.navLabel}>
