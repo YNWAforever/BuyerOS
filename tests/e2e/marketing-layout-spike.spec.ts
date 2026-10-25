@@ -40,6 +40,16 @@ test('public entry redirects and missing routes cannot swallow app or API routes
   expect(await auth.text()).not.toContain('<html');
 });
 
+test('missing public assets return 404 without breaking subsequent SSR', async ({request}) => {
+  // Nitro's fetchable RSC environment has no Node module runner. A duplicate
+  // generic RSC middleware must not turn asset fallthrough into a 500.
+  const missing = await request.get('/marketing-spike-missing.svg', {headers: {Accept: 'image/svg+xml'}});
+  expect(missing.status()).toBe(404);
+  const page = await request.get('/en');
+  expect(page.status()).toBe(200);
+  expect(await page.text()).toContain('Plenty of buyer names. Who deserves a closer look?');
+});
+
 test('locale links, CTA and product root transitions hydrate without public auth activity', async ({page}) => {
   const unexpected: string[] = [], errors: string[] = [], publicRequests: string[] = [];
   let onPublic = true;

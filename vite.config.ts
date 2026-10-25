@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import vinext from "vinext";
 import { defineConfig } from "vite";
+import type {} from "@vitejs/plugin-rsc/types";
 import hostingConfig from "./.openai/hosting.json";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
@@ -37,7 +38,7 @@ const localBindingConfig = {
     : [],
 };
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command, isPreview }) => {
   // Use Miniflare's local Request.cf placeholder unless fetching is requested.
   process.env.CLOUDFLARE_CF_FETCH_ENABLED ??= "false";
   process.env.WRANGLER_SEND_METRICS ??= "false";
@@ -51,8 +52,13 @@ export default defineConfig(async () => {
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
   const cloudflare = vercelTarget ? null : (await import("@cloudflare/vite-plugin")).cloudflare;
+  const nitroDev = vercelTarget && command === "serve" && !isPreview;
 
   return {
+    // Nitro dev owns HTTP and supplies fetchable RSC environments without a
+    // Node `.runner`. Keep Vinext's RSC registration/helpers, but disable the
+    // generic Node HTTP fallback that otherwise throws on missing assets.
+    ...(nitroDev ? { rsc: { serverHandler: false as const } } : {}),
     // The app uses Zod 3 while the auth SDK's Better Auth dependency uses Zod 4.
     // One optimized bare `zod` entry collapses those resolutions in dev and
     // crashes even the disabled auth route (.meta is a Zod 4 API).
