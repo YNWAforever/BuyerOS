@@ -2,7 +2,7 @@
 
 Approved on 2026-10-25 (Hong Kong): evidence-based buyer research positioning, Request a demo CTA, zh-HK default/en, and separate public/product layouts. This revision implements the compatibility sample only. The full marketing website, intake and deployment are separate work.
 
-Tested implementation commit: `7388c0edcf1ed085491de291bf557de6d3fe30ba`, plus the preserved uncommitted core patch described below. Documentation is a separate local commit. One independent review found the bare-app ambiguity; both added regressions failed first and pass after the single fix pass. No Critical or Minor findings were reported.
+Initial implementation: `7388c0edcf1ed085491de291bf557de6d3fe30ba`; initial report: `5c16025f80284f0c73ddda4a7d11cbfdf426a7cf`. Both remain preserved. The supported Nitro development follow-up is tested at `5c6d0128dfaf20e3af6be26f3cbe3403d5cf51d7`, plus the unchanged uncommitted core patch described below. Documentation is committed separately. The initial independent review's bare-app finding and the follow-up's two compatibility notes were addressed with runtime regression evidence.
 
 ## Decision and diff
 
@@ -29,13 +29,11 @@ The independent review found the related bare `/app` case: the generic locale pa
 
 ## Verification
 
-- Cloudflare local built output: 10/10 HTTP/browser contracts after the review fix.
-- Default Cloudflare/Vite development configuration: 10/10 after the Zod optimization and bare-app fixes.
-- Nitro/Vercel local built output: 10/10 same contracts; 9/9 existing built SSR/auth gate checks.
-- Contracts cover raw SSR language/title/headline/noindex, default/login redirects, unknown routes, product deep links, API non-interception and fail-closed responses, callback failure recovery, synthetic signed-token PKCE return with query preservation, back navigation, locale navigation without JS, keyboard skip/focus and widths 390/768/1440.
-- Existing offline Node suite: final 238/238 across 39 files using installed system Chromium through an output-only preload. The initial five owner-directory browser setup failures came from absent bundled Chromium, and were resolved in the harness without editing their tests.
-- Offline SDK server checks: 3/3. Domain checks: 11/11. Live adapter checks: 74/74. Compiled public auth/OIDC checks: 11/11.
-- TypeScript passes. Both builds pass. Lint: zero errors and four pre-existing warnings (draft hooks ×3, workspace-picker unused disable ×1).
+- Follow-up at5c6d012: default Cloudflare/Vite development11/11; the Vercel service's direct Nitro development11/11; Nitro/Vercel local built output11/11; built SSR/auth gate checks9/9.
+- Follow-up compiled public auth/OIDC checks11/11 and proxy checks5/5. TypeScript, Vercel build and Lint pass; lint retains four pre-existing warnings (draft hooks ×3, workspace-picker unused disable ×1). All nine commands and exits are recorded in `nitro-final-commands.json`.
+- Contracts cover raw SSR language/title/headline/noindex, redirects, unknown paths and missing assets404, healthy subsequent SSR, product deep links, API non-interception and fail-closed responses, callback recovery, signed synthetic PKCE with three return destinations, back/locale navigation, no-JS content, keyboard focus and390/768/1440.
+- Retained initial evidence at7388c0e: Cloudflare built10/10 and its successful build; offline Node238/238 across39 files, SDK3/3, domain11/11 and adapter74/74. These unchanged paths were not rerun solely to restate their results for this Nitro-development-only repair.
+- The initial five owner-directory browser setup failures were resolved with installed system Chromium through an output-only preload, without editing those tests.
 - No database used, no real identity/provider traffic, no outreach. These checks do not establish production authentication, deployment or full product acceptance.
 
 Docker cleanup/deployment suites and DB/worker journeys were not rerun for this route-only spike. The previous core-flow results remain historical evidence, not new executions.
@@ -59,6 +57,7 @@ corepack pnpm build
 MARKETING_SPIKE_RUNTIME=cloudflare-built node_modules/.bin/playwright test --config playwright.marketing-spike.config.ts
 node scripts/run-vercel.mjs build
 MARKETING_SPIKE_RUNTIME=vercel-built node_modules/.bin/playwright test --config playwright.marketing-spike.config.ts
+MARKETING_SPIKE_RUNTIME=vercel-dev node_modules/.bin/playwright test --config playwright.marketing-spike.config.ts
 node_modules/.bin/playwright test --config playwright.marketing-spike.config.ts
 node --test tests/vercel-render.test.mjs tests/neon-auth-built.test.mjs
 node --conditions=react-server --test tests/neon-auth-server-production.test.mjs
@@ -69,9 +68,17 @@ corepack pnpm lint
 
 Omit `MARKETING_SPIKE_CHROMIUM` where the normal Playwright browser is installed. The config starts and stops its own server and waits for readiness on port 5193; do not run its runtimes concurrently. It uses project-local XDG tool state. The built Vercel adapter serves the emitted function/static files locally and denies all upstream server fetches.
 
-### Development limitation
+### Nitro development closure — 2026-10-25 UTC
 
-Direct Nitro development reproduced `Cannot read properties of undefined (reading 'import')` from the RSC plugin after dependency optimization. That diagnostic, with the final bundler config but before the bare-app review fix, passed five routing/auth contracts and failed three responsive console checks. This entry is **not** accepted as a clean runtime; it was not rerun after that routing fix. Logs/JSON/traces are retained in `browser-vercel-dev.log`, `browser-vercel-dev-results.json` and `nitro-dev-failures/`. The supported, finally verified acceptance paths are default Cloudflare/Vite development and each built target. The spike does not upgrade dependencies or repair Nitro's lifecycle.
+`vercel.json` explicitly sets the app service's `devCommand` to `node scripts/run-vercel.mjs dev`. It is a supported development path, so the previous characterization as an additional unaccepted diagnostic was insufficient. The earlier failing evidence remains retained rather than being relabelled as passing.
+
+The failure was a duplicate HTTP handler, not a product/auth defect: Nitro creates a fetchable RSC environment without a Node `.runner`, but the generic RSC Node fallback still tried `environment.runner.import`. A missing public SVG consistently returned500 instead of404. The new HTTP regression was watched RED before the repair; the current-revision baseline also reproduced7/10 passing and3 responsive console failures.
+
+The repair uses the installed plugin's public top-level `rsc: {serverHandler: false}` setting only when the target is Vercel, `command === 'serve'` and `!isPreview`. Nitro owns development HTTP handling; `vinext()` and all its RSC registration/helpers remain intact. Builds, Cloudflare and preview retain their previous configuration. No copied private entry IDs, dependency upgrade, auth code or security/network setting changes are needed.
+
+The final chosen setting passes Nitro development11/11, including the new404 regression, raw bilingual SSR, all three signed synthetic PKCE callback destinations and390/768/1440 console checks. The same11 contracts pass in default Cloudflare/Vite dev and built Vercel output. Evidence: `nitro-missing-asset-regression-red.log`, `nitro-final-vercel-dev.log`, `nitro-final-vercel-dev.json` and the per-command receipts. The two compatibility notes from read-only review were addressed by keeping Vinext helpers and excluding preview; there were no Critical or Important findings. No known reproduced local compatibility defect remains from this spike.
+
+Supported local commands remain the existing default `corepack pnpm dev`, the Vercel service's `node scripts/run-vercel.mjs dev`, and built previews. Automated contracts use `MARKETING_SPIKE_RUNTIME=dev`, `vercel-dev` or `vercel-built` with the existing Playwright config and synthetic public settings above. This verifies local protocol behavior, not real identity, providers, DB or deployment acceptance.
 
 ## Preservation and next scope
 
@@ -79,6 +86,6 @@ Baseline `3c79793bea0c0defdf62cec28fa8ef9d3d8ffda2`; local feature branch `codex
 
 All checks run against the marketing revision **plus the preserved uncommitted core-flow patch**; these are not clean-HEAD-only product acceptance results.
 
-The layout structure can support the full bilingual site. Next scope is approved page/copy implementation and public quality checks, retaining native navigation across root layouts. Lead intake still needs its recipient/sink, data handling/privacy details and separate abuse-control contract before activation. Canonical domain/legal/pricing inputs remain owner-supplied. No push, merge, deployment, analytics transmission or lead collection is part of this spike.
+The layout structure can support the full bilingual site. The next user decision is approval to implement the complete bilingual public pages using the already-approved positioning, CTA and layout; those design choices need no repeat approval. Existing authorization ends at this compatibility spike. Lead intake still needs its recipient/sink, data handling/privacy details and separate abuse-control contract before activation. Canonical domain/legal/pricing inputs remain owner-supplied. No push, merge, deployment, analytics transmission or lead collection is part of this spike.
 
 Evidence is retained under `outputs/marketing-spike/`: baseline/preservation receipts, failed and passing logs, per-target browser JSON, screenshots and the original routing mismatch. The Step 3 archive remains an unchanged historical proposal; this document records the approved continuation.
