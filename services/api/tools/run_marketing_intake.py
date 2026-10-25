@@ -2,6 +2,8 @@
 
 From repo root: services/api/.venv/bin/python services/api/tools/run_marketing_intake.py [--serve]
 The serve command prints only a receipt and private Node environment file path.
+`--github-env --receipt` prepares the same fixture for an unfiltered suite and leaves it running.
+`--cleanup --receipt` removes that exact container.
 Ctrl-C verifies exact ownership again before removing its own container.
 """
 from __future__ import annotations
@@ -92,15 +94,71 @@ def prepare(owner, folder):
     return runtime
 
 
+def marketing_environment(runtime, token, receipt, owner):
+    return {"BUYEROS_MARKETING_ENABLED": "1", "BUYEROS_MARKETING_SYNTHETIC_MODE": "1",
+            "BUYEROS_MARKETING_DATABASE_URL": runtime, "BUYEROS_MARKETING_GATEWAY_KEY": token,
+            "BUYEROS_MARKETING_PUBLIC_ORIGIN": "http://127.0.0.1:5195",
+            "BUYEROS_MARKETING_RETENTION_DAYS": "1", "BUYEROS_MARKETING_GLOBAL_PER_HOUR": "100",
+            "BUYEROS_MARKETING_EMAIL_PER_DAY": "3", "BUYEROS_MARKETING_CHALLENGES_PER_MINUTE": "200",
+            "BUYEROS_MARKETING_TEST_TARGET": str(receipt), "BUYEROS_MARKETING_TEST_OWNER_DSN": owner}
+
+
+def publish_github_env(entries):
+    destination = os.environ.get("GITHUB_ENV")
+    if not destination:
+        raise ValueError("explicit GitHub job environment file required")
+    with open(destination, "a", encoding="utf-8") as output:
+        for key, value in entries.items():
+            if "\n" in value or "\r" in value:
+                raise ValueError("single-line fixture environment required")
+            output.write(key + "=" + value + "\n")
+
+
+def remove_owned(receipt, identity, folder):
+    from tests.policy_activation_target import inspect_target
+    inspect_target(receipt)
+    labels = json.loads(docker("inspect", identity["container_id"], "--format", "{{json .Config.Labels}}"))
+    if labels.get("buyeros.marketing.owner") != identity["run_id"]:
+        raise ValueError("refusing to remove a container that is not the owned marketing fixture")
+    docker("rm", "-f", "-v", identity["container_id"])
+    (folder / "cleanup.json").write_text(json.dumps({"container_id": identity["container_id"], "removed": True}))
+
+
+def cleanup_fixture(receipt_path: Path):
+    path = receipt_path.resolve()
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    os.environ["BUYEROS_TEST_DATABASE_URL"] = (
+        f"postgresql://buyeros:buyeros@127.0.0.1:{receipt['port']}/{receipt['database']}"
+    )
+    from tests.policy_activation_target import inspect_target
+    inspect_target(path)
+    labels = json.loads(docker("inspect", receipt["container_id"], "--format", "{{json .Config.Labels}}"))
+    if labels.get("buyeros.marketing.owner") != receipt["run_id"]:
+        raise ValueError("refusing to remove a container that is not the owned marketing fixture")
+    docker("rm", "-f", "-v", receipt["container_id"])
+    path.with_suffix(".cleanup.json").write_text(
+        json.dumps({"container_id": receipt["container_id"], "removed": True}), encoding="utf-8")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--serve", action="store_true")
+    parser.add_argument("--github-env", action="store_true")
+    parser.add_argument("--cleanup", action="store_true")
+    parser.add_argument("--receipt", type=Path)
     parser.add_argument("--api-port", type=int, default=8013)
     parser.add_argument("--readback", type=Path)
     parser.add_argument("--receipt-id", type=uuid.UUID)
     args, tests = parser.parse_known_args()
     if args.readback:
         return readback(args.readback, args.receipt_id)
+    if args.cleanup:
+        if args.github_env or args.serve or args.receipt is None:
+            parser.error("cleanup requires only --receipt")
+        return cleanup_fixture(args.receipt)
+    if args.github_env and (args.serve or args.receipt is None):
+        parser.error("github-env requires --receipt and does not serve")
     # Explicit isolation precedes any helper import or SQL client.
     child = clean_environment()
     for name in list(os.environ):
@@ -112,16 +170,23 @@ def main():
     owner, receipt, identity = allocate(folder)
     private_path = None
     process = None
+    retain = False
     try:
         runtime = prepare(owner, folder)
         token = secrets.token_urlsafe(48)
-        child.update(BUYEROS_MARKETING_ENABLED="1", BUYEROS_MARKETING_SYNTHETIC_MODE="1",
-                     BUYEROS_MARKETING_DATABASE_URL=runtime, BUYEROS_MARKETING_GATEWAY_KEY=token,
-                     BUYEROS_MARKETING_PUBLIC_ORIGIN="http://127.0.0.1:5195",
-                     BUYEROS_MARKETING_RETENTION_DAYS="1", BUYEROS_MARKETING_GLOBAL_PER_HOUR="100",
-                     BUYEROS_MARKETING_EMAIL_PER_DAY="3", BUYEROS_MARKETING_CHALLENGES_PER_MINUTE="200",
-                     BUYEROS_MARKETING_TEST_TARGET=str(receipt), BUYEROS_MARKETING_TEST_OWNER_DSN=owner)
-        print(json.dumps({"evidence": str(folder), "receipt": str(receipt), "identity": identity}), flush=True)
+        if args.github_env:
+            kept = args.receipt.resolve()
+            if kept.exists():
+                raise ValueError("receipt already exists; inspect/reuse the original target, never overwrite it")
+            kept.parent.mkdir(parents=True, exist_ok=True)
+            kept.write_text(receipt.read_text(encoding="utf-8"), encoding="utf-8")
+            receipt = kept
+        child.update(marketing_environment(runtime, token, receipt, owner))
+        print(json.dumps({"evidence": str(folder), "receipt": str(receipt)}), flush=True)
+        if args.github_env:
+            publish_github_env({key: value for key, value in child.items() if key.startswith("BUYEROS_MARKETING_")})
+            retain = True
+            return 0
         if args.serve:
             with socket.socket() as probe:
                 probe.bind(("127.0.0.1", args.api_port))
@@ -147,12 +212,8 @@ def main():
         if process and process.poll() is None:
             process.terminate()
             process.wait(timeout=15)
-        from tests.policy_activation_target import inspect_target
-        inspect_target(receipt)
-        labels = json.loads(docker("inspect", identity["container_id"], "--format", "{{json .Config.Labels}}"))
-        assert labels.get("buyeros.marketing.owner") == identity["run_id"]
-        docker("rm", "-f", "-v", identity["container_id"])
-        (folder / "cleanup.json").write_text(json.dumps({"container_id": identity["container_id"], "removed": True}))
+        if not retain:
+            remove_owned(receipt, identity, folder)
         if private_path:
             private_path.unlink(missing_ok=True)
 
