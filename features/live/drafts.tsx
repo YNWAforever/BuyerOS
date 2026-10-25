@@ -1,9 +1,10 @@
 'use client';
-import {useLayoutEffect,useEffect,useMemo,useRef,useState} from 'react';
+import {useLayoutEffect,useEffect,useEffectEvent,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
-import {readDraftApproval} from '@/services/live/work-queue';
+import {readDraftApproval,type ApprovalFilter} from '@/services/live/work-queue';
 import {useWorkspaceSession,useSessionSnapshot} from '@/features/providers/workspace-session';
-import {LiveCancelled,LiveError,describeLiveError} from '@/services/live/client';
+import {LiveCancelled,LiveError,describeLiveError,type LiveClient} from '@/services/live/client';
+import type {SessionScope} from '@/services/live/session';
 import {ActionIntent} from '@/services/live/action-intent';
 import {DraftDirtyDialog,guardDraftTransition,type DirtyDecision} from './draft-dirty-guard';
 import {ExportDialog} from './export-dialog';
@@ -113,6 +114,12 @@ function eligibleEvidence(row:Evidence){
   return row.status==='available'&&row.relationship==='supports'&&row.kind==='observation'
     &&Boolean(row.retention_until)&&Date.parse(row.retention_until!)>Date.now();
 }
+async function loadDraftListPage(client:LiveClient,session:SessionScope,approval:ApprovalFilter|undefined,listSequence:{current:number},nextOffset:number,setListLoading:(loading:boolean)=>void,setListError:(message:string)=>void,setDrafts:(items:Draft[])=>void,setTotal:(total:number)=>void,setOffset:(offset:number)=>void){
+  const sequence=++listSequence.current,identity=session.identity();setListLoading(true);setListError('');
+  try{const page=await listDrafts(client,session,nextOffset,8,approval);if(sequence===listSequence.current&&session.isCurrent(identity)){setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}}
+  catch(cause){if(sequence===listSequence.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){setDrafts([]);setListError(describeLiveError(cause));}}
+  finally{if(sequence===listSequence.current&&session.isCurrent(identity))setListLoading(false);}
+}
 export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestReview,canApprove,canExport}:{locale:'en'|'zh-HK';canGenerate:boolean;canReviewSender:boolean;canRequestReview:boolean;canApprove:boolean;canExport:boolean}){
   const {client,session,draftRecovery}=useWorkspaceSession(),snapshot=useSessionSnapshot();
   const t=(value:string)=>locale==='zh-HK'?(words[value]||value):value;
@@ -138,13 +145,13 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const editIntent=useRef(new ActionIntent<Draft>());
   const scope=snapshot.scope,scopeKey=snapshot.identity;
   const unsaved=Boolean(draft&&(subject!==draft.subject||body!==draft.body||draftLanguage!==draft.language));
-  const suppressRecovery=useRef(false),retainBuffer=useRef(()=>{}),transitionHandler=useRef<(proceed:()=>Promise<void>)=>Promise<boolean>>(async()=>false);
-  retainBuffer.current=()=>{
+  const suppressRecovery=useRef(false);
+  const retainBuffer=useEffectEvent(()=>{
     if(suppressRecovery.current||!unsaved||!draft||!scope.actor||!scope.workspace||!scope.project)return;
     draftRecovery.retain({actor:scope.actor,workspace:scope.workspace,project:scope.project,draftId:draft.id,
       revisionId:draft.revision_id,version:draft.version,subject,body,language:draftLanguage});
-  };
-  transitionHandler.current=async proceed=>{
+  });
+  const transitionHandler=useEffectEvent(async(proceed:()=>Promise<void>)=>{
     if(busy||transition.current){
       // A clean or explicitly discarded buffer may leave while an old read is pending.
       // A pending save still owns dirty content and must finish before navigation.
@@ -152,24 +159,24 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
       await proceed();return true;
     }
     let proceeded=false;await performTransition(async()=>{await proceed();proceeded=true;});return proceeded;
-  };
-  useEffect(()=>session.subscribeBeforeClear(()=>retainBuffer.current()),[session]);
+  });
+  useEffect(()=>session.subscribeBeforeClear(()=>retainBuffer()),[session]);
   const blocksHistory=useRef(false);
   useLayoutEffect(()=>{blocksHistory.current=unsaved;if(!unsaved)suppressRecovery.current=false;},[unsaved]);
-  useEffect(()=>session.registerTransitionGuard(proceed=>transitionHandler.current(proceed),()=>blocksHistory.current),[session]);
-  function restoreBuffer(opened:Draft){
+  useEffect(()=>session.registerTransitionGuard(proceed=>transitionHandler(proceed),()=>blocksHistory.current),[session]);
+  const restoreBuffer=useEffectEvent((opened:Draft)=>{
     const current=session.current();if(!current.actor||!current.workspace||!current.project)return;
     const buffer=draftRecovery.find({actor:current.actor,workspace:current.workspace,project:current.project,draftId:opened.id});if(!buffer)return;
     setSubject(buffer.subject);setBody(buffer.body);setDraftLanguage(buffer.language);setApprovalConfirmed(false);
     if(buffer.version!==opened.version||buffer.revisionId!==opened.revision_id)setConflict(opened);
     setNotice(t('Unsaved draft recovered. Compare the current revision before saving.'));
-  }
+  });
   useEffect(()=>()=>{choice.current?.('cancel');choice.current=null;},[snapshot.identity]);
   useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
   useEffect(()=>{if(!busy&&returnFocus.current){const target=returnFocus.current;returnFocus.current=null;if(target.isConnected)target.focus();}},[busy]);
   useEffect(()=>{
     if(!unsaved)return;
-    const warn=(event:BeforeUnloadEvent)=>{retainBuffer.current();event.preventDefault();event.returnValue='';};
+    const warn=(event:BeforeUnloadEvent)=>{retainBuffer();event.preventDefault();event.returnValue='';};
     window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);
   },[unsaved]);
   useEffect(()=>{
@@ -198,14 +205,11 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
     return()=>{active=false;};
   },[client,session,scopeKey,scope.workspace,scope.project]);
   useEffect(()=>{
-    if(scope.workspace&&scope.project)void refreshList(0);
-    return()=>{listSequence.current++;};
-  },[client,session,scopeKey,scope.workspace,scope.project,approval]);
-  async function refreshList(nextOffset:number){
-    const sequence=++listSequence.current,identity=session.identity();setListLoading(true);setListError('');
-    try{const page=await listDrafts(client,session,nextOffset,8,approval);if(sequence===listSequence.current&&session.isCurrent(identity)){setDrafts(page.items);setTotal(page.total);setOffset(nextOffset);}}
-    catch(cause){if(sequence===listSequence.current&&session.isCurrent(identity)&&!(cause instanceof LiveCancelled)){setDrafts([]);setListError(describeLiveError(cause));}}
-    finally{if(sequence===listSequence.current&&session.isCurrent(identity))setListLoading(false);}
+    if(scope.workspace&&scope.project)void loadDraftListPage(client,session,approval,listSequence,0,setListLoading,setListError,setDrafts,setTotal,setOffset);
+    return()=>{listSequence.current+=1;};
+  },[approval,client,scope.project,scope.workspace,scopeKey,session]);
+  function refreshList(nextOffset:number){
+    return loadDraftListPage(client,session,approval,listSequence,nextOffset,setListLoading,setListError,setDrafts,setTotal,setOffset);
   }
   async function persistSender(){
     if(!project||!canReviewSender||busy||!senderConfirmed)return;

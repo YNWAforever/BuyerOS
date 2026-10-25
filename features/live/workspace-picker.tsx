@@ -256,7 +256,7 @@ export function LiveWorkspace() {
   if(opening&&opening.id===navigationSnapshot()?.id&&pathname!==opening.path)return <main className="main-shell live-workspace" aria-busy="true">
     <section className="panel" role="status"><h1>{t('Opening page…')}</h1>
       <p>{t('Your previous edits were saved or explicitly discarded before navigation.')}</p>
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Native recovery cannot re-open the editable old route while an RSC request remains pending. */}
+      {/* Native recovery cannot re-open the editable old route while an RSC request remains pending. */}
       <a href={opening.href}>{t('Reload the requested page')}</a>
     </section>
   </main>;
