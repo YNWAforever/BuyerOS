@@ -1,5 +1,6 @@
 import {expect, test, type Page} from '@playwright/test';
 import {webcrypto} from 'node:crypto';
+import type {components} from '@/services/generated/buyeros-api';
 
 const issuer='https://oidc.buyeros.test/';
 const fixtureWorkspace=(id:string, roles=['operator'])=>({id,name:`Workspace ${id}`,roles,data_mode:'live'});
@@ -33,7 +34,16 @@ async function setup(page:Page, input:{workspaces?: ReturnType<typeof fixtureWor
     if(url.pathname==='/v1/workspaces') {const offset=Number(url.searchParams.get('offset')||0);data={items:workspaces.slice(offset,offset+100),offset,limit:100,total:workspaces.length};}
     else {
       const match=url.pathname.match(/^\/v1\/workspaces\/([^/]+)\/projects$/);
-      if(match) {if(match[1]==='A' && input.delayFirstProjectA && firstA) {firstA=false;await new Promise(resolve=>setTimeout(resolve,800));} const items=projects[match[1]]||[],offset=Number(url.searchParams.get('offset')||0);data={items:items.slice(offset,offset+100),offset,limit:100,total:items.length};}
+      const usage=url.pathname.match(/^\/v1\/workspaces\/([^/]+)\/projects\/([^/]+)\/usage$/);
+      if(url.pathname.match(/^\/v1\/workspaces\/[^/]+\/preferences$/)) data={locale:'en',default_markets:[],version:1};
+      else if(usage) data={
+        workspace_id:usage[1],project_id:usage[2],from:url.searchParams.get('from')!,to:url.searchParams.get('to')!,
+        as_of:new Date().toISOString(),categories:[],
+        total_settled:{amount:'0.000000',currency:'USD'},total_reserved:{amount:'0.000000',currency:'USD'},remaining:{amount:'0.000000',currency:'USD'},
+        accepted_company_count:0,eligible_contactable_company_count:0,cost_per_accepted_company:null,cost_per_contactable_accepted_company:null,
+        denominator_definition:'Synthetic empty usage for scope-only browser fixtures.',includes_partial_runs:true,
+      } satisfies components['schemas']['Usage'];
+      else if(match) {if(match[1]==='A' && input.delayFirstProjectA && firstA) {firstA=false;await new Promise(resolve=>setTimeout(resolve,800));} const items=projects[match[1]]||[],offset=Number(url.searchParams.get('offset')||0);data={items:items.slice(offset,offset+100),offset,limit:100,total:items.length};}
       else if(url.pathname.includes('/icp-versions')) data={items:[],offset:0,limit:100,total:0};
       else if(url.pathname.includes('/projects/')) data={id:url.pathname.split('/').at(-1),name:'Selected project',version:1,active_icp_version_id:null};
     }
@@ -133,7 +143,7 @@ test('short-lived token expires reactively and hides scoped UI',async({page})=>{
 
 test('unknown profile deep link returns a 404 state',async({page})=>{
   await setup(page);await signIn(page,'/app?workspace=A&project=P&profile=missing');
-  await expect(page.getByText('Profile not found (404)')).toBeVisible();
+  await expect(page.getByRole('region',{name:'Profile details',exact:true}).getByRole('alert')).toHaveText('Profile not found (404)');
 });
 
 test('workspace selection traverses actual API pages',async({page})=>{
@@ -141,7 +151,9 @@ test('workspace selection traverses actual API pages',async({page})=>{
   const calls=await setup(page,{workspaces,projects:{W104:[fixtureProject('P')]}});
   await signIn(page);
   await expect(page.getByRole('combobox',{name:'Workspace'}).locator('option')).toHaveCount(106);
+  const initialPages=calls.filter(call=>call.url.includes('/v1/workspaces?'));
+  expect(initialPages).toHaveLength(2);
+  expect(initialPages.map(call=>Number(new URL(call.url).searchParams.get('offset')||0))).toEqual([0,100]);
   await page.getByRole('combobox',{name:'Workspace'}).selectOption('W104');
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue('P');
-  expect(calls.filter(call=>call.url.includes('/v1/workspaces?')).length).toBe(2);
 });

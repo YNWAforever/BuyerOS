@@ -1,0 +1,51 @@
+/* BuyerOS visual system, taken from the marketing homepage.
+   Plain CSS shared by public documents and the product; no product utilities. */
+:root {
+  --buyeros-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans HK", sans-serif;
+  --buyeros-background: #f6f8fa;
+  --buyeros-surface: #fff;
+  --buyeros-surface-soft: #fbfcfc;
+  --buyeros-tint: #eef3f4;
+  --buyeros-ink: #0b1f2a;
+  --buyeros-copy: #435969;
+  --buyeros-muted: #536b73;
+  --buyeros-accent: #0e766e;
+  --buyeros-accent-hover: #095e58;
+  --buyeros-accent-soft: #eaf2ef;
+  --buyeros-accent-border: #acc9c1;
+  --buyeros-border: #d7e1e2;
+  --buyeros-input-border: #748b86;
+  --buyeros-success: #355d4d;
+  --buyeros-success-soft: #edf5f0;
+  --buyeros-warning: #715b27;
+  --buyeros-warning-soft: #f7f1e5;
+  --buyeros-warning-border: #e4d8be;
+  --buyeros-error: #91332a;
+  --buyeros-error-soft: #fff3ef;
+  --buyeros-error-border: #b43d31;
+  --buyeros-gold: #d5a867;
+  --buyeros-radius-label: 4px;
+  --buyeros-radius-input: 6px;
+  --buyeros-radius-control: 7px;
+  --buyeros-radius-small: 8px;
+  --buyeros-radius-icon: 9px;
+  --buyeros-radius-card: 10px;
+  --buyeros-radius-panel: 12px;
+  --buyeros-space-1: 4px;
+  --buyeros-space-2: 8px;
+  --buyeros-space-3: 12px;
+  --buyeros-space-4: 16px;
+  --buyeros-space-5: 20px;
+  --buyeros-space-6: 24px;
+  --buyeros-space-8: 32px;
+  --buyeros-space-10: 40px;
+  --buyeros-space-12: 48px;
+  --buyeros-type-title: clamp(28px, 3vw, 40px);
+  --buyeros-type-section: 21px;
+  --buyeros-type-card: 17px;
+  --buyeros-type-body: 16px;
+  --buyeros-type-small: 14px;
+  --buyeros-type-caption: 12px;
+  --buyeros-control-height: 44px;
+  --buyeros-shadow: 0 14px 60px #0b1f2a0d;
+}

@@ -25,7 +25,7 @@ export default function AuthCallbackPage() {
   }, [auth, router, session]);
   const configurationError=authBootstrap.kind==='configuration_error';
   const message = error || (configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');
-  return <main className="main-shell"><section className="panel" role={error || configurationError ? 'alert' : 'status'}>{t(message)}</section>{error&&<>
+  return <main className="main-shell live-workspace live-signin auth-callback"><section className="panel live-signin-card" role={error || configurationError ? 'alert' : 'status'}>{t(message)}</section>{error&&<>
     {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Native recovery abandons the failed callback transaction. */}
-    <a href="/app">{t('Start again')}</a></>}{picker}</main>;
+    <a className="live-auth-restart" href="/app">{t('Start again')}</a></>}{picker}</main>;
 }

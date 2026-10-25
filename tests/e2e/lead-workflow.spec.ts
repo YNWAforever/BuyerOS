@@ -4,7 +4,12 @@ test.beforeEach(async({request})=>resetLead(request));
 test('six_pages_preserve_project_and_progress_after_reload',async({page})=>{
   await signInLead(page,'/app');
   for(const path of ['/app','/app/discover/edit','/app/discover','/app/operations','/app/outreach','/app/settings']){
-    await page.goto(entry(path));await page.reload();await signInLead(page,path);
+    await page.goto(entry(path));await page.reload();
+    // Reuse the installed fictional issuer after the real reload; avoid a third navigation.
+    const workspaceRead=page.waitForRequest(request=>request.method()==='GET'&&new URL(request.url()).pathname==='/v1/workspaces');
+    await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+    await workspaceRead;
+    await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(leadProject,{timeout:30_000});
     await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(leadProject);
     if(path==='/app'||path==='/app/operations')await expect(page.getByRole('region',{name:'Lead workflow',exact:true})).toBeVisible();
     if(path==='/app/outreach')await expect(page.getByRole('region',{name:'Lead preparations',exact:true})).toBeVisible();

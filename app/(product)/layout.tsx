@@ -9,6 +9,7 @@ import {loadPublicAuth} from "@/lib/auth/public-auth";
 export const metadata: Metadata = {
   title: "FIMMICK BuyerOS",
   description: "Buyer discovery, evidence review and human-approved outreach. Private demo workspace.",
+  robots: { index: false, follow: false },
   other: {
     "codex-preview": "development",
   },

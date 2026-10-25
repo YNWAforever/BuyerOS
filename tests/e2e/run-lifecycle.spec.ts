@@ -39,7 +39,7 @@ test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, 
   test.setTimeout(240_000);
   await installFakeLogin(page);
   await login(page);
-  await expect(page.getByRole('heading',{name:'Research runs'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Research runs',level:2,exact:true})).toBeVisible();
   await expect(page.getByText('Actual runs: 12')).toBeVisible();
   await expect(page.locator('.run-list li')).toHaveCount(10);
   await page.getByRole('button',{name:'Next'}).click();
@@ -59,13 +59,14 @@ test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, 
   await expect(page).toHaveURL(createdUrl.toString());
   await expect(page.getByText(/Status:\s*cancelled/)).toBeVisible();
   await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
-  await expect(page.getByRole('heading',{name:'研究進度'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'研究進度',level:2,exact:true})).toBeVisible();
   await page.setViewportSize({width:390,height:844});
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.screenshot({path:'test-results/t20-run-mobile-zhHK-fixture.png',fullPage:true});
   await page.getByRole('combobox',{name:'語言'}).selectOption('en');
-  await expect(page.getByRole('heading',{name:'Research runs'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Research runs',level:2,exact:true})).toBeVisible();
   await login(page,`/app/discover/${seededRun}?${scope}`);
+  await page.getByRole('region',{name:'Research runs',exact:true}).locator('.run-detail > details > summary').click();
   await expect(page.getByText(/Connection:\s*sse/)).toBeVisible();
   const advanced=await request.post('http://127.0.0.1:8000/fixture/advance-run',{data:{step:'partial'}});
   expect(advanced.ok()).toBe(true);
@@ -86,6 +87,7 @@ test('T20 SSE failure falls back to authenticated polling; viewer cannot mutate'
   await login(page,`/app/discover/${seededRun}?${scope}`);
   await expect(page.getByText(/Status:\s*partial/)).toBeVisible();
   await expect(page.getByRole('button',{name:'Stop new work'})).toHaveCount(0);
+  await page.getByRole('region',{name:'Research runs',exact:true}).locator('.run-detail > details > summary').click();
   await expect(page.getByText(/Connection:\s*poll/)).toBeVisible();
   const advanced=await request.post('http://127.0.0.1:8000/fixture/advance-run',{data:{step:'completed'}});
   expect(advanced.ok()).toBe(true);

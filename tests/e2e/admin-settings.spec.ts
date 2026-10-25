@@ -15,24 +15,28 @@ async function signIn(page:Page,subject:'fixture-admin'|'fixture-viewer'){
     await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({access_token:subject,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});});
   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
   await page.goto(`/app/settings?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Sign in'}).click();
-  await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project,{timeout:30_000});
+  await page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}).click();
+  await expect(page.getByRole('combobox',{name:/^(Project|專案)$/,exact:true})).toHaveValue(project,{timeout:30_000});
 }
 
 test('T12 admin settings, durable zh-HK preferences, member audit and operations',async({page})=>{
   test.setTimeout(360_000);await signIn(page,'fixture-admin');
   await expect(page.getByRole('region',{name:'Workspace settings'})).toBeVisible();
-  await expect(page.getByText('Research provider')).toBeVisible();
+  const researchCapability=page.getByRole('region',{name:'Provider capabilities',exact:true}).locator('[data-capability="research"]');
+  await expect(researchCapability).toBeVisible();
+  await expect(researchCapability.locator('output')).toHaveText(/^(unconfigured|blocked|ready|degraded|disabled)$/);
   await expect(page.getByText('NaN',{exact:true})).toHaveCount(0);
   await page.getByRole('textbox',{name:'Default markets'}).fill('HK, US');
   await page.getByRole('button',{name:'Save preferences'}).click();
   await expect(page.getByRole('status').filter({hasText:'Preferences saved.'})).toBeVisible();
-  await page.getByRole('textbox',{name:'Change reason'}).fill('Duty rotation test');
-  const reviewer=page.getByRole('group',{name:'Roles 00000004'});
+  const members=page.getByRole('region',{name:'Member management',exact:true});
+  await members.getByRole('textbox',{name:'Change reason',exact:true}).fill('Duty rotation test');
+  const reviewerRow=members.getByRole('group').filter({has:page.locator('code').filter({hasText:'e0000000-0000-4000-8000-000000000004'})});
+  const reviewer=reviewerRow.getByRole('group',{name:/^Roles /});
   await expect(reviewer).toBeVisible({timeout:15_000});
   await reviewer.getByRole('checkbox',{name:'reviewer',exact:true}).uncheck();
   await reviewer.getByRole('checkbox',{name:'viewer',exact:true}).check();
-  await reviewer.locator('..').getByRole('button',{name:'Save member'}).click();
+  await reviewerRow.getByRole('button',{name:'Save member',exact:true}).click();
   await expect(page.getByRole('status').filter({hasText:'Membership updated.'})).toBeVisible();
   const localeSaved=page.waitForResponse(r=>r.url().includes(`/v1/workspaces/${workspace}/preferences`)&&r.request().method()==='PATCH');
   await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
@@ -44,8 +48,9 @@ test('T12 admin settings, durable zh-HK preferences, member audit and operations
   await expect(page.getByRole('region',{name:'工作區設定'})).toBeVisible();
   await page.screenshot({path:'test-results/t12-admin-settings-zhHK.png',fullPage:true});
   await page.reload();
-  await expect(page.getByRole('button',{name:'Sign in'})).toBeVisible();
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
+  await expect(page.getByRole('button',{name:'登入',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'登入',exact:true}).click();
   await expect(page.getByRole('combobox',{name:/Project|專案/})).toHaveValue(project,{timeout:60_000});
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK',{timeout:60_000});
   await expect(page.getByRole('textbox',{name:'預設市場'})).toHaveValue('HK, US');
@@ -97,11 +102,11 @@ test('T13 admin sets a versioned zero-start budget and viewer has no budget cont
   catch(error){throw new Error(`Unexpected alert after budget save; preference responses: ${preferenceResponses.join(', ')}`,{cause:error});}
   await page.screenshot({path:'test-results/t13-budget-mobile-disposable-db.png',fullPage:true});
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}).click();
   await expect(page.getByRole('combobox',{name:/Project|專案/})).toHaveValue(project,{timeout:60_000});
   await expect(page.getByRole('region',{name:/Budget settings|預算設定/})).toContainText('12.000000 USD',{timeout:60_000});
   await page.screenshot({path:'test-results/t13-budget-reload-disposable-db.png',fullPage:true});
-  await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
+  await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).selectOption('zh-HK');
   await expect(page.getByRole('region',{name:'預算設定'})).toContainText('12.000000 USD',{timeout:60_000});
   await expect(page.getByRole('region',{name:'預算設定'})).toContainText('核准上限');
   await expect(page.getByRole('alert')).toHaveCount(0,{timeout:30_000});

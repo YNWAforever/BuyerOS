@@ -16,6 +16,8 @@ async function signIn(page:Page,subject:'fixture-access'|'fixture-viewer'='fixtu
     await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({access_token:subject,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});});
   await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
   await page.goto(`/app/discover?workspace=${workspace}&project=${project}`);
+  await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).selectOption('en');
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
   await page.getByRole('button',{name:'Sign in'}).click();
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project,{timeout:30_000});
   await expect(page.getByText('101 in snapshot')).toBeVisible({timeout:30_000});
@@ -54,7 +56,7 @@ test('T11 preview, durable progress, failed-only export, retry and reload',async
   await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
   await expect(page.getByRole('region',{name:'批量工作進度'})).toContainText('已處理 101／101 列');
-  await expect(page.getByText('Rows 1–12 of 101')).toBeVisible();
+  await expect(page.getByText('第 1–12 項，共 101 項')).toBeVisible();
   await page.screenshot({path:'test-results/t11-bulk-disposable-db-zhHK.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);
