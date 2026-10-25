@@ -132,7 +132,8 @@ customer result is claimed.
 ## Verification and revision
 
 Final commands, results, fingerprints, local commit IDs and limitations are
-recorded in `outputs/marketing-full/verification.json` and the final task report.
+recorded in [marketing-site-verification.md](marketing-site-verification.md) and
+`outputs/marketing-full/verification.json`.
 Historical core acceptance evidence and its seven-file uncommitted patch are
 preserved separately. No push, merge, deployment or production data change is
 part of this delivery.
