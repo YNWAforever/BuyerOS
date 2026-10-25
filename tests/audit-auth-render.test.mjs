@@ -7,7 +7,7 @@ import React from 'react';
 import {renderToString} from 'react-dom/server';
 // Render the actual callback consumer at the server/hydration boundary.
 // Router/context stand-ins avoid a browser and do not simulate successful login.
-let source=ts.transpileModule(fs.readFileSync('app/auth/callback/page.tsx','utf8'),{compilerOptions:{
+let source=ts.transpileModule(fs.readFileSync('app/(product)/auth/callback/page.tsx','utf8'),{compilerOptions:{
   module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 source=source.replace(/from ["']@\/services\/live\/auth-session["']/g,`from ${JSON.stringify(moduleUrl('services/live/auth-session.ts'))}`).replace(/from ["']react["']/g,`from ${JSON.stringify(import.meta.resolve('react'))}`)
  .replace(/from ["']react\/jsx-runtime["']/g,`from ${JSON.stringify(import.meta.resolve('react/jsx-runtime'))}`)

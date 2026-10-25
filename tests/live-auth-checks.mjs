@@ -113,7 +113,7 @@ console.log(`${n} live auth checks passed including OIDC crypto`);
 // Exercise the actual layout argument after the actual Vite public definitions.
 // Cloudflare RSC has its own process.env; the Node build environment is separate.
 const {loadPublicAuth}=await loadModule('lib/auth/public-auth.ts');
-const layout=ts.createSourceFile('app/layout.tsx',readFileSync('app/layout.tsx','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const layout=ts.createSourceFile('app/(product)/layout.tsx',readFileSync('app/(product)/layout.tsx','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const authArguments=[];
 function visit(node){
  if(ts.isCallExpression(node)&&ts.isIdentifier(node.expression)&&node.expression.text==='loadPublicAuth'){

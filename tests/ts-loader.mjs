@@ -9,6 +9,10 @@ const cache=new Map();
 export function moduleUrl(file){
   const abs=path.resolve(file);
   if(cache.has(abs))return cache.get(abs);
+  if(abs.endsWith('.json')){
+    const u='data:text/javascript;base64,'+Buffer.from('export default '+JSON.stringify(JSON.parse(fs.readFileSync(abs,'utf8')))).toString('base64');
+    cache.set(abs,u);return u;
+  }
   let js=ts.transpileModule(fs.readFileSync(abs,'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
   js=js.replace(/from\s*(['"])([^'"]+)\1/g,(all,q,spec)=>{
     let f=spec.startsWith('@/')?path.resolve(spec.slice(2)):path.resolve(path.dirname(abs),spec);

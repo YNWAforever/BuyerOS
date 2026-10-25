@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../globals.css";
 import { DataModeProvider } from "@/features/providers/data-mode";
 import { WorkspaceSessionProvider } from "@/features/providers/workspace-session";
 import { resolveMode } from "@/services/live/mode";
