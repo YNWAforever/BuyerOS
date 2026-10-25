@@ -45,6 +45,7 @@ from .routes.worker_internal import router as worker_internal_router
 from .unimplemented import router as unimplemented_router
 from .write_precondition import WritePreconditionMiddleware
 from buyeros_api.settings import get_settings
+from buyeros_api.marketing.router import router as marketing_router
 
 
 @asynccontextmanager
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(HTTPException, http_error_handler)
     app.add_exception_handler(Exception, internal_error_handler)
     app.include_router(health_router)
+    app.include_router(marketing_router)
     app.include_router(release_binding_router)
     app.include_router(settings_router)
     app.include_router(memberships_router)
