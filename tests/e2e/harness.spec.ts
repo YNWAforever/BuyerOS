@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('demo UI loads beside an isolated Postgres API fixture with fake identity', async ({ page, request }) => {
-  await page.goto('/');
+  await page.goto('/app');
   await expect(page).toHaveTitle(/BuyerOS/);
   await expect(page.locator('body')).toContainText(/demo mode/i);
   await page.screenshot({ path: 'test-results/t00-demo-fixture.png', fullPage: true });
