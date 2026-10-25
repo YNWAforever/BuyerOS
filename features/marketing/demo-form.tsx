@@ -1,4 +1,5 @@
 'use client';
+import './demo-form.css';
 import {useCallback, useEffect, useRef, useState, useSyncExternalStore, type FormEvent} from 'react';
 import type {Locale, SiteCopy} from './content';
 import {Input} from '@/components/ui/input';
