@@ -1,10 +1,12 @@
 import {defineConfig} from '@playwright/test';
 
 const reuse=process.env.BUYEROS_REUSE_TEST_SERVER==='1';
-if(!process.env.BUYEROS_POLICY_TARGET_RECEIPT||!process.env.BUYEROS_TEST_DATABASE_URL){
-  throw new Error('Use services/api/tools/run_core_isolated.py to allocate and verify this run\'s disposable target');
-}
+const ownedTarget=Boolean(process.env.BUYEROS_POLICY_TARGET_RECEIPT&&process.env.BUYEROS_TEST_DATABASE_URL);
 export default defineConfig({
+  globalSetup:'./tests/e2e/core-isolated-setup.ts',
+  // The owned runner proves and removes its container. Direct Playwright still
+  // uses the shared teardown so an interrupted fixture cannot be adopted later.
+  ...(ownedTarget?{}:{globalTeardown:'./tests/e2e/teardown.ts'}),
   testDir:'./tests/e2e',testMatch:'core-isolated.spec.ts',workers:1,
   outputDir:process.env.BUYEROS_CORE_OUTPUT_DIR||'test-results/core-isolated',
   reporter:[['list'],['junit',{outputFile:process.env.BUYEROS_CORE_JUNIT||'test-results/core-isolated.xml'}]],
