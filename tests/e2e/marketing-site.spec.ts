@@ -67,12 +67,41 @@ for (const width of [390, 768, 1440]) test(`both languages and all pages fit ${w
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => {if (message.type() === 'error') errors.push(message.text());});
   await page.setViewportSize({width, height: 900});
+  await page.goto('/en');
+  const heroStyle = await page.locator('main h1').evaluate(el => {
+    const css = getComputedStyle(el);
+    return {fontSize: css.fontSize, lineHeight: css.lineHeight, letterSpacing: css.letterSpacing, fontWeight: css.fontWeight};
+  });
+  const introStyle = await page.locator('.m-hero-intro').evaluate(el => {
+    const css = getComputedStyle(el);
+    return {fontSize: css.fontSize, lineHeight: css.lineHeight, color: css.color};
+  });
   for (const locale of locales) for (const slug of slugs) {
     await page.goto(`/${locale}${slug}`);
     await expect(page.locator('main h1')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${slug}`).toBe(true);
+    if (slug) {
+      expect(await page.locator('main h1').evaluate(el => {
+        const css = getComputedStyle(el);
+        return {fontSize: css.fontSize, lineHeight: css.lineHeight, letterSpacing: css.letterSpacing, fontWeight: css.fontWeight};
+      }), `${locale}${slug}: homepage title scale`).toEqual(heroStyle);
+      expect(await page.locator('.m-page-hero .m-hero-intro').evaluate(el => {
+        const css = getComputedStyle(el);
+        return {fontSize: css.fontSize, lineHeight: css.lineHeight, color: css.color};
+      }), `${locale}${slug}: homepage introduction`).toEqual(introStyle);
+      if (['/privacy', '/terms', '/faq'].includes(slug)) {
+        const hero = await page.locator('.m-page-hero').boundingBox();
+        const body = await page.locator(slug === '/faq' ? 'main .m-section.m-faq-section' : '.m-legal').boundingBox();
+        expect(hero!.x, `${locale}${slug}: aligned reading column`).toBeCloseTo(body!.x, 0);
+      }
+    }
+    await page.locator('main img').evaluateAll(elements => Promise.all(elements.map(el => {
+      const image = el as HTMLImageElement;
+      image.loading = 'eager';
+      return image.decode();
+    })));
     // Hiding the caret mutates input style attributes while streamed React is hydrating.
-    if (['', '/features', '/demo'].includes(slug)) await page.screenshot({path: `outputs/marketing-full/${locale}-${slug.slice(1) || 'home'}-${width}.png`, fullPage: true, caret: 'initial'});
+    await page.screenshot({path: `outputs/marketing-full/${locale}-${slug.slice(1) || 'home'}-${width}.png`, fullPage: true, caret: 'initial'});
   }
   expect(errors).toEqual([]);
 });
@@ -163,5 +192,14 @@ test('public heading navigation has one h1 and no skipped levels', async ({page}
     const levels = await page.locator('main :is(h1,h2,h3,h4,h5,h6)').evaluateAll(elements => elements.map(el => Number(el.tagName[1])));
     expect(levels.filter(level => level === 1), `${locale}${slug}`).toHaveLength(1);
     for (let i = 1; i < levels.length; i++) expect(levels[i], `${locale}${slug}: ${levels.join(',')}`).toBeLessThanOrEqual(levels[i-1] + 1);
+  }
+});
+
+test('only the demo form loads the Tailwind product stylesheet', async ({page}) => {
+  for (const locale of locales) for (const slug of slugs) {
+    await page.goto(`/${locale}${slug}`);
+    const productStyles = await page.evaluate(() => Array.from(document.styleSheets).some(sheet =>
+      Array.from(sheet.cssRules).some(rule => rule.cssText.startsWith('@layer utilities'))));
+    expect(productStyles, `${locale}${slug}: product stylesheet isolation`).toBe(slug === '/demo');
   }
 });
