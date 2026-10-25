@@ -135,6 +135,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [approvalConfirmed,setApprovalConfirmed]=useState(false),[staleDiff,setStaleDiff]=useState<string[]>([]);
   const errorRef=useRef<HTMLParagraphElement>(null),generateIntent=useRef(new ActionIntent<DraftJob>());
+  const editIntent=useRef(new ActionIntent<Draft>());
   const scope=snapshot.scope,scopeKey=snapshot.identity;
   const unsaved=Boolean(draft&&(subject!==draft.subject||body!==draft.body||draftLanguage!==draft.language));
   const suppressRecovery=useRef(false),retainBuffer=useRef(()=>{}),transitionHandler=useRef<(proceed:()=>Promise<void>)=>Promise<boolean>>(async()=>false);
@@ -252,7 +253,11 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   async function persistRevision(identity:string){
     if(!draft||!canGenerate)throw new Error('Draft edit permission required');
     if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
-    const updated=await editDraft(client,session,draft,{subject,body,language:draftLanguage},crypto.randomUUID());
+    const baseline=draft,change={subject,body,language:draftLanguage};
+    const fingerprint=JSON.stringify({identity,draft:baseline.id,version:baseline.version,
+      revision:baseline.revision_id,change});
+    const updated=await editIntent.current.run(fingerprint,
+      key=>editDraft(client,session,baseline,change,key));
     if(!session.isCurrent(identity))throw new LiveCancelled('scope changed');
     forgetBuffer();suppressRecovery.current=true;applyDraft(updated,identity);setNotice(t('Human edits require a new grounding review before approval.'));
     await refreshList(offset);

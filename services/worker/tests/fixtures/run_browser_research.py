@@ -97,6 +97,10 @@ def main() -> None:
     worker = None
     publisher = None
     log_path = ROOT / "test-results" / ("t30-browser-draft-worker.log" if draft_job_id else "t30-browser-worker.log")
+    if directory := os.environ.get("BUYEROS_E2E_WORKER_LOG_DIR"):
+        log_directory = Path(directory)
+        log_directory.mkdir(parents=True, exist_ok=True)
+        log_path = log_directory / f"{run_id}-{draft_job_id or 'research'}-{uuid.uuid4().hex[:8]}.log"
     try:
         docker("run", "-d", "--name", broker_name, "-p", "127.0.0.1::6379", "valkey/valkey:8", timeout=60)
         broker_created = True
