@@ -11,6 +11,7 @@ export type PageId =
   | 'terms';
 
 export type CopyItem = {title: string; text: string};
+export type FaqId = 'about' | 'teams' | 'research' | 'drafts' | 'sources' | 'sending' | 'imports' | 'languages' | 'plans' | 'access';
 
 export type PageCopy = {
   eyebrow: string;
@@ -40,7 +41,13 @@ export type SiteCopy = {
     learnMore: string;
     backHome: string;
     close: string;
+    viewDemo: string;
+    allFeatures: string;
+    allFaq: string;
   };
+  footerGroups: {product: string; evaluate: string; legal: string};
+  featureGroups: Array<{id: 'define' | 'review' | 'drafts'; title: string; text: string; features: string[]}>;
+  faqGroups: Array<{title: string; questions: FaqId[]}>;
   extra: {
     mobileDemo: string;
     heroFootnote: string;
@@ -76,7 +83,7 @@ export type SiteCopy = {
   };
   features: Array<{id: string; title: string; text: string; detail: string}>;
   steps: Array<{title: string; text: string; detail: string}>;
-  faq: Array<{question: string; answer: string}>;
+  faq: Array<{id: FaqId; question: string; answer: string}>;
   form: {
     name: string;
     email: string;
@@ -159,7 +166,21 @@ export const siteCopy = {
       learnMore: '了解三步工作流程',
       backHome: '返回首頁',
       close: '關閉',
+      viewDemo: '查看示範',
+      allFeatures: '查看相關功能',
+      allFaq: '查看所有常見問題',
     },
+    footerGroups: {product: '產品', evaluate: '了解與評估', legal: '法律文件'},
+    featureGroups: [
+      {id: 'define', title: '定義產品與買家條件', text: '整理產品文件、目標市場與理想買家條件，保留版本供團隊檢視。', features: ['documents', 'criteria']},
+      {id: 'review', title: '整理與覆核買家', text: '匯入現有名單，把公司資料、來源、審閱狀態與負責同事放在一起。', features: ['records', 'imports', 'review']},
+      {id: 'drafts', title: '準備與覆核跟進草稿', text: '根據已批准資料建立固定模板，由同事修改與覆核；草稿未發送。', features: ['drafts']},
+    ],
+    faqGroups: [
+      {title: '工作流程', questions: ['about', 'teams', 'drafts', 'sending']},
+      {title: '資料來源與匯入', questions: ['research', 'sources', 'imports']},
+      {title: '存取、語言與方案', questions: ['languages', 'plans', 'access']},
+    ],
     extra: {
       mobileDemo: '示範',
       heroFootnote: '先覆核資料與來源，再決定下一步；此流程不提供寄送。',
@@ -399,16 +420,16 @@ export const siteCopy = {
       {title: '儲存草稿', text: '根據已批准資料準備訊息，交同事覆核。', detail: '固定模板可由同事修改並儲存新版本。草稿未發送，此流程不提供寄送。'},
     ],
     faq: [
-      {question: 'BuyerOS 是甚麼？', answer: 'BuyerOS 是把買家條件、公司資料、來源、人手覆核及跟進草稿整理在同一個工作空間的工具。'},
-      {question: '適合甚麼團隊？', answer: '適合需要一起整理企業買家資料及覆核跟進內容的團隊。可先查看示例流程，再透過示範確認是否適合你的工作方式。'},
-      {question: '會自動找到真實買家嗎？', answer: '研究功能取決於已啟用的服務供應商、權限及設定。本網站使用合成資料，不代表已取得真實買家，亦不保證資料覆蓋或商業成果。'},
-      {question: '草稿是否由 AI 任意撰寫？', answer: '已驗證的流程可使用已批准資料與來源建立固定模板，再由同事修改；這不等於任意 AI 寫作或自動翻譯。'},
-      {question: '有來源是否代表資料已核實？', answer: '不是。來源及審閱記錄協助同事判斷，並不保證第三方資料真確、完整或仍然有效。'},
-      {question: '會自動寄出訊息嗎？', answer: '這個 BuyerOS 流程不提供寄送，只儲存及覆核草稿。未來是否提供寄送仍未確認。'},
-      {question: '能匯入名單及產品文件嗎？', answer: '可匯入 CSV 與 XLSX 名單，並有格式及列數限制。產品文件可使用 PDF、PPTX、TXT 及 MD，另有格式及檔案大小限制。匯入不代表內容已核實。'},
-      {question: '支援哪些語言？', answer: '介面已有英文及香港繁體中文。切換介面語言不會自動翻譯來源內容或草稿中的原有資料。'},
-      {question: '是否免費？價格是多少？', answer: '免費安排、公開價格及方案內容尚待確認。正式聯絡入口開放後，可向團隊了解目前的使用安排；此頁沒有免費試用承諾。'},
-      {question: '誰可以看見資料？示範申請如何處理？', answer: '產品資料按工作空間與成員權限限制存取。正式示範申請目前停用，須先確認營運者、處理用途、接收人、聯絡方式及保存安排。本機合成表單只供虛構資料，收據不代表正式申請。'},
+      {id: 'about', question: 'BuyerOS 是甚麼？', answer: 'BuyerOS 是把買家條件、公司資料、來源、人手覆核及跟進草稿整理在同一個工作空間的工具。'},
+      {id: 'teams', question: '適合甚麼團隊？', answer: '適合需要一起整理企業買家資料及覆核跟進內容的團隊。可先查看示例流程，再透過示範確認是否適合你的工作方式。'},
+      {id: 'research', question: '會自動找到真實買家嗎？', answer: '研究功能取決於已啟用的服務供應商、權限及設定。本網站使用合成資料，不代表已取得真實買家，亦不保證資料覆蓋或商業成果。'},
+      {id: 'drafts', question: '草稿是否由 AI 任意撰寫？', answer: '已驗證的流程可使用已批准資料與來源建立固定模板，再由同事修改；這不等於任意 AI 寫作或自動翻譯。'},
+      {id: 'sources', question: '有來源是否代表資料已核實？', answer: '不是。來源及審閱記錄協助同事判斷，並不保證第三方資料真確、完整或仍然有效。'},
+      {id: 'sending', question: '會自動寄出訊息嗎？', answer: '這個 BuyerOS 流程不提供寄送，只儲存及覆核草稿。未來是否提供寄送仍未確認。'},
+      {id: 'imports', question: '能匯入名單及產品文件嗎？', answer: '可匯入 CSV 與 XLSX 名單，並有格式及列數限制。產品文件可使用 PDF、PPTX、TXT 及 MD，另有格式及檔案大小限制。匯入不代表內容已核實。'},
+      {id: 'languages', question: '支援哪些語言？', answer: '介面已有英文及香港繁體中文。切換介面語言不會自動翻譯來源內容或草稿中的原有資料。'},
+      {id: 'plans', question: '是否免費？價格是多少？', answer: '免費安排、公開價格及方案內容尚待確認。正式聯絡入口開放後，可向團隊了解目前的使用安排；此頁沒有免費試用承諾。'},
+      {id: 'access', question: '誰可以看見資料？示範申請如何處理？', answer: '產品資料按工作空間與成員權限限制存取。正式示範申請目前停用，須先確認營運者、處理用途、接收人、聯絡方式及保存安排。本機合成表單只供虛構資料，收據不代表正式申請。'},
     ],
     form: {
       name: '姓名',
@@ -488,7 +509,21 @@ export const siteCopy = {
       learnMore: 'Explore the three-step workflow',
       backHome: 'Back to home',
       close: 'Close',
+      viewDemo: 'View demo',
+      allFeatures: 'Explore these features',
+      allFaq: 'View all questions',
     },
+    footerGroups: {product: 'Product', evaluate: 'Evaluate', legal: 'Legal'},
+    featureGroups: [
+      {id: 'define', title: 'Define your offer and buyer criteria', text: 'Organize offer documents, target markets and buyer requirements, with versions your team can review.', features: ['documents', 'criteria']},
+      {id: 'review', title: 'Research, organize and review buyers', text: 'Import existing lists and keep company records, sources, review status and ownership together.', features: ['records', 'imports', 'review']},
+      {id: 'drafts', title: 'Prepare and review follow-up drafts', text: 'Build a fixed template from approved information, then edit and review it together. Drafts remain unsent.', features: ['drafts']},
+    ],
+    faqGroups: [
+      {title: 'Workflow', questions: ['about', 'teams', 'drafts', 'sending']},
+      {title: 'Sources and imports', questions: ['research', 'sources', 'imports']},
+      {title: 'Access, language and plans', questions: ['languages', 'plans', 'access']},
+    ],
     extra: {
       mobileDemo: 'Demo',
       heroFootnote: 'Review records and sources before deciding the next step. This workflow does not offer sending.',
@@ -728,16 +763,16 @@ export const siteCopy = {
       {title: 'Save a draft', text: 'Prepare a message from approved information for a colleague to review.', detail: 'Colleagues can edit the fixed template and save revisions. The draft is unsent; this workflow does not offer sending.'},
     ],
     faq: [
-      {question: 'What is BuyerOS?', answer: 'BuyerOS is a workspace for buyer criteria, company records, sources, human review and outreach drafts.'},
-      {question: 'Who is it for?', answer: 'Teams that organize business-buyer information and review follow-up content together. Explore the sample workflow, then use a demonstration to assess the fit.'},
-      {question: 'Does it automatically find real buyers?', answer: 'Research depends on enabled providers, permissions and configuration. This website uses synthetic data. It does not establish actual buyer results or guarantee data coverage or commercial outcomes.'},
-      {question: 'Are drafts freely written by AI?', answer: 'The verified workflow can build a fixed template from approved information and sources for human editing. That does not imply free-form AI writing or automatic translation.'},
-      {question: 'Does a source mean the information is verified?', answer: 'No. Sources and review history support a human decision. They do not guarantee that third-party information is accurate, complete or current.'},
-      {question: 'Will it send messages automatically?', answer: 'This BuyerOS workflow does not offer sending. It saves drafts for review. Future sending availability is unconfirmed.'},
-      {question: 'Can I import lists and offer documents?', answer: 'CSV and XLSX lists can be imported, subject to format and row limits. Offer documents can use PDF, PPTX, TXT and MD, with format and file-size limits. Importing does not verify the contents.'},
-      {question: 'Which languages are supported?', answer: 'English and Traditional Chinese for Hong Kong are present in the interface. Switching interface language does not automatically translate sources or existing information in drafts.'},
-      {question: 'Is it free, and what does it cost?', answer: 'Free access, public pricing and plan details are not confirmed. When the real contact route opens, ask the team about available arrangements. This page makes no free-trial promise.'},
-      {question: 'Who can see data, and how are demo requests handled?', answer: 'Product access is scoped by workspace and membership. Real demo intake is currently disabled until the publisher, purposes, recipient, contact details and retention arrangements are confirmed. The local synthetic form accepts fictional data only; its receipt is not a real demo request.'},
+      {id: 'about', question: 'What is BuyerOS?', answer: 'BuyerOS is a workspace for buyer criteria, company records, sources, human review and outreach drafts.'},
+      {id: 'teams', question: 'Who is it for?', answer: 'Teams that organize business-buyer information and review follow-up content together. Explore the sample workflow, then use a demonstration to assess the fit.'},
+      {id: 'research', question: 'Does it automatically find real buyers?', answer: 'Research depends on enabled providers, permissions and configuration. This website uses synthetic data. It does not establish actual buyer results or guarantee data coverage or commercial outcomes.'},
+      {id: 'drafts', question: 'Are drafts freely written by AI?', answer: 'The verified workflow can build a fixed template from approved information and sources for human editing. That does not imply free-form AI writing or automatic translation.'},
+      {id: 'sources', question: 'Does a source mean the information is verified?', answer: 'No. Sources and review history support a human decision. They do not guarantee that third-party information is accurate, complete or current.'},
+      {id: 'sending', question: 'Will it send messages automatically?', answer: 'This BuyerOS workflow does not offer sending. It saves drafts for review. Future sending availability is unconfirmed.'},
+      {id: 'imports', question: 'Can I import lists and offer documents?', answer: 'CSV and XLSX lists can be imported, subject to format and row limits. Offer documents can use PDF, PPTX, TXT and MD, with format and file-size limits. Importing does not verify the contents.'},
+      {id: 'languages', question: 'Which languages are supported?', answer: 'English and Traditional Chinese for Hong Kong are present in the interface. Switching interface language does not automatically translate sources or existing information in drafts.'},
+      {id: 'plans', question: 'Is it free, and what does it cost?', answer: 'Free access, public pricing and plan details are not confirmed. When the real contact route opens, ask the team about available arrangements. This page makes no free-trial promise.'},
+      {id: 'access', question: 'Who can see data, and how are demo requests handled?', answer: 'Product access is scoped by workspace and membership. Real demo intake is currently disabled until the publisher, purposes, recipient, contact details and retention arrangements are confirmed. The local synthetic form accepts fictional data only; its receipt is not a real demo request.'},
     ],
     form: {
       name: 'Name',
@@ -792,3 +827,12 @@ export const siteCopy = {
     },
   },
 } satisfies Record<Locale, SiteCopy>;
+
+// Visible FAQ selection and JSON-LD share the same stable question IDs.
+export function pageFaq(locale: Locale, page: 'home' | 'faq') {
+  const copy = siteCopy[locale];
+  const ids: readonly FaqId[] = page === 'home'
+    ? ['about', 'research', 'sending', 'languages']
+    : copy.faqGroups.flatMap(group => group.questions);
+  return ids.map(id => copy.faq.find(item => item.id === id)!);
+}

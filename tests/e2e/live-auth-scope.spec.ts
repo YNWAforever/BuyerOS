@@ -51,6 +51,59 @@ async function setup(page:Page, input:{workspaces?: ReturnType<typeof fixtureWor
 }
 async function signIn(page:Page,path='/app') {await page.goto(path);const auth=authFixtures.get(page);if(!auth)throw new Error('Install the owned Neon fixture before sign-in');await auth.signIn();}
 
+test('grouped live navigation preserves scoped destinations and viewer offer restrictions',async({page})=>{
+  await setup(page,{workspaces:[fixtureWorkspace('A',['viewer'])]});
+  await signIn(page,'/app/discover/synthetic-run?workspace=A&project=P');
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue('P');
+  const nav=page.getByRole('navigation',{name:'BuyerOS sections'});
+  const discovery=nav.getByRole('group',{name:'Discover & review',exact:true});
+  await expect(discovery.getByRole('button')).toHaveText(['Offer','Research runs','Buyers']);
+  await expect(discovery.getByRole('button',{name:'Offer',exact:true})).toBeDisabled();
+  await expect(discovery.getByRole('button',{name:'Research runs',exact:true})).toHaveAttribute('aria-current','page');
+  await expect(nav.getByRole('group',{name:'Follow up',exact:true}).getByRole('button')).toHaveText(['Drafts','Results']);
+  await expect(nav.getByRole('group',{name:'Manage',exact:true}).getByRole('button')).toHaveText(['Settings','Operations']);
+  await expect(nav.getByRole('button',{name:'Buyer Lists',exact:true})).toHaveCount(0);
+  await discovery.getByRole('button',{name:'Buyers',exact:true}).click();
+  await expect.poll(()=>new URL(page.url()).pathname).toBe('/app/discover');
+  expect(new URL(page.url()).searchParams.get('workspace')).toBe('A');
+  expect(new URL(page.url()).searchParams.get('project')).toBe('P');
+  await expect(discovery.getByRole('button',{name:'Buyers',exact:true})).toHaveAttribute('aria-current','page');
+  await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
+  await expect(nav.getByRole('group',{name:'尋找與覆核',exact:true}).getByRole('button')).toHaveText(['產品資料','研究進度','買家']);
+  await expect(nav.getByRole('group',{name:'跟進',exact:true}).getByRole('button')).toHaveText(['草稿','結果']);
+  await expect(nav.getByRole('group',{name:'管理',exact:true}).getByRole('button')).toHaveText(['設定','營運工作台']);
+});
+
+test('overview puts daily work before progress, profile and usage while access recovery stays reachable',async({page})=>{
+  await setup(page,{workspaces:[fixtureWorkspace('A',['workspace_admin'])]});await signIn(page);
+  await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue('P');
+  const names=['Daily work queue','Pilot monthly budget','Lead workflow','Profile details','Usage'];
+  for(const name of names)await expect(page.getByRole('region',{name,exact:true})).toBeVisible();
+  const order=await page.locator('main section[aria-label]').evaluateAll(elements=>elements.map(element=>element.getAttribute('aria-label')));
+  const indices=names.map(name=>order.indexOf(name));
+  expect(indices).toEqual([...indices].sort((a,b)=>a-b));
+  const access=page.locator('.live-access-details');
+  await expect(access).not.toHaveAttribute('open');
+  await expect(page.getByRole('button',{name:'Check access again',exact:true})).toBeVisible();
+  await access.getByText('Access details',{exact:true}).click();
+  await expect(access).toContainText('Role');
+  await expect(page.getByRole('button',{name:'Check access again',exact:true})).toBeVisible();
+  const manage=page.locator('.live-project-management');
+  await expect(manage).not.toHaveAttribute('open');
+  await manage.locator('summary').click();
+  await expect(manage.getByRole('region',{name:'Project management',exact:true})).toBeVisible();
+});
+
+test('initial workspace access failure announces one error and keeps retry visible',async({page})=>{
+  await setup(page);
+  await page.route('https://api.buyeros.test/v1/workspaces?**',route=>route.fulfill({status:503,contentType:'application/json',
+    headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
+    body:JSON.stringify({code:'TEMPORARILY_UNAVAILABLE',message:'Owned fixture unavailable',request_id:'e0000000-0000-4000-8000-000000000099',retryable:true})}));
+  await signIn(page);
+  await expect(page.getByRole('button',{name:'Retry loading workspaces',exact:true})).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(1);
+});
+
 test('Neon cookie callback selects sole membership and project; no bearer reaches URL or storage',async({page})=>{
   const calls=await setup(page);
   const issuedToken=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/token'&&response.status()===200);

@@ -4,6 +4,31 @@ const routes = ['/app', '/app/discover', '/app/discover/new', '/app/discover/sam
   '/app/lists', '/app/lists/list-1', '/app/buyers/buyer-1', '/app/buyers/missing-fixture',
   '/app/outreach', '/app/results', '/app/settings'];
 
+test('demo groups use Buyers and Drafts and preserve active parent navigation on deep links', async ({page}) => {
+  await page.setViewportSize({width: 1440, height: 900});
+  await page.goto('/app/discover/sample-run');
+  await expect(page.locator('main[data-demo-ready="true"]')).toBeVisible();
+  const sidebar=page.locator('[data-slot="sidebar"]');
+  const discovery=sidebar.getByRole('group',{name:'Discover & review',exact:true});
+  await expect(discovery.getByRole('button')).toHaveText(['Buyers','Buyer Lists1']);
+  await expect(discovery.getByRole('button',{name:'Buyers',exact:true})).toHaveAttribute('data-active','true');
+  await sidebar.getByRole('group',{name:'Follow up',exact:true}).getByRole('button',{name:'Drafts',exact:true}).click();
+  await expect.poll(()=>new URL(page.url()).pathname).toBe('/app/outreach');
+  await expect(page.locator('.page-heading h1')).toHaveText('Drafts');
+  await expect(sidebar.getByRole('button',{name:'Drafts',exact:true})).toHaveAttribute('data-active','true');
+  await page.goto('/app/lists/list-1');
+  await expect(sidebar.getByRole('button',{name:/^Buyer Lists/})).toHaveAttribute('data-active','true');
+  await page.goto('/app/buyers/buyer-1');
+  await expect(discovery.getByRole('button',{name:'Buyers',exact:true})).toHaveAttribute('data-active','true');
+  await expect(sidebar.getByRole('group',{name:'Manage',exact:true}).getByRole('button',{name:'Settings',exact:true})).toBeVisible();
+  await page.getByRole('combobox',{name:'Language',exact:true}).click();
+  await page.getByRole('option',{name:'繁體中文',exact:true}).click();
+  await expect(sidebar.getByRole('group',{name:'尋找與覆核',exact:true})).toBeVisible();
+  await sidebar.getByRole('group',{name:'跟進',exact:true}).getByRole('button',{name:'草稿',exact:true}).click();
+  await expect(page.locator('.page-heading h1')).toHaveText('草稿');
+  await expect(sidebar.getByRole('group',{name:'管理',exact:true}).getByRole('button',{name:'設定',exact:true})).toBeVisible();
+});
+
 test('workspace and sign-in documents remain noindex', async ({request}) => {
   for (const route of [...routes, '/app/discover/edit', '/app/runs', '/app/operations', '/auth/sign-in', '/auth/callback']) {
     const response = await request.get(route);

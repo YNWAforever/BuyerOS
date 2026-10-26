@@ -21,9 +21,11 @@ test('only approved public origin and legal details produce canonical localized 
  assert.equal(entries.some(x=>/\/(app|auth|api|v1)(\/|$)/.test(new URL(x.url).pathname)),false);
  for(const siteUrl of ['http://example.test','https://user:pass@example.test','https://example.test/path','https://example.test/?x=1','javascript:alert(1)'])assert.equal(publishing({siteUrl}).origin,null);
 });
-test('structured FAQ uses the ten visible answers without invented offers or ratings',()=>{
+test('homepage FAQ schema describes its four practical questions while the full FAQ keeps ten',()=>{
  const values=structuredData('en','home',ready),faq=values.find(x=>x['@type']==='FAQPage');
- assert.equal(faq.mainEntity.length,10);assert.equal(faq.mainEntity[0].name,'What is BuyerOS?');
+ assert.equal(faq.mainEntity.length,4);assert.equal(faq.mainEntity[0].name,'What is BuyerOS?');
+ assert.equal(structuredData('en','faq',ready).find(x=>x['@type']==='FAQPage').mainEntity.length,10);
+ assert.deepEqual(faq.mainEntity.map(item=>item.name),['What is BuyerOS?','Does it automatically find real buyers?','Will it send messages automatically?','Which languages are supported?']);
  for(const value of values){assert.equal('offers' in value,false);assert.equal('aggregateRating' in value,false);assert.equal('review' in value,false);}
  const script=jsonLd({name:'</script><img src=x>',separator:'\u2028'});assert.equal(script.includes('<'),false);assert.equal(JSON.parse(script).name,'</script><img src=x>');
 });

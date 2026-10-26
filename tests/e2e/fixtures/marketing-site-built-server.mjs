@@ -6,7 +6,7 @@ import {pathToFileURL} from 'node:url';
 import {gzipSync} from 'node:zlib';
 import {neonFixtureEnvironmentFor} from './neon-fixture-protocol.mjs';
 const origin = 'http://127.0.0.1:5195', staticRoot = resolve('.vercel/output/static');
-Object.assign(process.env,neonFixtureEnvironmentFor(origin),{NODE_ENV:'test'});
+Object.assign(process.env,neonFixtureEnvironmentFor(origin),{NODE_ENV:'test',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'});
 const nativeFetch = globalThis.fetch;
 globalThis.fetch = async (input, init) => {
   const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url);
