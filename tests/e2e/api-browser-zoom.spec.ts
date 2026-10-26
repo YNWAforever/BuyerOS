@@ -6,12 +6,12 @@ import { signInWorkbench } from './fixtures/workbench-auth';
 const fixtureRoot = resolve('test-results/t29-api-actual-zoom');
 const baseURL = 'http://localhost:5173';
 const sections = [
-  { index: 0, path: '/app' },
-  { index: 2, path: '/app/discover' },
-  { index: 3, path: '/app/results' },
-  { index: 5, path: '/app/outreach' },
-  { index: 6, path: '/app/settings' },
-  { index: 7, path: '/app/operations' },
+  { name: /^(Overview|總覽)$/, path: '/app' },
+  { name: /^(Buyers|買家)$/, path: '/app/discover' },
+  { name: /^(Results|結果)$/, path: '/app/results' },
+  { name: /^(Drafts|草稿)$/, path: '/app/outreach' },
+  { name: /^(Settings|設定)$/, path: '/app/settings' },
+  { name: /^(Operations|營運工作台)$/, path: '/app/operations' },
 ];
 
 function assertOwned(path: string) {
@@ -71,7 +71,7 @@ for (const locale of ['en', 'zh-HK'] as const) {
       const nav = page.getByRole('navigation', { name: 'BuyerOS sections' });
       const measurements = [];
       for (const section of sections) {
-        await nav.getByRole('button').nth(section.index).click();
+        await nav.getByRole('button',{name:section.name}).click();
         await expect.poll(() => new URL(page.url()).pathname).toBe(section.path);
         await expect(page.locator('main')).toBeVisible();
         await expect(page.locator('html')).toHaveAttribute('lang', locale);

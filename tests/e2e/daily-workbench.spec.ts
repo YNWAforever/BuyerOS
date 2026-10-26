@@ -69,15 +69,15 @@ for (const locale of ['en','zh-HK'] as const) {
     const nav=page.getByRole('navigation',{name:'BuyerOS sections'});
     const cdp=await page.context().newCDPSession(page);
     const sections=[
-      {index:0,path:'/app'},
-      {index:2,path:'/app/discover'},
-      {index:3,path:'/app/results'},
-      {index:5,path:'/app/outreach'},
-      {index:6,path:'/app/settings'},
-      {index:7,path:'/app/operations'},
+      {name: /^(Overview|總覽)$/,path:'/app'},
+      {name: /^(Buyers|買家)$/,path:'/app/discover'},
+      {name: /^(Results|結果)$/,path:'/app/results'},
+      {name: /^(Drafts|草稿)$/,path:'/app/outreach'},
+      {name: /^(Settings|設定)$/,path:'/app/settings'},
+      {name: /^(Operations|營運工作台)$/,path:'/app/operations'},
     ];
     for(const section of sections){
-      await nav.getByRole('button').nth(section.index).click();
+      await nav.getByRole('button',{name:section.name}).click();
       await expect.poll(()=>new URL(page.url()).pathname).toBe(section.path);
       await expect(page.locator('main')).toBeVisible();
       for(const width of [320,390,720,768,1280,1440]){
@@ -222,15 +222,15 @@ test('T29 live operations and results text meets measured AA contrast in both lo
     await page.locator('header select').selectOption(locale);
     await expect(page.locator('html')).toHaveAttribute('lang',locale);
     const nav=page.getByRole('navigation',{name:'BuyerOS sections'});
-    for(const {index,path} of [{index:0,path:'/app'},{index:3,path:'/app/results'},{index:7,path:'/app/operations'}]){
-      await nav.getByRole('button').nth(index).click();
+    for(const {name,path} of [{name: /^(Overview|總覽)$/,path:'/app'},{name: /^(Results|結果)$/,path:'/app/results'},{name: /^(Operations|營運工作台)$/,path:'/app/operations'}]){
+      await nav.getByRole('button',{name}).click();
       await expect.poll(()=>new URL(page.url()).pathname).toBe(path);
-      const routeRegion=index===0?(locale==='en'?'Daily work queue':'每日工作佇列')
-        :index===3?(locale==='en'?'Usage':'使用量'):(locale==='en'?'Work queue':'工作佇列');
+      const routeRegion=path==='/app'?(locale==='en'?'Daily work queue':'每日工作佇列')
+        :path==='/app/results'?(locale==='en'?'Usage':'使用量'):(locale==='en'?'Work queue':'工作佇列');
       const region=page.getByRole('region',{name:routeRegion});
       await expect(region).toBeVisible({timeout:30_000});
-      if(index===3)await expect(region).not.toContainText(/Loading usage|載入使用量/,{timeout:30_000});
-      if(index===7)await expect(region).not.toContainText(/Loading|載入中/,{timeout:30_000});
+      if(path==='/app/results')await expect(region).not.toContainText(/Loading usage|載入使用量/,{timeout:30_000});
+      if(path==='/app/operations')await expect(region).not.toContainText(/Loading|載入中/,{timeout:30_000});
       const failures=await page.evaluate(()=>{
         type Color={r:number;g:number;b:number;a:number};
         const parse=(value:string):Color|null=>{
@@ -276,7 +276,7 @@ test('T29 live operations and results text meets measured AA contrast in both lo
         }
         return bad.slice(0,30);
       });
-      expect(failures,`${locale} route index ${index} text contrast`).toEqual([]);
+      expect(failures,`${locale} ${path} text contrast`).toEqual([]);
     }
   }
 });
@@ -316,9 +316,9 @@ test('T29 live form controls have a visible three-to-one boundary in both locale
     await page.locator('header select').selectOption(locale);
     await expect(page.locator('html')).toHaveAttribute('lang',locale);
     const nav=page.getByRole('navigation',{name:'BuyerOS sections'});
-    for(const {index,path} of [{index:3,path:'/app/results'},{index:5,path:'/app/outreach'},
-      {index:6,path:'/app/settings'},{index:7,path:'/app/operations'}]){
-      await nav.getByRole('button').nth(index).click();
+    for(const {name,path} of [{name: /^(Results|結果)$/,path:'/app/results'},{name: /^(Drafts|草稿)$/,path:'/app/outreach'},
+      {name: /^(Settings|設定)$/,path:'/app/settings'},{name: /^(Operations|營運工作台)$/,path:'/app/operations'}]){
+      await nav.getByRole('button',{name}).click();
       await expect.poll(()=>new URL(page.url()).pathname).toBe(path);
       const result=await page.evaluate(()=>{
         type Color={r:number;g:number;b:number;a:number};

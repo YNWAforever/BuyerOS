@@ -265,22 +265,28 @@ export function LiveWorkspace() {
   </main>;
   const workspaceName=workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.name:undefined;
   const projectName=projects.kind==='ready'?projects.items.find(item=>item.id===project)?.name:undefined;
+  const accessDetails=<>
+    {auth.accountEmail?.() && <p className="live-account-email">{t('Signed in as')}: <b>{auth.accountEmail()}</b></p>}
+    {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+    {lastChecked?.identity===snapshot.identity&&<p>{t('Last checked')}: {new Date(lastChecked.time).toLocaleTimeString(locale)}</p>}
+  </>;
   return <LiveFrame t={t} pathname={pathname}
     navigation={<LiveNavigation t={t} navigate={navigate} pathname={pathname} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>}
     footer={<div className="user-profile"><div className="avatar" aria-hidden="true">{(workspaceName||'F').slice(0,1).toUpperCase()}</div><span><b>{workspaceName||t('No workspace selected')}</b><small>{projectName||t('No project selected')}</small></span></div>}
     header={<LiveTopbar t={t} pathname={pathname} languagePicker={languagePicker} signOut={<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button>}/>}>
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
-      {auth.accountEmail?.() && <p className="live-account-email">{t('Signed in as')}: <b>{auth.accountEmail()}</b></p>}
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
       {workspaces.kind === 'ready' && (workspaces.items.length ? <label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><p>{t('Check that you used the account invited to this workspace. Use Sign out to change accounts.')}</p></>)}
-      {workspaces.kind==='ready'&&<><button disabled={accessChecking} onClick={retryAccess}>{t('Check access again')}</button>{accessError&&<p role="alert">{localizeError(accessError)}</p>}</>}
+      {authorized
+        ? <details className="live-access-details"><summary>{t('Access details')}</summary>{accessDetails}</details>
+        : accessDetails}
+      {workspaces.kind==='ready'&&<button disabled={accessChecking} onClick={retryAccess}>{t('Check access again')}</button>}
+      {workspaces.kind==='ready'&&accessError&&<p role="alert">{localizeError(accessError)}</p>}
       {accessChecking&&<p role="status" aria-live="polite">{t('Checking access…')}</p>}
-      {lastChecked?.identity===snapshot.identity&&<p>{t('Last checked')}: {new Date(lastChecked.time).toLocaleTimeString(locale)}</p>}
       {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={()=>void copyDiagnostics()}>{t('Copy diagnostics')}</button></>}
       {diagnostic?.identity===snapshot.identity&&<><p role="status" aria-live="polite">{t(diagnostic.result==='copied'?'Diagnostics copied.':diagnostic.result==='failed'?'Could not copy. Select the diagnostics below.':'Copying diagnostics…')}</p>
         {diagnostic.result==='failed'&&<label>{t('Diagnostic details')}<textarea aria-label={t('Diagnostic details')} readOnly rows={7} value={diagnostic.text}/></label>}</>}
-      {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     </section>
     {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
       {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
@@ -291,12 +297,21 @@ export function LiveWorkspace() {
     </div>
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
-    {authorized&&projectKnown&&pathname==='/app'&&<><LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/><PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/></>}
+    {authorized && projectKnown && pathname === '/app' && <>
+      <LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/>
+      <PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/>
+      <LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/>
+      <LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>
+      <LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/>
+      {canArchive && <details className="live-project-management" key={`management-${workspace}-${project}`}>
+        <summary>{t('Project management')}</summary>
+        <LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>
+      </details>}
+    </>}
     {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
     {authorized&&projectKnown&&pathname==='/app/settings'&&<PilotBudgetPanel key={`pilot-budget-${snapshot.identity}`} locale={locale} isAdmin={canArchive&&projectActive}/>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}
-    {authorized && projectKnown && pathname === '/app' && <><LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/><LiveUsage key={`usage-${workspace}-${project}`} locale={locale} t={t}/><LiveProfilePanel key={`${workspace}-${project}`} canApprove={canApprove&&projectActive} t={t}/>{canArchive&&<LiveProjectManager key={`manager-${workspace}-${project}`} projectId={project!} t={t} onArchived={()=>{session.next({project:null});updateUrl(router,{project:null,profile:null});setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}/>}</>}
     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
     {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}

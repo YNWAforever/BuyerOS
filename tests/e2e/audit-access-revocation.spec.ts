@@ -102,6 +102,7 @@ test('U05 forbidden save rechecks downgraded role while retaining dirty Unicode 
  await editor.getByRole('textbox',{name:'Subject',exact:true}).fill('未保存主旨🙂');await editor.getByRole('textbox',{name:'Body',exact:true}).fill('保留本地內容🙂');await editor.getByRole('combobox',{name:'Language',exact:true}).selectOption('zh-HK');
  await changeAccess(page,true,['viewer']);const fail=page.waitForResponse(r=>r.request().method()==='PATCH'&&r.url().includes('/drafts/')&&r.status()===403);
  await editor.getByRole('button',{name:'Save revision',exact:true}).click();await fail;
+ await page.locator('.live-access-details > summary').click();
  await expect(page.getByText('Role: viewer',{exact:true})).toBeVisible();await expect(page.getByRole('combobox',{name:'Workspace',exact:true})).toHaveValue(workspace);
  await expect(editor.getByRole('textbox',{name:'Subject',exact:true})).toHaveValue('未保存主旨🙂');await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue('保留本地內容🙂');await expect(editor.getByRole('combobox',{name:'Language',exact:true})).toHaveValue('zh-HK');await expect(editor).toHaveAttribute('data-live-unsaved','true');
  const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-admin'}});expect(stored.status()).toBe(200);expect((await stored.json()).data.subject).toBe(seeded.subject);

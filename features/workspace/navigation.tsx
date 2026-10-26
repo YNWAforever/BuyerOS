@@ -11,12 +11,16 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { money } from '@/services/mock-client';
 
-const nav = [
-  ['Overview', '/app', LayoutDashboard],
-  ['Find Buyers', '/app/discover', Search],
-  ['Buyer Lists', '/app/lists', FolderOpen],
-  ['Outreach', '/app/outreach', Mail],
-  ['Results', '/app/results', ChartNoAxesCombined],
+const navGroups = [
+  {title: 'Discover & review', items: [
+    ['Buyers', '/app/discover', Search],
+    ['Buyer Lists', '/app/lists', FolderOpen],
+  ]},
+  {title: 'Follow up', items: [
+    ['Drafts', '/app/outreach', Mail],
+    ['Results', '/app/results', ChartNoAxesCombined],
+  ]},
+  {title: 'Manage', items: [['Settings', '/app/settings', Settings]]},
 ] as const;
 
 type DemoNavigationProps = {
@@ -54,12 +58,17 @@ export function DemoNavigation({
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <div className="nav-label">{t('WORKSPACE')}</div>
+          <SidebarMenu><SidebarMenuItem><SidebarMenuButton isActive={navTitle === 'Overview'} onClick={() => navigate('/app')}>
+            <LayoutDashboard size={18} /><span>{t('Overview')}</span>
+          </SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+        </SidebarGroup>
+        {navGroups.map(group => <SidebarGroup key={group.title} role="group" aria-label={t(group.title)}>
+          <div className="nav-label" aria-hidden="true">{t(group.title)}</div>
           <SidebarMenu>
-            {nav.map(([title, url, Icon]) => (
+            {group.items.map(([title, url, Icon]) => (
               <SidebarMenuItem key={url}>
                 <SidebarMenuButton
-                  isActive={navTitle === title || (title === 'Find Buyers' && (isWizard || isFull))}
+                  isActive={navTitle === title || (title === 'Buyers' && (isWizard || isFull)) || (title === 'Settings' && isSettings)}
                   onClick={() => navigate(url)}
                 >
                   <Icon size={18} />
@@ -69,7 +78,7 @@ export function DemoNavigation({
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-        </SidebarGroup>
+        </SidebarGroup>)}
         <div className="sidebar-project">
           <div className="nav-label">{t('ACTIVE PROJECT')}</div>
           <span className="project-symbol"><Globe2 size={16} /></span>
@@ -93,13 +102,6 @@ export function DemoNavigation({
           <Progress value={Math.min(100, spent / (budget + discoveryBudget) * 100)} />
           <small>{t('No charge · demo only')}</small>
         </div>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton isActive={isSettings} onClick={() => navigate('/app/settings')}>
-              <Settings size={18} />{t('Settings')}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <div className="user-profile">
           <div className="avatar">WL</div>
           <span><b>Willy Lai</b><small>{t('Fimmick workspace')}</small></span>

@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {siteCopy, type Locale, type PageId} from './content';
+import {siteCopy, pageFaq, type Locale, type PageId} from './content';
 import {publicPages, locales, publicPath} from './routes';
 import {publishing, type Publisher} from './publishing';
 
@@ -32,7 +32,7 @@ export function structuredData(locale: Locale, page: PageId, publisher: Publishe
     description: copy.seo[page].description, inLanguage: locale,
     ...(origin ? {url: origin + publicPath(locale, page)} : {})});
   if (page === 'home' || page === 'faq') result.push({'@context': 'https://schema.org', '@type': 'FAQPage', inLanguage: locale,
-    mainEntity: copy.faq.map(item => ({'@type': 'Question', name: item.question, acceptedAnswer: {'@type': 'Answer', text: item.answer}}))});
+    mainEntity: pageFaq(locale, page).map(item => ({'@type': 'Question', name: item.question, acceptedAnswer: {'@type': 'Answer', text: item.answer}}))});
   return result;
 }
 export function jsonLd(value: object): string {return JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');}

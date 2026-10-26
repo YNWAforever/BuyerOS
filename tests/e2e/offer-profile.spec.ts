@@ -193,6 +193,7 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
   });
   test('admin archives with reason and archived project cannot be edited',async({page})=>{
     await signIn(page,'fixture-admin',`/app?workspace=${workspace}&project=${primaryProjectId}`);
+    await page.locator('.live-project-management > summary').click();
     await expect(page.getByRole('region',{name:'Project management'})).toBeVisible();
     await page.getByLabel('Archive reason').fill('Pilot finished after review.');
     await page.getByRole('button',{name:'Archive project'}).click();

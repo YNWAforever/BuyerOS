@@ -18,15 +18,24 @@ export function Arrow({diagonal = false}: {diagonal?: boolean}) {
 export function PublicDocument({locale, children}: {locale: Locale; children: ReactNode}) {
   return <html lang={locale}><body className="marketing-shell">{children}</body></html>;
 }
+function demoLabel(locale: Locale, requestedLabel?: ReactNode) {
+  return process.env.MARKETING_ENABLED === '1' && process.env.MARKETING_SYNTHETIC_MODE !== '1'
+    ? requestedLabel ?? siteCopy[locale].common.demo : siteCopy[locale].common.viewDemo;
+}
 export function DemoLink({locale, position, children, secondary = false}: {locale: Locale; position: string; children?: ReactNode; secondary?: boolean}) {
   return <a className={secondary ? 'm-text-link' : 'm-button'} href={publicPath(locale, 'demo')} data-marketing-event="cta_click" data-position={position}>
-    {children ?? siteCopy[locale].common.demo}<Arrow />
+    {demoLabel(locale, children)}<Arrow />
   </a>;
 }
 
 export function SiteShell({locale, page, children}: {locale: Locale; page: PageId; children: ReactNode}) {
   const copy = siteCopy[locale], alternate = otherLocale(locale);
-  const navigation: PageId[] = ['features', 'how-it-works', 'pricing', 'faq'];
+  const navigation: PageId[] = ['how-it-works', 'features', 'pricing', 'faq'];
+  const footerGroups: Array<{id: keyof typeof copy.footerGroups; pages: PageId[]}> = [
+    {id: 'product', pages: ['how-it-works', 'features']},
+    {id: 'evaluate', pages: ['pricing', 'faq', 'demo']},
+    {id: 'legal', pages: ['privacy', 'terms']},
+  ];
   return <>
     <MarketingClicks />
     <a className="marketing-skip" href="#content">{copy.common.skip}</a>
@@ -39,11 +48,11 @@ export function SiteShell({locale, page, children}: {locale: Locale; page: PageI
         <div className="m-nav-actions">
           <a className="m-language" href={publicPath(alternate, page)} hrefLang={alternate} lang={alternate} data-marketing-event="locale_change" data-position="header">{alternate === 'en' ? 'English' : '繁體中文'}</a>
           <a className="m-login" href="/app">{copy.common.login}</a>
-          <a className="m-button m-nav-cta" href={publicPath(locale, 'demo')} data-marketing-event="cta_click" data-position="header"><span className="m-long-label">{copy.common.demo}</span><span className="m-short-label">{copy.extra.mobileDemo}</span><Arrow /></a>
+          <a className="m-button m-nav-cta" href={publicPath(locale, 'demo')} data-marketing-event="cta_click" data-position="header"><span className="m-long-label">{demoLabel(locale)}</span><span className="m-short-label">{copy.extra.mobileDemo}</span><Arrow /></a>
           <details className="m-mobile-nav">
             <summary aria-label={copy.common.menu}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 6h16M4 12h16M4 18h16" /></svg></summary>
             <nav aria-label={copy.common.navLabel}>
-              {(['home', ...navigation, 'demo'] as PageId[]).map(id => <a key={id} href={publicPath(locale, id)} aria-current={page === id ? 'page' : undefined}>{copy.nav[id]}<Arrow /></a>)}
+              {(['home', ...navigation, 'demo'] as PageId[]).map(id => <a key={id} href={publicPath(locale, id)} aria-current={page === id ? 'page' : undefined}>{id === 'demo' ? demoLabel(locale) : copy.nav[id]}<Arrow /></a>)}
               <a className="m-menu-login" href="/app">{copy.common.login}<Arrow diagonal /></a>
             </nav>
           </details>
@@ -53,7 +62,12 @@ export function SiteShell({locale, page, children}: {locale: Locale; page: PageI
     <main id="content" tabIndex={-1}>{children}</main>
     <footer className="m-site-footer">
       <div className="m-container m-footer-top"><div><a className="m-brand" href={publicPath(locale)}>BuyerOS<span className="m-brand-dot">·</span></a><p>{copy.common.footer}</p></div>
-        <nav aria-label={copy.common.navLabel}>{(['features', 'how-it-works', 'pricing', 'faq', 'demo', 'privacy', 'terms'] as PageId[]).map(id => <a key={id} href={publicPath(locale, id)}>{copy.nav[id]}</a>)}</nav>
+        <div className="m-footer-links">{footerGroups.map(group => <div key={group.id}>
+          <h2>{copy.footerGroups[group.id]}</h2>
+          <nav aria-label={copy.footerGroups[group.id]}>{group.pages.map(id => <a key={id} href={publicPath(locale, id)}>{id === 'demo' ? demoLabel(locale) : copy.nav[id]}</a>)}
+            {group.id === 'evaluate' && <a href="/app">{copy.common.login}</a>}
+          </nav>
+        </div>)}</div>
       </div>
       <div className="m-container m-footer-bottom"><p>{copy.common.footerNote}</p><span>BuyerOS{!publishing().indexable ? ` · ${copy.common.preview}` : ''}</span></div>
     </footer>

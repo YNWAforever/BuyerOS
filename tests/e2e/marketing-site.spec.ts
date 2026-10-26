@@ -3,6 +3,34 @@ import {expect, test} from '@playwright/test';
 const slugs = ['', '/features', '/how-it-works', '/pricing', '/faq', '/demo', '/privacy', '/terms'];
 const locales = ['zh-HK', 'en'];
 
+test('public navigation leads with the workflow and home links to the detailed feature anchors', async ({page}) => {
+  await page.setViewportSize({width: 1440, height: 900});
+  for (const locale of locales) {
+    await page.goto(`/${locale}`);
+    await expect(page.locator('.m-desktop-nav a')).toHaveCount(4);
+    expect(await page.locator('.m-desktop-nav a').evaluateAll(links => links.map(link => link.getAttribute('href'))))
+      .toEqual([`/${locale}/how-it-works`, `/${locale}/features`, `/${locale}/pricing`, `/${locale}/faq`]);
+    await expect(page.locator('main .sample-workflow')).toHaveCount(1);
+    await expect(page.locator('main #sample .sample-workflow')).toHaveCount(1);
+    await expect(page.locator('main .m-faq-list details')).toHaveCount(4);
+    expect(await page.locator('main > section[id]').evaluateAll(elements=>elements.map(element=>element.id)))
+      .toEqual(['why','sample','capabilities','teams','plans','questions']);
+    await expect(page.locator('.m-hero img')).toHaveAttribute('src', `/marketing/product-overview-${locale}.png`);
+    const links = page.locator('main a[href*="/features#"]');
+    expect(await links.evaluateAll(elements => elements.map(link => link.getAttribute('href'))))
+      .toEqual([`/${locale}/features#define`, `/${locale}/features#review`, `/${locale}/features#drafts`]);
+    await links.first().click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}/features#define$`));
+    await expect(page.locator('#define')).toBeVisible();
+    await expect(page.locator('#review')).toHaveCount(1);
+    await expect(page.locator('#drafts')).toHaveCount(1);
+    await expect(page.locator('.m-feature-card')).toHaveCount(6);
+    await page.goto(`/${locale}/faq`);
+    await expect(page.locator('.m-faq-list details')).toHaveCount(10);
+    await expect(page.locator('main .m-faq-group')).toHaveCount(3);
+  }
+});
+
 test('all sixteen public pages deliver localized SSR without product providers', async ({request}) => {
   const titles = new Set<string>();
   for (const locale of locales) for (const slug of slugs) {
@@ -130,7 +158,7 @@ test('native navigation and FAQ work without JS; keyboard menu and reduced motio
   await page.locator('header details summary').click();
   await expect(page.locator('header details[open]')).toBeVisible();
   await expect(page.locator('header details nav a').first()).toBeVisible();
-  expect(await page.locator('.sample-workflow').evaluateAll(elements => elements.map(el => getComputedStyle(el).animationName))).toEqual(['none', 'none']);
+  expect(await page.locator('.sample-workflow').evaluateAll(elements => elements.map(el => getComputedStyle(el).animationName))).toEqual(['none']);
 });
 
 test('demo and legal pages disclose inactive collection and pending publisher values', async ({page}) => {

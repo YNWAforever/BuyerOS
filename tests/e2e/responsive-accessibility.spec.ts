@@ -142,7 +142,7 @@ test('fictional sidebar navigation keeps routes and usage action wired', async (
   await page.goto('/app');
   await expect(page.locator('main[data-demo-ready="true"]')).toBeVisible();
   const sidebar = page.locator('.brand-sidebar');
-  await sidebar.getByRole('button', { name: 'Find Buyers' }).click();
+  await sidebar.getByRole('button', { name: 'Buyers' }).click();
   await expect(page).toHaveURL(/\/app\/discover$/);
   await sidebar.getByRole('button', { name: /Buyer Lists/ }).click();
   await expect(page).toHaveURL(/\/app\/lists$/);
@@ -182,7 +182,7 @@ test('fictional project strip and route heading preserve navigation', async ({ p
   await expect(projectDialog).toContainText('HarbourSense Instruments');
   await projectDialog.getByRole('button', { name: 'Use sample project' }).click();
   await expect(page).toHaveURL(/\/app\/discover$/);
-  await expect(page.locator('.page-heading').getByRole('heading', { name: 'Find Buyers' })).toBeVisible();
+  await expect(page.locator('.page-heading').getByRole('heading', { name: 'Buyers' })).toBeVisible();
   await page.locator('.page-heading').getByRole('button', { name: 'New buyer search' }).click();
   await expect(page).toHaveURL(/\/app\/discover\/new$/);
 });
