@@ -1,7 +1,10 @@
 # C61-10 exact provider trust and rollback
 
 Local signed protocol/API/PG delivery only. No provider is enabled and no real
-Neon issuer/audience/JWKS is supplied. The runtime default remainsAuth0RS256.
+Neon issuer/audience/JWKS is supplied. The API still defaults to Auth0 RS256
+when `BUYEROS_AUTH_MODE` is unset. The browser does not: public login is Neon
+only, and an Auth0 issuer is never assigned. `BUYEROS_AUTH_MODE=neon` accepts
+Neon EdDSA only and does not trust Auth0 tokens.
 The prior898-case whole-API proof is C61-09; the current focused110auth/DB gate
 has positive110discovery and0fail/error/skip. A later whole-candidate gate is
 still required before release.

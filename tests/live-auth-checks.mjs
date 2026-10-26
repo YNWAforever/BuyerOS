@@ -35,6 +35,11 @@ await check('public auth config never accepts client secret or non-HTTPS issuer'
  assert.throws(()=>createAuthAdapter({issuer:'http://evil.test',clientId:'id',audience:'api'}));
  assert.throws(()=>createAuthAdapter({issuer:'https://issuer.test',clientId:'id',audience:'api',clientSecret:'secret'}));
 });
+await check('Auth0 hosts are refused before any redirect',()=>{
+ const location={href:'http://localhost:5173/app',origin:'http://localhost:5173',assign(url){this.href=url;}};
+ assert.throws(()=>createAuthAdapter({issuer:'https://dev-oaug20cdxqqgn1s8.us.auth0.com/',clientId:'id',audience:'api'},{location,storage:{getItem:()=>null,setItem(){},removeItem(){}},fetch:async()=>{throw Error('must not fetch');},crypto,now:()=>0}),/Auth0 sign-in is disabled/);
+ assert.equal(location.href,'http://localhost:5173/app');
+});
 console.log(`${n} live auth checks passed`);
 
 const config={issuer:'https://issuer.test/',clientId:'public-client',audience:'buyer-api'};
@@ -129,8 +134,9 @@ function visitConfig(node){
  ts.forEachChild(node,visitConfig);
 }
 visitConfig(configSource);assert.equal(defineExpressions.length,1);
-const publicSlots=['BUYEROS_AUTH0_ISSUER','BUYEROS_AUTH0_CLIENT_ID','BUYEROS_AUTH0_AUDIENCE'];
-const publicValues=['https://oidc.buyeros.test/','fixture-public-client','fixture-api'];
+const publicSlots=['BUYEROS_AUTH_PROVIDER','BUYEROS_NEON_AUTH_ROUTE_ENABLED','BUYEROS_NEON_ENVIRONMENT','BUYEROS_NEON_AUTH_URL','BUYEROS_NEON_EXPECTED_AUTH_URL','BUYEROS_PUBLIC_ORIGIN','BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN'];
+const publicValues=['neon','1','preview','https://fixture.neon.tech/auth','https://fixture.neon.tech/auth','https://buyeros.test','https://buyeros.test'];
+const neonRuntime={NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2)};
 async function compiledAuth(values,runtime={}){
  const buildEnvironment=Object.fromEntries(publicSlots.map((key,i)=>[key,values[i]]));
  const definitions=vm.runInNewContext(`(${defineExpressions[0]})`,{process:{env:buildEnvironment},vercelTarget:false});
@@ -138,25 +144,23 @@ async function compiledAuth(values,runtime={}){
  const scope={process:{env:runtime}};vm.runInNewContext(transformed.code,scope);
  return loadPublicAuth(scope.captured);
 }
-await check('compiled layout public auth remains configured in an empty Cloudflare RSC environment',async()=>{
- assert.deepEqual(await compiledAuth(publicValues),{provider:'auth0',config:{issuer:publicValues[0],clientId:publicValues[1],audience:publicValues[2]}});
+await check('compiled layout public auth selects Neon and never publishes an Auth0 issuer',async()=>{
+ const neon=await compiledAuth(publicValues,{...neonRuntime,BUYEROS_AUTH0_ISSUER:'https://dev-oaug20cdxqqgn1s8.us.auth0.com/',BUYEROS_AUTH0_CLIENT_ID:'legacy',BUYEROS_AUTH0_AUDIENCE:'legacy'});
+ assert.deepEqual(neon,{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://fixture.neon.tech',socialInitPath:'/auth/sign-in/social/init'}});
+ assert.doesNotMatch(JSON.stringify(neon),/auth0\.com|legacy|synthetic-runtime/);
 });
-await check('compiled layout public auth remains closed when any required public setting is missing',async()=>{
- for(let i=0;i<publicSlots.length;i++){
-  const values=[...publicValues];values[i]='';assert.deepEqual(await compiledAuth(values),{provider:'auth0',config:null});
- }
+await check('compiled layout public auth stays closed without a Neon route and refuses an Auth0 provider',async()=>{
+ const closedValues=[...publicValues];closedValues[1]='0';
+ const closed=await compiledAuth(closedValues,neonRuntime);
+ assert.equal(closed.provider,'unavailable');assert.match(closed.message,/Neon/);
+ const abandoned=await compiledAuth(['auth0',...publicValues.slice(1)],{...neonRuntime,BUYEROS_AUTH0_ISSUER:'https://dev-oaug20cdxqqgn1s8.us.auth0.com/'});
+ assert.equal(abandoned.provider,'unavailable');
+ assert.match(abandoned.message,/Auth0 sign-in is disabled/);
+ assert.doesNotMatch(JSON.stringify(abandoned),/auth0\.com/);
 });
 await check('compiled layout preserves runtime provider selection and closed Neon configuration',async()=>{
- const unavailable=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'unexpected'});
+ const unavailable=await compiledAuth(['unexpected',...publicValues.slice(1)],neonRuntime);
  assert.equal(unavailable.provider,'unavailable');
- const closed=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'});
- assert.equal(closed.provider,'unavailable');assert.match(closed.message,/Neon/);
- const neon=await compiledAuth(publicValues,{BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',
-  NODE_ENV:'production',BUYEROS_NEON_ENVIRONMENT:'preview',VERCEL_ENV:'preview',
-  BUYEROS_NEON_AUTH_URL:'https://fixture.neon.tech/auth',BUYEROS_NEON_EXPECTED_AUTH_URL:'https://fixture.neon.tech/auth',
-  BUYEROS_PUBLIC_ORIGIN:'https://buyeros.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://buyeros.test',
-  BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2)});
- assert.deepEqual(neon,{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://fixture.neon.tech',socialInitPath:'/auth/sign-in/social/init'}});
- assert.equal(JSON.stringify(neon).includes('synthetic-runtime'),false);
+ assert.doesNotMatch(JSON.stringify(unavailable),/auth0\.com/);
 });
 console.log(`${n} live auth checks passed including compiled public runtime`);

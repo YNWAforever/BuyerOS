@@ -172,7 +172,11 @@ test('C11 explicit public provider config cannot reveal secrets or fall back fro
  const env={NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',BUYEROS_NEON_ENVIRONMENT:'preview',BUYEROS_NEON_AUTH_URL:url,BUYEROS_NEON_EXPECTED_AUTH_URL:url,BUYEROS_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_COOKIE_SECRET:'PRIVATE_CANARY_DO_NOT_SERIALIZE_'.repeat(2),BUYEROS_AUTH0_ISSUER:'https://legacy.example.test/',BUYEROS_AUTH0_CLIENT_ID:'legacy',BUYEROS_AUTH0_AUDIENCE:'legacy'};
  assert.deepEqual(loadPublicAuth(env),{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://ep-owned.neonauth.us-east-2.aws.neon.tech',socialInitPath:'/neondb/auth/sign-in/social/init'}});
  for(const wrong of [{BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'},{BUYEROS_NEON_EXPECTED_AUTH_URL:'https://other.neon.tech/auth'},{BUYEROS_AUTH_PROVIDER:'unknown'}]){const value=loadPublicAuth({...env,...wrong});assert.equal(value.provider,'unavailable');assert.doesNotMatch(JSON.stringify(value),/PRIVATE_CANARY|legacy/);}
- assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:undefined}).provider,'auth0');
+ assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:undefined}).provider,'neon');
+ assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:''}).provider,'neon');
+ const abandoned=loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:'auth0',BUYEROS_AUTH0_ISSUER:'https://dev-oaug20cdxqqgn1s8.us.auth0.com/',BUYEROS_AUTH0_CLIENT_ID:'public',BUYEROS_AUTH0_AUDIENCE:'https://buyer-os-nu.vercel.app/v1'});
+ assert.equal(abandoned.provider,'unavailable');
+ assert.doesNotMatch(JSON.stringify(abandoned),/auth0\.com|public|buyer-os-nu/);
 });
 
 test('C11 multipart retry freezes fields and intent without changing the original browser boundary',async()=>{

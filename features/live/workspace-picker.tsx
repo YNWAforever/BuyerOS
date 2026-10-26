@@ -157,7 +157,7 @@ export function LiveWorkspace() {
     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
     // Allow-listed support fields only: no token, OAuth code, email or user claims.
     const text=JSON.stringify({request_id:requestId,time:lastChecked?.identity===identity?lastChecked.time:new Date().toISOString(),
-      workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2);
+      workspace_id:workspace,project_id:project,login_method:auth?.provider??'neon'},null,2);
     setDiagnostic({identity,text,result:'copying'});
     try {
       if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');

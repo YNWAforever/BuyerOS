@@ -63,6 +63,8 @@ function issuerOf(value: string): string {
 export function createAuthAdapter(config: AuthConfig, provided?: AuthEnvironment): AuthAdapter {
   if ('clientSecret' in config || !config.clientId || !config.audience) throw new Error('Public OIDC configuration required');
   const issuer = issuerOf(config.issuer);
+  const host = new URL(issuer).hostname.toLowerCase();
+  if (host === 'auth0.com' || host.endsWith('.auth0.com')) throw new Error('Auth0 sign-in is disabled');
   const env = provided ?? {location: window.location, storage: window.sessionStorage, fetch: window.fetch.bind(window), crypto: window.crypto, now: Date.now};
   const redirectUri = `${env.location.origin}/auth/callback`;
   let accessToken: string | undefined;
