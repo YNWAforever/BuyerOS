@@ -392,10 +392,20 @@ body{margin:0;background:var(--buyeros-background);color:var(--buyeros-ink);font
 
 
 /* T21: one usable auth surface, with reflow at 320px and native validation. */
-.live-auth-form { display:grid; gap:1rem; margin-block:1.25rem; }
-.live-auth-form label { display:grid; gap:.4rem; text-align:start; }
+.live-auth-form { display:grid; gap:.9rem; margin-block:.75rem .25rem; }
+.live-auth-field { display:grid; gap:.3rem; min-width:0; }
+.live-auth-form label { text-align:start; font-weight:650; }
 .live-auth-form input { width:100%; min-width:0; min-height:44px; box-sizing:border-box; }
+.live-auth-form input::placeholder { color:var(--buyeros-muted); opacity:1; }
 .live-auth-form button, .live-auth-google { min-height:44px; width:100%; }
+.live-auth-lead { font-size:15px; }
+.live-signin-card .live-auth-hint { color:var(--buyeros-muted); font-size:13px; line-height:1.45; }
+.live-auth-or { display:flex; align-items:center; gap:10px; margin:0; color:var(--buyeros-muted); font-size:13px; }
+.live-signin-card .live-auth-or { color:var(--buyeros-muted); }
+.live-auth-or::before, .live-auth-or::after { content:""; flex:1; height:1px; background:var(--buyeros-border); }
+.live-auth-secondary { display:grid; gap:8px; }
+.live-signin-card .live-auth-alert { color:var(--buyeros-error); background:var(--buyeros-error-soft); border:1px solid var(--buyeros-error-border); border-radius:var(--buyeros-radius-control); padding:10px 12px; }
+.live-signin-card .live-auth-support { color:var(--buyeros-muted)!important; font-size:13px; overflow-wrap:anywhere; }
 .live-auth-restart { display:inline-block; padding-block:.8rem; margin-top:.5rem; }
 .live-signin-card { min-width:0; max-width:min(28rem,calc(100vw - 2rem)); box-sizing:border-box; }
 

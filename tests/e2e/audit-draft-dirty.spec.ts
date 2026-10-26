@@ -30,9 +30,32 @@ test('D02 Save is awaited before opening another draft and persists one revision
 });
 for(const status of [401,412,503])test(`D02 failed Save ${status} keeps buffer and dirty baseline`,async({page})=>{
   const {seeded,editor}=await enter(page);await dirty(page);const revision=await editor.getAttribute('data-baseline-revision'),version=await editor.getAttribute('data-baseline-version');
+  const saves:{key:string;body:unknown}[]=[];
   if(status===412){const changed=await page.request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-access','If-Match':'"1"','Idempotency-Key':`audit-other-${seeded.draft}`},data:{subject:'Remote changed subject',body:'Remote changed body'}});expect(changed.status()).toBe(200);}
-  else await page.route(`**/v1/workspaces/${workspace}/drafts/${seeded.draft}`,route=>route.request().method()==='PATCH'?route.fulfill({status,contentType:'application/json',body:JSON.stringify({code:status===401?'UNAUTHORIZED':'SERVICE_UNAVAILABLE',request_id:'11111111-1111-4111-8111-111111111111',retryable:true})}):route.continue());
-  await page.getByRole('button',{name:'Refresh draft',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByRole('alert').first()).toBeVisible();await kept(page);await expect(editor).toHaveAttribute('data-baseline-revision',revision!);await expect(editor).toHaveAttribute('data-baseline-version',version!);
+  else await page.route(`**/v1/workspaces/${workspace}/drafts/${seeded.draft}`,route=>{
+    if(route.request().method()!=='PATCH')return route.continue();
+    saves.push({key:route.request().headers()['idempotency-key'],body:route.request().postDataJSON()});
+    return route.fulfill({status,contentType:'application/json',body:JSON.stringify({code:status===401?'UNAUTHORIZED':'SERVICE_UNAVAILABLE',request_id:'11111111-1111-4111-8111-111111111111',retryable:true})});
+  });
+  await page.getByRole('button',{name:'Refresh draft',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByRole('alert').first()).toBeVisible();
+  if(status===401){
+    await expect(page.getByRole('alert')).toHaveText('Your session ended. Your unsaved draft is retained in this tab. Sign in again to recover it and compare the current revision.');
+    await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();
+    await expect(editor).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('Local unsaved body');
+    const retained=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('buyeros-private-draft-recovery')||'[]'));
+    expect(retained).toContainEqual({actor:'fixture-access',workspace,project,draftId:seeded.draft,
+      revisionId:revision,version:Number(version),subject:'Local unsaved subject',body:'Local unsaved body',language:'zh-HK'});
+    await page.getByRole('combobox',{name:'Language',exact:true}).first().selectOption('zh-HK');
+    await expect(page.getByRole('alert')).toHaveText('你的登入階段已結束。未儲存的草稿已保留在此分頁。請重新登入以還原草稿，並核對目前版本。');
+    await page.getByRole('combobox',{name:'語言',exact:true}).first().selectOption('en');
+    await signInWorkbench(page,true,'access',`/app/outreach?workspace=${workspace}&project=${project}&draft=${seeded.draft}&draft_job=${seeded.job}`);
+    await expect(editor.getByRole('textbox',{name:'Body',exact:true})).toHaveValue('Local unsaved body');
+    expect(saves).toHaveLength(2);expect(saves[0].key).toBeTruthy();expect(saves[1]).toEqual(saves[0]);
+    const stored=await page.request.get(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seeded.draft}`,{headers:{Authorization:'Bearer fixture-access'}});
+    expect(stored.status()).toBe(200);expect((await stored.json()).data).toMatchObject({subject:seeded.subject,revision_id:revision,version:Number(version)});
+  }
+  await kept(page);await expect(editor).toHaveAttribute('data-baseline-revision',revision!);await expect(editor).toHaveAttribute('data-baseline-version',version!);
   if(status===412){await expect(page.getByRole('region',{name:'Draft conflict comparison'})).toContainText('Remote changed subject');await expect(page.getByRole('button',{name:'Copy local content'})).toBeVisible();await page.context().grantPermissions(['clipboard-read','clipboard-write']);await page.getByRole('button',{name:'Copy local content'}).click();const copied=await page.evaluate(()=>navigator.clipboard.readText());writeFileSync('test-results/audit-draft-clipboard.json',JSON.stringify({platform:process.platform,raw:copied,normalized:copied.replace(/\r\n/g,'\n')},null,2));await expect.poll(async()=>(await page.evaluate(()=>navigator.clipboard.readText())).replace(/\r\n/g,'\n')).toBe('Local unsaved subject\nLocal unsaved body\nzh-HK');await kept(page);}
   await page.screenshot({path:`test-results/audit-draft-failure-${status}.png`,fullPage:true});
 });

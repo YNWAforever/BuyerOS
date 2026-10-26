@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
+import { assertPublicNeonBootstrap } from './t30-public-neon-bootstrap.mjs';
 
 const origin = 'https://buyer-os-nu.vercel.app';
 const source = '12327c7ac98849b90b0bd08f63872be7dd302ac6';
@@ -41,13 +42,11 @@ await check('production root initial HTML', '/', (response, body) => {
   assert.match(response.headers.get('content-type') ?? '', /text\/html/);
   assert.ok(body.includes('FIMMICK BuyerOS'), 'expected application title absent');
 });
-await check('app HTML and public Auth0 bootstrap', '/app', (response, body, row) => {
+await check('app HTML and public Neon bootstrap', '/app', (response, body, row) => {
   assert.equal(response.status, 200, 'app must serve HTTP200 without redirect');
   assert.match(response.headers.get('content-type') ?? '', /text\/html/);
-  assert.ok(body.includes('https://dev-oaug20cdxqqgn1s8.us.auth0.com'), 'public issuer absent');
-  assert.ok(body.includes('iVnUZbP4JsjRAJAHob1qmTSlZ0rgZU1R'), 'public SPA client ID absent');
-  assert.ok(body.includes('https://buyer-os-nu.vercel.app/v1'), 'API audience absent');
-  row.public_auth0_bootstrap_present = true;
+  assertPublicNeonBootstrap(body);
+  row.public_neon_bootstrap_present = true;
 });
 function rejectedBearer(expectedMessage) {
   return (response, body, row) => {

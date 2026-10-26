@@ -26,7 +26,7 @@ async function worker(...args:string[]){
   return JSON.parse(result.stdout.trim().split(/\r?\n/).at(-1)!);
 }
 async function reloadSignedIn(page:Page){
-  await page.reload();await page.getByRole('button',{name:'Sign in',exact:true}).click();
+  await page.reload();
   await expect(page.getByRole('combobox',{name:'Project',exact:true})).not.toHaveValue('');
 }
 

@@ -1,32 +1,10 @@
 import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 async function signIn(page:Page,accessToken='fixture-access',initialPath='/app'){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
-    publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'ingest-fixture',use:'sig'};
-  let nonce='';const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{
-    const query=new URL(route.request().url()).searchParams;
-    nonce=query.get('nonce')||'';
-    await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=fixture&state=${query.get('state')}`},body:''});
-  });
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'ingest-fixture'})}.${encode({
-      iss:'https://oidc.buyeros.test/',aud:'fixture-public-client',sub:accessToken,
-      nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',
-      headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-      body:JSON.stringify({access_token:accessToken,
-        id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});
-  });
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>
-    route.fulfill({status:200,contentType:'application/json',
-      headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-      body:JSON.stringify({keys:[publicKey]})}));
+  const auth=await installNeonFixture(page,{accessToken});
   await page.goto(initialPath);
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Workspace'})).toHaveValue('e0000000-0000-4000-8000-000000000001',{timeout:30_000});
 }
 
@@ -63,7 +41,6 @@ test('T16 live offer upload status survives reload and is role scoped',async({pa
   await page.screenshot({path:'test-results/t16-offer-upload-en-fixture.png',fullPage:true});
 
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
   await page.getByRole('button',{name:'Edit offer'}).click();
   await expect(page.getByText('fixture-offer.txt')).toBeVisible();
   await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');

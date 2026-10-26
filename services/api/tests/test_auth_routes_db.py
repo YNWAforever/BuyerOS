@@ -25,6 +25,7 @@ VIEWER = "auth0|viewer-a"
 def auth_env(seeded, monkeypatch):
     """Point the app at a local verifier and the runtime-role database."""
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     from buyeros_api.settings import get_settings

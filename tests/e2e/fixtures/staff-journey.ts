@@ -1,7 +1,6 @@
-import {fulfillSyntheticRedirect,closeSyntheticRedirectServer} from './synthetic-oidc-redirect.mjs';
+import {installNeonFixture} from './neon-sign-in';
 import {expect,test,type Page,type Browser,type APIRequestContext} from '@playwright/test';
 import type {components} from '@/services/generated/buyeros-api';
-import {webcrypto} from 'node:crypto';
 import {runOwnedFixtureProcess} from './owned-fixture-process';
 import {resolve} from 'node:path';
 import {readFile} from 'node:fs/promises';
@@ -10,36 +9,16 @@ import {createJourneyInput,observeWorkspaceLocale,type JourneyInputMode} from '.
 import {resetWorkbenchFixtureRateWindows as resetStaffJourneyFixtureRateWindows} from './workbench-auth';
 export {resetStaffJourneyFixtureRateWindows};
 
-test.afterAll(closeSyntheticRedirectServer);
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e9100000-0000-4000-8000-000000000001';
 
 export async function signIn(page:Page,accessToken='fixture-access',initialPath=`/app/runs?workspace=${workspace}&project=${project}`,locale:'en'|'zh-HK'='en',inputMode:JourneyInputMode='pointer',providedInput?:ReturnType<typeof createJourneyInput>){
   const input=providedInput??createJourneyInput(inputMode);await input.install(page);
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
-    publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'research-fixture',use:'sig'};
-  const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');let nonce='';
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{const q=new URL(route.request().url()).searchParams;
-    nonce=q.get('nonce')||'';await fulfillSyntheticRedirect(page,route,`http://localhost:5173/auth/callback?code=research-fixture&state=${q.get('state')}`);});
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'research-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',
-      aud:'fixture-public-client',sub:accessToken,nonce,exp:Math.floor(Date.now()/1000)+900})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-      body:JSON.stringify({access_token:accessToken,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:900})});});
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
-    contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
-  await page.route('https://oidc.buyeros.test/v2/logout**',async route=>{
-    const q=new URL(route.request().url()).searchParams;
-    expect(q.get('client_id')).toBe('fixture-public-client');
-    expect(q.get('returnTo')).toBe('http://localhost:5173/app');
-    await fulfillSyntheticRedirect(page,route,q.get('returnTo')!);
-  });
+  const fixture=await installNeonFixture(page,{subject:accessToken,accessToken});
   const localeRead=inputMode==='keyboard'?observeWorkspaceLocale(page,workspace):null;
   try{
     await page.goto(initialPath);
-    await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/}));
+    await fixture.signIn(input);
     await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(new URL(initialPath,'http://localhost:5173').searchParams.get('project')!,{timeout:30_000});
     if(localeRead)await localeRead.settle();
   }finally{localeRead?.dispose();}
@@ -195,7 +174,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await input.activate(sender.getByRole('button',{name:ui('Save sender')}));
   await expect(sender.getByText(locale==='en'?/Reviewed sender:/:/已審核寄件人:/)).toBeVisible();
   await page.reload();
-  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));
+
   await expect(page.locator('html')).toHaveAttribute('lang',locale);
   await expect(page.getByText(locale==='en'?'Current approved: v2':'目前已批准: v2')).toBeVisible();
   await input.activate(page.getByRole('button',{name:ui('Research runs')}));
@@ -294,7 +273,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await input.activate(assigned.getByRole('button',{name:ui('Assign to me')}));
   await expect(assigned).toContainText(`${locale==='en'?'Owner membership:':'負責人成員:'} e0000000-0000-4000-8000-000000000005`);
   await page.reload();
-  await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));
+
   await input.activate(page.getByRole('button',{name:ui('Buyers'),exact:true}));
   try{await expect(page.getByText('T30 Fictional Industrial Buyer',{exact:true})).toBeVisible();}
   catch(cause){throw new Error(`Post-refresh buyer read failed: ${failedApi.join(' | ')}`,{cause});}
@@ -419,7 +398,7 @@ test(`${transport==='cloudflare'?'CF07':'T30'} ${inputMode==='keyboard'?'keyboar
   await input.activate(page.getByRole('button',{name:ui('Record manual outcome')}));
   const outcomes=page.getByRole('region',{name:ui('Manual outcomes')});
   await expect(outcomes).toContainText('T30 continuous fixture outcome after approved copy');
-  await page.reload();await input.activate(page.getByRole('button',{name:/^(Sign in|登入)$/,exact:true}));await expect(page.locator('html')).toHaveAttribute('lang',locale);
+  await page.reload();await expect(page.locator('html')).toHaveAttribute('lang',locale);
   await expect(page.getByRole('region',{name:ui('Manual outcomes')})).toContainText('T30 continuous fixture outcome after approved copy');
   await fits(page);
   await page.screenshot({path:`test-results/${transport}${inputMode==='keyboard'?'-keyboard':''}-continuity-${locale}-${layout}-outcome-fixture.png`,fullPage:true});

@@ -1,12 +1,14 @@
 // Local adapter for the actual emitted Nitro/Vercel function; no fixture DB or
-// provider service. Browser tests intercept synthetic OIDC at the HTTP boundary.
+// provider service. Browser tests intercept synthetic Neon cookie endpoints.
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {resolve, sep, extname} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {neonFixtureEnvironmentFor} from './neon-fixture-protocol.mjs';
 
 const port = 5193;
 const origin = `http://127.0.0.1:${port}`;
+Object.assign(process.env,neonFixtureEnvironmentFor(origin),{NODE_ENV:'test'});
 const staticRoot = resolve('.vercel/output/static');
 const {default: built} = await import(pathToFileURL(resolve('.vercel/output/functions/__server.func/index.mjs')).href);
 globalThis.fetch = async () => {throw Error('Marketing spike server forbids upstream network');};

@@ -4,6 +4,7 @@ import {spawn,execFileSync} from 'node:child_process';
 import {mkdir,readFile,writeFile,rm} from 'node:fs/promises';
 import {resolve,relative,sep,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {neonFixtureEnvironment} from '../tests/e2e/fixtures/neon-fixture-protocol.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 export function validateAcceptanceOptions(options,environment=process.env){
@@ -41,8 +42,7 @@ export async function runCloudflareAcceptance(options){
   const command=[process.execPath,'node_modules/@playwright/test/cli.js','test','--config','playwright.cloudflare.config.ts','--reporter=line,junit'];
   const environment=Object.fromEntries(Object.entries(process.env).filter(([key])=>!(/^(BUYEROS_|AUTH0_|R2_|VERCEL_|CLOUDFLARE_|DATABASE_URL|REDIS_URL|OPENAI_)/.test(key))));
   environment.BUYEROS_STRICT_INTEGRATION='1';environment.PLAYWRIGHT_JUNIT_OUTPUT_FILE=junit;
-  environment.BUYEROS_AUTH0_ISSUER='https://oidc.buyeros.test/';
-  environment.BUYEROS_AUTH0_CLIENT_ID='fixture-public-client';environment.BUYEROS_AUTH0_AUDIENCE='fixture-api';
+  Object.assign(environment,neonFixtureEnvironment);
   environment.BUYEROS_API_BASE_URL='/';
   const buildCommand=[process.execPath,'scripts/run-vercel.mjs','build'];
   const buildLog=resolve(valid.evidenceDir,'build.txt');
@@ -67,7 +67,7 @@ export async function runCloudflareAcceptance(options){
   const files=['services/cloudflare-jobs/src/dispatcher.ts','services/cloudflare-jobs/src/api-client.ts','services/cloudflare-jobs/src/protocol.ts','services/cloudflare-jobs/src/queue.ts','vite.config.ts','package.json','pnpm-lock.yaml','services/api/uv.lock','services/cloudflare-jobs/src/index.ts','services/cloudflare-jobs/src/workflow.ts','services/cloudflare-jobs/wrangler.jsonc','services/api/tools/serve_cloudflare_e2e.py','services/api/tools/serve_e2e_fixture.py','scripts/serve-cloudflare-fixture.mjs','scripts/serve-built-ui-fixture.mjs','scripts/run-cloudflare-acceptance.mjs','tests/e2e/cloudflare-journey.spec.ts','tests/e2e/fixtures/staff-journey.ts','playwright.cloudflare.config.ts'];
   const sourceFiles=Object.fromEntries(await Promise.all(files.map(async file=>[file,createHash('sha256').update(await readFile(resolve(root,file))).digest('hex')])));
   const report={mode:'local',baseUrl:valid.baseUrl,sourceHead:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),sourceFiles,started,finished:new Date().toISOString(),buildCommand,buildExitCode:0,command,exitCode:code,counts,
-    evidence:{identity:'fictional OIDC/machine identity',provider:'fictional bounded search and unknown lookup acceptance',transport:'actual local Queue/Workflow -> HMAC native API -> owned PostgreSQL16',frontend:'actual emitted Vercel function/static assets; runtime loopback app-to-API binding',scheduledIntervalMilliseconds:1000,productionCronSeconds:60,hosted:'not run',deployed:false}};
+    evidence:{identity:'synthetic Neon cookie/machine identity',provider:'fictional bounded search and unknown lookup acceptance',transport:'actual local Queue/Workflow -> HMAC native API -> owned PostgreSQL16',frontend:'actual emitted Vercel function/static assets; runtime loopback app-to-API binding',scheduledIntervalMilliseconds:1000,productionCronSeconds:60,hosted:'not run',deployed:false}};
   await writeFile(resolve(valid.evidenceDir,'report.json'),JSON.stringify(report,null,2)+'\n','utf8');return report;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){

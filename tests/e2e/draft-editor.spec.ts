@@ -1,41 +1,17 @@
-import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {expect,test} from '@playwright/test';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e1000000-0000-4000-8000-000000000001';
-
-async function fakeSignIn(page:Page){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
-    publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'draft-fixture',use:'sig'};
-  const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  let nonce='';
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{
-    const query=new URL(route.request().url()).searchParams;nonce=query.get('nonce')||'';
-    await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=draft-fixture&state=${query.get('state')}`},body:''});
-  });
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'draft-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',
-      aud:'fixture-public-client',sub:'fixture-access',nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',
-      headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-      body:JSON.stringify({access_token:'fixture-access',
-        id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});
-  });
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
-    contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-    body:JSON.stringify({keys:[publicKey]})}));
-}
 
 const buyer='e2000000-0000-4000-8000-000000000001';
 const seededDraft='ec000000-0000-4000-8000-000000000001';
 
 test('T24 staff prepares an unaddressed draft and recovers immutable edits',async({page,request})=>{
   test.setTimeout(180_000);
-  await fakeSignIn(page);
+  const auth=await installNeonFixture(page,{accessToken:'fixture-access'});
   await page.goto(`/app/outreach?workspace=${workspace}&project=${project}&buyer=${buyer}`);
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project);
   await expect(page.getByText(/Fixture Alex/)).toBeVisible();
   await expect(page.getByText('Fictional industrial sensors',{exact:true})).toBeVisible();
@@ -56,7 +32,6 @@ test('T24 staff prepares an unaddressed draft and recovers immutable edits',asyn
   await expect(page.getByRole('status').filter({hasText:/Human edits require a new grounding review/})).toBeVisible();
   await expect(page.getByText('Revision: 2',{exact:true})).toBeVisible();
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
   await expect(page.getByRole('textbox',{name:'Body',exact:true})).toContainText('Human edited draft, pending grounding review.');
   const denied=await request.patch(`http://127.0.0.1:8000/v1/workspaces/${workspace}/drafts/${seededDraft}`,{
     headers:{Authorization:'Bearer fixture-viewer','Idempotency-Key':'viewer-draft-edit',

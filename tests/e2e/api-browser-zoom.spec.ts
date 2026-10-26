@@ -40,6 +40,9 @@ for (const locale of ['en', 'zh-HK'] as const) {
       await writeFile(resolve(extensionDir, 'background.js'), 'chrome.runtime.onInstalled.addListener(() => {});');
       context = await chromium.launchPersistentContext(profileDir, {
         channel: 'chromium', headless: true, baseURL,
+        // Playwright disables extensions by default; this owned extension drives real tab zoom.
+        ignoreDefaultArgs: ['--disable-extensions'],
+        ...(process.env.BUYEROS_TEST_CHROMIUM?{executablePath:process.env.BUYEROS_TEST_CHROMIUM}:{}),
         viewport: { width: 1440, height: 900 },
         args: [`--disable-extensions-except=${extensionDir}`, `--load-extension=${extensionDir}`],
       });
@@ -156,7 +159,7 @@ for (const locale of ['en', 'zh-HK'] as const) {
         }
       }
       await writeFile(resolve('test-results', `t29-api-actual-zoom-${locale}.json`), JSON.stringify({
-        fixture_only: true, identity: 'fake OIDC reviewer', database: 'disposable PostgreSQL',
+        fixture_only: true, identity: 'synthetic Neon cookie reviewer', database: 'disposable PostgreSQL',
         browser: context.browser()?.version() ?? await page.evaluate(() => navigator.userAgent),
         locale, viewport: { width: 1440, height: 900 }, before, measurements,
       }, null, 2));

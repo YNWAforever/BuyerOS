@@ -87,6 +87,7 @@ def lead_case(isolated_seeded):
 def lead_api(lead_case, monkeypatch):
     from buyeros_api.settings import get_settings
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(lead_case["dsn"]))
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     monkeypatch.setenv("BUYEROS_PAID_ADMISSION_ENABLED", "false")

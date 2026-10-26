@@ -195,6 +195,7 @@ def _approve_client_with_principal(monkeypatch):
     from buyeros_api.api.app import create_app
     from buyeros_api.settings import get_settings
 
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
     get_settings.cache_clear()

@@ -1,44 +1,21 @@
 import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e9100000-0000-4000-8000-000000000001';
 const seededRun='e9400000-0000-4000-8000-000000000001';
 const scope=`workspace=${workspace}&project=${project}`;
 
-async function installFakeLogin(page:Page,access='fixture-access'){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,
-    publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'run-fixture',use:'sig'};
-  const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  let nonce='';
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{
-    const query=new URL(route.request().url()).searchParams;nonce=query.get('nonce')||'';
-    await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=run-fixture&state=${query.get('state')}`},body:''});
-  });
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'run-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',
-      aud:'fixture-public-client',sub:access,nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',
-      headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-      body:JSON.stringify({access_token:access,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});
-  });
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,
-    contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},
-    body:JSON.stringify({keys:[publicKey]})}));
-}
-
-async function login(page:Page,path=`/app/runs?${scope}`){
+async function login(page:Page,auth:Awaited<ReturnType<typeof installNeonFixture>>,path=`/app/runs?${scope}`){
   await page.goto(path);
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project);
 }
 
 test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, locale and mobile',async({page,request})=>{
   test.setTimeout(240_000);
-  await installFakeLogin(page);
-  await login(page);
+  const auth=await installNeonFixture(page,{accessToken:'fixture-access'});
+  await login(page,auth);
   await expect(page.getByRole('heading',{name:'Research runs',level:2,exact:true})).toBeVisible();
   await expect(page.getByText('Actual runs: 12')).toBeVisible();
   await expect(page.locator('.run-list li')).toHaveCount(10);
@@ -55,7 +32,6 @@ test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, 
   await page.getByRole('button',{name:'Stop new work'}).click();
   await expect(page.getByText(/Status:\s*cancelled/)).toBeVisible();
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
   await expect(page).toHaveURL(createdUrl.toString());
   await expect(page.getByText(/Status:\s*cancelled/)).toBeVisible();
   await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
@@ -65,7 +41,8 @@ test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, 
   await page.screenshot({path:'test-results/t20-run-mobile-zhHK-fixture.png',fullPage:true});
   await page.getByRole('combobox',{name:'語言'}).selectOption('en');
   await expect(page.getByRole('heading',{name:'Research runs',level:2,exact:true})).toBeVisible();
-  await login(page,`/app/discover/${seededRun}?${scope}`);
+  await page.goto(`/app/discover/${seededRun}?${scope}`);
+  await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project);
   await page.getByRole('region',{name:'Research runs',exact:true}).locator('.run-detail > details > summary').click();
   await expect(page.getByText(/Connection:\s*sse/)).toBeVisible();
   const advanced=await request.post('http://127.0.0.1:8000/fixture/advance-run',{data:{step:'partial'}});
@@ -77,14 +54,14 @@ test('T20 live fixture run pagination, start, SSE replay, cancellation, reload, 
 
 test('T20 SSE failure falls back to authenticated polling; viewer cannot mutate',async({page,request})=>{
   test.setTimeout(180_000);
-  await installFakeLogin(page,'fixture-viewer');
+  const auth=await installNeonFixture(page,{accessToken:'fixture-viewer'});
   await page.route('http://127.0.0.1:8000/v1/workspaces/*/runs/*/events?**',async route=>{
     if(route.request().headers()['accept']?.includes('text/event-stream'))
       await route.fulfill({status:503,contentType:'application/json',
         headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:'{"code":"UNAVAILABLE"}'});
     else await route.continue();
   });
-  await login(page,`/app/discover/${seededRun}?${scope}`);
+  await login(page,auth,`/app/discover/${seededRun}?${scope}`);
   await expect(page.getByText(/Status:\s*partial/)).toBeVisible();
   await expect(page.getByRole('button',{name:'Stop new work'})).toHaveCount(0);
   await page.getByRole('region',{name:'Research runs',exact:true}).locator('.run-detail > details > summary').click();

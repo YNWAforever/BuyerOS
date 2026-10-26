@@ -6,6 +6,7 @@ import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {resolve,relative,isAbsolute,sep,extname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {neonFixtureEnvironment} from '../tests/e2e/fixtures/neon-fixture-protocol.mjs';
 
 export function validateBuiltUiFixture(env,context){
   if(env.BUYEROS_STRICT_INTEGRATION!=='1') throw new Error('strict owned fixture required');
@@ -28,7 +29,9 @@ export async function serveBuiltUiFixture(){
   const proof=await fetch('http://127.0.0.1:8000/fixture/frontend',{signal:AbortSignal.timeout(10_000)});
   if(!proof.ok) throw new Error('owned API not available');
   validateBuiltUiFixture(process.env,await proof.json());
-  process.env.NODE_ENV='production';
+  // Execute the emitted production artifact in a guarded local fixture runtime.
+  // The local HTTP origin must retain the production Neon config's local-only gate.
+  Object.assign(process.env,neonFixtureEnvironment,{NODE_ENV:'test'});
   // Local analogue of the calling app's runtime-only Vercel service binding.
   process.env.BUYEROS_INTERNAL_API_URL='http://127.0.0.1:8000';
   const root=resolve('.vercel/output/static');

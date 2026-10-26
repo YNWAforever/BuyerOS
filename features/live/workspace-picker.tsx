@@ -39,7 +39,7 @@ function updateUrl(router: ReturnType<typeof useRouter>, changes: Record<string,
   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
 }
 export function LiveWorkspace() {
-  const {session, client, auth, authError, authBootstrap} = useWorkspaceSession();
+  const {session, client, auth, authError, authBootstrap, draftRecovery} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
@@ -146,17 +146,18 @@ export function LiveWorkspace() {
     checkingAccess.current=true;
     setWorkspaceRefresh(value=>value+1);
   }),[client,session]);
-  // Bootstrap becomes ready only after client hydration. A native select
-  // changed before React attaches its handler otherwise loses the user's
+  // The server snapshot stays false so the first HTML keeps the select disabled.
+  // A native change before React attaches its handler otherwise loses the user's
   // language choice when the sign-in route opens (notably Firefox/WebKit).
-  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||authBootstrap.kind==='initializing'}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+  const interactionReady=useSyncExternalStore(()=>()=>{},()=>true,()=>false);
+  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||!interactionReady||authBootstrap.kind==='initializing'}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
   async function copyDiagnostics(){
     const identity=session.identity();
     const message=workspaces.kind==='error'?workspaces.message:accessError;
     const requestId=message.match(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/i)?.[0]??null;
     // Allow-listed support fields only: no token, OAuth code, email or user claims.
     const text=JSON.stringify({request_id:requestId,time:lastChecked?.identity===identity?lastChecked.time:new Date().toISOString(),
-      workspace_id:workspace,project_id:project,login_method:auth?.provider??'auth0'},null,2);
+      workspace_id:workspace,project_id:project,login_method:auth?.provider??'neon'},null,2);
     setDiagnostic({identity,text,result:'copying'});
     try {
       if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');
@@ -251,8 +252,10 @@ export function LiveWorkspace() {
     <section className="panel live-signin-card"><LiveBrand/>{body}</section>
     <p className="live-signin-note"><ShieldCheck size={14} aria-hidden="true"/>{t('Private workspace. Sign-in is required for every visitor.')}</p>
   </main>;
-  if (!auth || authBootstrap.kind==='initializing') return signInFrame(<div role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&<p>{authError}</p>}</div>);
-  if (!snapshot.authenticated) return signInFrame(<><h1>FIMMICK BuyerOS</h1><p>{t('Sign in to access your workspaces.')}</p>{session.preparationEditsWereCleared()&&<p role="alert">{t('Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.')}</p>}{authError&&<p role="alert">{authError}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
+  if (!auth || authBootstrap.kind==='initializing') return signInFrame(<div role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&authError&&<p>{t(authError)}</p>}</div>);
+  if (!snapshot.authenticated) return signInFrame(<><h1>{t('Sign in')}</h1><p>{t('Sign in to access your workspaces.')}</p><p>{t('Use the work email on your invitation. The next page asks for that email and its password.')}</p><p className="live-auth-hint">{t('Google is on the next page, and only for accounts created with Google.')}</p>
+    {draftRecovery.hasRetained()&&<p role="alert">{t('Your session ended. Your unsaved draft is retained in this tab. Sign in again to recover it and compare the current revision.')}</p>}
+    {session.preparationEditsWereCleared()&&<p role="alert">{t('Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.')}</p>}{authError&&<p className="live-auth-alert" role="alert">{t(authError)}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
   if(opening&&opening.id===navigationSnapshot()?.id&&pathname!==opening.path)return <main className="main-shell live-workspace" aria-busy="true">
     <section className="panel" role="status"><h1>{t('Opening page…')}</h1>
       <p>{t('Your previous edits were saved or explicitly discarded before navigation.')}</p>
