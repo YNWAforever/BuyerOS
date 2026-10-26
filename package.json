@@ -11,6 +11,7 @@
     "build": "node scripts/run-framework.mjs build",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .vercel",
+    "test:core": "node scripts/test-core.mjs",
     "cloudflare:types": "tsc --noEmit -p services/cloudflare-jobs/tests/tsconfig.json",
     "cloudflare:lint": "eslint services/cloudflare-jobs --max-warnings=0",
     "cloudflare:test": "vitest run --config services/cloudflare-jobs/vitest.config.ts",

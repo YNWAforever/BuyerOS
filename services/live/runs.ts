@@ -151,7 +151,8 @@ export function subscribeRun({runId,afterSequence,ctx,onEvent}:RunSubscription):
         try{
           while(active()){
             const {value,done}=await reader.read();if(done)break;
-            pending+=decoder.decode(value,{stream:true}).replaceAll('\r\n','\n');
+            // A network chunk can end between CR and LF; normalize after joining.
+            pending=(pending+decoder.decode(value,{stream:true})).replaceAll('\r\n','\n');
             for(let boundary=pending.indexOf('\n\n');boundary>=0;boundary=pending.indexOf('\n\n')){
               const frame=pending.slice(0,boundary);pending=pending.slice(boundary+2);
               const data=frame.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');
