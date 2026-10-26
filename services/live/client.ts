@@ -22,6 +22,38 @@ export function describeLiveError(error: unknown): string {
 /** A request was aborted because the scope changed. Normal, never an error state. */
 export class LiveCancelled extends Error {}
 
+function guardRequest(signal?: AbortSignal | null): void {
+  if (signal?.aborted) throw new LiveCancelled('cancelled');
+}
+
+/** One deadline covers fetch, auth recovery and body consumption, even if abort is ignored. */
+async function withinRequestLifetime<T>(parent: AbortSignal | undefined, timeoutMs: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  guardRequest(parent);
+  const own = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let cancel = () => {};
+  const stopped = new Promise<never>((_resolve, reject) => {
+    cancel = () => {
+      const error = new LiveCancelled('cancelled');
+      reject(error); own.abort(error);
+    };
+    parent?.addEventListener('abort', cancel, {once: true});
+    timer = setTimeout(() => {
+      const error = new LiveError('request deadline exceeded', 'REQUEST_TIMEOUT', 0, '', true);
+      // Settle before aborting: transport AbortError must not turn a timeout into silent cancellation.
+      reject(error); own.abort(error);
+    }, timeoutMs);
+  });
+  try {
+    const value = await Promise.race([run(own.signal), stopped]);
+    guardRequest(own.signal);
+    return value;
+  } finally {
+    clearTimeout(timer);
+    parent?.removeEventListener('abort', cancel);
+  }
+}
+
 export interface AccessDenied {scope: string; workspace: string;}
 
 export interface LiveRequest {
@@ -62,7 +94,9 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
   const accessListeners = new Set<(event: AccessDenied) => void>();
   let authRecovery = recovery;
   async function send(path: string, init: RequestInit, token: string | undefined, scope: string, mayRetry: boolean, retryBody?: FormData) {
+    guardRequest(init.signal);
     const first = await fetchImpl(`${root}${path}`, init);
+    guardRequest(init.signal);
     const current = authRecovery;
     if (first.status !== 401 || !token || !current) return first;
     const guard = () => {if (init.signal?.aborted || !current.isCurrent(scope)) throw new LiveCancelled('scope changed');};
@@ -88,77 +122,87 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
       accessListeners.add(listener);
       return () => {accessListeners.delete(listener);};
     },
-    async requestContent({path, token, scope, signal}: Pick<LiveRequest,'path'|'token'|'scope'|'signal'>): Promise<{text:string;contentType:string}> {
-      let response: Awaited<ReturnType<typeof fetch>>;
-      try {
-        response = await send(path, {method:'GET',
-          headers:{Accept:'text/csv, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})}, signal}, token, scope, true);
-      } catch (err) {
-        if (err instanceof LiveCancelled) throw err;
-        if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
-        throw new LiveError('request failed','NETWORK_ERROR',0,'',true);
-      }
-      if (!response.ok) {
-        const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
-        notifyAccessDenied(path, scope, response.status, signal);
-        throw new LiveError(typeof errorBody.message==='string'?errorBody.message:'request failed',
-          typeof errorBody.code==='string'?errorBody.code:'UNKNOWN_ERROR', response.status,
-          typeof errorBody.request_id==='string'?errorBody.request_id:response.headers.get('X-Request-ID')||'',
-          errorBody.retryable===true);
-      }
-      const contentType=response.headers.get('Content-Type')||'';
-      if (!contentType.startsWith('text/csv')&&!contentType.startsWith('text/plain'))
-        throw new LiveError('Invalid export content','INVALID_CONTENT',response.status,
-          response.headers.get('X-Request-ID')||'',false);
-      const text=await response.text();
-      if (new TextEncoder().encode(text).byteLength>1_000_000)
-        throw new LiveError('Export exceeds client size limit','INVALID_CONTENT',response.status,
-          response.headers.get('X-Request-ID')||'',false);
-      return {text,contentType};
+    async requestContent({path, token, scope, signal: parent}: Pick<LiveRequest,'path'|'token'|'scope'|'signal'>): Promise<{text:string;contentType:string}> {
+      return withinRequestLifetime(parent, 30_000, async signal => {
+        let response: Awaited<ReturnType<typeof fetch>>;
+        try {
+          response = await send(path, {method:'GET',
+            headers:{Accept:'text/csv, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})}, signal}, token, scope, true);
+        } catch (err) {
+          if (err instanceof LiveCancelled) throw err;
+          if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
+          throw new LiveError('request failed','NETWORK_ERROR',0,'',true);
+        }
+        if (!response.ok) {
+          const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+          guardRequest(signal);
+          notifyAccessDenied(path, scope, response.status, signal);
+          throw new LiveError(typeof errorBody.message==='string'?errorBody.message:'request failed',
+            typeof errorBody.code==='string'?errorBody.code:'UNKNOWN_ERROR', response.status,
+            typeof errorBody.request_id==='string'?errorBody.request_id:response.headers.get('X-Request-ID')||'',
+            errorBody.retryable===true);
+        }
+        const contentType=response.headers.get('Content-Type')||'';
+        if (!contentType.startsWith('text/csv')&&!contentType.startsWith('text/plain'))
+          throw new LiveError('Invalid export content','INVALID_CONTENT',response.status,
+            response.headers.get('X-Request-ID')||'',false);
+        const text=await response.text();
+        guardRequest(signal);
+        if (new TextEncoder().encode(text).byteLength>1_000_000)
+          throw new LiveError('Export exceeds client size limit','INVALID_CONTENT',response.status,
+            response.headers.get('X-Request-ID')||'',false);
+        return {text,contentType};
+      });
     },
-    async request<T>({path, method = 'GET', token, scope, signal, body, formData, rawBody, chunkSha256, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
-      const headers: Record<string, string> = {Accept: 'application/json'};
-      if (token) headers.Authorization = `Bearer ${token}`;
-      if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
-      // Carry the domain precondition past hosting response validators. The API
-      // restores If-Match before its unchanged version/idempotency checks run.
-      if (ifMatch) headers['X-BuyerOS-If-Match'] = ifMatch;
-      if ([body,formData,rawBody].filter(value=>value!==undefined).length>1) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
-      let payload: string | FormData | Uint8Array<ArrayBuffer> | undefined=formData;
-      if(rawBody!==undefined){
-        if(!chunkSha256||rawBody.byteLength<1||rawBody.byteLength>2097152)throw new LiveError('invalid chunk','INVALID_REQUEST',0,'',false);
-        headers['Content-Type']='application/octet-stream';headers['X-Chunk-Sha256']=chunkSha256;
-        payload=new Uint8Array(rawBody);
-      }
-      let retryBody:FormData|undefined;
-      if (formData) {const frozen = new FormData(); for (const [key, value] of formData.entries()) frozen.append(key, value); retryBody = frozen;}
-      if (body !== undefined) {
-        headers['Content-Type'] = 'application/json';
-        payload = JSON.stringify(body);
-      }
-      let response: Awaited<ReturnType<typeof fetch>>;
-      try {
-        response = await send(path, {method, headers, signal, body: payload}, token, scope, ['GET','HEAD','OPTIONS'].includes(method.toUpperCase()) || !!idempotencyKey, retryBody);
-      } catch (err) {
-        if (err instanceof LiveCancelled) throw err;
-        if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
-        throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
-      }
-      if (!response.ok) {
-        const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
-        const code = typeof errorBody.code === 'string' ? errorBody.code : 'UNKNOWN_ERROR';
-        const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
-        const headerId = response.headers?.get('X-Request-ID') || '';
-        const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
-        notifyAccessDenied(path, scope, response.status, signal);
-        throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
-      }
-      if (response.status === 204) return undefined as T;
-      const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
-      if (responseBody.data_mode !== 'live' || typeof responseBody.request_id !== 'string' || !Object.hasOwn(responseBody, 'data')) {
-        throw new LiveError('Invalid live response', 'INVALID_ENVELOPE', response.status, response.headers?.get('X-Request-ID') || '', false);
-      }
-      return responseBody.data as T;
+    async request<T>({path, method = 'GET', token, scope, signal: parent, body, formData, rawBody, chunkSha256, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
+      const readOnly = ['GET','HEAD','OPTIONS'].includes(method.toUpperCase());
+      // Mutations may use the API's 90-second execution budget. A timeout never replays them.
+      return withinRequestLifetime(parent, readOnly ? 30_000 : 120_000, async signal => {
+        const headers: Record<string, string> = {Accept: 'application/json'};
+        if (token) headers.Authorization = `Bearer ${token}`;
+        if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+        // Carry the domain precondition past hosting response validators. The API
+        // restores If-Match before its unchanged version/idempotency checks run.
+        if (ifMatch) headers['X-BuyerOS-If-Match'] = ifMatch;
+        if ([body,formData,rawBody].filter(value=>value!==undefined).length>1) throw new LiveError('ambiguous request body', 'INVALID_REQUEST', 0, '', false);
+        let payload: string | FormData | Uint8Array<ArrayBuffer> | undefined=formData;
+        if(rawBody!==undefined){
+          if(!chunkSha256||rawBody.byteLength<1||rawBody.byteLength>2097152)throw new LiveError('invalid chunk','INVALID_REQUEST',0,'',false);
+          headers['Content-Type']='application/octet-stream';headers['X-Chunk-Sha256']=chunkSha256;
+          payload=new Uint8Array(rawBody);
+        }
+        let retryBody:FormData|undefined;
+        if (formData) {const frozen = new FormData(); for (const [key, value] of formData.entries()) frozen.append(key, value); retryBody = frozen;}
+        if (body !== undefined) {
+          headers['Content-Type'] = 'application/json';
+          payload = JSON.stringify(body);
+        }
+        let response: Awaited<ReturnType<typeof fetch>>;
+        try {
+          response = await send(path, {method, headers, signal, body: payload}, token, scope, readOnly || !!idempotencyKey, retryBody);
+        } catch (err) {
+          if (err instanceof LiveCancelled) throw err;
+          if (err instanceof Error && err.name === 'AbortError') throw new LiveCancelled('cancelled');
+          throw new LiveError('request failed', 'NETWORK_ERROR', 0, '', true);
+        }
+        if (!response.ok) {
+          const errorBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+          guardRequest(signal);
+          const code = typeof errorBody.code === 'string' ? errorBody.code : 'UNKNOWN_ERROR';
+          const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
+          const headerId = response.headers?.get('X-Request-ID') || '';
+          const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
+          notifyAccessDenied(path, scope, response.status, signal);
+          throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
+        }
+        if (response.status === 204) return undefined as T;
+        const responseBody = await bodyOf(response as unknown as {json: () => Promise<unknown>});
+        guardRequest(signal);
+        if (responseBody.data_mode !== 'live' || typeof responseBody.request_id !== 'string' || !Object.hasOwn(responseBody, 'data')) {
+          throw new LiveError('Invalid live response', 'INVALID_ENVELOPE', response.status, response.headers?.get('X-Request-ID') || '', false);
+        }
+        return responseBody.data as T;
+      });
     },
   };
 }
