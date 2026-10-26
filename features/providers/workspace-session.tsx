@@ -30,13 +30,15 @@ export function WorkspaceSessionProvider({children, authConfig, publicAuth}: {ch
     providerError=publicAuth?.provider==='unavailable'?publicAuth.message:undefined;
   const authState = useMemo((): Pick<SessionValue, 'auth' | 'authError' | 'authBootstrap'> => {
     if (mode !== 'live') return {auth: null, authError: null, authBootstrap: {kind:'disabled'}};
-    if (!browser) return {auth: null, authError: null, authBootstrap: {kind:'initializing'}};
     const invalid = (message:string) => ({auth:null, authError:message, authBootstrap:{kind:'configuration_error' as const,message}});
+    // Missing public config is known before the browser. Do not show "Initializing sign-in…" first.
     if(provider==='unavailable')return invalid(providerError??'Sign-in configuration unavailable. Ask an administrator to restore sign-in.');
+    if(provider==='neon' && (!authPath || !socialInitOrigin || !socialInitPath))return invalid('Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.');
+    if(provider!=='neon' && (!issuer || !clientId || !audience))return invalid('Sign-in is not configured. An administrator needs to finish the public Auth0 sign-in setup before anyone can sign in.');
+    if (!browser) return {auth: null, authError: null, authBootstrap: {kind:'initializing'}};
     if(provider==='neon'){try{const auth=createNeonAuthAdapter({authPath:authPath??'',socialInitOrigin:socialInitOrigin??'',socialInitPath:socialInitPath??''});return {auth,authError:null,authBootstrap:{kind:'ready',auth}};}catch{return invalid('Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.');}}
-    if (!issuer || !clientId || !audience) return invalid('Sign-in is not configured. Ask an administrator to finish public sign-in setup, then use Sign in.');
-    try {const auth=createAuthAdapter({issuer, clientId, audience});return {auth, authError:null, authBootstrap:{kind:'ready',auth}};}
-    catch {return invalid('Sign-in configuration is invalid. Ask an administrator to correct it, then use Sign in.');}
+    try {const auth=createAuthAdapter({issuer:issuer??'', clientId:clientId??'', audience:audience??''});return {auth, authError:null, authBootstrap:{kind:'ready',auth}};}
+    catch {return invalid('Sign-in configuration is invalid. An administrator needs to correct the public Auth0 sign-in setup before anyone can sign in.');}
   }, [browser,mode,issuer,clientId,audience,provider,authPath,socialInitOrigin,socialInitPath,providerError]);
   useEffect(() => {
     const auth=authState.auth;if(!auth)return;

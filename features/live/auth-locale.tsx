@@ -7,8 +7,8 @@ const copy:Record<string,string>={
  'Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.':'Neon 登入設定暫不可用。請要求管理員恢復登入。',
  'Sign-in provider configuration is unavailable. Ask an administrator to restore sign-in.':'登入服務設定暫不可用。請要求管理員恢復登入。',
  'Sign-in configuration unavailable. Ask an administrator to restore sign-in.':'登入設定暫不可用。請要求管理員恢復登入。',
- 'Sign-in is not configured. Ask an administrator to finish public sign-in setup, then use Sign in.':'登入尚未設定。請要求管理員完成公開登入設定，然後按登入。',
- 'Sign-in configuration is invalid. Ask an administrator to correct it, then use Sign in.':'登入設定不正確。請要求管理員修正，然後按登入。',
+ 'Sign-in is not configured. An administrator needs to finish the public Auth0 sign-in setup before anyone can sign in.':'登入尚未設定。管理員須先完成公開 Auth0 登入設定，訪客才能登入。',
+ 'Sign-in configuration is invalid. An administrator needs to correct the public Auth0 sign-in setup before anyone can sign in.':'登入設定不正確。管理員須先修正公開 Auth0 登入設定，訪客才能登入。',
  'Sign-in failed. BuyerOS could not check for an existing session. Choose Sign in and enter your email and password.':'登入失敗。BuyerOS 未能檢查是否已有登入階段。請按登入，並輸入電郵及密碼。',
 
  'Support reference':'支援參考',

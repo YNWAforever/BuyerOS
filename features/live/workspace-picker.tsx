@@ -146,10 +146,11 @@ export function LiveWorkspace() {
     checkingAccess.current=true;
     setWorkspaceRefresh(value=>value+1);
   }),[client,session]);
-  // Bootstrap becomes ready only after client hydration. A native select
-  // changed before React attaches its handler otherwise loses the user's
+  // The server snapshot stays false so the first HTML keeps the select disabled.
+  // A native change before React attaches its handler otherwise loses the user's
   // language choice when the sign-in route opens (notably Firefox/WebKit).
-  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||authBootstrap.kind==='initializing'}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
+  const interactionReady=useSyncExternalStore(()=>()=>{},()=>true,()=>false);
+  const languagePicker=<label>{t('Language')} <select aria-label={t('Language')} value={locale} onChange={e=>void updateLocale(e.target.value as 'en'|'zh-HK')} disabled={localeSaving||!interactionReady||authBootstrap.kind==='initializing'}><option value="en">English</option><option value="zh-HK">繁體中文</option></select></label>;
   async function copyDiagnostics(){
     const identity=session.identity();
     const message=workspaces.kind==='error'?workspaces.message:accessError;
