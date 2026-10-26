@@ -19,6 +19,24 @@ Register `/auth/callback` and the app origin as the public SPA callback/logout U
 
 `node tests/live-auth-checks.mjs` exercises PKCE, signed ID token verification, state/nonce failures, expiry, logout and the reactive scope in memory. `pnpm exec playwright test tests/e2e/live-auth-scope.spec.ts --config playwright.live.config.ts` uses a test-only intercepted issuer and API; no fixture-auth bypass is included in the application build. This fixture result is not a real Auth0, CORS, or deployed API proof.
 
+## Live API request recovery
+
+The shared browser API client bounds GET/HEAD/OPTIONS requests and text exports to
+30 seconds, and mutations to 120 seconds to accommodate the API's 90-second
+execution budget. One deadline covers transport, the existing single 401
+refresh/replay, and reading the response body. A deadline aborts the request and
+surfaces `REQUEST_TIMEOUT`; scope changes or unmount cancellation remain silent.
+Timers and caller-signal listeners are released when the request settles.
+
+A timeout does not confirm whether a write committed. The client never
+automatically replays a timed-out write: use the flow's status/readback action or
+retry its retained command with the same idempotency key and payload. No schema
+migration, new environment variable, or caller API change is required.
+
+`node tests/audit-request-lifetime.test.mjs` verifies stalled fetches, response
+bodies and token refresh, cancellation, late responses, cleanup and retained
+write intents with virtual time. The existing frontend CI audit glob includes it.
+
 ## Prerequisites
 
 - Node.js `>=22.13.0`
