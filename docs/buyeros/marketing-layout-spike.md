@@ -45,12 +45,9 @@ Use the existing installed toolchain. Set only synthetic public build settings, 
 ```sh
 export COREPACK_HOME=/workspace/.cache/corepack
 export BUYEROS_API_BASE_URL=/
-export BUYEROS_AUTH_PROVIDER=auth0
+export BUYEROS_AUTH_PROVIDER=neon
 export BUYEROS_INTERNAL_API_URL=
 export BUYEROS_NEON_AUTH_ROUTE_ENABLED=0
-export BUYEROS_AUTH0_ISSUER=https://oidc.marketing-spike.test/
-export BUYEROS_AUTH0_CLIENT_ID=synthetic-public-client
-export BUYEROS_AUTH0_AUDIENCE=synthetic-api
 export MARKETING_SPIKE_CHROMIUM=/usr/bin/chromium
 
 corepack pnpm build

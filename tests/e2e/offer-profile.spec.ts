@@ -1,18 +1,10 @@
 import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 async function signIn(page:Page,accessToken='fixture-reviewer',initialPath='/app'){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'offer-fixture',use:'sig'};
-  let nonce='';const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{const query=new URL(route.request().url()).searchParams;
-    nonce=query.get('nonce')||'';await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=offer-fixture&state=${query.get('state')}`},body:''});});
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{const unsigned=`${encode({alg:'RS256',kid:'offer-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',aud:'fixture-public-client',sub:accessToken,nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({access_token:accessToken,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});});
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
-  await page.goto(initialPath);await page.getByRole('button',{name:'Sign in'}).click();
+  const auth=await installNeonFixture(page,{accessToken});
+  await page.goto(initialPath);await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Workspace'})).toHaveValue(workspace);
 }
 async function fillOffer(page:Page,name:string){
@@ -70,7 +62,7 @@ test('UK rice intake keeps complete criteria and roles through summary, save and
   await page.screenshot({path:'test-results/uk-rice-intake-summary.png',fullPage:true});
   await page.getByRole('button',{name:'Save profile'}).click();
   await expect(page.getByRole('heading',{name:'Profile version 1'})).toBeVisible();
-  await page.reload();await page.getByRole('button',{name:'Sign in'}).click();
+  await page.reload();
   await page.getByRole('button',{name:'Edit offer'}).click();
   await page.getByRole('button',{name:'Continue'}).click();
   await expect(page.getByLabel('Markets (country codes or names)')).toHaveValue('GB');
@@ -115,7 +107,7 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
     },{workspaceId:workspace,projectId:primaryProjectId});
     expect(approvedFacts).toEqual([true,true]);
 
-    await operator.reload();await operator.getByRole('button',{name:'Sign in'}).click();
+    await operator.reload();
     await expect(operator.getByText('Current approved: v1')).toBeVisible();
     await operator.getByRole('button',{name:'Edit offer'}).click();
     await expect(operator.getByLabel('Product / service')).toHaveValue('Industrial sensors');
@@ -136,10 +128,10 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
       return {first:first?.id,parent:second?.parent_icp_version_id};
     },{workspaceId:workspace,projectId:primaryProjectId});
     expect(parentLink.parent).toBe(parentLink.first);
-    await operator.reload();await operator.getByRole('button',{name:'Sign in'}).click();
+    await operator.reload();
     await expect(operator.getByRole('heading',{name:'Profile version 2'})).toBeVisible();
     await expect(operator.getByText(/offer facts/)).toBeVisible();
-    await reviewer.reload();await reviewer.getByRole('button',{name:'Sign in'}).click();
+    await reviewer.reload();
     await expect(reviewer.getByRole('heading',{name:'Profile version 2'})).toBeVisible();
     await reviewer.getByRole('checkbox',{name:/Confirm approval of this exact version v2/}).check();
     await reviewer.getByRole('button',{name:'Approve profile'}).click();
@@ -185,7 +177,7 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
     await fillOffer(page,name);
     await page.getByRole('button',{name:'Save profile'}).click();
     await expect(page.getByText('Project saved; profile still needs saving.')).toBeVisible();
-    await page.reload();await page.getByRole('button',{name:'Sign in'}).click();
+    await page.reload();
     await page.getByRole('combobox',{name:'Project'}).selectOption({label:name});
     await page.getByRole('button',{name:'Edit offer'}).click();
     await expect(page.getByLabel('Product / service')).toHaveValue('Industrial sensors');

@@ -1,3 +1,4 @@
+import {neonFixtureEnvironmentFor} from './tests/e2e/fixtures/neon-fixture-protocol.mjs';
 import {defineConfig} from '@playwright/test';
 import {fileURLToPath} from 'node:url';
 
@@ -18,8 +19,7 @@ export default defineConfig({
   webServer: process.env.MARKETING_EXTERNAL_SERVER === '1' ? undefined : {
     command: commands[runtime], url: 'http://127.0.0.1:5195/app', reuseExistingServer: false, timeout: 120_000,
     env: {XDG_CONFIG_HOME: fileURLToPath(new URL('./.sites-runtime/xdg', import.meta.url)),
-      BUYEROS_API_BASE_URL: '/', BUYEROS_INTERNAL_API_URL: '', BUYEROS_AUTH_PROVIDER: 'auth0', BUYEROS_NEON_AUTH_ROUTE_ENABLED: '0',
-      BUYEROS_AUTH0_ISSUER: 'https://oidc.marketing-spike.test/', BUYEROS_AUTH0_CLIENT_ID: 'synthetic-public-client', BUYEROS_AUTH0_AUDIENCE: 'synthetic-api',
+      BUYEROS_API_BASE_URL: '/', BUYEROS_INTERNAL_API_URL: '', ...neonFixtureEnvironmentFor('http://127.0.0.1:5195'),
       MARKETING_ENABLED: '0', MARKETING_SYNTHETIC_MODE: '0', MARKETING_SITE_URL: 'http://127.0.0.1:5195'},
   },
 });

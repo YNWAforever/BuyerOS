@@ -1,3 +1,4 @@
+import {neonFixtureEnvironment} from './tests/e2e/fixtures/neon-fixture-protocol.mjs';
 import {defineConfig} from '@playwright/test';
 export default defineConfig({
   globalTeardown:'./tests/e2e/teardown.ts',testDir:'./tests/e2e',testMatch:'native-attachments.spec.ts',workers:1,timeout:120_000,
@@ -9,6 +10,6 @@ export default defineConfig({
       env:{BUYEROS_STRICT_INTEGRATION:'1',BUYEROS_E2E_SEED_BUYERS:'1',BUYEROS_PRIVATE_OBJECT_BACKEND:'postgres',BUYEROS_CLOUDFLARE_EXECUTION_ENABLED:'false',BUYEROS_CORS_ORIGINS:'["http://localhost:5173"]'}},
     {command:process.env.BUYEROS_NATIVE_REUSE_BUILD==='1'?'node scripts/serve-built-ui-fixture.mjs':'node scripts/run-vercel.mjs build && node scripts/serve-built-ui-fixture.mjs',url:'http://localhost:5173',timeout:300_000,reuseExistingServer:false,
       env:{BUYEROS_STRICT_INTEGRATION:'1',BUYEROS_TEST_DATABASE_URL:'',BUYEROS_DATABASE_URL:'',BUYEROS_EXECUTION_DATABASE_URL:'',BUYEROS_RUNTIME_ADMIN_DATABASE_URL:'',DATABASE_URL:'',CLOUDFLARE_API_TOKEN:'',BUYEROS_REUSE_TEST_SERVER:'',
-        BUYEROS_API_BASE_URL:'/',BUYEROS_AUTH0_ISSUER:'https://oidc.buyeros.test/',BUYEROS_AUTH0_CLIENT_ID:'fixture-public-client',BUYEROS_AUTH0_AUDIENCE:'fixture-api'}},
+        ...neonFixtureEnvironment,BUYEROS_API_BASE_URL:'/',}},
   ],
 });

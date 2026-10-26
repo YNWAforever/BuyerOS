@@ -1,18 +1,22 @@
 # C61-11 session boundary, local proof and rollback
 
-This is a local implementation checkpoint, not real Neon or production acceptance.
-The current public PR checkpoint remains1b21dc4; this code is not authorized for
-public push yet. Release A, Neon-only and native send remain NOT ACCEPTED.
+This runbook retains the historical C61-11 local implementation proof and its
+limits, not real Neon or production acceptance. Its public PR checkpoint was
+1b21dc4, before public push authorization. Its unaccepted Release A, Neon-only
+and native-send gates describe that checkpoint, not current deployment status.
 
 ## Provider and cookie boundary
 
-BUYEROS_AUTH_PROVIDER defaults toauth0. Selectingneon requires the separately
-validated C61-08 server configuration and BUYEROS_NEON_AUTH_ROUTE_ENABLED=1.
-Only{authPath:'/api/auth'} crosses the server/client boundary; secret, upstream,
-expected target and test credentials never become public auth configuration.
-Invalid/missing Neon config is unavailable and does not fall back toAuth0.
-No real environment variable, account, issuer, provider or production setting
-has been changed by this task.
+BUYEROS_AUTH_PROVIDER defaults to `neon`. Public browser login is Neon only;
+explicit `auth0` is unavailable. Neon requires the separately validated C61-08
+server configuration and BUYEROS_NEON_AUTH_ROUTE_ENABLED=1. Public configuration
+contains only `authPath:'/api/auth'`, the approved `socialInitOrigin` and
+`socialInitPath`; the cookie secret, full server configuration, expected target
+bindings and test credentials remain server-side. Invalid/missing Neon config
+is unavailable and does not fall back to Auth0. The API separately defaults
+BUYEROS_AUTH_MODE to `neon` and retains explicit Auth0/dual compatibility modes.
+These source defaults do not change any deployed environment variable, account,
+issuer, provider or production setting.
 
 The pinned unmodified@neondatabase/auth0.5.0-beta browser implementation emits
 sessionData through BetterAuth's broadcast system, including session.token.
@@ -86,8 +90,10 @@ observations, not a fresh committed DB lost-response proof.
 ## Rollback
 
 Use the reviewed compatible app/provider artifact and stop new Neon admission.
-For existing Auth0 users the current dual-compatible client can selectauth0;
-this is not a login rollback for Neon-only accounts. That population requires
+The C61-11 checkpoint described a dual-compatible client for existing Auth0
+users. The current browser is Neon only; an Auth0 rollback needs a reviewed
+compatible app artifact, not `BUYEROS_AUTH_PROVIDER=auth0` on this client.
+An Auth0 rollback is not a login rollback for Neon-only accounts. That population requires
 the C61-13 compatible Neon artifact rehearsal before cutover. Clear in-memory
 client auth and the bounded return/invalidation transaction when intentionally
 changing compatible provider configuration. Preserve private draft recovery

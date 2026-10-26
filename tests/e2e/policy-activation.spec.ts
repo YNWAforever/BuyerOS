@@ -1,37 +1,13 @@
 import {expect, test, type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace = 'e0000000-0000-4000-8000-000000000001';
 const project = 'e1000000-0000-4000-8000-000000000001';
 const api = 'http://127.0.0.1:8000';
 async function signIn(page: Page, subject = 'fixture-admin') {
-  const keys = await webcrypto.subtle.generateKey({name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048,
-    publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256'}, true, ['sign', 'verify']);
-  const publicKey = {...await webcrypto.subtle.exportKey('jwk', keys.publicKey), kid: 'policy-native-fixture', use: 'sig'};
-  const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
-  let nonce = '';
-  await page.route('https://oidc.buyeros.test/authorize**', async route => {
-    const query = new URL(route.request().url()).searchParams;
-    nonce = query.get('nonce') ?? '';
-    await route.fulfill({status: 302, headers: {location:
-      `http://localhost:5173/auth/callback?code=policy-native-fixture&state=${query.get('state')}`}, body: ''});
-  });
-  await page.route('https://oidc.buyeros.test/oauth/token', async route => {
-    const unsigned = `${encode({alg: 'RS256', kid: 'policy-native-fixture'})}.${encode({
-      iss: 'https://oidc.buyeros.test/', aud: 'fixture-public-client', sub: subject, nonce,
-      exp: Math.floor(Date.now() / 1000) + 300,
-    })}`;
-    const signature = await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5', keys.privateKey, new TextEncoder().encode(unsigned));
-    await route.fulfill({status: 200, contentType: 'application/json', headers: {'Access-Control-Allow-Origin': '*'},
-      body: JSON.stringify({access_token: subject, id_token: `${unsigned}.${Buffer.from(signature).toString('base64url')}`,
-        expires_in: 300})});
-  });
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json', route => route.fulfill({
-    status: 200, contentType: 'application/json', headers: {'Access-Control-Allow-Origin': '*'},
-    body: JSON.stringify({keys: [publicKey]}),
-  }));
+  const auth=await installNeonFixture(page,{accessToken:subject});
   await page.goto(`/app/settings?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button', {name: 'Sign in', exact: true}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox', {name: 'Project', exact: true})).toHaveValue(project);
 }
 const panel = (page: Page) => page.getByRole('region', {name: 'Controlled purpose activation', exact: true});
@@ -198,7 +174,6 @@ test('viewer_and_foreign_workspace_cannot_activate', async ({page, request}) => 
     {headers: {Authorization: 'Bearer fixture-admin'}});
   expect(foreign.status()).toBe(404);
 });
-
 
 test('N21-ACCESS-04 summary agrees with exact pending terms and details start collapsed',async({page})=>{
  await signIn(page);const view=await submit(page);

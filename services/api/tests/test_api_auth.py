@@ -110,6 +110,7 @@ def test_get_principal_bearer_scheme_is_case_insensitive(monkeypatch):
     from buyeros_api.api.app import create_app
     from buyeros_api.settings import get_settings
 
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
     get_settings.cache_clear()
@@ -148,6 +149,7 @@ def test_get_principal_verifies_a_real_token(monkeypatch):
     from buyeros_api.api.verifier import TokenVerifier
     from tests import auth_fixtures as fx
 
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     from buyeros_api.settings import get_settings
@@ -184,6 +186,7 @@ def test_verifier_is_reused_so_its_jwks_cache_survives(monkeypatch):
     from buyeros_api.settings import get_settings
     from tests import auth_fixtures as fx
 
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     get_settings.cache_clear()

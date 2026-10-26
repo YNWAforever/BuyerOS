@@ -5,12 +5,13 @@ import type {AuthAdapter} from '@/services/live/auth';
 import {completeSessionCallback} from '@/services/live/auth-session';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {useAuthLocale} from '@/features/live/auth-locale';
+import {describeSignInFailure,signInFailureMessage,type SignInReason} from '@/services/live/sign-in-failure';
 
 export default function AuthCallbackPage() {
   const {auth, session, authBootstrap} = useWorkspaceSession();
-  const {t,picker}=useAuthLocale();
+  const {t,picker,locale}=useAuthLocale();
   const router = useRouter();
-  const [error, setError] = useState('');
+  const [failure, setFailure] = useState<SignInReason | null>(null);
   const completion=useRef<{auth:AuthAdapter;promise:Promise<string>}|null>(null),activeAuth=useRef<AuthAdapter|null>(null);
   useEffect(() => {
     let active = true;
@@ -20,12 +21,13 @@ export default function AuthCallbackPage() {
     if(completion.current?.auth!==auth)completion.current={auth,promise:completeSessionCallback(auth,session,()=>activeAuth.current===auth)};
     void completion.current.promise.then(path => {
       if (active) router.replace(path);
-    }).catch(() => { if (active&&session.isCurrent(identity)) { session.setToken(undefined); setError('Sign-in failed. Please start again.'); } });
+    }).catch((cause: unknown) => { if (active&&session.isCurrent(identity)) { session.setToken(undefined); setFailure(describeSignInFailure(cause,'callback')); } });
     return () => {active=false;if(activeAuth.current===auth)activeAuth.current=null;};
   }, [auth, router, session]);
   const configurationError=authBootstrap.kind==='configuration_error';
-  const message = error || (configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');
-  return <main className="main-shell"><section className="panel" role={error || configurationError ? 'alert' : 'status'}>{t(message)}</section>{error&&<>
+  const failureText = failure ? signInFailureMessage(failure, locale) : '';
+  const message = failureText || t(configurationError ? authBootstrap.message : authBootstrap.kind==='disabled' ? 'Live sign-in is disabled' : 'Completing sign-in…');
+  return <main className="main-shell live-workspace live-signin auth-callback"><section className="panel live-signin-card" role={failure || configurationError ? 'alert' : 'status'}>{message}</section>{failure&&<>
     {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Native recovery abandons the failed callback transaction. */}
-    <a href="/app">{t('Start again')}</a></>}{picker}</main>;
+    <a className="live-auth-restart" href="/app">{t('Start again')}</a></>}{picker}</main>;
 }

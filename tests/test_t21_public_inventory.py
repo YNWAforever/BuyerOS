@@ -19,7 +19,7 @@ class PublicInventory(unittest.TestCase):
  def test_duplicate_native_ids_are_rejected(self):
   value=receipt();second=copy.deepcopy(value['suites'][0]['specs'][0]);second['title']='another synthetic control';value['suites'][0]['specs'].append(second)
   with self.assertRaises(ValueError):checker._built_playwright_names(json.dumps(value).encode(),'ci-required')
- def test_navigation_protocol_controls_are_executed_with_exact_fourteen_case_report(self):
+ def test_navigation_protocol_controls_are_executed_with_exact_twelve_case_report(self):
   import shlex
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text()
   inventory_count=unittest.defaultTestLoader.discover(str(ROOT/'tests'),pattern='test_t21_public_inventory.py').countTestCases()
@@ -35,9 +35,9 @@ class PublicInventory(unittest.TestCase):
   block=after.split(chr(10)+'      - ',1)[0]
   command=next(shlex.split(line.strip()) for line in block.splitlines() if line.strip().startswith('node --test '))
   self.assertEqual(command,['node','--test','--test-reporter=junit','--test-reporter-destination=artifacts/t21/navigation-unit.xml',
-   'tests/t21-navigation.test.mjs','tests/t21-history-replay.test.mjs','tests/t21-oidc-redirect.test.mjs','tests/t21-oidc-redirect-concurrency.test.mjs'])
+   'tests/t21-navigation.test.mjs','tests/t21-history-replay.test.mjs','tests/workbench-neon-fixture.test.mjs'])
   self.assertIn('python scripts/check-required-tests.py --junit artifacts/t21/navigation-unit.xml',block)
-  self.assertIn('len(cases)==len(names)==14',block)
+  self.assertIn('len(cases)==len(names)==12',block)
   self.assertIn('buyeros-t21-navigation-unit',after)
  def test_execution_results_cannot_replace_original_collection(self):
   value=receipt();value['suites'][0]['specs'][0]['tests'][0]['results']=[{'status':'passed'}]

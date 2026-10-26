@@ -1,5 +1,6 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Your session ended. Your unsaved draft is retained in this tab. Sign in again to recover it and compare the current revision.':'你的登入階段已結束。未儲存的草稿已保留在此分頁。請重新登入以還原草稿，並核對目前版本。',
   'Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.':'登入時效已結束，本頁的準備內容更改已清除。已提交的儲存仍可能完成，請重新登入後先讀取原操作，再決定是否重試。',
   'Unsubmitted preparation edits are not retained after session expiry. Save your preparation before your session ends.':'登入時效結束後不會保留未提交的準備內容更改，請在到期前儲存。',
   'Preparation readback did not match the original target.':'準備內容讀回與原來目標不符；請核對原操作。',
@@ -115,7 +116,15 @@ export const liveZh: Record<string,string> = {
   'Checking access…':'正在檢查存取…',
   'Last checked':'最後檢查',
   'Initializing sign-in…':'正在初始化登入…',
+  'Live sign-in unavailable':'即時登入暫不可用',
   'Sign in to access your workspaces.':'請登入以存取工作區。',
+  'Use the work email on your invitation. The next page asks for that email and its password.':'請使用邀請上的工作電郵。下一頁會要求輸入該電郵及其密碼。',
+  'Google is on the next page, and only for accounts created with Google.':'下一頁提供 Google，只適用於以 Google 建立的帳戶。',
+  'Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.':'Neon 登入設定暫不可用。請要求管理員恢復登入。',
+  'Sign-in provider configuration is unavailable. Ask an administrator to restore sign-in.':'登入服務設定暫不可用。請要求管理員恢復登入。',
+  'Sign-in configuration unavailable. Ask an administrator to restore sign-in.':'登入設定暫不可用。請要求管理員恢復登入。',
+  'Auth0 sign-in is disabled. An administrator needs to finish Neon sign-in setup before anyone can sign in.':'Auth0 登入已停用。管理員須先完成 Neon 登入設定，訪客才能登入。',
+  'Sign-in failed. BuyerOS could not check for an existing session. Choose Sign in and enter your email and password.':'登入失敗。BuyerOS 未能檢查是否已有登入階段。請按登入，並輸入電郵及密碼。',
 
   'Workspace selection':'工作區選擇','Project selection':'專案選擇',
   'Buyer details: {buyer}':'買家詳情：{buyer}','Buyer dossier tabs':'買家詳情頁籤',

@@ -65,7 +65,7 @@ export function BudgetSettings({workspace,isAdmin,t}:{workspace:string;isAdmin:b
 function BudgetRow({row,isAdmin,pending,t,onSave}:{row:Budget;isAdmin:boolean;pending:boolean;t:(value:string)=>string;onSave:(row:Budget,amount:string,reason:string)=>Promise<void>}){
   const [amount,setAmount]=useState(row.approved_limit.amount),[reason,setReason]=useState('');
   const label=`${t(row.scope)} ${row.scope_id.slice(-8)} · ${t(row.category)} · ${row.period_start.slice(0,7)}`;
-  return <div className="budget-row" style={{display:'grid',gap:'0.35rem',padding:'1rem 0',borderBottom:'1px solid #d9e1e8',overflowWrap:'anywhere'}}><strong>{label}</strong>
+  return <div className="budget-row" style={{display:'grid',gap:'0.35rem',padding:'1rem 0',borderBottom:'1px solid var(--border)',overflowWrap:'anywhere'}}><strong>{label}</strong>
     <span>{t('Limit')}: {money(row.approved_limit)}</span>
     <span>{t('Settled')}: {money(row.settled)}</span>
     <span>{t('Reserved')}: {money(row.reserved)}</span>

@@ -1,12 +1,16 @@
 # C61-10 exact provider trust and rollback
 
-Local signed protocol/API/PG delivery only. No provider is enabled and no real
-Neon issuer/audience/JWKS is supplied. The runtime default remainsAuth0RS256.
-The prior898-case whole-API proof is C61-09; the current focused110auth/DB gate
-has positive110discovery and0fail/error/skip. A later whole-candidate gate is
-still required before release.
+The historical C61-10 checkpoint covered local signed protocol/API/PG delivery
+only; it enabled no provider and supplied no real Neon issuer/audience/JWKS.
+The API defaulted to Auth0 RS256 at that checkpoint. Current source defaults
+to Neon EdDSA when `BUYEROS_AUTH_MODE` is unset and does not trust Auth0 tokens
+in that mode. Public browser login is Neon only; selecting Auth0 makes sign-in
+unavailable rather than assigning an Auth0 redirect target.
+The preceding898-case whole-API proof was C61-09; C61-10's focused110auth/DB
+gate recorded positive110discovery and0fail/error/skip. That historical result
+does not replace a later whole-candidate gate before release.
 
-BUYEROS_AUTH_MODE accepts auth0(default), dual or neon. Auth0 uses its existing
+BUYEROS_AUTH_MODE accepts neon (default), dual or explicit auth0. Auth0 uses its existing
 issuer/audience and derived JWKS contract withRSA/RS256. Neon requires all of:
 BUYEROS_NEON_ISSUER, BUYEROS_NEON_AUDIENCE, BUYEROS_NEON_JWKS_URL, and separately
 reviewed BUYEROS_NEON_EXPECTED_ISSUER/AUDIENCE/JWKS_URL. Values must be exact;
@@ -38,8 +42,10 @@ Review env bindings and source hashes, then run required suites and the
 authorized real-Neon/browser gates. This task does not alter deployed auth,
 migrate a production DB, provision accounts or consume provider quota.
 
-Rollback to the known Auth0 trust settings/app artifact, without widening its
-issuer/audience/algorithms. Keep the active-mapping resolver and canonical UUIDs,
+An Auth0 rollback requires the reviewed compatible Auth0 app artifact and explicit
+`BUYEROS_AUTH_MODE=auth0`; the current Neon-only browser cannot switch to Auth0
+through configuration alone. Do not widen issuer/audience/algorithms. Keep the
+active-mapping resolver and canonical UUIDs,
 all historical FKs, Neon-only users and revoked identities. Auth0-only rollback
 does not prove a Neon-only user can still log in: the compatible provider/client
 rehearsal and actual user login remainC61-13 gates. Already-issued provider JWT
@@ -47,4 +53,5 @@ lifetime is distinct from client logout; actual mapping/membership revocation
 is rechecked on the next business request.
 
 Contract source: [Neon JWT plugin](https://neon.com/docs/auth/guides/plugins/jwt)
-and the existing reviewedC61-07 decision. Exact real target remains unset.
+and the existing reviewedC61-07 decision. This historical proof did not bind a
+real target; current deployment values must come from its authorized manifest.

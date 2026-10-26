@@ -1,20 +1,11 @@
 import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace='e0000000-0000-4000-8000-000000000001',project='e1000000-0000-4000-8000-000000000001';
 async function signIn(page:Page,subject='fixture-access',count:number|null=24){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const key={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'import-fixture',use:'sig'};
-  let nonce='';const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{const query=new URL(route.request().url()).searchParams;nonce=query.get('nonce')||'';
-    await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=import-fixture&state=${query.get('state')}`},body:''});});
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'import-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',aud:'fixture-public-client',sub:subject,nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({access_token:subject,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});});
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[key]})}));
+  const auth=await installNeonFixture(page,{accessToken:subject});
   await page.goto(`/app/discover?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Sign in',exact:true}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Project',exact:true})).toHaveValue(project);
   if(count!==null)await expect(page.getByText(`${count} in snapshot`)).toBeVisible();
 }
@@ -89,7 +80,6 @@ test('CSV preview, lost-response recovery, provenance and duplicate reimport use
   const importId=new URL(recoverableUrl).searchParams.get('buyer_import');
   await page.route(`**/buyer-imports/${importId}`,async route=>{await recoveryGate;await route.continue();},{times:1});
   await page.reload();
-  await page.getByRole('button',{name:'Sign in',exact:true}).click();
   try{
     await page.getByText('Import buyers from Excel or CSV',{exact:true}).click();
     await expect(page.getByLabel('Buyer spreadsheet',{exact:true})).toBeDisabled();
@@ -101,7 +91,6 @@ test('CSV preview, lost-response recovery, provenance and duplicate reimport use
   // another preview to overwrite the only recoverable identity.
   await page.route(`**/buyer-imports/${importId}`,route=>route.abort('connectionreset'),{times:1});
   await page.reload();
-  await page.getByRole('button',{name:'Sign in',exact:true}).click();
   await expect(page.getByText(/The import result is unconfirmed/)).toBeVisible();
   await expect(page.getByLabel('Buyer spreadsheet',{exact:true})).toBeDisabled();
   await expect(page.getByRole('button',{name:'Preview import',exact:true})).toBeDisabled();

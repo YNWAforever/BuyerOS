@@ -4,6 +4,7 @@ import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve,join,relative,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
+import {neonFixtureEnvironment} from '../tests/e2e/fixtures/neon-fixture-protocol.mjs';
 const root=resolve('.'),owner=createHash('sha256').update(root).digest('hex').slice(0,12);
 const name=`buyeros-audit-ui-${owner}`,volume=`buyeros-audit-ui-deps-${owner}`;
 const mode=process.env.BUYEROS_AUDIT_UI_MODE??'http';
@@ -17,7 +18,7 @@ else docker(['volume','create','--label',`buyeros.audit.owner=${owner}`,volume])
 const work=mkdtempSync(join(tmpdir(),'buyeros-audit-ui-'));
 const source=spawnSync('git',['ls-files','--cached','--others','--exclude-standard'],{encoding:'utf8'});
 if(source.status!==0)throw new Error('source inventory failed');
-const files=source.stdout.split(/\r?\n/).filter(Boolean).filter(p=>! /^(services\/(api|worker|cloudflare-jobs)|docs|artifacts|tests)\//.test(p));
+const files=source.stdout.split(/\r?\n/).filter(Boolean).filter(p=>p==='tests/e2e/fixtures/neon-fixture-protocol.mjs'||! /^(services\/(api|worker|cloudflare-jobs)|docs|artifacts|tests)\//.test(p));
 for(const p of files){const inside=relative(root,resolve(root,p));if(isAbsolute(inside)||inside.startsWith('..')||p.startsWith('.env'))throw new Error('unsafe source file');}
 writeFileSync(join(work,'files.txt'),files.join('\n')+'\n');
 const tar=spawnSync('tar',['-cf',join(work,'source.tar'),'-T',join(work,'files.txt')],{cwd:root,encoding:'utf8',timeout:60_000});
@@ -25,8 +26,9 @@ if(tar.status!==0)throw new Error(tar.stderr);
 docker(['run','-d','--name',name,'--label',`buyeros.audit.owner=${owner}`,'--cpus','4','--memory','6g',
  '-p','127.0.0.1:5173:3000','--mount',`type=volume,src=${volume},dst=/src/node_modules`,
  '-e',`BUYEROS_DEPLOY_TARGET=${mode==='http'?'vercel':''}`,'-e','BUYEROS_INTERNAL_API_URL=http://host.docker.internal:8000',
- '-e',`BUYEROS_API_BASE_URL=${mode==='http'?'/':''}`,'-e',`BUYEROS_AUTH0_ISSUER=${mode==='http'?'https://oidc.buyeros.test/':''}`,
- '-e',`BUYEROS_AUTH0_CLIENT_ID=${mode==='http'?'fixture-public-client':''}`,'-e',`BUYEROS_AUTH0_AUDIENCE=${mode==='http'?'fixture-api':''}`,
+ '-e',`BUYEROS_API_BASE_URL=${mode==='http'?'/':''}`,
+ ...(mode==='http'?Object.entries(neonFixtureEnvironment).flatMap(([key,value])=>['-e',`${key}=${value}`]):[]),
+ ...(runtime==='built'?['-e','NODE_ENV=test']:[]),
  ...(runtime==='built'?['-e','NITRO_PRESET=node-server','-e','PORT=3000','-e','HOST=0.0.0.0']:[]),
  '-w','/src','node:22.23.2-bookworm-slim','sleep','infinity']);
 const executionProfile=mode==='demo'?'portable':'managed-linux';

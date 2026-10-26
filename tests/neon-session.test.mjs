@@ -132,10 +132,12 @@ test('C11 a cancelled or failed dirty transition cannot sign out; changed scopes
 test('C11 retained draft requires exact authenticated actor, workspace, project and draft after server read',async()=>{
  const {DraftRecovery}=await loadModule('services/live/draft-recovery.ts'),h=environment(),recovery=new DraftRecovery(h.env.storage);
  const buffer={actor:'user',workspace:'A',project:'P',draftId:'draft',revisionId:'r1',version:3,subject:'Unsaved subject',body:'Unsaved text',language:'en'};
+ assert.equal(recovery.hasRetained(),false);
  recovery.retain(buffer);const afterReload=new DraftRecovery(h.env.storage);
+ assert.equal(recovery.hasRetained(),true);assert.equal(afterReload.hasRetained(),true);
  for(const changed of [{actor:'other'},{workspace:'B'},{project:'Q'},{draftId:'other'}])assert.equal(afterReload.find({...buffer,...changed}),null);
  assert.deepEqual(afterReload.find(buffer),buffer);assert.deepEqual(afterReload.find({...buffer,version:4,revisionId:'r2'}),buffer);
- assert.equal([...h.entries.values()].some(value=>value.includes(jwt())),false);afterReload.forget(buffer);assert.equal(afterReload.find(buffer),null);
+ assert.equal([...h.entries.values()].some(value=>value.includes(jwt())),false);afterReload.forget(buffer);assert.equal(afterReload.find(buffer),null);assert.equal(afterReload.hasRetained(),false);
 });
 test('C11 OAuth verifier is forwarded only to cookie exchange and never saved or broadcast',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');const tx=JSON.parse([...h.entries.values()][0]);
@@ -172,7 +174,11 @@ test('C11 explicit public provider config cannot reveal secrets or fall back fro
  const env={NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',BUYEROS_NEON_ENVIRONMENT:'preview',BUYEROS_NEON_AUTH_URL:url,BUYEROS_NEON_EXPECTED_AUTH_URL:url,BUYEROS_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://app.example.test',BUYEROS_NEON_COOKIE_SECRET:'PRIVATE_CANARY_DO_NOT_SERIALIZE_'.repeat(2),BUYEROS_AUTH0_ISSUER:'https://legacy.example.test/',BUYEROS_AUTH0_CLIENT_ID:'legacy',BUYEROS_AUTH0_AUDIENCE:'legacy'};
  assert.deepEqual(loadPublicAuth(env),{provider:'neon',config:{authPath:'/api/auth',socialInitOrigin:'https://ep-owned.neonauth.us-east-2.aws.neon.tech',socialInitPath:'/neondb/auth/sign-in/social/init'}});
  for(const wrong of [{BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'},{BUYEROS_NEON_EXPECTED_AUTH_URL:'https://other.neon.tech/auth'},{BUYEROS_AUTH_PROVIDER:'unknown'}]){const value=loadPublicAuth({...env,...wrong});assert.equal(value.provider,'unavailable');assert.doesNotMatch(JSON.stringify(value),/PRIVATE_CANARY|legacy/);}
- assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:undefined}).provider,'auth0');
+ assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:undefined}).provider,'neon');
+ assert.equal(loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:''}).provider,'neon');
+ const abandoned=loadPublicAuth({...env,BUYEROS_AUTH_PROVIDER:'auth0',BUYEROS_AUTH0_ISSUER:'https://dev-oaug20cdxqqgn1s8.us.auth0.com/',BUYEROS_AUTH0_CLIENT_ID:'public',BUYEROS_AUTH0_AUDIENCE:'https://buyer-os-nu.vercel.app/v1'});
+ assert.equal(abandoned.provider,'unavailable');
+ assert.doesNotMatch(JSON.stringify(abandoned),/auth0\.com|public|buyer-os-nu/);
 });
 
 test('C11 multipart retry freezes fields and intent without changing the original browser boundary',async()=>{
@@ -301,7 +307,110 @@ test('T21-01 failed social transport exposes only a bounded category, status and
   h.env.fetch=async()=>Response.json({message:'synthetic-private-response-must-not-be-shown'},{status:503,headers:{'x-request-id':requestId}});
   let captured;try{await auth.signInGoogle();}catch(error){captured=error;}
   assert.deepEqual(neonSignInDiagnostic(captured),{category:'service_response',http_status:503,
-   request_id:requestId.startsWith('1234')?requestId:null});
+   request_id:requestId.startsWith('1234')?requestId:null,reason:'service'});
   assert.doesNotMatch(JSON.stringify(neonSignInDiagnostic(captured)),/opaque|private-response/);
+ }
+});
+
+test('sign-in failures name what failed and never copy the provider body',async()=>{
+ const {neonSignInDiagnostic}=await loadModule('services/live/neon-auth.ts');
+ const {describeSignInFailure,signInFailureCopy,signInReasons,signInFailureMessage}=await loadModule('services/live/sign-in-failure.ts');
+ for(const reason of signInReasons){
+  const row=signInFailureCopy[reason];
+  assert.match(row.en,/^Sign-in failed\./);
+  assert.match(row['zh-HK'],/登入失敗/);
+  assert.notEqual(row.en,row['zh-HK']);
+  assert.equal(signInFailureMessage(reason,'en'),row.en);
+  assert.equal(signInFailureMessage(reason,'zh-HK'),row['zh-HK']);
+  if(reason==='callback'||reason==='session')assert.match(row.en,/Sign-in failed\. Please start again\./);
+ }
+ const cases=[
+  [401,{code:'INVALID_PASSWORD',message:'synthetic-private-response'},'wrong_password'],
+  [401,{code:'USER_NOT_FOUND',message:'opaque-email'},'unknown_email'],
+  [401,{code:'USER_EMAIL_NOT_FOUND',message:'opaque'},'unknown_email'],
+  [401,{code:'INVALID_CREDENTIALS',message:'opaque'},'credentials'],
+  [401,{code:'INVALID_EMAIL_OR_PASSWORD',message:'opaque'},'credentials'],
+  [401,{message:'opaque-unspecified'},'credentials'],
+  [400,{code:'INVALID_EMAIL',message:'opaque'},'invalid_email'],
+  [400,{message:'not-a-code'},'validation'],
+  [422,{code:'PASSWORD_TOO_SHORT',message:'opaque'},'validation'],
+  [403,{code:'AUTH_FORBIDDEN',message:'opaque'},'forbidden'],
+  [404,{message:'opaque'},'service'],
+  [429,{message:'opaque'},'rate_limited'],
+  [503,{code:'not-allow-listed',message:'synthetic-private-response'},'service'],
+  [401,{code:'EMAIL_NOT_VERIFIED',message:'opaque'},'unverified_email'],
+  [401,{code:'CREDENTIAL_ACCOUNT_NOT_FOUND',message:'opaque'},'social_only'],
+ ];
+ for(const [status,body,reason] of cases){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+  h.env.fetch=async()=>Response.json(body,{status});
+  let captured;try{await auth.signInEmail('synthetic@example.test','secret-value');}catch(error){captured=error;}
+  const diagnostic=neonSignInDiagnostic(captured);
+  assert.equal(diagnostic.reason,reason,JSON.stringify(body));
+  assert.equal(describeSignInFailure(captured),reason);
+  assert.equal(diagnostic.category,'service_response');
+  assert.equal(diagnostic.http_status,status);
+  const encoded=JSON.stringify(diagnostic)+signInFailureCopy[reason].en+signInFailureCopy[reason]['zh-HK'];
+  assert.doesNotMatch(encoded,/opaque|private-response|secret-value|not-allow-listed/);
+ }
+ const network=environment(),networkAuth=await adapter(network.env);await networkAuth.signIn('/app');
+ network.env.fetch=async()=>{throw new TypeError('Failed to fetch');};
+ let networkError;try{await networkAuth.signInEmail('synthetic@example.test','secret-value');}catch(error){networkError=error;}
+ assert.equal(neonSignInDiagnostic(networkError).reason,'network');
+ assert.equal(neonSignInDiagnostic(networkError).category,'session_or_transport');
+ let validationError;try{await (await adapter(environment().env)).signInEmail('   ','x');}catch(error){validationError=error;}
+ assert.equal(describeSignInFailure(validationError),'validation');
+ assert.equal(describeSignInFailure(new Error('Invalid Google redirect')),'google_redirect');
+ assert.equal(neonSignInDiagnostic(new Error('Invalid Google redirect')).category,'redirect_validation');
+ assert.equal(describeSignInFailure(new Error('Start sign-in again')),'stale_transaction');
+ assert.equal(describeSignInFailure(new Error('OIDC state mismatch')),'callback');
+ assert.equal(describeSignInFailure(new Error('OIDC keys unavailable')),'service');
+ assert.equal(describeSignInFailure(new Error('OIDC token exchange failed'),'callback'),'service');
+ assert.equal(describeSignInFailure(new Error('Sign-in did not create a session')),'session');
+});
+
+test('callback and Google HTTP failures never use credential-form copy',async()=>{
+ const {describeSignInFailure,reasonForHttp,signInFailureMessage}=await loadModule('services/live/sign-in-failure.ts');
+ const cases=[
+  [400,'INVALID_EMAIL','session','google_sign_in'],
+  [401,'INVALID_PASSWORD','session','google_sign_in'],
+  [401,'USER_NOT_FOUND','session','google_sign_in'],
+  [401,'INVALID_CREDENTIALS','session','google_sign_in'],
+  [401,'INVALID_EMAIL_OR_PASSWORD','session','google_sign_in'],
+  [401,null,'session','google_sign_in'],
+  [422,'PASSWORD_TOO_SHORT','session','google_sign_in'],
+  [422,'PASSWORD_TOO_LONG','session','google_sign_in'],
+  [401,'EMAIL_NOT_VERIFIED','session','google_sign_in'],
+  [401,'CREDENTIAL_ACCOUNT_NOT_FOUND','session','google_sign_in'],
+  [404,null,'session','google_sign_in'],
+  [503,'INVALID_PASSWORD','service','service'],
+  [503,'FAILED_TO_CREATE_SESSION','service','service'],
+  [429,null,'rate_limited','rate_limited'],
+  [403,'AUTH_FORBIDDEN','forbidden','forbidden'],
+ ];
+ for(const context of ['callback','google']){
+  for(const [status,code,callbackReason,googleReason] of cases){
+   const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+   if(context==='callback'){
+    const tx=JSON.parse(h.entries.get('buyeros-neon-return'));
+    h.env.location.href=`https://app.example.test/auth/callback?state=${tx.state}`;
+   }
+   h.env.fetch=async()=>Response.json({code,message:'synthetic-private-response'},{status});
+   let captured;
+   try{await (context==='callback'?auth.completeCallback():auth.signInGoogle());}catch(error){captured=error;}
+   const reason=describeSignInFailure(captured,context);
+   const expected=context==='google'?googleReason:callbackReason;
+   assert.equal(reason,expected,`${context} HTTP ${status} ${code}`);
+   assert.equal(reasonForHttp(status,code,context),expected);
+   for(const locale of ['en','zh-HK']){
+    const copy=signInFailureMessage(reason,locale);
+    assert.doesNotMatch(copy,/password|email above|密碼|上方電郵|synthetic-private-response/i);
+   }
+  }
+  for(const error of [new Error('Start sign-in again'),new Error('Sign-in did not create a session')]){
+   for(const locale of ['en','zh-HK']){
+    assert.doesNotMatch(signInFailureMessage(describeSignInFailure(error,context),locale),/password|密碼/i);
+   }
+  }
  }
 });

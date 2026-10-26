@@ -1,3 +1,4 @@
+import {neonFixtureEnvironment} from './tests/e2e/fixtures/neon-fixture-protocol.mjs';
 import {defineConfig} from '@playwright/test';
 /** T11 disposable PostgreSQL + fake OIDC; the test pumps the real handler without Valkey. */
 export default defineConfig({
@@ -7,7 +8,7 @@ export default defineConfig({
   webServer:[
     {command:'uv run --frozen python tools/serve_e2e_fixture.py',cwd:'services/api',url:'http://127.0.0.1:8000/health/live',timeout:600_000,reuseExistingServer:false,
       env:{BUYEROS_STRICT_INTEGRATION:'1',BUYEROS_E2E_SEED_BUYERS:'1',BUYEROS_E2E_BUYER_COUNT:'101',BUYEROS_CORS_ORIGINS:'["http://localhost:5173"]'}},
-    {command:'pnpm dev',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:false,
-      env:{BUYEROS_API_BASE_URL:'http://127.0.0.1:8000',BUYEROS_AUTH0_ISSUER:'https://oidc.buyeros.test/',BUYEROS_AUTH0_CLIENT_ID:'fixture-public-client',BUYEROS_AUTH0_AUDIENCE:'fixture-api'}},
+    {command:'node scripts/run-vercel.mjs dev --host 127.0.0.1 --port 5173',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:false,
+      env:{...neonFixtureEnvironment,BUYEROS_API_BASE_URL:'http://127.0.0.1:8000',}},
   ],
 });

@@ -21,7 +21,7 @@ jobs:
           mkdir -p artifacts/repair
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py --collect-only -q > artifacts/repair/promotion-discovery.txt
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py -q --junitxml=artifacts/repair/promotion.xml
-          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 183 --junit artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 188 --junit artifacts/repair/promotion.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -87,6 +87,7 @@ jobs:
           node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-candidate-client.xml tests/research-candidate-client.test.mjs
           python scripts/check-required-tests.py --junit artifacts/c61/ci-candidate-client.xml
       - run: node tests/live-auth-checks.mjs
+      - run: node --test tests/workbench-neon-fixture.test.mjs tests/production-acceptance.test.mjs tests/vite-runtime-config.test.mjs
       - run: node --test tests/audit-*.test.mjs tests/job-poller-checks.mjs
       - run: node --test tests/api-types-generation.test.mjs
       - run: node --test tests/vercel-services.test.mjs tests/deployment/cloudflare-python-runtime.test.mjs tests/deployment/cloudflare-acceptance.test.mjs tests/deployment/built-ui-fixture.test.mjs
@@ -616,13 +617,13 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3035 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3039 --discovery-only
       - name: Prepare owned marketing intake fixture
         working-directory: services/api
         run: uv run --frozen python tools/run_marketing_intake.py --github-env --receipt artifacts/marketing-api.target.json
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3035 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3039 --junit services/api/artifacts/tests.xml
       - name: Clean owned marketing intake fixture
         if: ${{ always() && hashFiles('services/api/artifacts/marketing-api.target.json') != '' }}
         working-directory: services/api
@@ -1015,9 +1016,9 @@ jobs:
       - name: Verify T21 traversal and synthetic protocol controls
         run: |
           mkdir -p artifacts/t21
-          node --test --test-reporter=junit --test-reporter-destination=artifacts/t21/navigation-unit.xml tests/t21-navigation.test.mjs tests/t21-history-replay.test.mjs tests/t21-oidc-redirect.test.mjs tests/t21-oidc-redirect-concurrency.test.mjs
+          node --test --test-reporter=junit --test-reporter-destination=artifacts/t21/navigation-unit.xml tests/t21-navigation.test.mjs tests/t21-history-replay.test.mjs tests/workbench-neon-fixture.test.mjs
           python scripts/check-required-tests.py --junit artifacts/t21/navigation-unit.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/t21/navigation-unit.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==14 and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'missing duplicate or nonpassing T21 navigation/protocol execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/t21/navigation-unit.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==12 and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'missing duplicate or nonpassing T21 navigation/protocol execution'"
           python -m unittest discover -s tests -p test_t21_public_inventory.py -v
       - uses: actions/upload-artifact@v4
         if: always()

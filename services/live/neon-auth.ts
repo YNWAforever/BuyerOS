@@ -1,4 +1,5 @@
 import {normalizeReturnPath, type AuthAdapter} from './auth';
+import {allowListedSignInCode, describeSignInFailure, type SignInReason} from './sign-in-failure';
 
 export interface PublicNeonConfig {
   authPath: string;
@@ -21,12 +22,13 @@ export interface NeonEnvironment {
 const transactionKey = 'buyeros-neon-return', invalidatedKey='buyeros-neon-invalidated';
 class InvalidatedSession extends Error {}
 class NeonRequestFailure extends Error {
-  constructor(readonly status:number,readonly requestId:string|null){super('Neon session unavailable');}
+  constructor(readonly status:number,readonly requestId:string|null,readonly code:string|null){super('Neon session unavailable');}
 }
-/** Allow-listed diagnostics only; never surface a provider body, URL, token, code or OAuth state. */
-export function neonSignInDiagnostic(error:unknown):{category:string;http_status:number|null;request_id:string|null}{
-  if(error instanceof NeonRequestFailure)return {category:'service_response',http_status:error.status,request_id:error.requestId};
-  return {category:error instanceof Error&&error.message==='Invalid Google redirect'?'redirect_validation':'session_or_transport',http_status:null,request_id:null};
+/** Allow-listed diagnostics only; never surface a provider body, URL, token or OAuth state. */
+export function neonSignInDiagnostic(error:unknown):{category:string;http_status:number|null;request_id:string|null;reason:SignInReason}{
+  const reason=describeSignInFailure(error);
+  if(error instanceof NeonRequestFailure)return {category:'service_response',http_status:error.status,request_id:error.requestId,reason};
+  return {category:reason==='google_redirect'?'redirect_validation':'session_or_transport',http_status:null,request_id:null,reason};
 }
 
 function browserChannel(): NeonChannel | undefined {
@@ -67,6 +69,19 @@ function trustedSocialInit(config: PublicNeonConfig): {origin: string; path: str
   return {origin:config.socialInitOrigin,path:config.socialInitPath};
 }
 
+/** Read only an allow-listed `code`. The rest of the provider body is discarded. */
+async function allowListedFailureCode(response: Response): Promise<string | null> {
+  const length = Number(response.headers.get('content-length'));
+  if (Number.isFinite(length) && length > 4096) return null;
+  try {
+    const text = await response.text();
+    if (!text || text.length > 4096) return null;
+    const parsed: unknown = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return allowListedSignInCode((parsed as {code?: unknown}).code);
+  } catch { return null; }
+}
+
 /** Cookie transport to the unpatched server SDK. JWTs stay in this instance's memory.
  * The pinned browser SDK broadcasts sessionData (including token); this boundary intentionally
  * uses its server routes without importing that client or patching its cookies/cache/trust.
@@ -95,7 +110,7 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
     if (!response.ok) {
       const candidate=response.headers.get('x-request-id');
       const requestId=candidate&&/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(candidate)?candidate:null;
-      throw new NeonRequestFailure(response.status,requestId);
+      throw new NeonRequestFailure(response.status,requestId,await allowListedFailureCode(response));
     }
     const text = await response.text();
     if (new TextEncoder().encode(text).byteLength > 128_000) throw new Error('Invalid session response');

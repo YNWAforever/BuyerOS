@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 
 // Catch public routes inheriting product providers, incorrect SSR language,
 // catch-all interception, broken auth/API routes, and cross-root hydration.
@@ -15,7 +15,7 @@ test('public language, copy and metadata arrive in SSR without product auth', as
     expect(html).toContain(headline);
     expect(html).toContain(`<title>${title}</title>`);
     expect(html).toMatch(/name="robots" content="noindex, nofollow"/);
-    expect(html).not.toMatch(/synthetic-public-client|oidc\.marketing-spike|WorkspaceSessionProvider|DataModeProvider/);
+    expect(html).not.toMatch(/OWNED_SYNTHETIC_COOKIE_SECRET|WorkspaceSessionProvider|DataModeProvider/);
   }
 });
 
@@ -28,14 +28,14 @@ test('public entry redirects and missing routes cannot swallow app or API routes
   for (const path of ['/fr', '/zh-HK/missing', '/missing/nested']) {
     const response = await request.get(path);
     expect(response.status(), path).toBe(404);
-    expect(await response.text()).not.toContain('synthetic-public-client');
+    expect(await response.text()).not.toContain('OWNED_SYNTHETIC_COOKIE_SECRET');
   }
   const api = await request.get('/v1/workspaces?offset=2');
   expect(api.status()).toBe(503);
   expect(api.headers()['cache-control']).toBe('private, no-store');
   expect((await api.json()).code).toBe('SERVICE_UNAVAILABLE');
-  const auth = await request.get('/api/auth/get-session');
-  expect(auth.status()).toBe(503);
+  const auth = await request.get('/api/auth/get-session', {headers: {Origin: 'https://untrusted.example.test'}});
+  expect(auth.status()).toBe(403);
   expect(auth.headers()['content-type']).toContain('application/json');
   expect(await auth.text()).not.toContain('<html');
 });
@@ -63,6 +63,7 @@ test('locale links, CTA and product root transitions hydrate without public auth
     if (onPublic && /^\/(v1|api\/auth)\//.test(url.pathname)) publicRequests.push(url.pathname);
     return route.continue();
   });
+  await installNeonFixture(page,{origin:'http://127.0.0.1:5193'});
   await page.goto('/zh-HK');
   await expect(page.getByRole('heading', {level: 1})).toContainText('買家名單不少');
   await page.getByRole('link', {name: 'English', exact: true}).click();
@@ -88,25 +89,22 @@ test('product deep links and callback keep the product provider and recovery pat
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.route('https://**/*', route => route.abort());
+  await installNeonFixture(page,{origin:'http://127.0.0.1:5193'});
   await page.goto('/app/settings?workspace=synthetic');
   await expect(page).toHaveURL(/\/app\/settings\?workspace=synthetic$/);
   await expect(page.getByRole('button', {name: 'Sign in', exact: true})).toBeVisible();
   await expect(page.locator('.marketing-shell')).toHaveCount(0);
-  await page.goto('/auth/callback?code=synthetic-invalid&state=synthetic-invalid');
-  await expect(page.getByRole('alert')).toContainText('Sign-in failed. Please start again.');
+  await page.goto('/auth/callback?state=synthetic-invalid');
+  await expect(page.getByRole('alert')).toHaveText('Sign-in failed. This page is no longer linked to your workspace. Choose Start again, then Sign in.');
   await page.getByRole('link', {name: 'Start again', exact: true}).click();
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.getByRole('button', {name: 'Sign in', exact: true})).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-for (const returnPath of ['/app', '/app?spike_return=preserved', '/app/settings?spike_return=preserved']) test(`synthetic PKCE login preserves callback state and return ${returnPath} after public navigation`, async ({page}) => {
-  const issuer = 'https://oidc.marketing-spike.test/';
+for (const returnPath of ['/app', '/app?spike_return=preserved', '/app/settings?spike_return=preserved']) test(`synthetic Neon email login preserves callback state and return ${returnPath} after public navigation`, async ({page}) => {
   const origin = 'http://127.0.0.1:5193';
-  const keys = await webcrypto.subtle.generateKey({name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048,
-    publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256'}, true, ['sign', 'verify']);
-  const publicKey = {...await webcrypto.subtle.exportKey('jwk', keys.publicKey), kid: 'spike-key', use: 'sig'};
-  let nonce = '', challenge = '', exchanges = 0;
+  const emailCalls: Array<{email:string;password:string;callbackURL:string}> = [];
   const unexpected: string[] = [], errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.route('**/*', route => {
@@ -114,30 +112,10 @@ for (const returnPath of ['/app', '/app?spike_return=preserved', '/app/settings?
     if (url.origin === origin) return route.continue();
     unexpected.push(url.origin + url.pathname); return route.abort();
   });
-  await page.route(`${issuer}authorize**`, route => {
-    const url = new URL(route.request().url());
-    nonce = url.searchParams.get('nonce') ?? '';
-    challenge = url.searchParams.get('code_challenge') ?? '';
-    expect(url.searchParams.get('code_challenge_method')).toBe('S256');
-    expect(url.searchParams.get('redirect_uri')).toBe(origin + '/auth/callback');
-    return route.fulfill({status: 302, headers: {location: `${origin}/auth/callback?code=spike-code&state=${url.searchParams.get('state')}`}, body: ''});
+  const auth=await installNeonFixture(page,{origin,subject:'spike-actor',accessToken:'synthetic-spike-access'});
+  page.on('request',request=>{
+    if(new URL(request.url()).pathname==='/api/auth/sign-in/email')emailCalls.push(request.postDataJSON());
   });
-  await page.route(`${issuer}oauth/token`, async route => {
-    const body = new URLSearchParams(route.request().postData() ?? '');
-    expect(body.get('code')).toBe('spike-code');
-    expect(body.get('client_secret')).toBeNull();
-    expect(body.get('redirect_uri')).toBe(origin + '/auth/callback');
-    expect(Buffer.from(await webcrypto.subtle.digest('SHA-256', new TextEncoder().encode(body.get('code_verifier') ?? ''))).toString('base64url')).toBe(challenge);
-    const b64 = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
-    const unsigned = `${b64({alg: 'RS256', kid: 'spike-key'})}.${b64({iss: issuer, aud: 'synthetic-public-client', sub: 'spike-actor', nonce, exp: Math.floor(Date.now() / 1000) + 300})}`;
-    const signature = await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5', keys.privateKey, new TextEncoder().encode(unsigned));
-    exchanges++;
-    return route.fulfill({status: 200, contentType: 'application/json', headers: {'Access-Control-Allow-Origin': origin}, body: JSON.stringify({
-      access_token: 'synthetic-spike-access', id_token: `${unsigned}.${Buffer.from(signature).toString('base64url')}`, expires_in: 300,
-    })});
-  });
-  await page.route(`${issuer}.well-known/jwks.json`, route => route.fulfill({status: 200,
-    contentType: 'application/json', headers: {'Access-Control-Allow-Origin': origin}, body: JSON.stringify({keys: [publicKey]})}));
   await page.route(`${origin}/v1/workspaces?**`, route => {
     expect(route.request().headers().authorization).toBe('Bearer synthetic-spike-access');
     return route.fulfill({status: 200, contentType: 'application/json', body: JSON.stringify({
@@ -147,10 +125,14 @@ for (const returnPath of ['/app', '/app?spike_return=preserved', '/app/settings?
   await page.goto('/en');
   await page.locator('.m-login').click();
   await page.goto(returnPath);
-  await page.getByRole('button', {name: 'Sign in', exact: true}).click();
+  await auth.signIn();
   await expect(page.getByText('No workspace membership. Ask an administrator for access.')).toBeVisible();
   await expect(page).toHaveURL(origin + returnPath);
-  expect(exchanges).toBe(1);
+  expect(emailCalls).toHaveLength(1);
+  expect(emailCalls[0].email).toBe('spike-actor@example.test');
+  const callback=new URL(emailCalls[0].callbackURL);
+  expect(callback.origin).toBe(origin);expect(callback.pathname).toBe('/auth/callback');
+  expect(callback.searchParams.get('state')).toMatch(/^[0-9a-f-]{36}$/);
   expect(await page.evaluate(() => location.href + JSON.stringify({...localStorage}) + JSON.stringify({...sessionStorage}))).not.toContain('synthetic-spike-access');
   expect(unexpected).toEqual([]);
   expect(errors).toEqual([]);

@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime configuration. Fails closed: no Auth0 values means live auth is off."""
+    """Runtime configuration. Neon is the default; incomplete provider trust fails closed."""
 
     model_config = SettingsConfigDict(env_prefix="BUYEROS_", extra="ignore")
 
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     database_migration_url: str | None = Field(default=None, repr=False, exclude=True)
     auth0_issuer: str | None = None
     auth0_audience: str | None = None
-    auth_mode: str = "auth0"
+    auth_mode: str = "neon"
     neon_issuer: str | None = None
     neon_audience: str | None = None
     neon_jwks_url: str | None = None

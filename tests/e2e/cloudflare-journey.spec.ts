@@ -36,7 +36,7 @@ test('CF07 real second page, 101-row native bulk and persistent Workflow restart
     expect(await state()).toMatchObject({processed:101,updated:101,conflicts:0,platform_receipts:3});
     await page.getByRole('button',{name:'Refresh job'}).click();
     await expect(page.getByRole('region',{name:'Bulk job progress'})).toContainText('completed: 101 of 101 processed');
-    await page.reload();await page.getByRole('button',{name:'Sign in'}).click();
+    await page.reload();
     await expect(page.getByRole('region',{name:'Bulk job progress'})).toContainText('completed: 101 of 101 processed');
     await page.locator('header select').selectOption('zh-HK');
     await page.setViewportSize({width:390,height:844});

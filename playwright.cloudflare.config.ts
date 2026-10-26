@@ -1,3 +1,4 @@
+import {neonFixtureEnvironment} from './tests/e2e/fixtures/neon-fixture-protocol.mjs';
 import {defineConfig} from '@playwright/test';
 
 if (process.env.BUYEROS_TEST_DATABASE_URL || process.env.BUYEROS_REUSE_TEST_SERVER === '1') {
@@ -16,7 +17,6 @@ export default defineConfig({
     {command:'node scripts/serve-cloudflare-fixture.mjs',url:'http://127.0.0.1:8788/health',
       timeout:600_000,reuseExistingServer:false},
     {command:'node scripts/serve-built-ui-fixture.mjs',url:'http://localhost:5173',timeout:600_000,reuseExistingServer:false,
-      env:{BUYEROS_API_BASE_URL:'http://127.0.0.1:8000',BUYEROS_AUTH0_ISSUER:'https://oidc.buyeros.test/',
-        BUYEROS_AUTH0_CLIENT_ID:'fixture-public-client',BUYEROS_AUTH0_AUDIENCE:'fixture-api'}},
+      env:{...neonFixtureEnvironment,BUYEROS_API_BASE_URL:'http://127.0.0.1:8000',}},
   ],
 });
