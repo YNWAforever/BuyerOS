@@ -72,7 +72,7 @@ class PolicyActivationCiRegistration(unittest.TestCase):
         native = self.step("browser-continuity", "Verify native lead workflow without provider activation")
         self.assertIn("--expected-count 46", native)
         self.assertIn("--run-suite native-browser", native)
-        self.assertEqual(len(self.jobs), 12)
+        self.assertEqual(len(self.jobs), 13)
 
     def test_api_gate_has_no_application_database_url_fallback(self):
         block = self.step("api", "Create verified controlled policy test target")

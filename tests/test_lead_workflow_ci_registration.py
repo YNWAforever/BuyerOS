@@ -139,7 +139,7 @@ class LeadWorkflowCIRegistration(unittest.TestCase):
         jobs = set(re.findall(r"^  ([a-z][a-z0-9-]*):$", self.workflow.split("jobs:", 1)[1], re.MULTILINE))
         self.assertEqual(jobs, {"release-readiness", "frontend", "cloudflare-controller", "api", "worker",
             "owned-worker-capacity", "browser-smoke", "browser-zoom", "cloudflare-staff-acceptance",
-            "browser-continuity", "audit-fixes", "c61-evidence-checker"})
+            "browser-continuity", "audit-fixes", "c61-evidence-checker", "offer-profile"})
         preload = re.findall(r"run: (docker pull [^\n]+:16)\n", self.workflow)
         self.assertEqual(len(preload), 2)
         self.assertEqual(len(set(preload)), 1)
