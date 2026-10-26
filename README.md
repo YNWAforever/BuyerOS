@@ -62,6 +62,24 @@ provider and budget gates. Building or opening a PR does not enable them.
 Deployment instructions describe the checked-in controls, not a claim that a given
 release is live.
 
+## Live API request recovery
+
+The shared browser API client bounds GET/HEAD/OPTIONS requests and text exports to
+30 seconds, and mutations to 120 seconds to accommodate the API's 90-second
+execution budget. One deadline covers transport, the existing single 401
+refresh/replay, and reading the response body. A deadline aborts the request and
+surfaces `REQUEST_TIMEOUT`; scope changes or unmount cancellation remain silent.
+Timers and caller-signal listeners are released when the request settles.
+
+A timeout does not confirm whether a write committed. The client never
+automatically replays a timed-out write: use the flow's status/readback action or
+retry its retained command with the same idempotency key and payload. No schema
+migration, new environment variable, or caller API change is required.
+
+`node tests/audit-request-lifetime.test.mjs` verifies stalled fetches, response
+bodies and token refresh, cancellation, late responses, cleanup and retained
+write intents with virtual time. The existing frontend CI audit glob includes it.
+
 ## Existing records
 
 [BuyerOS handoff index](docs/buyeros/HANDOFF_INDEX.md) and
