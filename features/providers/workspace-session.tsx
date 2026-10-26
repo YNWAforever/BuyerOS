@@ -32,18 +32,18 @@ export function WorkspaceSessionProvider({children, authConfig, publicAuth}: {ch
     if (mode !== 'live') return {auth: null, authError: null, authBootstrap: {kind:'disabled'}};
     if (!browser) return {auth: null, authError: null, authBootstrap: {kind:'initializing'}};
     const invalid = (message:string) => ({auth:null, authError:message, authBootstrap:{kind:'configuration_error' as const,message}});
-    if(provider==='unavailable')return invalid(providerError??'Sign-in configuration unavailable.');
-    if(provider==='neon'){try{const auth=createNeonAuthAdapter({authPath:authPath??'',socialInitOrigin:socialInitOrigin??'',socialInitPath:socialInitPath??''});return {auth,authError:null,authBootstrap:{kind:'ready',auth}};}catch{return invalid('Neon sign-in configuration is unavailable.');}}
-    if (!issuer || !clientId || !audience) return invalid('Configure an Auth0 public SPA client, issuer, client ID and API audience.');
+    if(provider==='unavailable')return invalid(providerError??'Sign-in configuration unavailable. Ask an administrator to restore sign-in.');
+    if(provider==='neon'){try{const auth=createNeonAuthAdapter({authPath:authPath??'',socialInitOrigin:socialInitOrigin??'',socialInitPath:socialInitPath??''});return {auth,authError:null,authBootstrap:{kind:'ready',auth}};}catch{return invalid('Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.');}}
+    if (!issuer || !clientId || !audience) return invalid('Sign-in is not configured. Ask an administrator to finish public sign-in setup, then use Sign in.');
     try {const auth=createAuthAdapter({issuer, clientId, audience});return {auth, authError:null, authBootstrap:{kind:'ready',auth}};}
-    catch {return invalid('Public OIDC configuration is invalid');}
+    catch {return invalid('Sign-in configuration is invalid. Ask an administrator to correct it, then use Sign in.');}
   }, [browser,mode,issuer,clientId,audience,provider,authPath,socialInitOrigin,socialInitPath,providerError]);
   useEffect(() => {
     const auth=authState.auth;if(!auth)return;
     let active=true;
     const binding=bindAuthSession(base.session,auth,base.client,{hydrate:!window.location.pathname.startsWith('/auth/')});
     void binding.ready.then(()=>{if(active)setHydrated({auth,error:null});}).catch(()=>{
-      if(active)setHydrated({auth,error:'Sign-in session unavailable. Please start sign-in again.'});
+      if(active)setHydrated({auth,error:'Sign-in failed. BuyerOS could not check for an existing session. Choose Sign in and enter your email and password.'});
     });
     return()=>{active=false;binding.dispose();};
   },[authState.auth,base.session,base.client]);

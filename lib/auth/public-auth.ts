@@ -17,7 +17,7 @@ export function loadPublicAuth(env:Record<string,string|undefined>):PublicAuth {
         socialInitPath:base.pathname.replace(/\/+$/,'')+'/sign-in/social/init',
       }};
     }
-    catch {return {provider:'unavailable',message:'Neon sign-in configuration is unavailable.'};}
+    catch {return {provider:'unavailable',message:'Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.'};}
   }
-  return {provider:'unavailable',message:'Sign-in provider configuration is unavailable.'};
+  return {provider:'unavailable',message:'Sign-in provider configuration is unavailable. Ask an administrator to restore sign-in.'};
 }

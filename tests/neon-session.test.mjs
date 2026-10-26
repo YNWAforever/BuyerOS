@@ -301,7 +301,63 @@ test('T21-01 failed social transport exposes only a bounded category, status and
   h.env.fetch=async()=>Response.json({message:'synthetic-private-response-must-not-be-shown'},{status:503,headers:{'x-request-id':requestId}});
   let captured;try{await auth.signInGoogle();}catch(error){captured=error;}
   assert.deepEqual(neonSignInDiagnostic(captured),{category:'service_response',http_status:503,
-   request_id:requestId.startsWith('1234')?requestId:null});
+   request_id:requestId.startsWith('1234')?requestId:null,reason:'service'});
   assert.doesNotMatch(JSON.stringify(neonSignInDiagnostic(captured)),/opaque|private-response/);
  }
+});
+
+test('sign-in failures name what failed and never copy the provider body',async()=>{
+ const {neonSignInDiagnostic}=await loadModule('services/live/neon-auth.ts');
+ const {describeSignInFailure,signInFailureCopy,signInReasons,signInFailureMessage}=await loadModule('services/live/sign-in-failure.ts');
+ for(const reason of signInReasons){
+  const row=signInFailureCopy[reason];
+  assert.match(row.en,/^Sign-in failed\./);
+  assert.match(row['zh-HK'],/登入失敗/);
+  assert.notEqual(row.en,row['zh-HK']);
+  assert.equal(signInFailureMessage(reason,'en'),row.en);
+  assert.equal(signInFailureMessage(reason,'zh-HK'),row['zh-HK']);
+  if(reason==='callback'||reason==='session')assert.match(row.en,/Sign-in failed\. Please start again\./);
+ }
+ const cases=[
+  [401,{code:'INVALID_PASSWORD',message:'synthetic-private-response'},'wrong_password'],
+  [401,{code:'USER_NOT_FOUND',message:'opaque-email'},'unknown_email'],
+  [401,{code:'USER_EMAIL_NOT_FOUND',message:'opaque'},'unknown_email'],
+  [401,{code:'INVALID_CREDENTIALS',message:'opaque'},'credentials'],
+  [401,{code:'INVALID_EMAIL_OR_PASSWORD',message:'opaque'},'credentials'],
+  [401,{message:'opaque-unspecified'},'credentials'],
+  [400,{code:'INVALID_EMAIL',message:'opaque'},'invalid_email'],
+  [400,{message:'not-a-code'},'validation'],
+  [422,{code:'PASSWORD_TOO_SHORT',message:'opaque'},'validation'],
+  [403,{code:'AUTH_FORBIDDEN',message:'opaque'},'forbidden'],
+  [404,{message:'opaque'},'service'],
+  [429,{message:'opaque'},'rate_limited'],
+  [503,{code:'not-allow-listed',message:'synthetic-private-response'},'service'],
+  [401,{code:'EMAIL_NOT_VERIFIED',message:'opaque'},'unverified_email'],
+  [401,{code:'CREDENTIAL_ACCOUNT_NOT_FOUND',message:'opaque'},'social_only'],
+ ];
+ for(const [status,body,reason] of cases){
+  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+  h.env.fetch=async()=>Response.json(body,{status});
+  let captured;try{await auth.signInEmail('synthetic@example.test','secret-value');}catch(error){captured=error;}
+  const diagnostic=neonSignInDiagnostic(captured);
+  assert.equal(diagnostic.reason,reason,JSON.stringify(body));
+  assert.equal(describeSignInFailure(captured),reason);
+  assert.equal(diagnostic.category,'service_response');
+  assert.equal(diagnostic.http_status,status);
+  const encoded=JSON.stringify(diagnostic)+signInFailureCopy[reason].en+signInFailureCopy[reason]['zh-HK'];
+  assert.doesNotMatch(encoded,/opaque|private-response|secret-value|not-allow-listed/);
+ }
+ const network=environment(),networkAuth=await adapter(network.env);await networkAuth.signIn('/app');
+ network.env.fetch=async()=>{throw new TypeError('Failed to fetch');};
+ let networkError;try{await networkAuth.signInEmail('synthetic@example.test','secret-value');}catch(error){networkError=error;}
+ assert.equal(neonSignInDiagnostic(networkError).reason,'network');
+ assert.equal(neonSignInDiagnostic(networkError).category,'session_or_transport');
+ let validationError;try{await (await adapter(environment().env)).signInEmail('   ','x');}catch(error){validationError=error;}
+ assert.equal(describeSignInFailure(validationError),'validation');
+ assert.equal(describeSignInFailure(new Error('Invalid Google redirect')),'google_redirect');
+ assert.equal(neonSignInDiagnostic(new Error('Invalid Google redirect')).category,'redirect_validation');
+ assert.equal(describeSignInFailure(new Error('Start sign-in again')),'stale_transaction');
+ assert.equal(describeSignInFailure(new Error('OIDC state mismatch')),'callback');
+ assert.equal(describeSignInFailure(new Error('OIDC keys unavailable')),'network');
+ assert.equal(describeSignInFailure(new Error('Sign-in did not create a session')),'session');
 });

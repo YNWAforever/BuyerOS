@@ -14,8 +14,9 @@ source=source.replace(/from ["']@\/services\/live\/auth-session["']/g,`from ${JS
  .replace(/import \{ useRouter \} from ["']next\/navigation["'];/,`const useRouter=()=>({replace(){}});`)
  .replace(/import \{ useWorkspaceSession \} from ["']@\/features\/providers\/workspace-session["'];/,
    `const useWorkspaceSession=()=>({auth:null,authBootstrap:{kind:'initializing'},session:{}});`);
+source=source.replace(/from ["']@\/services\/live\/sign-in-failure["']/g, `from ${JSON.stringify(moduleUrl('services/live/sign-in-failure.ts'))}`);
 source=source.replace(/import.*useAuthLocale.*from[^;]+;/,
- `const useAuthLocale=()=>({t:value=>value,picker:null});`);
+ `const useAuthLocale=()=>({t:value=>value,picker:null,locale:'en'});`);
 const {default:Callback}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 test('U13 actual callback render during initializing is status, never configuration alert',()=>{
   const html=renderToString(React.createElement(Callback));
