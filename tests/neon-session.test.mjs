@@ -362,6 +362,53 @@ test('sign-in failures name what failed and never copy the provider body',async(
  assert.equal(neonSignInDiagnostic(new Error('Invalid Google redirect')).category,'redirect_validation');
  assert.equal(describeSignInFailure(new Error('Start sign-in again')),'stale_transaction');
  assert.equal(describeSignInFailure(new Error('OIDC state mismatch')),'callback');
- assert.equal(describeSignInFailure(new Error('OIDC keys unavailable')),'network');
+ assert.equal(describeSignInFailure(new Error('OIDC keys unavailable')),'service');
+ assert.equal(describeSignInFailure(new Error('OIDC token exchange failed'),'callback'),'service');
  assert.equal(describeSignInFailure(new Error('Sign-in did not create a session')),'session');
+});
+
+test('callback and Google HTTP failures never use credential-form copy',async()=>{
+ const {describeSignInFailure,reasonForHttp,signInFailureMessage}=await loadModule('services/live/sign-in-failure.ts');
+ const cases=[
+  [400,'INVALID_EMAIL','session','google_sign_in'],
+  [401,'INVALID_PASSWORD','session','google_sign_in'],
+  [401,'USER_NOT_FOUND','session','google_sign_in'],
+  [401,'INVALID_CREDENTIALS','session','google_sign_in'],
+  [401,'INVALID_EMAIL_OR_PASSWORD','session','google_sign_in'],
+  [401,null,'session','google_sign_in'],
+  [422,'PASSWORD_TOO_SHORT','session','google_sign_in'],
+  [422,'PASSWORD_TOO_LONG','session','google_sign_in'],
+  [401,'EMAIL_NOT_VERIFIED','session','google_sign_in'],
+  [401,'CREDENTIAL_ACCOUNT_NOT_FOUND','session','google_sign_in'],
+  [404,null,'session','google_sign_in'],
+  [503,'INVALID_PASSWORD','service','service'],
+  [503,'FAILED_TO_CREATE_SESSION','service','service'],
+  [429,null,'rate_limited','rate_limited'],
+  [403,'AUTH_FORBIDDEN','forbidden','forbidden'],
+ ];
+ for(const context of ['callback','google']){
+  for(const [status,code,callbackReason,googleReason] of cases){
+   const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');
+   if(context==='callback'){
+    const tx=JSON.parse(h.entries.get('buyeros-neon-return'));
+    h.env.location.href=`https://app.example.test/auth/callback?state=${tx.state}`;
+   }
+   h.env.fetch=async()=>Response.json({code,message:'synthetic-private-response'},{status});
+   let captured;
+   try{await (context==='callback'?auth.completeCallback():auth.signInGoogle());}catch(error){captured=error;}
+   const reason=describeSignInFailure(captured,context);
+   const expected=context==='google'?googleReason:callbackReason;
+   assert.equal(reason,expected,`${context} HTTP ${status} ${code}`);
+   assert.equal(reasonForHttp(status,code,context),expected);
+   for(const locale of ['en','zh-HK']){
+    const copy=signInFailureMessage(reason,locale);
+    assert.doesNotMatch(copy,/password|email above|密碼|上方電郵|synthetic-private-response/i);
+   }
+  }
+  for(const error of [new Error('Start sign-in again'),new Error('Sign-in did not create a session')]){
+   for(const locale of ['en','zh-HK']){
+    assert.doesNotMatch(signInFailureMessage(describeSignInFailure(error,context),locale),/password|密碼/i);
+   }
+  }
+ }
 });

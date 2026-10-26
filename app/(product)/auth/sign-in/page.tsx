@@ -26,15 +26,16 @@ export default function NeonSignInPage(){
  const submitting=useRef(false);
  const [support,setSupport]=useState<ReturnType<typeof neonSignInDiagnostic>|null>(null);
  const linked=useSyncExternalStore(()=>()=>{},signInIsLinked,()=>true);
- async function submit(action:()=>Promise<void>){
+ async function submit(action:()=>Promise<void>,context:'email'|'google'='email'){
    if(submitting.current)return;submitting.current=true;setBusy(true);setFailure(null);setFieldError(null);setSupport(null);
-   try{await action();}catch(cause){setPassword('');setFailure(describeSignInFailure(cause));setSupport(neonSignInDiagnostic(cause));}
+   try{await action();}catch(cause){setPassword('');setFailure(describeSignInFailure(cause,context));setSupport(neonSignInDiagnostic(cause));}
    finally{submitting.current=false;setBusy(false);}
  }
  function prepareValidity(){
    const apply=(id:string,missing:string,bad:string)=>{
      const field=document.getElementById(id);
      if(!(field instanceof HTMLInputElement))return;
+     field.setCustomValidity('');
      if(field.validity.valueMissing)field.setCustomValidity(t(missing));
      else if(!field.validity.valid)field.setCustomValidity(t(bad));
      else field.setCustomValidity('');
@@ -71,7 +72,7 @@ export default function NeonSignInPage(){
      <div className="live-auth-secondary">
        <p className="live-auth-or">{t('or')}</p>
        <p className="live-auth-hint">{t('Only for accounts created with Google.')}</p>
-       <button className="live-secondary live-auth-google" type="button" disabled={busy} onClick={()=>void submit(()=>auth!.signInGoogle!())}>{t('Sign in with Google')}</button>
+       <button className="live-secondary live-auth-google" type="button" disabled={busy} onClick={()=>void submit(()=>auth!.signInGoogle!(),'google')}>{t('Sign in with Google')}</button>
      </div>
      {busy&&<p role="status">{t('Signing in…')}</p>}
      {alertText&&<p id="sign-in-error" className="live-auth-alert" role="alert">{alertText}</p>}

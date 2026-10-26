@@ -21,7 +21,7 @@ export default function AuthCallbackPage() {
     if(completion.current?.auth!==auth)completion.current={auth,promise:completeSessionCallback(auth,session,()=>activeAuth.current===auth)};
     void completion.current.promise.then(path => {
       if (active) router.replace(path);
-    }).catch((cause: unknown) => { if (active&&session.isCurrent(identity)) { session.setToken(undefined); setFailure(describeSignInFailure(cause)); } });
+    }).catch((cause: unknown) => { if (active&&session.isCurrent(identity)) { session.setToken(undefined); setFailure(describeSignInFailure(cause,'callback')); } });
     return () => {active=false;if(activeAuth.current===auth)activeAuth.current=null;};
   }, [auth, router, session]);
   const configurationError=authBootstrap.kind==='configuration_error';

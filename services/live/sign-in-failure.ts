@@ -9,6 +9,7 @@ export const signInReasons = [
   'rate_limited',
   'service',
   'google_redirect',
+  'google_sign_in',
   'stale_transaction',
   'forbidden',
   'unverified_email',
@@ -17,6 +18,7 @@ export const signInReasons = [
   'session',
 ] as const;
 export type SignInReason = typeof signInReasons[number];
+export type SignInContext = 'email' | 'google' | 'callback';
 
 const allowedCodes = new Set([
   'INVALID_EMAIL_OR_PASSWORD',
@@ -38,7 +40,13 @@ export function allowListedSignInCode(value: unknown): string | null {
   return typeof value === 'string' && allowedCodes.has(value) ? value : null;
 }
 
-export function reasonForHttp(status: number, code: string | null): SignInReason {
+export function reasonForHttp(status: number, code: string | null, context: SignInContext = 'email'): SignInReason {
+  if (context !== 'email') {
+    if (status === 429) return 'rate_limited';
+    if (status === 403 || code === 'AUTH_FORBIDDEN') return 'forbidden';
+    if (status >= 500 || code === 'FAILED_TO_CREATE_SESSION') return 'service';
+    return context === 'google' ? 'google_sign_in' : 'session';
+  }
   if (code === 'INVALID_PASSWORD') return 'wrong_password';
   if (code === 'USER_NOT_FOUND' || code === 'USER_EMAIL_NOT_FOUND') return 'unknown_email';
   if (code === 'INVALID_EMAIL') return 'invalid_email';
@@ -66,8 +74,6 @@ const networkMessages = new Set([
   'Load failed',
   'NetworkError when attempting to fetch resource.',
   'Network request failed',
-  'OIDC keys unavailable',
-  'OIDC token exchange failed',
 ]);
 
 function neonFailure(error: unknown): {status: number; code: string | null} | null {
@@ -78,16 +84,17 @@ function neonFailure(error: unknown): {status: number; code: string | null} | nu
   return {status, code: typeof code === 'string' ? code : null};
 }
 
-export function describeSignInFailure(error: unknown): SignInReason {
+export function describeSignInFailure(error: unknown, context: SignInContext = 'email'): SignInReason {
   const http = neonFailure(error);
-  if (http) return reasonForHttp(http.status, http.code);
+  if (http) return reasonForHttp(http.status, http.code, context);
   if (error instanceof TypeError) return 'network';
   if (error instanceof Error) {
     if (error.message === 'Invalid Google redirect') return 'google_redirect';
-    if (error.message === 'Email and password required') return 'validation';
+    if (context === 'email' && error.message === 'Email and password required') return 'validation';
     if (error.message === 'Start sign-in again' || error.message === 'Invalid return transaction') return 'stale_transaction';
     if (networkMessages.has(error.message)) return 'network';
     if (callbackMessages.has(error.message)) return 'callback';
+    if (error.message === 'OIDC keys unavailable' || error.message === 'OIDC token exchange failed') return 'service';
   }
   return 'session';
 }
@@ -118,20 +125,24 @@ export const signInFailureCopy: Record<SignInReason, {en: string; 'zh-HK': strin
     'zh-HK': '登入失敗。登入請求未能送達服務。請檢查連線後再試一次。',
   },
   rate_limited: {
-    en: 'Sign-in failed. Too many attempts. Wait a moment, then try the same email and password again.',
-    'zh-HK': '登入失敗。嘗試次數過多。請稍候，然後以同一電郵及密碼再試一次。',
+    en: 'Sign-in failed. Too many attempts. Wait a moment, then try signing in again.',
+    'zh-HK': '登入失敗。嘗試次數過多。請稍候，然後再試一次登入。',
   },
   service: {
-    en: 'Sign-in failed. The sign-in service did not complete. Wait a moment and try again. Your password was cleared and the email above was kept.',
-    'zh-HK': '登入失敗。登入服務未能完成。請稍候再試。密碼已清除，上方電郵仍保留。',
+    en: 'Sign-in failed. The sign-in service did not complete. Wait a moment, then choose Start again and try signing in again.',
+    'zh-HK': '登入失敗。登入服務未能完成。請稍候，然後選擇重新開始，再試一次登入。',
   },
   google_redirect: {
     en: 'Sign-in failed. Google did not return a trusted sign-in address. Choose Start again, then try Google once more.',
     'zh-HK': '登入失敗。Google 沒有返回可信任的登入地址。請選擇重新開始，然後再試一次 Google 登入。',
   },
+  google_sign_in: {
+    en: 'Sign-in failed. The Google sign-in request did not complete. Choose Start again, then try Sign in with Google once more.',
+    'zh-HK': '登入失敗。Google 登入請求未能完成。請選擇重新開始，然後再試一次使用 Google 登入。',
+  },
   stale_transaction: {
-    en: 'Sign-in failed. This page is no longer linked to your workspace. Choose Start again, then Sign in, and enter your email and password.',
-    'zh-HK': '登入失敗。此頁已不再連接到你的工作區。請選擇重新開始，然後按登入，並輸入電郵及密碼。',
+    en: 'Sign-in failed. This page is no longer linked to your workspace. Choose Start again, then Sign in.',
+    'zh-HK': '登入失敗。此頁已不再連接到你的工作區。請選擇重新開始，然後按登入。',
   },
   forbidden: {
     en: 'Sign-in failed. This site refused the sign-in request. Choose Start again and sign in from this BuyerOS page.',
@@ -150,8 +161,8 @@ export const signInFailureCopy: Record<SignInReason, {en: string; 'zh-HK': strin
     'zh-HK': '登入失敗，請重新開始。返回連結與此瀏覽器不相符，因此沒有開啟工作區。請在此網站按登入並再試一次。',
   },
   session: {
-    en: 'Sign-in failed. Please start again. No workspace session was created. Use Sign in on this site and enter your email and password again.',
-    'zh-HK': '登入失敗，請重新開始。沒有建立工作區登入階段。請在此網站按登入，並輸入電郵及密碼。',
+    en: 'Sign-in failed. Please start again. No workspace session was created. Use Sign in on this site and try again.',
+    'zh-HK': '登入失敗，請重新開始。沒有建立工作區登入階段。請在此網站按登入並再試一次。',
   },
 };
 
