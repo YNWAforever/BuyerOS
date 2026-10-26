@@ -37,7 +37,6 @@ test('T27 usage, queue filters and manual outcome history survive refresh in bot
     data:{buyer_id:'e2000000-0000-4000-8000-000000000001',stage:'reply',source:'manual',occurred_at:new Date().toISOString(),notes:'Viewer cannot write'}});
   expect(denied.status()).toBe(403);
   await page.reload();
-  await page.getByRole('button',{name:'Sign in'}).click();
   await expect(page.getByRole('region',{name:'Manual outcomes'})).toContainText('2 outcome events');
   await page.screenshot({path:'test-results/t27-workbench-en-fixture.png',fullPage:true});
   await page.locator('header select').selectOption('zh-HK');
@@ -166,7 +165,6 @@ test('T29 manual locale remains usable while preference loads and saves with its
   await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
   const restoredPreference=page.waitForResponse(response=>isPreference(response)&&response.request().method()==='GET'&&response.status()===200,{timeout:30_000});
   await page.reload();
-  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/}))
     .toHaveValue(project,{timeout:30_000});
   const restored=(await (await restoredPreference).json()).data;

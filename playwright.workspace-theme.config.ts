@@ -19,7 +19,7 @@ export default defineConfig({
     url: 'http://127.0.0.1:5197/app',
     reuseExistingServer: false,
     timeout: 120_000,
-    env: {BUYEROS_API_BASE_URL: '', BUYEROS_INTERNAL_API_URL: '', BUYEROS_AUTH_PROVIDER: 'auth0',
+    env: {BUYEROS_API_BASE_URL: '', BUYEROS_INTERNAL_API_URL: '', BUYEROS_AUTH_PROVIDER: 'unavailable',
       BUYEROS_NEON_AUTH_ROUTE_ENABLED: '0', WRANGLER_SEND_METRICS: 'false', CLOUDFLARE_CF_FETCH_ENABLED: 'false'},
   },
 });

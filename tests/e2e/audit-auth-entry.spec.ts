@@ -29,7 +29,7 @@ test('U02 U03 no membership permits locale switching and read-only access retry'
   await expect(page.getByRole('button',{name:'複製診斷資料'})).toBeVisible();
   expect(writes).toEqual([]);
   await page.screenshot({path:'test-results/audit-auth-empty-zh.png',fullPage:true});
-  await page.reload();await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
+  await page.reload();
   await expect(page.getByRole('combobox',{name:'語言',exact:true})).toHaveValue('zh-HK');
 });
 

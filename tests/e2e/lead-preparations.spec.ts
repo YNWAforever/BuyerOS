@@ -96,10 +96,6 @@ test('preparation_reload_restores_revision_and_original_intent',async({page,requ
   await panel.getByRole('button',{name:'Save preparation revision',exact:true}).click();
   await expect(panel.getByRole('alert')).toBeVisible();
   await page.reload();
-  // Keep the actual reload and sign-in without reinstalling routes or navigating again.
-  const workspaceRead=page.waitForRequest(request=>request.method()==='GET'&&new URL(request.url()).pathname==='/v1/workspaces');
-  await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
-  await workspaceRead;
   await expect(page.getByRole('combobox',{name:/^(Project|專案)$/})).toHaveValue(leadProject,{timeout:30_000});
   const restored=page.getByRole('region',{name:'Lead preparations',exact:true});
   await restored.getByLabel('Preparation company').selectOption(leadBuyer);

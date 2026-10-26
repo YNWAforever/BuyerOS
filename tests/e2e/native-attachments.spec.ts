@@ -60,7 +60,7 @@ test('native large PPTX original, literal slide text and complete profile surviv
   await page.getByRole('button',{name:'Save profile',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Profile version 2 · saved',exact:true})).toBeVisible();
   const project=new URL(page.url()).searchParams.get('project');expect(project).toBeTruthy();
-  await page.reload();await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Edit offer',exact:true}).click();
+  await page.reload();await page.getByRole('button',{name:'Edit offer',exact:true}).click();
   await expect(row(page,'native-large.pptx').getByRole('checkbox',{name:'Use in profile'})).toBeChecked();
   const profiles=await request.get(`http://localhost:5173/v1/workspaces/${workspace}/projects/${project}/icp-versions`,{headers:{Authorization:'Bearer fixture-access'}});
   expect(profiles.ok()).toBe(true);const values=(await profiles.json()).data.items;
@@ -80,7 +80,7 @@ test('lost chunk response reload resumes the same manifest without duplicate att
   });
   await page.getByLabel('Offer file').setInputFiles(resolve(fixtures,'native-large.pptx'));await page.getByRole('button',{name:'Upload document',exact:true}).click();
   await expect(page.getByText(/Upload paused\. Reselect the same file to resume:/)).toBeVisible();
-  await page.reload();await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('button',{name:'Edit offer',exact:true}).click();
+  await page.reload();await page.getByRole('button',{name:'Edit offer',exact:true}).click();
   await expect(page.getByText(/Upload paused\. Reselect the same file to resume:/)).toBeVisible();
   await upload(page);expect(indices).toEqual([0,1,2]);
   await upload(page);await expect(row(page,'native-large.pptx')).toHaveCount(1);

@@ -185,7 +185,7 @@ def test_binding_collector_refuses_changed_effective_configuration():
     with pytest.raises(ValueError): collector.collect_configuration(manifest,'https://owned.vercel.app','owned-token-'+'x'*32,get=lambda u,t:(200,changed))
 
 
-def owned_stage(tmp_path, monkeypatch, deployment_policy=False):
+def owned_stage(tmp_path, monkeypatch, deployment_policy=False,auth_mode='auth0'):
     """Run real stage orchestration with only external CLI/HTTP/DB adapters replaced."""
     import json
     from types import SimpleNamespace
@@ -239,7 +239,8 @@ def owned_stage(tmp_path, monkeypatch, deployment_policy=False):
         calls.append(argv)
         if argv[:2]==['vercel','pull']:
             path=tmp_path/'.vercel/.env.production.local';path.parent.mkdir()
-            path.write_text('BUYEROS_DATABASE_URL='+json.dumps(dsn)+'\nBUYEROS_RELEASE_PROBE_TOKEN="owned-probe-token"\n')
+            path.write_text('BUYEROS_DATABASE_URL='+json.dumps(dsn)+'\nBUYEROS_RELEASE_PROBE_TOKEN="owned-probe-token"\n'
+                +('BUYEROS_AUTH_MODE='+json.dumps(auth_mode)+'\n' if auth_mode is not None else ''))
             return ''
         if argv[:2]==['vercel','build']: return ''
         if argv[:2]==['vercel','deploy']:
@@ -262,6 +263,29 @@ def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,m
     assert len([call for call in calls if call[:2]==['vercel','deploy']])==1
     assert not (tmp_path/'.vercel/.env.production.local').exists()
     assert 'postgresql://' not in output.read_text()
+
+
+@pytest.mark.parametrize('auth_mode,expected',[(None,'neon'),('auth0','auth0'),('neon','neon'),('dual','dual')])
+def test_stage_records_effective_auth_mode_and_keeps_neon_receipt(auth_mode,expected,tmp_path,monkeypatch):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,auth_mode=auth_mode)
+    receipt={'offline_fixture':True}
+    monkeypatch.setenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',json.dumps(receipt))
+    runtime.stage(123,output)
+    packet=runtime.decrypt_observation_packet(json.loads(output.read_text()),'1'*64)
+    assert packet['files']['manifest.json']['activation']['auth']==expected
+    if expected in ('neon','dual'):
+        assert packet['files']['neon-receipt.json']==receipt
+    else:
+        assert 'neon-receipt.json' not in packet['files']
+
+
+def test_stage_omitted_auth_mode_requires_neon_receipt_before_publishing_packet(tmp_path,monkeypatch):
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,auth_mode=None)
+    monkeypatch.delenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',raising=False)
+    with pytest.raises(ValueError,match='protected input unavailable'):runtime.stage(123,output)
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
 
 
 @pytest.mark.parametrize('fault',['assigned','assignment-unproven','auto-assigned','malformed-auto-assignment'])

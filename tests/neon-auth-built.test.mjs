@@ -20,3 +20,12 @@ test('C61-08 actual built route rejects foreign origin before provider access',a
  Object.assign(process.env,{NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_NEON_ENVIRONMENT:'preview',BUYEROS_NEON_AUTH_URL:url,BUYEROS_NEON_EXPECTED_AUTH_URL:url,BUYEROS_PUBLIC_ORIGIN:origin,BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:origin,BUYEROS_NEON_COOKIE_SECRET:'C61_BUILT_PRIVATE_OFFLINE_ONLY_'.repeat(2)});
  const response=await request('POST',{origin:'https://foreign.example.test'});assert.equal(response.status,403);assert.equal(response.headers.getSetCookie().length,0);assert.equal(calls,0);assert.deepEqual(await response.json(),{code:'AUTH_FORBIDDEN'});
 });
+test('built workspace reads the same runtime Neon configuration as its auth route',async()=>{
+ // The artifact is built without auth settings. Deployment bindings arrive at runtime.
+ const response=await built.fetch(new Request(origin+'/app'));
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html.replaceAll('\\"','"'),/"publicAuth":\{"provider":"neon","config":\{"authPath":"\/api\/auth"/);
+ assert.doesNotMatch(html,/restore sign-in|CANARY|C61_BUILT_PRIVATE_OFFLINE_ONLY/);
+ assert.equal(calls,0);
+});

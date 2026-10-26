@@ -71,17 +71,22 @@ export default defineConfig(async ({ command, isPreview }) => {
       // in the Linux SSR bundle. Use tslib's public ESM helpers directly.
       { find: /^tslib$/, replacement: fileURLToPath(import.meta.resolve("tslib/tslib.es6.mjs")) },
     ] } } : {}),
-    // Public, build-time browser configuration only. The Cloudflare dev RSC runtime does not
-    // inherit Node process.env; never add a client secret or provider credential here.
+    // The Cloudflare RSC runtime needs public build-time settings. Vercel reads
+    // its server bindings at runtime, alongside the auth route; inlining empty
+    // build settings there would mask the deployment's valid Neon configuration.
+    // Never inline a client secret or provider credential.
     define: {
-      "process.env.BUYEROS_API_BASE_URL": JSON.stringify(vercelTarget ? "/" : (process.env.BUYEROS_API_BASE_URL ?? "")),
-      "process.env.BUYEROS_AUTH_PROVIDER": JSON.stringify(process.env.BUYEROS_AUTH_PROVIDER || "neon"),
-      "process.env.BUYEROS_NEON_AUTH_ROUTE_ENABLED": JSON.stringify(process.env.BUYEROS_NEON_AUTH_ROUTE_ENABLED ?? ""),
-      "process.env.BUYEROS_NEON_ENVIRONMENT": JSON.stringify(process.env.BUYEROS_NEON_ENVIRONMENT ?? ""),
-      "process.env.BUYEROS_NEON_AUTH_URL": JSON.stringify(process.env.BUYEROS_NEON_AUTH_URL ?? ""),
-      "process.env.BUYEROS_NEON_EXPECTED_AUTH_URL": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_AUTH_URL ?? ""),
-      "process.env.BUYEROS_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_PUBLIC_ORIGIN ?? ""),
-      "process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN ?? ""),
+      "process.env.BUYEROS_API_BASE_URL": JSON.stringify(vercelTarget && command === "build"
+        ? "/" : (process.env.BUYEROS_API_BASE_URL ?? (vercelTarget ? "/" : ""))),
+      ...(!vercelTarget ? {
+        "process.env.BUYEROS_AUTH_PROVIDER": JSON.stringify(process.env.BUYEROS_AUTH_PROVIDER || "neon"),
+        "process.env.BUYEROS_NEON_AUTH_ROUTE_ENABLED": JSON.stringify(process.env.BUYEROS_NEON_AUTH_ROUTE_ENABLED ?? ""),
+        "process.env.BUYEROS_NEON_ENVIRONMENT": JSON.stringify(process.env.BUYEROS_NEON_ENVIRONMENT ?? ""),
+        "process.env.BUYEROS_NEON_AUTH_URL": JSON.stringify(process.env.BUYEROS_NEON_AUTH_URL ?? ""),
+        "process.env.BUYEROS_NEON_EXPECTED_AUTH_URL": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_AUTH_URL ?? ""),
+        "process.env.BUYEROS_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_PUBLIC_ORIGIN ?? ""),
+        "process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN ?? ""),
+      } : {}),
     },
     server: {
       ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),

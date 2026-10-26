@@ -97,12 +97,43 @@ def configured(mode='dual',**change):
  from buyeros_api.settings import Settings
  return Settings(auth_mode=mode,auth0_issuer=AUTH0,auth0_audience=AUD,neon_issuer=NEON,neon_audience=AUD,neon_jwks_url=NEON+'/jwks',neon_expected_issuer=NEON,neon_expected_audience=AUD,neon_expected_jwks_url=NEON+'/jwks',auth_migration_expires_at=str(int(time.time())+120),environment='preview',**change)
 
-def test_runtime_exact_neon_binding_and_default_auth0_are_separate():
+def test_runtime_exact_neon_binding_and_explicit_auth0_are_separate():
  from buyeros_api.api.auth_trust import trusts_from_settings
  from buyeros_api.settings import Settings
  assert [t.algorithms for t in trusts_from_settings(configured())]==[('RS256',),('EdDSA',)]
  assert [t.issuer for t in trusts_from_settings(configured('neon'))]==[NEON]
- assert [t.algorithms for t in trusts_from_settings(Settings(auth0_issuer=AUTH0,auth0_audience=AUD))]==[('RS256',)]
+ assert [t.algorithms for t in trusts_from_settings(Settings(auth_mode='auth0',auth0_issuer=AUTH0,auth0_audience=AUD))]==[('RS256',)]
+
+@pytest.mark.parametrize('environment',['preview','production'])
+def test_unset_auth_mode_verifies_neon_and_does_not_trust_legacy_issuer(environment,keypair,monkeypatch):
+ from buyeros_api.api import verifier as verifier_module
+ from buyeros_api.settings import Settings
+ monkeypatch.delenv('BUYEROS_AUTH_MODE',raising=False)
+ monkeypatch.setenv('AUTH_MODE','auth0')  # Only the BUYEROS-prefixed setting selects a provider.
+ settings=Settings(**configured('neon').model_dump(exclude={'auth_mode','environment'}),environment=environment)
+ seen=[]
+ async def fetch(url):
+  seen.append(url)
+  return {'keys':[keypair['EdDSA'][1]]}
+ monkeypatch.setattr(verifier_module,'fetch_jwks_document',fetch)
+ active=verifier_module.default_verifier(settings)
+ assert run(active.verify(token(keypair)))==Principal(NEON,'verified-fixture-user')
+ with pytest.raises(AuthError):run(active.verify(token(keypair,AUTH0,'RS256')))
+ assert seen==[NEON+'/jwks']
+
+def test_unset_auth_mode_with_only_legacy_settings_fails_closed(monkeypatch):
+ from buyeros_api.api.verifier import default_verifier
+ from buyeros_api.settings import Settings
+ monkeypatch.delenv('BUYEROS_AUTH_MODE',raising=False)
+ with pytest.raises(AuthError):default_verifier(Settings(auth0_issuer=AUTH0,auth0_audience=AUD))
+
+def test_unset_auth_mode_with_wrong_neon_binding_never_falls_back(monkeypatch):
+ from buyeros_api.api.verifier import default_verifier
+ from buyeros_api.settings import Settings
+ monkeypatch.delenv('BUYEROS_AUTH_MODE',raising=False)
+ values=configured('neon').model_dump(exclude={'auth_mode'})
+ values['neon_expected_issuer']=NEON.replace('verifier','other')
+ with pytest.raises(AuthError):default_verifier(Settings(**values))
 
 @pytest.mark.parametrize('name',['neon_issuer','neon_audience','neon_jwks_url','neon_expected_issuer','neon_expected_audience','neon_expected_jwks_url','auth_migration_expires_at'])
 def test_dual_missing_explicit_binding_or_expiry_never_falls_back(name):
@@ -127,7 +158,7 @@ def test_invalid_header_kid_returns401_at_actual_API_boundary(keypair,monkeypatc
  from buyeros_api.settings import Settings
  valid=token(keypair,AUTH0,'RS256');parts=valid.split('.')
  parts[0]=base64.urlsafe_b64encode(json.dumps({'alg':'RS256','kid':['invalid']}).encode()).decode().rstrip('=')
- monkeypatch.setattr(auth,'get_settings',lambda:Settings(auth0_issuer=AUTH0,auth0_audience=AUD))
+ monkeypatch.setattr(auth,'get_settings',lambda:Settings(auth_mode='auth0',auth0_issuer=AUTH0,auth0_audience=AUD))
  async def keys():return {'keys':[keypair['RS256'][1]]}
  monkeypatch.setattr(auth,'_verifier_from_settings',lambda:TokenVerifier(JwksKeyCache(keys),issuer=AUTH0,audience=AUD))
  app=create_app()

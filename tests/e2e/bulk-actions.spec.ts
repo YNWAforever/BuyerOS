@@ -1,24 +1,15 @@
 import {expect,test,type Page} from '@playwright/test';
-import {webcrypto} from 'node:crypto';
+import {installNeonFixture} from './fixtures/neon-sign-in';
 import {execFileSync} from 'node:child_process';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
 const project='e1000000-0000-4000-8000-000000000001';
 async function signIn(page:Page,subject:'fixture-access'|'fixture-viewer'='fixture-access'){
-  const keys=await webcrypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
-  const publicKey={...(await webcrypto.subtle.exportKey('jwk',keys.publicKey)),kid:'management-fixture',use:'sig'};
-  let nonce='';const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-  await page.route('https://oidc.buyeros.test/authorize**',async route=>{const query=new URL(route.request().url()).searchParams;
-    nonce=query.get('nonce')||'';await route.fulfill({status:302,headers:{location:`http://localhost:5173/auth/callback?code=management-fixture&state=${query.get('state')}`},body:''});});
-  await page.route('https://oidc.buyeros.test/oauth/token',async route=>{
-    const unsigned=`${encode({alg:'RS256',kid:'management-fixture'})}.${encode({iss:'https://oidc.buyeros.test/',aud:'fixture-public-client',sub:subject,nonce,exp:Math.floor(Date.now()/1000)+300})}`;
-    const signature=await webcrypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.privateKey,new TextEncoder().encode(unsigned));
-    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({access_token:subject,id_token:`${unsigned}.${Buffer.from(signature).toString('base64url')}`,expires_in:300})});});
-  await page.route('https://oidc.buyeros.test/.well-known/jwks.json',async route=>route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://localhost:5173'},body:JSON.stringify({keys:[publicKey]})}));
+  const auth=await installNeonFixture(page,{accessToken:subject});
   await page.goto(`/app/discover?workspace=${workspace}&project=${project}`);
   await page.getByRole('combobox',{name:/^(Language|語言)$/,exact:true}).selectOption('en');
   await expect(page.locator('html')).toHaveAttribute('lang','en');
-  await page.getByRole('button',{name:'Sign in'}).click();
+  await auth.signIn();
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project,{timeout:30_000});
   await expect(page.getByText('101 in snapshot')).toBeVisible({timeout:30_000});
 }
@@ -47,8 +38,6 @@ test('T11 preview, durable progress, failed-only export, retry and reload',async
   await page.getByRole('button',{name:'Export failed IDs and reasons'}).click();
   expect((await download).suggestedFilename()).toMatch(/buyer-job-.*-failed\.csv/);
   await page.reload();
-  await expect(page.getByRole('button',{name:'Sign in'})).toBeVisible();
-  await page.getByRole('button',{name:'Sign in'}).click();
   await expect(page.getByRole('combobox',{name:'Project'})).toHaveValue(project);
   await expect(page.getByRole('region',{name:'Bulk job progress'})).toContainText('completed: 101 of 101 processed');
   await page.getByRole('button',{name:'Retry failed only with current versions'}).click();

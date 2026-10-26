@@ -16,6 +16,7 @@ def test_tenant_routes_fail_closed_without_configured_auth(monkeypatch):
     deleting that guard fails this test rather than silently passing it."""
     from buyeros_api.settings import get_settings
 
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.delenv("BUYEROS_AUTH0_ISSUER", raising=False)
     monkeypatch.delenv("BUYEROS_AUTH0_AUDIENCE", raising=False)
     get_settings.cache_clear()
@@ -66,6 +67,7 @@ def test_route_tenant_scope_comes_from_the_membership_checked_path(seeded, monke
 
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
     # The short-circuit runs before the seam, so the issuer/audience must be configured...
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", "https://issuer.test/")
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", "buyeros-api")
     get_settings.cache_clear()

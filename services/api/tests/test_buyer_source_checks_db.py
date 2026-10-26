@@ -91,6 +91,7 @@ _SOURCE_VIEWER = "auth0|source-check-viewer"
 @pytest.fixture
 def source_check_api(seeded, monkeypatch):
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     from buyeros_api.settings import get_settings

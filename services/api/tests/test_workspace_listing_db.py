@@ -122,6 +122,7 @@ def directory_case(migrated, monkeypatch):
         for user, subject in zip(users, subjects):
             owner.execute("INSERT INTO users(id,issuer,subject) VALUES (%s,%s,%s)", (user, fx.ISSUER, subject))
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(migrated))
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     get_settings.cache_clear()

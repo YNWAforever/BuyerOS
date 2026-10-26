@@ -34,5 +34,5 @@ test('B05 B06 committed lost 202 and manual Retry share one durable research int
   expect(posted[1].key).toBe(posted[0].key);expect(posted[1].body).toEqual(posted[0].body);expect(posted[1].id).toBe(posted[0].id);
   expect(recovered.runs).toBe(1);expect(recovered.admission_outbox).toBe(1);expect(recovered.economic_intents).toBe(1);expect(recovered.provider_operations-baseline.provider_operations).toBe(0);expect(recovered.reservations-baseline.reservations).toBe(0);
   await expect(page).toHaveURL(new RegExp(`/app/discover/${posted[0].id}`));await page.screenshot({path:'test-results/audit-research-recovered.png',fullPage:true});
-  await page.reload();await expect(page.getByRole('button',{name:'Sign in',exact:true})).toBeVisible();expect(posted).toHaveLength(2);
+  await page.reload();await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeVisible();expect(posted).toHaveLength(2);
 });

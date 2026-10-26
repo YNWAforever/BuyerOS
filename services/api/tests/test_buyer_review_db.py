@@ -129,6 +129,7 @@ def test_snapshot_selection_requires_excluded_ids():
 def api(seeded, monkeypatch):
     """An authenticated client on the runtime role with operator, reviewer and admin members."""
     monkeypatch.setenv("BUYEROS_DATABASE_URL", runtime_role_dsn(seeded))
+    monkeypatch.setenv("BUYEROS_AUTH_MODE", "auth0")
     monkeypatch.setenv("BUYEROS_AUTH0_ISSUER", fx.ISSUER)
     monkeypatch.setenv("BUYEROS_AUTH0_AUDIENCE", fx.AUDIENCE)
     from buyeros_api.settings import get_settings
