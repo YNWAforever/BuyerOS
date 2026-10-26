@@ -132,10 +132,12 @@ test('C11 a cancelled or failed dirty transition cannot sign out; changed scopes
 test('C11 retained draft requires exact authenticated actor, workspace, project and draft after server read',async()=>{
  const {DraftRecovery}=await loadModule('services/live/draft-recovery.ts'),h=environment(),recovery=new DraftRecovery(h.env.storage);
  const buffer={actor:'user',workspace:'A',project:'P',draftId:'draft',revisionId:'r1',version:3,subject:'Unsaved subject',body:'Unsaved text',language:'en'};
+ assert.equal(recovery.hasRetained(),false);
  recovery.retain(buffer);const afterReload=new DraftRecovery(h.env.storage);
+ assert.equal(recovery.hasRetained(),true);assert.equal(afterReload.hasRetained(),true);
  for(const changed of [{actor:'other'},{workspace:'B'},{project:'Q'},{draftId:'other'}])assert.equal(afterReload.find({...buffer,...changed}),null);
  assert.deepEqual(afterReload.find(buffer),buffer);assert.deepEqual(afterReload.find({...buffer,version:4,revisionId:'r2'}),buffer);
- assert.equal([...h.entries.values()].some(value=>value.includes(jwt())),false);afterReload.forget(buffer);assert.equal(afterReload.find(buffer),null);
+ assert.equal([...h.entries.values()].some(value=>value.includes(jwt())),false);afterReload.forget(buffer);assert.equal(afterReload.find(buffer),null);assert.equal(afterReload.hasRetained(),false);
 });
 test('C11 OAuth verifier is forwarded only to cookie exchange and never saved or broadcast',async()=>{
  const h=environment(),auth=await adapter(h.env);await auth.signIn('/app');const tx=JSON.parse([...h.entries.values()][0]);

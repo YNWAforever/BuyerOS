@@ -39,7 +39,7 @@ function updateUrl(router: ReturnType<typeof useRouter>, changes: Record<string,
   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
 }
 export function LiveWorkspace() {
-  const {session, client, auth, authError, authBootstrap} = useWorkspaceSession();
+  const {session, client, auth, authError, authBootstrap, draftRecovery} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
@@ -253,7 +253,9 @@ export function LiveWorkspace() {
     <p className="live-signin-note"><ShieldCheck size={14} aria-hidden="true"/>{t('Private workspace. Sign-in is required for every visitor.')}</p>
   </main>;
   if (!auth || authBootstrap.kind==='initializing') return signInFrame(<div role={authBootstrap.kind==='configuration_error'?'alert':'status'}><h1>{t(authBootstrap.kind==='initializing'?'Initializing sign-in…':'Live sign-in unavailable')}</h1>{authBootstrap.kind==='configuration_error'&&authError&&<p>{t(authError)}</p>}</div>);
-  if (!snapshot.authenticated) return signInFrame(<><h1>{t('Sign in')}</h1><p>{t('Sign in to access your workspaces.')}</p><p>{t('Use the work email on your invitation. The next page asks for that email and its password.')}</p><p className="live-auth-hint">{t('Google is on the next page, and only for accounts created with Google.')}</p>{session.preparationEditsWereCleared()&&<p role="alert">{t('Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.')}</p>}{authError&&<p className="live-auth-alert" role="alert">{t(authError)}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
+  if (!snapshot.authenticated) return signInFrame(<><h1>{t('Sign in')}</h1><p>{t('Sign in to access your workspaces.')}</p><p>{t('Use the work email on your invitation. The next page asks for that email and its password.')}</p><p className="live-auth-hint">{t('Google is on the next page, and only for accounts created with Google.')}</p>
+    {draftRecovery.hasRetained()&&<p role="alert">{t('Your session ended. Your unsaved draft is retained in this tab. Sign in again to recover it and compare the current revision.')}</p>}
+    {session.preparationEditsWereCleared()&&<p role="alert">{t('Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.')}</p>}{authError&&<p className="live-auth-alert" role="alert">{t(authError)}</p>}<button className="live-primary" onClick={() => void auth.signIn(pathname + window.location.search)}>{t('Sign in')}</button></>);
   if(opening&&opening.id===navigationSnapshot()?.id&&pathname!==opening.path)return <main className="main-shell live-workspace" aria-busy="true">
     <section className="panel" role="status"><h1>{t('Opening page…')}</h1>
       <p>{t('Your previous edits were saved or explicitly discarded before navigation.')}</p>

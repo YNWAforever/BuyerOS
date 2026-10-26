@@ -1,5 +1,6 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Your session ended. Your unsaved draft is retained in this tab. Sign in again to recover it and compare the current revision.':'你的登入階段已結束。未儲存的草稿已保留在此分頁。請重新登入以還原草稿，並核對目前版本。',
   'Your session ended. Preparation edits on this page were cleared. A submitted save may have completed. Sign in and read the original operation before retrying.':'登入時效已結束，本頁的準備內容更改已清除。已提交的儲存仍可能完成，請重新登入後先讀取原操作，再決定是否重試。',
   'Unsubmitted preparation edits are not retained after session expiry. Save your preparation before your session ends.':'登入時效結束後不會保留未提交的準備內容更改，請在到期前儲存。',
   'Preparation readback did not match the original target.':'準備內容讀回與原來目標不符；請核對原操作。',

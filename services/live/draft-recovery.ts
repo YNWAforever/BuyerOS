@@ -36,6 +36,7 @@ export class DraftRecovery {
     if (existing < 0) this.buffers.push({...value}); else this.buffers[existing] = {...value};
     return this.save();
   }
+  hasRetained(): boolean { return this.buffers.length > 0; }
   find(scope: Pick<RetainedDraft, 'actor' | 'workspace' | 'project' | 'draftId'>): RetainedDraft | null {
     const value = this.buffers.find(row => same(row, scope)); return value ? {...value} : null;
   }
