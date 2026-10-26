@@ -2,6 +2,7 @@ import {expect,test,type Page} from '@playwright/test';
 import {installNeonFixture} from './fixtures/neon-sign-in';
 
 const workspace='e0000000-0000-4000-8000-000000000001';
+const browserApiOrigin=process.env.BUYEROS_E2E_FRONTEND==='vercel-built'?'http://localhost:5173':'http://127.0.0.1:8000';
 async function signIn(page:Page,accessToken='fixture-reviewer',initialPath='/app'){
   const auth=await installNeonFixture(page,{accessToken});
   await page.goto(initialPath);await auth.signIn();
@@ -144,8 +145,8 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
   test('lost ICP response replays one project and one profile with the same action',async({page})=>{
     test.setTimeout(90_000);
     let lost=false;
-    await page.route('http://127.0.0.1:8000/v1/workspaces/*/projects/*/icp-versions',async route=>{
-      if(route.request().method()==='POST'&&!lost){lost=true;await route.fetch();await route.abort('failed');}
+    await page.route(`${browserApiOrigin}/v1/workspaces/*/projects/*/icp-versions`,async route=>{
+      if(route.request().method()==='POST'&&!lost){lost=true;expect((await route.fetch()).status()).toBe(201);await route.abort('failed');}
       else await route.continue();
     });
     await signIn(page,'fixture-access');
@@ -167,7 +168,7 @@ test.describe.serial('T07 persisted offer/profile journey',()=>{
   test('reload after project-only save can resume the pending profile',async({page})=>{
     test.setTimeout(90_000);
     let interrupted=false;
-    await page.route('http://127.0.0.1:8000/v1/workspaces/*/projects/*/icp-versions',async route=>{
+    await page.route(`${browserApiOrigin}/v1/workspaces/*/projects/*/icp-versions`,async route=>{
       if(route.request().method()==='POST'&&!interrupted){interrupted=true;await route.abort('failed');}
       else await route.continue();
     });
