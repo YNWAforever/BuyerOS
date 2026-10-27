@@ -87,3 +87,28 @@ write intents with virtual time. The existing frontend CI audit glob includes it
 historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
+
+## Conversation home — Stage 0 Preview
+
+`NEXT_PUBLIC_CONVERSATION_HOME=true` opts the **live** workspace into the
+illustrative Discussion home. Unset (the default), `false`, or any other value
+keeps the #35 Overview home and navigation groups. This is a public build-time
+flag; it needs no model-provider secrets.
+
+For Vercel, add the variable with value `true` to **Preview only**, scoped to the
+`codex/conversation-home-stage0` branch, then redeploy that branch's Preview.
+Leave Production unset. To roll back a Preview, remove the override (or set it to
+`false`) and rebuild it.
+
+When enabled, `/app` opens the Prepare follow-up example; `/app/discussions/new`,
+`/app/discussions/prepare-follow-up`, and `/app/discussions/review-buyers` are
+static discussion surfaces. Project work → Overview opens the retained queue at
+`/app/overview`. Discover & review, Follow up, and Manage keep their existing
+routes and access checks under Project work (retained). Output and template
+stubs open `/app/outreach`; Saved results opens `/app/results`. Existing guarded
+navigation retains the selected workspace/project and unsaved-edit protection.
+Conversations do not call AI, research, approve, send, or persist messages.
+
+Focused checks: `node --test tests/audit-conversation-home.test.mjs` (also picked
+up by the existing CI audit suite), `pnpm test:core`, `pnpm exec tsc --noEmit`,
+`pnpm lint`, and `NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.

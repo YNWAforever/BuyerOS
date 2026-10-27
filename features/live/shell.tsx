@@ -1,9 +1,12 @@
 'use client';
 import type {ReactNode} from 'react';
 import {ChevronRight, ShieldCheck} from 'lucide-react';
+import {discussionForPath} from './conversation-home';
 
 /** Route copy for the live page heading. Paths mirror the workspace router in workspace-picker. */
-export function liveRouteMeta(pathname: string): {title: string; description: string} {
+export function liveRouteMeta(pathname: string, conversationHome=false): {title: string; description: string} {
+  const discussion=discussionForPath(pathname,conversationHome);
+  if(discussion)return {title:discussion.title,description:'A conversation for your project. Illustrative preview only.'};
   if (pathname === '/app/discover/new') return {title: 'New project', description: 'Describe your offer, then approve the buyer profile before research starts.'};
   if (pathname === '/app/discover/edit') return {title: 'Offer', description: 'Update offer facts and the buyer profile that research will use.'};
   if (pathname === '/app/discover') return {title: 'Buyers', description: 'Find the right companies. Know why they belong on your list.'};
@@ -27,6 +30,7 @@ type FrameProps = {
   footer: ReactNode;
   header: ReactNode;
   children: ReactNode;
+  conversationHome?: boolean;
 };
 
 /**
@@ -34,8 +38,8 @@ type FrameProps = {
  * sticky top strip with a horizontally scrolling section bar below 1024px. Layout is
  * CSS-only so every section button stays in the DOM and reachable at every width.
  */
-export function LiveFrame({t, pathname, navigation, footer, header, children}: FrameProps) {
-  const meta = liveRouteMeta(pathname);
+export function LiveFrame({t, pathname, navigation, footer, header, children, conversationHome=false}: FrameProps) {
+  const meta = liveRouteMeta(pathname,conversationHome);
   return <div className="live-app">
     <aside className="live-sidebar">
       <LiveBrand/>
@@ -54,14 +58,14 @@ export function LiveFrame({t, pathname, navigation, footer, header, children}: F
   </div>;
 }
 
-type HeaderProps = {t: (value: string) => string; pathname: string; languagePicker: ReactNode; signOut: ReactNode};
+type HeaderProps = {t: (value: string) => string; pathname: string; languagePicker: ReactNode; signOut: ReactNode; conversationHome?: boolean};
 
-export function LiveTopbar({t, pathname, languagePicker, signOut}: HeaderProps) {
+export function LiveTopbar({t, pathname, languagePicker, signOut, conversationHome=false}: HeaderProps) {
   return <header className="topbar live-topbar">
     <div className="inline live-breadcrumb">
       <span className="breadcrumb">FIMMICK BuyerOS</span>
       <ChevronRight size={14} aria-hidden="true"/>
-      <b>{t(liveRouteMeta(pathname).title)}</b>
+      <b>{t(liveRouteMeta(pathname,conversationHome).title)}</b>
     </div>
     <div className="inline top-right">
       <span className="live-indicator"><ShieldCheck size={14} aria-hidden="true"/>{t('Live workspace')}</span>

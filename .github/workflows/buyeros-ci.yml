@@ -104,6 +104,8 @@ jobs:
       - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-built.xml tests/neon-auth-built.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-built.xml
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify conversation shell responsive navigation
+        run: node --test tests/conversation-home-responsive.test.mjs
       - name: Verify C61-25 polling budget and native connectivity defaults
         run: |
           node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-job-poller.xml tests/job-poller-checks.mjs

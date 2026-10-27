@@ -17,12 +17,12 @@ type Page<T>={items:T[];offset:number;limit:number;total:number};
 type Job=components['schemas']['AsyncJob'];
 type Result=components['schemas']['BulkItemResult'];
 
-type OperationsProps={workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;t:(value:string)=>string};
+type OperationsProps={workspace:string;project:string|null;isAdmin:boolean;onOpenBuyers:()=>void;onOpenOverview?:()=>void;t:(value:string)=>string};
 export function LiveOperations(props:OperationsProps){
  const searchParams=useSearchParams();
  return searchParams.get('acceptance')==='unknown'?<LiveProviderOperations {...props}/>:<LiveJobOperations {...props}/>;
 }
-function LiveProviderOperations({workspace,project,t}:OperationsProps){
+function LiveProviderOperations({workspace,project,t,onOpenOverview}:OperationsProps){
  const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),router=useRouter();
  const [offsetState,setOffset]=useState<{identity:string;offset:number}>(),[reload,setReload]=useState(0);
  const offset=offsetState?.identity===snapshot.identity?offsetState.offset:0,key=`${snapshot.identity}:${offset}`;
@@ -44,7 +44,7 @@ function LiveProviderOperations({workspace,project,t}:OperationsProps){
     <div className="inline"><button disabled={offset===0} onClick={()=>setOffset({identity:snapshot.identity,offset:Math.max(0,offset-20)})}>{t('Previous')}</button><button disabled={offset+20>=current.page.total} onClick={()=>setOffset({identity:snapshot.identity,offset:offset+20})}>{t('Next')}</button></div></>:current?.error?<p role="alert">{current.error}</p>:<p role="status">{t('Loading…')}</p>}
    <button type="button" disabled={!project} onClick={()=>{setResult(undefined);setReload(value=>value+1);}}>{t('Refresh receipts')}</button>
   </section>
-  <button type="button" onClick={()=>router.push('/app?'+new URLSearchParams({workspace,...(project?{project}:{})}))}>{t('Back to daily queue')}</button>
+  <button type="button" onClick={()=>onOpenOverview?onOpenOverview():router.push('/app?'+new URLSearchParams({workspace,...(project?{project}:{})}))}>{t('Back to daily queue')}</button>
  </section>;
 }
 function LiveJobOperations({workspace,project,isAdmin,onOpenBuyers,t}:OperationsProps){

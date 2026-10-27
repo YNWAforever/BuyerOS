@@ -24,6 +24,8 @@ import {LeadProgressPanel} from './lead-workflow/progress-panel';
 import {PilotBudgetPanel} from './lead-workflow/budget-panel';
 import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
+import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute} from './conversation-home';
+import {LiveDiscussion} from './discussion';
 import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
 import {liveZh} from './locale';
@@ -42,6 +44,9 @@ export function LiveWorkspace() {
   const {session, client, auth, authError, authBootstrap, draftRecovery} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
+  const conversationHome=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME);
+  const discussion=discussionForPath(pathname,conversationHome);
+  const overviewRoute=isLiveOverviewRoute(pathname,conversationHome);
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
   const [projects, setProjects] = useState<LoadState<LiveProject>>({kind:'loading'});
   const [selectionError, setSelectionError] = useState('');
@@ -270,10 +275,10 @@ export function LiveWorkspace() {
     {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
     {lastChecked?.identity===snapshot.identity&&<p>{t('Last checked')}: {new Date(lastChecked.time).toLocaleTimeString(locale)}</p>}
   </>;
-  return <LiveFrame t={t} pathname={pathname}
-    navigation={<LiveNavigation t={t} navigate={navigate} pathname={pathname} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>}
+  return <LiveFrame t={t} pathname={pathname} conversationHome={conversationHome}
+    navigation={<LiveNavigation t={t} navigate={navigate} pathname={pathname} conversationHome={conversationHome} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>}
     footer={<div className="user-profile"><div className="avatar" aria-hidden="true">{(workspaceName||'F').slice(0,1).toUpperCase()}</div><span><b>{workspaceName||t('No workspace selected')}</b><small>{projectName||t('No project selected')}</small></span></div>}
-    header={<LiveTopbar t={t} pathname={pathname} languagePicker={languagePicker} signOut={<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button>}/>}>
+    header={<LiveTopbar t={t} pathname={pathname} conversationHome={conversationHome} languagePicker={languagePicker} signOut={<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button>}/>}>
     <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
       {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
       {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
@@ -297,7 +302,8 @@ export function LiveWorkspace() {
     </div>
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
-    {authorized && projectKnown && pathname === '/app' && <>
+    {authorized && projectKnown && discussion && <LiveDiscussion t={t} discussion={discussion} navigate={navigate}/>}
+    {authorized && projectKnown && overviewRoute && <>
       <LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/>
       <PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/>
       <LeadProgressPanel key={`lead-overview-${snapshot.identity}`} mode="overview" locale={locale} onNavigate={navigate}/>
@@ -317,7 +323,7 @@ export function LiveWorkspace() {
     {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
     {authorized && projectKnown && pathname === '/app/outreach' && <><LeadPreparationsPanel key={`preparations-${workspace}-${project}`} locale={locale} canEdit={canEdit&&projectActive} canReview={canApprove&&projectActive}/><LiveDraftEditor key={`drafts-${workspace}-${project}`} locale={locale} canGenerate={canEdit&&projectActive} canReviewSender={canApprove&&projectActive} canRequestReview={canBuyerEdit&&projectActive} canApprove={canApprove&&projectActive} canExport={canBuyerEdit&&projectActive}/></>}
     {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} roles={roles} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
-    {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} t={t}/>}
-    {authorized && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
+    {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} onOpenOverview={conversationHome?()=>navigate('/app/overview'):undefined} t={t}/>}
+    {authorized && !discussion && !overviewRoute && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
   </LiveFrame>;
 }
