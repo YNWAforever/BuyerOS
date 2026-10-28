@@ -24,7 +24,7 @@ import {LeadProgressPanel} from './lead-workflow/progress-panel';
 import {PilotBudgetPanel} from './lead-workflow/budget-panel';
 import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
-import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope} from './conversation-home';
+import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope,navigateLocalDiscussion} from './conversation-home';
 import {LiveConversation} from './discussion-workspace';
 import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
@@ -250,7 +250,10 @@ export function LiveWorkspace() {
   function navigate(path:string) {
     const params = new URLSearchParams(); if (workspace) params.set('workspace',workspace); if (project) params.set('project',project); if (project && requested('profile')) params.set('profile',requested('profile')!);
     const target=new URL(path,window.location.origin);applyConversationNavigationScope(target,params,conversationHome);
-    void session.transition(async()=>{if(mayLeaveOffer()){beginNavigation(target.pathname+target.search);router.push(target.pathname+target.search);}}).catch(()=>{});
+    void session.transition(async()=>{if(mayLeaveOffer()){
+      if(navigateLocalDiscussion(pathname,target,conversationHome,window.history))return;
+      beginNavigation(target.pathname+target.search);router.push(target.pathname+target.search);
+    }}).catch(()=>{});
   }
   const signInFrame=(body:React.ReactNode)=><main ref={signInMain} tabIndex={-1} className="main-shell live-workspace live-signin">
     <header className="live-signin-top">{languagePicker}</header>

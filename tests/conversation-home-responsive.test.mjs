@@ -94,7 +94,8 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   assert.equal(requests.length,initialReads,'template, route and Send actions must not fetch');
   await page.getByRole('button',{name:'Change language',exact:true}).click();await page.getByText('只儲存於此裝置 · 不會共用',{exact:true}).waitFor();await page.getByRole('button',{name:'Change language',exact:true}).click();
   // The DOM gets real values, while selections only persist generic labels and IDs.
-  await page.getByRole('checkbox').first().check();
+  await page.getByRole('checkbox').first().click();
+  await page.waitForFunction(()=>document.querySelector('input[type=checkbox]').checked);
   const stored=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage).filter(([k])=>k.startsWith('buyeros.discussions'))));
   const serialized=JSON.stringify(stored);assert.ok(!serialized.includes('PRIVATE_FACT_CONTENT'));assert.ok(!serialized.includes('project-evidence.pdf'));assert.ok(serialized.includes(documentId));
   await page.reload();await page.getByText('My next local step',{exact:true}).waitFor();await page.getByText('project-evidence.pdf',{exact:false}).waitFor();assert.equal(await page.getByRole('checkbox').first().isChecked(),true);
@@ -119,5 +120,55 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Second workspace',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   assert.deepEqual(errors,[]);writeFileSync('work/conversation-browser-network.json',JSON.stringify({initialReads,requests,errors},null,2));
+  // Two real tabs begin from the same snapshot. The scope lock makes one save
+  // win and the stale writer must keep its composer instead of erasing data.
+  const tabs=await browser.newContext(),tabRequests=[];
+  await tabs.route('**/v1/**',route=>{
+   const req=route.request(),data=contextResponse(new URL(req.url()));tabRequests.push(req.method());
+   return route.fulfill({status:data?200:403,json:data?{data,data_mode:'live',request_id:'multitab-fixture'}:{error:{code:'PERMISSION_DENIED'},request_id:'multitab-fixture'}});
+  });
+  const a=await tabs.newPage(),b=await tabs.newPage();
+  for(const tab of [a,b]){await tab.goto(origin+'fixture');await tab.getByText('project-evidence.pdf',{exact:false}).waitFor();}
+  const tabReadCount=tabRequests.length;
+  await a.getByRole('textbox').fill('Question in tab A');await b.getByRole('textbox').fill('Question in tab B');
+  await Promise.all([a.getByRole('button',{name:'Send',exact:true}).click(),b.getByRole('button',{name:'Send',exact:true}).click()]);
+  const conflict='Saved discussions changed in another tab. Changes were not saved. Copy any unsaved work before reloading.';
+  await Promise.any([a.getByText(conflict,{exact:true}).waitFor(),b.getByText(conflict,{exact:true}).waitFor()]);
+  const winner=(await a.getByRole('textbox').inputValue())===''?a:b,loser=winner===a?b:a;
+  const persisted=()=>winner.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('buyeros.discussions'))[1]));
+  const firstSave=await persisted();assert.equal(firstSave.threads.length,1);
+  assert.match(await loser.getByRole('textbox').inputValue(),/^Question in tab [AB]$/);
+  assert.equal(tabRequests.length,tabReadCount,'simultaneous local saves must not fetch');
+  await loser.reload();await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await loser.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
+  await winner.getByRole('textbox').fill('Saved in the winner');await winner.getByRole('button',{name:'Send',exact:true}).click();
+  await winner.getByText('Saved in the winner',{exact:true}).waitFor();
+  await loser.getByRole('textbox').fill('Keep this unsaved message');await loser.getByRole('button',{name:'Send',exact:true}).click();
+  await loser.getByText(conflict,{exact:true}).waitFor();
+  assert.equal(await loser.getByRole('textbox').inputValue(),'Keep this unsaved message');
+  await loser.getByRole('checkbox').first().click();
+  await loser.waitForFunction(()=>!document.querySelector('input[type=checkbox]').checked);
+  assert.deepEqual((await persisted()).threads[0].messages.map(row=>row.text),[firstSave.threads[0].messages[0].text,'Saved in the winner']);
+  assert.deepEqual((await persisted()).threads[0].sources,[]);
+  // A queued write must recheck its actor/project before running under the lock.
+  await loser.reload();await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await winner.evaluate(()=>{window.fixtureLockHeld=false;void navigator.locks.request(Object.keys(localStorage).find(key=>key.startsWith('buyeros.discussions')),async()=>{window.fixtureLockHeld=true;await new Promise(resolve=>window.releaseFixtureLock=resolve);});});
+  await winner.waitForFunction(()=>window.fixtureLockHeld);
+  const beforeQueued=await persisted();
+  await loser.getByRole('textbox').fill('Must not enter the old scope');await loser.getByRole('button',{name:'Send',exact:true}).click();
+  await winner.waitForFunction(async()=> (await navigator.locks.query()).pending.length>0);
+  await loser.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');
+  await loser.getByText('This discussion is not saved for this account and project on this device.',{exact:true}).waitFor();
+  await winner.evaluate(()=>window.releaseFixtureLock());
+  await winner.waitForFunction(async()=> (await navigator.locks.query()).pending.length===0&&(await navigator.locks.query()).held.length===0);
+  assert.deepEqual(await persisted(),beforeQueued);
+  // Unsupported lock capability must not fall back to unsafe persistent writes.
+  const unlocked=await tabs.newPage();await unlocked.addInitScript(()=>Object.defineProperty(navigator,'locks',{value:undefined}));
+  await unlocked.goto(origin+'fixture');await unlocked.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await unlocked.getByRole('textbox').fill('Memory only');await unlocked.getByRole('button',{name:'Send',exact:true}).click();
+  await unlocked.getByLabel('Discussion messages',{exact:true}).getByText('Memory only',{exact:true}).waitFor();
+  await unlocked.getByText('Local storage is unavailable. Discussions are kept only in this tab.',{exact:true}).waitFor();
+  assert.deepEqual(await persisted(),beforeQueued);assert.ok(tabRequests.every(method=>method==='GET'));
+  await tabs.close();
  }finally{await browser?.close();await server.close();rmSync(fixtureDir,{recursive:true,force:true});}
 });

@@ -108,8 +108,11 @@ scope components. Limits: 256 KiB UTF-8 per scope, 30 threads, 100 messages and
 100 selected sources per thread, 4,000 characters per message. Invalid, foreign,
 old-version or oversized payloads are ignored with a notice. A full limit refuses
 additions and keeps existing data; unavailable storage keeps changes in the tab
-with an honest notice. Sign-out clears session-owned memory caches. Source
-selections persist only IDs and generic labels; filenames, document contents,
+with an honest notice. Sign-out clears session-owned memory caches.
+Browser writes use a per-scope local lock. A stale tab refuses to overwrite
+another tab's saved changes and asks you to copy unsaved work before reloading.
+Browsers without local lock support keep edits in the tab instead of persisting.
+Source selections persist only IDs and generic labels; filenames, document contents,
 fact values, buyer records and draft bodies are never copied into the store.
 Do not enter private buyer details, draft bodies or document text into messages.
 

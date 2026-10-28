@@ -85,6 +85,7 @@ export class DiscussionStore {
   private scope: DiscussionScope = {actor: '', workspace: '', project: ''};
   private key = '';
   private storage?: StoragePort;
+  private savedRaw: string | null | undefined;
   private listeners = new Set<() => void>();
   private snapshot = freezeSnapshot({threads: [], notice: ''});
 
@@ -104,6 +105,7 @@ export class DiscussionStore {
         return;
       }
       const raw = this.storage.getItem(this.key);
+      this.savedRaw = raw;
       if (raw === null) return;
       if (raw.length > MAX_BYTES || byteLength(raw) > MAX_BYTES) {
         this.ignore('Saved discussions exceeded the local storage limit and were ignored.'); return;
@@ -125,6 +127,7 @@ export class DiscussionStore {
       }
       this.snapshot = freezeSnapshot({threads: newestFirst(saved.threads), notice: ''});
     } catch {
+      if (this.savedRaw === undefined) this.storage = undefined;
       this.ignore('Saved discussions could not be read and were ignored. New discussions are kept in this tab if storage is unavailable.');
     }
   }
@@ -135,6 +138,24 @@ export class DiscussionStore {
   };
 
   getSnapshot = (): DiscussionSnapshot => this.snapshot;
+
+  /** Serialize browser read/check/write sequences across tabs. Recheck scope after waiting. */
+  async withLocalWrite(isCurrent: () => boolean, write: () => void): Promise<void> {
+    if (!this.active || !isCurrent()) return;
+    const run = () => { if (isCurrent()) write(); };
+    let entered = false;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.locks) {
+        await navigator.locks.request(this.key, () => { entered = true; run(); });
+        return;
+      }
+    } catch (error) {
+      if (entered) throw error;
+    }
+    // Without a cross-tab lock, keep edits in memory instead of risking saved work.
+    this.storage = undefined;
+    run();
+  }
 
   private ignore(notice: string): void {
     this.snapshot = freezeSnapshot({threads: [], notice});
@@ -162,7 +183,12 @@ export class DiscussionStore {
     let notice = '';
     if (!this.storage) notice = memoryNotice;
     else {
-      try { this.storage.setItem(this.key, payload); }
+      try {
+        if (this.savedRaw === undefined || this.storage.getItem(this.key) !== this.savedRaw)
+          return this.refuse('Saved discussions changed in another tab. Changes were not saved. Copy any unsaved work before reloading.');
+        this.storage.setItem(this.key, payload);
+        this.savedRaw = payload;
+      }
       catch { notice = 'Local storage could not save these changes. They are kept only in this tab.'; }
     }
     this.publish(ordered, notice);

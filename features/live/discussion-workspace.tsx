@@ -36,13 +36,14 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
   },[cache.stores,scopeKey,scope.actor,scope.workspace,scope.project]);
   const snapshot=useSyncExternalStore(store.subscribe,store.getSnapshot,store.getSnapshot);
   const [value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[refresh,setRefresh]=useState(0);
-  const focus=useRef<HTMLDivElement>(null),route=discussionForPath(pathname,true)!;
+  const focus=useRef<HTMLDivElement>(null),writing=useRef(false),mounted=useRef(true),route=discussionForPath(pathname,true)!;
   const thread=snapshot.threads.find(item=>item.id===route.id)??null;
   const localRoute=route.id.startsWith('local-');
   const readKey=JSON.stringify([identity,canViewOffer,canViewResults]);
   // A permission reduction hides old records during this render, before effects run.
   const context=contextRead?.key===readKey?contextRead.sections:null;
   useEffect(()=>{focus.current?.focus();},[pathname]);
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   useEffect(()=>{
     let active=true;
     let read=cache.reads.get(readKey);
@@ -50,22 +51,32 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
     void read.then(sections=>{if(active&&session.isCurrent(identity))setContext({key:readKey,sections});}).catch(()=>{if(active&&session.isCurrent(identity))setContext({key:readKey,sections:[{title:'Sources',items:[],notice:'Project context could not be loaded. Try refreshing.'}]});});
     return()=>{active=false;};
   },[cache.reads,readKey,client,session,identity,canViewOffer,canViewResults,refresh]);
-  const current=()=>session.isCurrent(identity)&&session.getSnapshot().authenticated;
+  const current=()=>mounted.current&&session.isCurrent(identity)&&session.getSnapshot().authenticated;
+  async function write(action:()=>void){
+    if(writing.current||!current())return;
+    writing.current=true;
+    try{await store.withLocalWrite(current,action);}finally{writing.current=false;}
+  }
   function create(id:string){
-    if(!current())return;
-    const template=templateForId(id),created=store.create(template.id,t(template.prompt));
-    if(created){setValue('');navigate(`/app/discussions/${created.id}`);}
+    const input=value,template=templateForId(id),prompt=t(template.prompt);
+    void write(()=>{
+      const created=store.create(template.id,prompt);
+      if(created){setValue(current=>current===input?'':current);navigate(`/app/discussions/${created.id}`);}
+    });
   }
   function send(){
     if(!current()||!value.trim())return;
-    if(thread){if(store.append(thread.id,value))setValue('');}
-    else{const created=store.create('custom',value);if(created){setValue('');navigate(`/app/discussions/${created.id}`);}}
+    const input=value,clear=()=>setValue(current=>current===input?'':current);
+    void write(()=>{
+      if(thread){if(store.append(thread.id,input))clear();}
+      else{const created=store.create('custom',input);if(created){clear();navigate(`/app/discussions/${created.id}`);}}
+    });
   }
   return <div ref={focus} tabIndex={-1} aria-label={t('Discussion workspace')}>
     {localRoute&&!thread?<>{snapshot.notice&&<p role="status">{t(snapshot.notice)}</p>}<LiveUnavailable state="not_found" reason={t('This discussion is not saved for this account and project on this device.')}/></>:<LiveDiscussion
       t={t} locale={locale} thread={thread} threads={snapshot.threads} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
       value={value} onChange={setValue} onSend={send} onTemplate={create} navigate={navigate} notice={snapshot.notice} context={context}
-      onSource={(source,selected)=>{if(thread&&current())store.select(thread.id,source,selected);}}
+      onSource={(source,selected)=>{if(thread)void write(()=>{store.select(thread.id,source,selected);});}}
       onRefresh={()=>{if(current()){setContext(null);cache.reads.delete(readKey);setRefresh(value=>value+1);}}}/>}
   </div>;
 }

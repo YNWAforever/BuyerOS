@@ -136,7 +136,8 @@ test('Stage 1 stays behind membership/project checks and existing guarded naviga
  const source=readFileSync('features/live/workspace-picker.tsx','utf8');
  assert.match(source,/authorized && projectKnown && discussion && <LiveConversation/);
  assert.match(source,/canViewOffer=\{canEdit&&projectActive\}/);
- assert.match(source,/session\.transition\(async\(\)=>\{if\(mayLeaveOffer\(\)\)\{beginNavigation/);
+ assert.match(source,/session\.transition\(async\(\)=>\{if\(mayLeaveOffer\(\)\)\{/);
+ assert.match(source,/if\(navigateLocalDiscussion\(pathname,target,conversationHome,window.history\)\)return;/);
  assert.match(source,/applyConversationNavigationScope\(target,params,conversationHome\)/);
  assert.match(source,/focusDocument=\{conversationHome\?requested\('document'\)/);
  const controller=readFileSync('features/live/discussion-workspace.tsx','utf8');
@@ -158,4 +159,16 @@ test('OFF controller never consults session, storage or context',async()=>{
  const {LiveConversation}=await import('../features/live/discussion-workspace.tsx');
  const session=new Proxy({},{get(){throw Error('OFF must not consult discussion dependencies');}});
  assert.equal(LiveConversation({enabled:false,session,client:null,pathname:'/app',locale:'en',t:x=>x,navigate(){},canViewOffer:true,canViewResults:true}),null);
+});
+
+test('local discussion navigation updates browser history without invoking route transport',async()=>{
+ const {navigateLocalDiscussion}=await import('../features/live/conversation-home.ts');
+ const entries=[],history={state:{existing:'routing metadata'},pushState:(...args)=>entries.push(args)};
+ const target=new URL('https://fixture.invalid/app/discussions/local-12345678-1234-4123-8123-123456789012?workspace=w&project=p');
+ assert.equal(navigateLocalDiscussion('/app',target,true,history),true);
+ assert.deepEqual(entries,[[history.state,'','/app/discussions/local-12345678-1234-4123-8123-123456789012?workspace=w&project=p']]);
+ for(const [from,to,enabled] of [['/app',target,false],['/app/outreach',target,true],['/app',new URL('https://fixture.invalid/app/results'),true]]){
+  assert.equal(navigateLocalDiscussion(from,to,enabled,history),false);
+ }
+ assert.equal(entries.length,1);
 });

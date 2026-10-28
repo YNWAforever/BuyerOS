@@ -102,6 +102,7 @@ export const liveZh: Record<string,string> = {
   "Research run":"研究執行",
   "Results summary":"結果摘要",
   "Local storage is unavailable. Discussions are kept only in this tab.":"本機儲存空間無法使用，討論只會保留於此分頁。",
+  "Saved discussions changed in another tab. Changes were not saved. Copy any unsaved work before reloading.":"已儲存討論已在另一分頁更改，這次更改未有儲存。重新載入前，請先複製任何未儲存的內容。",
   "A valid account, workspace and project are required for local discussions.":"本機討論需要有效的帳戶、工作區及專案。",
   "Saved discussions exceeded the local storage limit and were ignored.":"已儲存討論超出本機容量限制，已略過相關資料。",
   "Saved discussions were invalid and were ignored.":"已儲存討論的資料無效，已略過相關資料。",

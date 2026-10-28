@@ -267,3 +267,28 @@ test('unavailable storage and read errors leave the discussion usable with an ho
     assert.ok(own.getSnapshot().notice);
   }
 });
+
+test('a stale tab cannot overwrite threads created by another tab',()=>{
+  const port=storage(),first=store(true,scope,port),stale=store(true,scope,port);
+  const saved=first.create('custom','Saved in the first tab');
+  const before=port.entries.get(key);
+  assert.equal(stale.create('custom','Still in the composer'),null);
+  assert.equal(port.entries.get(key),before);
+  assert.deepEqual(store(true,scope,port).getSnapshot().threads,[saved]);
+  assert.match(stale.getSnapshot().notice,/another tab/i);
+});
+
+test('stale appends and source changes preserve both persisted and tab-only work',()=>{
+  for(const action of ['append','select']){
+    const port=storage(),first=store(true,scope,port),thread=first.create('custom','Original');
+    const stale=store(true,scope,port);
+    first.append(thread.id,'Saved elsewhere');
+    const saved=port.entries.get(key),before=stale.getSnapshot().threads;
+    const accepted=action==='append'?stale.append(thread.id,'Unsaved message'):
+      stale.select(thread.id,{id:'document:one',label:'Offer document'},true);
+    assert.equal(accepted,false);
+    assert.equal(port.entries.get(key),saved);
+    assert.strictEqual(stale.getSnapshot().threads,before);
+    assert.match(stale.getSnapshot().notice,/another tab/i);
+  }
+});

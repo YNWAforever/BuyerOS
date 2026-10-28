@@ -40,6 +40,13 @@ export function discussionForPath(pathname: string, enabled: boolean): Discussio
   return undefined;
 }
 
+/** These routes share the mounted workspace; local thread moves need no RSC request. */
+export function navigateLocalDiscussion(from:string,target:URL,enabled:boolean,history:Pick<History,'state'|'pushState'>):boolean {
+  if(!discussionForPath(from,enabled)||!discussionForPath(target.pathname,enabled))return false;
+  history.pushState(history.state,'',target.pathname+target.search+target.hash);
+  return true;
+}
+
 export function isLiveOverviewRoute(pathname: string, enabled: boolean): boolean {
   return pathname === (enabled ? '/app/overview' : '/app');
 }
