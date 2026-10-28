@@ -45,7 +45,7 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
     {conversationHome && <>
       {item('New discussion',Plus,'/app/discussions/new',discussion?.id==='new',!authorized||!projectKnown)}
       <div className="live-nav-group" role="group" aria-label={t('Discussions')}>
-        <div className="nav-label" aria-hidden="true">{t('Discussions')} <small>· {t('Examples')}</small></div>
+        <div className="nav-label" aria-hidden="true">{t('Guided templates')}</div>
         {illustrativeDiscussions.map(entry=><div className="live-nav-discussion" key={entry.id}>{item(entry.title,MessageSquare,`/app/discussions/${entry.id}`,discussion?.id===entry.id,!authorized||!projectKnown)}</div>)}
       </div>
     </>}

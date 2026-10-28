@@ -6,7 +6,7 @@ import {discussionForPath} from './conversation-home';
 /** Route copy for the live page heading. Paths mirror the workspace router in workspace-picker. */
 export function liveRouteMeta(pathname: string, conversationHome=false): {title: string; description: string} {
   const discussion=discussionForPath(pathname,conversationHome);
-  if(discussion)return {title:discussion.title,description:'A conversation for your project. Illustrative preview only.'};
+  if(discussion)return {title:discussion.title,description:'Saved on this device only · not shared'};
   if (pathname === '/app/discover/new') return {title: 'New project', description: 'Describe your offer, then approve the buyer profile before research starts.'};
   if (pathname === '/app/discover/edit') return {title: 'Offer', description: 'Update offer facts and the buyer profile that research will use.'};
   if (pathname === '/app/discover') return {title: 'Buyers', description: 'Find the right companies. Know why they belong on your list.'};
