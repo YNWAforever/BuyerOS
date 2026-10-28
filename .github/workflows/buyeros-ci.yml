@@ -1068,7 +1068,7 @@ jobs:
           mkdir -p artifacts/t21
           node --test --test-reporter=junit --test-reporter-destination=artifacts/t21/navigation-unit.xml tests/t21-navigation.test.mjs tests/t21-history-replay.test.mjs tests/workbench-neon-fixture.test.mjs
           python scripts/check-required-tests.py --junit artifacts/t21/navigation-unit.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/t21/navigation-unit.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==12 and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'missing duplicate or nonpassing T21 navigation/protocol execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('artifacts/t21/navigation-unit.xml').getroot().iter('testcase')); names={(c.get('classname'),c.get('name')) for c in cases}; assert len(cases)==len(names)==14 and not any(c.find('failure') is not None or c.find('error') is not None or c.find('skipped') is not None for c in cases), 'missing duplicate or nonpassing T21 navigation/protocol execution'"
           python -m unittest discover -s tests -p test_t21_public_inventory.py -v
       - uses: actions/upload-artifact@v4
         if: always()
