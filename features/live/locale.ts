@@ -1,5 +1,16 @@
 /** Live-only system copy; factual source/user text is never translated automatically. */
 export const liveZh: Record<string,string> = {
+  'Ask BuyerOS':'詢問 BuyerOS',
+  'AI reply · needs review':'AI 回覆 · 需要覆核',
+  'Fixture reply · no live model':'測試回覆 · 未使用即時模型',
+  'Reply citations':'回覆來源',
+  'Check the cited sources. This reply does not approve, research or send anything.':'請核對引用來源。此回覆不會進行批准、研究或傳送。',
+  'Checking selected sources…':'正在核對所選來源…',
+  'Select 1–20 approved sources to ask BuyerOS. AI may be unavailable; your question stays here.':'選擇 1 至 20 個已批准來源以詢問 BuyerOS。AI 可能暫時無法使用；你的問題會保留在此。',
+  'Messages stay local. Ask BuyerOS sends your question and selected IDs for source checks. Research, approval and sending stay in their existing work surfaces.':'訊息保存在本機。「詢問 BuyerOS」會傳送你的問題及所選來源編號以核對來源。研究、批准及傳送仍在原有工作頁面進行。',
+  'BuyerOS AI is unavailable. Your question is still here; you can use the guided step or try later.':'BuyerOS AI 暫時無法使用。你的問題仍在此；你可以使用引導步驟或稍後再試。',
+  'Selected sources are unavailable or not approved. Refresh project context and review your selection.':'所選來源無法使用或尚未獲批准。請重新整理專案資料並檢查你的選擇。',
+  'The AI reply could not be verified. Review the selected sources and try again.':'無法核實 AI 回覆。請檢查所選來源後重試。',
   'The local discussion timestamp limit has been reached. Existing discussions have been kept.':'本機討論時間標記已達上限，現有討論已保留。',
   "Discussion resources":"討論資源",
   "Recent research runs":"最近研究執行",
