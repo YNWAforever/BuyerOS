@@ -210,12 +210,19 @@ test('Stage 2 optional missing API stays non-blocking and genuine permission den
  const {SessionScope}=await import('../services/live/session.ts');
  const {createLiveClient}=await import('../services/live/client.ts');
  const session=new SessionScope({mode:'live',actor:'a',workspace:'w',project:'p'});session.setToken('fixture');
- let status=404;const client=createLiveClient(async()=>new Response(JSON.stringify({code:'NOT_FOUND',message:'unavailable'}),{status}));
+ let status=404,message='request failed';const client=createLiveClient(async()=>new Response(JSON.stringify({code:'NOT_FOUND',message}),{status}));
  const denied=[];client.subscribeAccessDenied(event=>denied.push(event));
  const options={enabled:true,question:'Review?',sources:[{id:stage2Ref.id,label:stage2Ref.label}],locale:'en',signal:new AbortController().signal};
  await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.unavailable});assert.equal(denied.length,0);
  status=403;await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.sources});assert.equal(denied.length,1);
- status=404;await assert.rejects(client.request({path:'/v1/workspaces/w/projects/p',scope:session.identity(),token:session.token()}));assert.equal(denied.length,2);
+ status=404;message='workspace not found';
+ await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.unavailable});assert.equal(denied.length,2);
+ message='unrecognized failure';
+ await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.unavailable});assert.equal(denied.length,3);
+ message=undefined;
+ await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.unavailable});assert.equal(denied.length,4);
+ message='request failed';
+ await assert.rejects(client.request({path:'/v1/workspaces/w/projects/p',scope:session.identity(),token:session.token()}));assert.equal(denied.length,5);
 });
 
 test('Stage 2 citations use existing guarded navigation, and empty sources disable AI ask',async()=>{

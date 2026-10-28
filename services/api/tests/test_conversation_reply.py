@@ -63,6 +63,12 @@ def test_flag_off_has_no_new_route(flag, monkeypatch):
         monkeypatch.setenv("NEXT_PUBLIC_CONVERSATION_HOME", flag)
     paths = {route.path for route in create_app().routes if hasattr(route, "path")}
     assert not any("conversation-reply" in path for path in paths)
+    # The optional-route client exemption must not swallow membership NOT_FOUND errors.
+    response = TestClient(create_app()).post(
+        "/v1/workspaces/11111111-1111-4111-8111-111111111111/projects/22222222-2222-4222-8222-222222222222/conversation-reply")
+    assert response.status_code == 404
+    assert response.json()["code"] == "NOT_FOUND"
+    assert response.json()["message"] == "request failed"
 
 
 def test_flag_on_endpoint_requires_authentication(monkeypatch):

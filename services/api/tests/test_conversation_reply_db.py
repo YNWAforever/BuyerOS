@@ -118,3 +118,7 @@ def test_unavailable_sources_permissions_and_extra_inputs_never_reach_generation
     response = client.post(target, headers=headers, json={"question": "Please review.", "source_ids": sources, "language": "en", **changes})
     assert response.status_code in {403, 404, 422}, response.text
     assert "data" not in response.json()
+    if mutation == "membership":
+        assert response.status_code == 404
+        assert response.json()["code"] == "NOT_FOUND"
+        assert response.json()["message"] == "workspace not found"

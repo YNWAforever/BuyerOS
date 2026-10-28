@@ -194,7 +194,10 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
           const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
           const headerId = response.headers?.get('X-Request-ID') || '';
           const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
-          if(!missingIsUnavailable||response.status!==404)notifyAccessDenied(path, scope, response.status, signal);
+          // Only the API's generic HTTP route miss is optional. Membership 404s
+          // ("workspace not found") must still recheck access and clear stale context.
+          const missingRoute=missingIsUnavailable&&response.status===404&&code==='NOT_FOUND'&&errorBody.message==='request failed';
+          if(!missingRoute)notifyAccessDenied(path, scope, response.status, signal);
           throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
         }
         if (response.status === 204) return undefined as T;
