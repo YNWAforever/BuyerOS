@@ -2,7 +2,7 @@ import type {components} from '@/services/generated/buyeros-api';
 import {conversationHomeEnabled} from '@/features/live/conversation-home';
 import {LiveCancelled,LiveError,type LiveClient} from './client';
 import type {SessionScope} from './session';
-import {startResearch,getRun,resetResearchIntent,type RunContext} from './runs';
+import {startResearch,getRun,hasUncertainResearch,resetResearchIntent,type RunContext} from './runs';
 import {loadPilotBudget} from './pilot-budgets';
 
 export const researchNotices={
@@ -83,11 +83,13 @@ export async function reviewResearch(client:LiveClient,session:SessionScope,enab
 export async function confirmResearch(client:LiveClient,session:SessionScope,options:{enabled:boolean;confirmed:boolean;review:ResearchReview;maxCost:string;target:number}):Promise<RunReference>{
   const ctx=context(client,session,options.enabled);
   if(!options.confirmed||!fixed(options.maxCost)||Number(options.maxCost)<=0||Number(options.maxCost)>Number(options.review.remaining)||!Number.isInteger(options.target)||options.target<1||options.target>100||!uuid.test(options.review.profileId))throw new Error(researchNotices.context);
+  const wasUncertain=hasUncertainResearch(ctx);
   let run;
   try{run=await startResearch(ctx,{icp_version_id:options.review.profileId,target_companies:options.target,
     max_cost:{amount:options.maxCost,currency:'USD'},limits:{...conversationLimits}});
   }catch(error){
-    if(error instanceof LiveError&&(error.status===403||['CAPABILITY_DISABLED','PROVIDER_UNAVAILABLE','POLICY_BLOCKED','BUDGET_LIMIT','STALE_REVISION'].includes(error.code)))resetResearchIntent(ctx);
+    // A later refusal cannot disprove acceptance of an earlier ambiguous request.
+    if(!wasUncertain&&error instanceof LiveError&&(error.status===403||['CAPABILITY_DISABLED','PROVIDER_UNAVAILABLE','POLICY_BLOCKED','BUDGET_LIMIT','STALE_REVISION'].includes(error.code)))resetResearchIntent(ctx);
     throw error;
   }
   const ref={id:run.id,label:'Research run' as const,status:run.status};

@@ -298,3 +298,27 @@ test('Stage 2b persists only generic run references and never live model bodies'
  const {liveZh}=await import('../features/live/locale.ts');
  for(const file of ['features/live/conversation-research.tsx'])for(const [,text] of readFileSync(file,'utf8').matchAll(/\bt\('([^']+)'\)/g))assert.ok(liveZh[text],text);
 });
+
+test('Stage 2b retains an uncertain research key through a later permission denial',async()=>{
+ const {confirmResearch}=await import('../services/live/conversation-research.ts');
+ const {SessionScope}=await import('../services/live/session.ts');
+ const {LiveError}=await import('../services/live/client.ts');
+ const workspace='a1000000-0000-4000-8000-000000000001',project='a2000000-0000-4000-8000-000000000001';
+ const run='a4000000-0000-4000-8000-000000000001',accepted=new Map(),keys=[];
+ const session=new SessionScope({mode:'live',actor:'fixture',workspace,project});session.setToken('fixture');
+ let permitted=true,loseResponse=true;
+ const client={request:async req=>{
+  keys.push(req.idempotencyKey);
+  if(!permitted)throw new LiveError('permission revoked','PERMISSION_DENIED',403,'',false);
+  if(!accepted.has(req.idempotencyKey))accepted.set(req.idempotencyKey,{id:accepted.size?crypto.randomUUID():run,workspace_id:workspace,project_id:project,status:'queued'});
+  if(loseResponse){loseResponse=false;throw new LiveError('response lost','REQUEST_TIMEOUT',0,'',true);}
+  return accepted.get(req.idempotencyKey);
+ }};
+ const options={enabled:true,confirmed:true,review:{profileId:stage2Profile,profileNumber:1,remaining:'1.000000'},maxCost:'0.500000',target:10};
+ await assert.rejects(confirmResearch(client,session,options));
+ permitted=false;await assert.rejects(confirmResearch(client,session,options));
+ permitted=true;
+ assert.deepEqual(await confirmResearch(client,session,options),{id:run,label:'Research run',status:'queued'});
+ assert.equal(new Set(keys).size,1,'a later denial cannot prove that the original request was never accepted');
+ assert.equal(accepted.size,1,'retry after permission restoration must not admit a second run');
+});
