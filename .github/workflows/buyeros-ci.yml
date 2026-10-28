@@ -45,7 +45,7 @@ jobs:
           mkdir -p test-results
           pnpm test:core --test-reporter=junit --test-reporter-destination=test-results/core-client.xml
           python scripts/check-required-tests.py --junit test-results/core-client.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==21, 'missing, duplicate or file-only core client execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==75, 'missing, duplicate or file-only core client execution'"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

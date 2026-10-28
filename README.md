@@ -88,27 +88,57 @@ historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
 
-## Conversation home — Stage 0 Preview
+## Conversation home — Stage 1 Preview
 
-`NEXT_PUBLIC_CONVERSATION_HOME=true` opts the **live** workspace into the
-illustrative Discussion home. Unset (the default), `false`, or any other value
-keeps the #35 Overview home and navigation groups. This is a public build-time
-flag; it needs no model-provider secrets.
+`NEXT_PUBLIC_CONVERSATION_HOME === 'true'` opts the **live** workspace into
+Conversation home. Unset (default), `false`, or any other value retains the
+#35/#37 OFF Overview, navigation, guards and reads. Preview is already enabled;
+this change requires no Vercel environment edits. Production remains unset/OFF.
 
-For Vercel, add the variable with value `true` to **Preview only**, scoped to the
-`codex/conversation-home-stage0` branch, then redeploy that branch's Preview.
-Leave Production unset. To roll back a Preview, remove the override (or set it to
-`false`) and rebuild it.
+`/app` and `/app/discussions/new` offer six BuyerOS guided templates and a local
+composer. `/app/discussions/<localId>` restores messages and selected source
+references after refresh. Continue working lists only the current actor,
+workspace and project's discussions, newest first. The two Stage 0 example
+bookmarks remain template entry pages. All destination buttons use the existing
+guarded navigation with workspace/project and any selected record IDs.
 
-When enabled, `/app` opens the Prepare follow-up example; `/app/discussions/new`,
-`/app/discussions/prepare-follow-up`, and `/app/discussions/review-buyers` are
-static discussion surfaces. Project work → Overview opens the retained queue at
-`/app/overview`. Discover & review, Follow up, and Manage keep their existing
-routes and access checks under Project work (retained). Output and template
-stubs open `/app/outreach`; Saved results opens `/app/results`. Existing guarded
-navigation retains the selected workspace/project and unsaved-edit protection.
-Conversations do not call AI, research, approve, send, or persist messages.
+Messages are **saved on this device only, not shared**. A versioned, strictly
+validated `buyeros.discussions.v1:<actor>:<workspace>:<project>` key uses encoded
+scope components. Limits: 256 KiB UTF-8 per scope, 30 threads, 100 messages and
+100 selected sources per thread, 4,000 characters per message. Invalid, foreign,
+old-version or oversized payloads are ignored with a notice. A full limit refuses
+additions and keeps existing data; unavailable storage keeps changes in the tab
+with an honest notice. Sign-out clears session-owned memory caches. Source
+selections persist only IDs and generic labels; filenames, document contents,
+fact values, buyer records and draft bodies are never copied into the store.
+Do not enter private buyer details, draft bodies or document text into messages.
 
-Focused checks: `node --test tests/audit-conversation-home.test.mjs` (also picked
-up by the existing CI audit suite), `pnpm test:core`, `pnpm exec tsc --noEmit`,
-`pnpm lint`, and `NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.
+Documents & outputs reads existing project records with current permissions:
+offer documents/extraction state, candidate and approved facts, recent runs with
+authoritative statuses, and the current UTC month's Results counts. Reads are
+bounded and cached for the active session scope; Refresh project context explicitly
+re-reads them. Missing permissions, partial lists, empty and unavailable services
+are reported without blocking local discussion work. A fact is shown as approved
+only with the authoritative active reviewer-approved current profile. Document
+candidates always need reviewer approval. Offer context follows the existing
+active-project/operator Offer gate; other retained surfaces keep their own gates.
+
+Every BuyerOS reply is deterministic static **Guided step · no AI** copy in
+English and zh-HK. Templates, Send, source selection and thread navigation make
+no network calls. Project context uses existing GETs only; refreshing the page
+or changing validated scope may reload context. Offer document links focus the
+existing document row, run links open the existing run, Drafts and Saved results
+remain links to existing work. Overview stays at `/app/overview`, with Offer,
+Research runs, Buyers, Drafts, Results, Settings and Operations retained.
+
+Out of scope: AI/LLM replies or citations; research starts, providers or paid
+calls from chat; enrichment/contact quotes, approval, exports or sending; backend
+or schema changes; server-side discussions, sharing/ACL; SME/GSC/Firecrawl/
+DataForSEO, CRM/shared-library connectors or OAuth; Production enablement,
+deployment/promotion, merging, or removal/restyling of retained work surfaces.
+
+Checks: `node --test tests/audit-conversation-home.test.mjs`,
+`node --test tests/conversation-home-responsive.test.mjs` (compiled Vercel CSS +
+local Chromium), `pnpm test:core`, `pnpm exec tsc --noEmit`, `pnpm lint`,
+`pnpm build`, and
+`NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.

@@ -26,3 +26,23 @@
 @media(max-width:1200px){.live-discussion{grid-template-columns:minmax(0,1fr)}.live-discussion-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
 @media(max-width:1023px){.live-nav-retained{flex-direction:row;flex-wrap:wrap;min-width:0;flex-shrink:1;border-top:0;margin-top:0;gap:2px}}
 @media(max-width:720px){.live-discussion-resources{grid-template-columns:minmax(0,1fr);gap:0}.live-discussion-message{max-width:100%}.live-discussion-chrome,.live-discussion-messages{padding:16px}.live-discussion-composer{margin:0 16px 16px}}
+/* Stage 1 local continuity and read-only context. */
+.live-discussion-turn{display:flex;flex-direction:column;gap:16px}
+.live-discussion-templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.live-discussion-templates button{white-space:normal;text-align:left;display:flex;align-items:flex-start;flex-direction:column;gap:6px;min-width:0}
+.live-discussion button,.live-discussion textarea{overflow-wrap:anywhere;max-width:100%}
+.live-discussion-continue{padding:0 22px 22px}
+.live-discussion-continue ul,.live-discussion-connections{padding:0;list-style:none}
+.live-discussion-continue button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;white-space:normal;width:100%;text-align:left;margin:8px 0}
+.live-discussion-continue span,.live-discussion-continue time{font-size:12px;color:var(--buyeros-copy)}
+.live-discussion-context{border-top:1px solid var(--buyeros-border);margin-top:16px;padding-top:12px;overflow-wrap:anywhere}
+.live-discussion-context article{margin:12px 0;padding-bottom:12px;border-bottom:1px solid var(--buyeros-border)}
+.live-discussion-context label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.live-discussion-context input{flex-shrink:0;width:16px;height:16px;margin-top:4px}
+.live-discussion-context small{display:block;font-size:12px;color:var(--buyeros-copy)}
+.live-discussion-resources h2{font-size:16px;overflow-wrap:anywhere}
+.live-discussion-resources details{margin-top:12px;overflow-wrap:anywhere}
+.live-discussion-resources details button{margin-top:6px}
+.live-discussion-suggestions{margin:12px 0}
+.live-discussion-suggestions button{white-space:normal;text-align:left}
+@media(max-width:480px){.live-discussion-templates{grid-template-columns:minmax(0,1fr)}.live-discussion-composer>div{flex-wrap:wrap}.live-discussion-continue{padding:0 16px 16px}}

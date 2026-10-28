@@ -24,8 +24,8 @@ import {LeadProgressPanel} from './lead-workflow/progress-panel';
 import {PilotBudgetPanel} from './lead-workflow/budget-panel';
 import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
-import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute} from './conversation-home';
-import {LiveDiscussion} from './discussion';
+import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope} from './conversation-home';
+import {LiveConversation} from './discussion-workspace';
 import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
 import {liveZh} from './locale';
@@ -249,7 +249,7 @@ export function LiveWorkspace() {
   }
   function navigate(path:string) {
     const params = new URLSearchParams(); if (workspace) params.set('workspace',workspace); if (project) params.set('project',project); if (project && requested('profile')) params.set('profile',requested('profile')!);
-    const target=new URL(path,window.location.origin);for(const [key,value] of params)target.searchParams.set(key,value);
+    const target=new URL(path,window.location.origin);applyConversationNavigationScope(target,params,conversationHome);
     void session.transition(async()=>{if(mayLeaveOffer()){beginNavigation(target.pathname+target.search);router.push(target.pathname+target.search);}}).catch(()=>{});
   }
   const signInFrame=(body:React.ReactNode)=><main ref={signInMain} tabIndex={-1} className="main-shell live-workspace live-signin">
@@ -302,7 +302,7 @@ export function LiveWorkspace() {
     </div>
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
-    {authorized && projectKnown && discussion && <LiveDiscussion t={t} discussion={discussion} navigate={navigate}/>}
+    {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
     {authorized && projectKnown && overviewRoute && <>
       <LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/>
       <PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/>
@@ -317,7 +317,7 @@ export function LiveWorkspace() {
     {authorized&&projectKnown&&pathname==='/app/operations'&&<LeadProgressPanel key={`lead-queue-${snapshot.identity}`} mode="queue" canAssign={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} locale={locale} canEdit={canBuyerEdit&&projectActive} onNavigate={navigate}/>}
     {authorized&&projectKnown&&pathname==='/app/settings'&&<PilotBudgetPanel key={`pilot-budget-${snapshot.identity}`} locale={locale} isAdmin={canArchive&&projectActive}/>}
     {authorized && canCreate && pathname === '/app/discover/new' && <LiveOfferWizard key={`new-${workspace}`} mode="create" onSaved={saved} t={t}/>}
-    {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t}/>}
+    {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t} focusDocument={conversationHome?requested('document')??undefined:undefined}/>}
     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
     {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}

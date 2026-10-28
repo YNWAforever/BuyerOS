@@ -15,9 +15,9 @@ type Fact=components['schemas']['OfferFact'];
 type EditBase={id:string;version:number;offer_revision:number;latestIcpVersionId:string|null};
 const labels=['Your offer','Target buyers','Buyer requirements','Review and save'];
 
-export function LiveOfferWizard({mode,projectId,onSaved,t}: {
+export function LiveOfferWizard({mode,projectId,onSaved,t,focusDocument}: {
   mode:'create'|'edit';projectId?:string;
-  onSaved:(info:{projectId:string;icpVersionId:string})=>void;t:(text:string)=>string;
+  onSaved:(info:{projectId:string;icpVersionId:string})=>void;t:(text:string)=>string;focusDocument?:string;
 }) {
   const {session,client}=useWorkspaceSession();
   const [offer,setOffer]=useState<Offer>(emptyLiveOffer);
@@ -124,7 +124,7 @@ export function LiveOfferWizard({mode,projectId,onSaved,t}: {
       <label>{t('Value proposition')}<textarea value={offer.value} onChange={e=>update('value',e.target.value)}/></label>
       <label>{t('Website (optional)')}<input value={offer.website} onChange={e=>update('website',e.target.value)}/></label>
       {mode==='create'&&<p>{t('Save the project first, then use Edit offer to attach PowerPoint, PDF, text or Markdown sources. Import Excel or CSV buyer lists from Buyers.')}</p>}
-      {mode==='edit'&&projectId&&<LiveOfferDocuments projectId={projectId} selected={selectedDocuments}
+      {mode==='edit'&&projectId&&<LiveOfferDocuments projectId={projectId} selected={selectedDocuments} focusDocument={focusDocument}
         onSelect={chooseDocument} onApply={applyCandidate} t={t}/>}
     </>}
     {step===1&&<>

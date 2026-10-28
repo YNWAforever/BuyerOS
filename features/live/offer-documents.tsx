@@ -11,9 +11,9 @@ type Fact=components['schemas']['OfferFact'];
 type Page={items:Document[];offset:number;limit:number;total:number};
 type Slide=components['schemas']['DocumentSlide'];
 
-export function LiveOfferDocuments({projectId,selected,onSelect,onApply,t}:{
+export function LiveOfferDocuments({projectId,selected,onSelect,onApply,t,focusDocument}:{
   projectId:string;selected:string[];onSelect:(id:string,selected:boolean)=>void;
-  onApply:(fact:Fact)=>void;t:(text:string)=>string;
+  onApply:(fact:Fact)=>void;t:(text:string)=>string;focusDocument?:string;
 }) {
   const {client,session}=useWorkspaceSession();
   const [rows,setRows]=useState<Document[]>([]);
@@ -73,6 +73,11 @@ export function LiveOfferDocuments({projectId,selected,onSelect,onApply,t}:{
       if(fileInput.current)fileInput.current.value='';
     });
   },[session]);
+  useEffect(()=>{
+    if(!focusDocument||loading||!rows.some(row=>row.id===focusDocument))return;
+    const target=window.document.querySelector<HTMLElement>('[data-discussion-document="true"]');
+    target?.focus();target?.scrollIntoView({block:'nearest'});
+  },[focusDocument,loading,rows]);
 
   async function upload(){
     if(!file||busy)return;
@@ -186,7 +191,8 @@ export function LiveOfferDocuments({projectId,selected,onSelect,onApply,t}:{
     {pendingName&&<p role="status">{t('Upload paused. Reselect the same file to resume:')} {pendingName}</p>}
     {progress&&<div role="status"><span>{t(progress.phase==='hashing'?'Checking file...':progress.phase==='completing'?'Saving attachment...':'Uploading attachment...')} {progress.percent}%</span><progress max="100" value={progress.percent}/></div>}
     {error&&<p role="alert">{t(error)}</p>}
-    <ul>{rows.map(document=><li key={document.id}>
+    {focusDocument&&!loading&&!rows.some(row=>row.id===focusDocument)&&<p role="status">{t('Selected document is unavailable in this project.')}</p>}
+    <ul>{rows.map(document=><li key={document.id} data-discussion-document={focusDocument===document.id?'true':undefined} tabIndex={focusDocument===document.id?-1:undefined}>
       <div className="live-offer-doc-row"><span><strong>{document.filename}</strong> · {t(document.status)}
       {document.failure_code&&<> · {document.failure_code}</>}</span>
       {document.status==='ready'&&<label><input type="checkbox" checked={selected.includes(document.id)}
