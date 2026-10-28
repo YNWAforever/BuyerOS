@@ -7,6 +7,8 @@ import {loadDiscussionContext,type ContextSection} from '@/services/live/discuss
 import {askBuyerOS,replyNotices} from '@/services/live/conversation-reply';
 import {LiveCancelled} from '@/services/live/client';
 import {conversationHomeEnabled,discussionForPath,templateForId} from './conversation-home';
+import type {GroundedReply} from '@/services/live/discussion-citations';
+import {ConversationResearch} from './conversation-research';
 import {LiveDiscussion} from './discussion';
 import {LiveUnavailable} from './unavailable';
 
@@ -38,6 +40,7 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
   },[cache.stores,scopeKey,scope.actor,scope.workspace,scope.project]);
   const snapshot=useSyncExternalStore(store.subscribe,store.getSnapshot,store.getSnapshot);
   const [value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[refresh,setRefresh]=useState(0);
+  const [liveReply,setLiveReply]=useState<{threadId:string;selection:string;reply:GroundedReply}|null>(null);
   const [asking,setAsking]=useState(false),[replyState,setReplyState]=useState({key:'',notice:''});
   const request=useRef<AbortController|null>(null),askingRef=useRef(false);
   const focus=useRef<HTMLDivElement>(null),writing=useRef(false),mounted=useRef(true),route=discussionForPath(pathname,true)!;
@@ -94,7 +97,8 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
       const reply=await askBuyerOS(client,session,{enabled:true,question:input,sources:thread.sources,locale,signal:controller.signal});
       if(!stillCurrent())return;
       await store.withLocalWrite(stillCurrent,()=>{
-        if(store.appendReply(thread.id,input,reply,sourceIds))setValue(value=>value===input?'':value);
+        const saved=reply.fixture?store.appendReply(thread.id,input,reply,sourceIds):store.append(thread.id,input);
+        if(saved){if(!reply.fixture)setLiveReply({threadId:thread.id,selection,reply});setValue(value=>value===input?'':value);}
       });
     }catch(error){
       if(stillCurrent()&&!(error instanceof LiveCancelled))setReplyState({key:replyKey,notice:error instanceof Error?error.message:replyNotices.unavailable});
@@ -108,6 +112,8 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
     {localRoute&&!thread?<>{snapshot.notice&&<p role="status">{t(snapshot.notice)}</p>}<LiveUnavailable state="not_found" reason={t('This discussion is not saved for this account and project on this device.')}/></>:<LiveDiscussion
       t={t} locale={locale} thread={thread} threads={snapshot.threads} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
       value={value} onChange={setValue} onSend={send} onTemplate={create} navigate={navigate} notice={snapshot.notice} context={context}
+      research={thread&&canViewOffer?<ConversationResearch key={thread.id} client={client} session={session} store={store} thread={thread} t={t} navigate={navigate}/>:null}
+      liveReply={canViewOffer&&liveReply?.threadId===thread?.id&&liveReply?.selection===selection?liveReply?.reply:undefined}
       onAsk={()=>void ask()} asking={asking} replyNotice={replyNotice} canAsk={canViewOffer}
       onSource={(source,selected)=>{if(thread)void write(()=>{store.select(thread.id,source,selected);});}}
       onRefresh={()=>{if(current()){setContext(null);cache.reads.delete(readKey);setRefresh(value=>value+1);}}}/>}

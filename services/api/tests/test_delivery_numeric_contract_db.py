@@ -31,7 +31,7 @@ def test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_sh
         # Rehearse the exact money migration in place without deleting newer
         # policy history or pretending the entire schema was downgraded.
         invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money')
-        invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
+        invoke_revision(dsn,ledger.config(),'0057_conversation_model','_fences',('0057_conversation_model',))
         with monkeypatch.context() as context:
             with ledger.ledger_case(quote_case) as data:
                 with ledger.tenant(dsn,str(data['args']['workspace_id'])) as db:
@@ -49,20 +49,20 @@ def test_populated0048_money_expand_retains_original_unknown_hold_and_refuses_sh
                 with psycopg.connect(dsn) as db:
                     assert db.execute("SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_name='delivery_liabilities' AND column_name='max_liability'").fetchone()==(18,6)
                 invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money','upgrade')
-                invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
+                invoke_revision(dsn,ledger.config(),'0057_conversation_model','_fences',('0057_conversation_model',))
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0057_conversation_model',)
                     assert db.execute("SELECT numeric_precision,numeric_scale FROM information_schema.columns WHERE table_name='delivery_liabilities' AND column_name='max_liability'").fetchone()==(20,6)
                 with pytest.raises(RuntimeError,match='retain delivery history'):
                     invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money')
                 assert snapshot()==before
                 with psycopg.connect(dsn) as db:
-                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0056_policy_activation',)
+                    assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0057_conversation_model',)
                     assert str(db.execute('SELECT remaining_hold FROM budget_reservations WHERE id=%s',(data['reservation'],)).fetchone()[0])=='0.010000'
     finally:
         # Keep the session fixture at its declared head even if an assertion fails.
         try:
             invoke_revision(dsn,ledger.config(),'0049_c61_delivery_money','upgrade')
-            invoke_revision(dsn,ledger.config(),'0056_policy_activation','_fences',('0056_policy_activation',))
+            invoke_revision(dsn,ledger.config(),'0057_conversation_model','_fences',('0057_conversation_model',))
         finally:get_settings.cache_clear()

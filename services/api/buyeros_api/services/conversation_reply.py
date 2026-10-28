@@ -1,10 +1,6 @@
-"""Stage 2 read-only grounding. No paid model route is admitted for conversations.
-
-Research model receipts bind runs/buyers/operations and cannot be borrowed here.
-Only tests may supply a fixture candidate; the HTTP route always returns unavailable.
-"""
+"""Selected approved grounding; fixtures are test-only, live admission is separate."""
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sqlalchemy import select
 
@@ -28,10 +24,16 @@ def unavailable_source():
 @dataclass(frozen=True)
 class Grounding:
     citations: list[dict]
-    excerpts: list[str]  # Request memory only; never a response, job or thread record.
+    excerpts: list[str]  # Request/receipt memory only; never local thread source bodies.
+    sources: list[dict] = field(default_factory=list)
+    profile_id: str = ""
+    profile_hash: str = ""
+    offer_revision: int = 0
+    document_ids: list[str] = field(default_factory=list)
+    paid_eligible: bool = False
 
 
-async def resolve_sources(session, *, workspace_id, project_id, source_ids):
+async def resolve_sources(session, *, workspace_id, project_id, source_ids, readonly=False):
     if not 1 <= len(source_ids) <= 20 or len(set(source_ids)) != len(source_ids):
         raise unavailable_source()
     project = (await session.execute(select(Project).where(
@@ -49,7 +51,8 @@ async def resolve_sources(session, *, workspace_id, project_id, source_ids):
         raise unavailable_source()
     facts = effective_offer_facts(profile)
     fact_map = {str(row.get("id")): row for row in facts if row.get("approved") is True}
-    citations, excerpts = [], []
+    citations, excerpts, sources, dependencies = [], [], [], set()
+    paid_eligible = True
     for source_id in source_ids:
         document_match = re.fullmatch(rf"document:({UUID})", source_id)
         fact_match = re.fullmatch(rf"fact:profile:({UUID}):({UUID})", source_id)
@@ -76,9 +79,11 @@ async def resolve_sources(session, *, workspace_id, project_id, source_ids):
             if any(str(value) not in profile.content.get("offer_document_ids", []) for value in document_ids):
                 raise unavailable_source()
             await validate_offer_document_refs(session, workspace_id=workspace_id,
-                project_id=project_id, document_ids=document_ids, facts=qualified)
+                project_id=project_id, document_ids=document_ids, facts=qualified, lock=not readonly)
         except (ApiError, ValueError, TypeError) as exc:
             raise unavailable_source() from exc
+        paid_eligible = paid_eligible and all(fact.source_document_id is not None and fact.provenance == 'document_excerpt' for fact in qualified)
+        dependencies.update(str(value) for value in document_ids)
         for fact in qualified:
             if not fact.value.strip() or len(fact.value) > 400:
                 raise unavailable_source()
@@ -86,10 +91,13 @@ async def resolve_sources(session, *, workspace_id, project_id, source_ids):
             if fact.excerpt and len(fact.excerpt) > 800:
                 raise unavailable_source()
             excerpts.append(fact.value)
-        citations.append({"id": source_id, "label": label, "locator": locator})
+        citation = {"id": source_id, "label": label, "locator": locator}
+        citations.append(citation)
+        sources.append({"citation": citation, "excerpts": [fact.value for fact in qualified]})
     if sum(len(value.encode("utf-8")) for value in excerpts) > 12000:
         raise unavailable_source()
-    return Grounding(citations=citations, excerpts=excerpts)
+    return Grounding(citations=citations, excerpts=excerpts, sources=sources, profile_id=str(profile.id),
+        profile_hash=profile.content_hash, offer_revision=project.offer_revision, document_ids=sorted(dependencies), paid_eligible=paid_eligible)
 
 
 def reply_from_grounding(grounding, *, fixture_candidate=None):

@@ -139,7 +139,7 @@ def test_contact_runtime_rls_immutable_private_result_and_populated_rollback(con
             assert await store.get(ref)==saved
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
         finally:
-            invoke_revision(case['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+            invoke_revision(case['dsn'],config,'0057_conversation_model','_fences',('0057_conversation_model',))
             monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved
     asyncio.run(engines(case,exercise))

@@ -38,7 +38,7 @@ def test_unknown_redacted_payload_and_hash_survive_downgrade_and_reupgrade(conta
             assert paused['epoch']==epoch and paused['enabled'] is False and paused['applied'] is False
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
         finally:
-            invoke_revision(case['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+            invoke_revision(case['dsn'],config,'0057_conversation_model','_fences',('0057_conversation_model',))
             monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved and not (await store.claim(intent))[1] and held(case)[1]==0
     asyncio.run(expiring_engines(case,exercise))

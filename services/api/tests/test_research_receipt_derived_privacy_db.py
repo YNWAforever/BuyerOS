@@ -133,7 +133,7 @@ def test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receip
             assert db.execute('SELECT excerpt,translation FROM evidence WHERE id=%s',(c['derived']['evidence'],)).fetchone()==('Source expired',None)
             assert db.execute('SELECT state,remaining_hold FROM budget_reservations').fetchall()==c['hold']
     finally:
-        invoke_revision(c['dsn'],cfg,'0056_policy_activation','_fences',('0056_policy_activation',))
+        invoke_revision(c['dsn'],cfg,'0057_conversation_model','_fences',('0057_conversation_model',))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert erase(c) is False
     with psycopg.connect(c['dsn']) as db:

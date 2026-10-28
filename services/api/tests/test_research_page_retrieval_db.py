@@ -172,7 +172,7 @@ def test_page_migration_rollback_keeps_rows_hashes_holds_and_closes_writes(page_
             assert db.execute('SELECT count(*) FROM source_documents WHERE id=%s',(uuid.UUID(result['source_document_id']),)).fetchone()==(1,)
         assert execute(c,t)['status']=='stale' and t.calls==1
     finally:
-        invoke_revision(c['dsn'],cfg,'0056_policy_activation','_fences',('0056_policy_activation',))
+        invoke_revision(c['dsn'],cfg,'0057_conversation_model','_fences',('0057_conversation_model',))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert execute(c,t)==result and t.calls==1
 

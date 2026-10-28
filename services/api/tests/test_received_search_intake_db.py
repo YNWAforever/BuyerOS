@@ -298,7 +298,7 @@ def test_intake_migration_rollback_retains_tombstones_and_closes_writes(received
             assert db.execute('SELECT request_hash,response_hash,intent_key FROM search_receipts WHERE id=%s',(c['ref'],)).fetchone()==before
         with pytest.raises(ValueError):consume(c)
     finally:
-        invoke_revision(c['dsn'],config,'0056_policy_activation','_fences',('0056_policy_activation',))
+        invoke_revision(c['dsn'],config,'0057_conversation_model','_fences',('0057_conversation_model',))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert consume(c)['source_count']==1
 

@@ -10,7 +10,7 @@ from ..db.ingestion import OfferDocument
 
 
 async def validate_offer_document_refs(session, *, workspace_id, project_id,
-                                       document_ids, facts) -> None:
+                                       document_ids, facts, lock=True) -> None:
     ids = [str(value) for value in document_ids]
     if len(ids) != len(set(ids)):
         raise ApiError(422, "INVALID_REQUEST", "duplicate offer document")
@@ -18,11 +18,12 @@ async def validate_offer_document_refs(session, *, workspace_id, project_id,
         if any(fact.source_document_id is not None for fact in facts):
             raise ApiError(422, "INVALID_REQUEST", "fact references an unselected document")
         return
-    rows = (await session.execute(select(OfferDocument).where(
+    query = select(OfferDocument).where(
         OfferDocument.workspace_id == workspace_id,
         OfferDocument.project_id == project_id,
         OfferDocument.id.in_(document_ids),
-    ).with_for_update())).scalars().all()
+    )
+    rows = (await session.execute(query.with_for_update() if lock else query)).scalars().all()
     by_id = {str(row.id): row for row in rows}
     now = datetime.now(timezone.utc)
     if len(by_id) != len(ids) or any(

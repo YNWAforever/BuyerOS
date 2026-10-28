@@ -13,7 +13,7 @@ from ..schemas import BudgetUpdate
 from ...db.budget import BudgetAccount
 from ...db.icp import Project
 from ...services.audit_service import append_audit
-from ...services.budget_service import (CATEGORIES, _money, _held, budget_data,
+from ...services.budget_service import (enabled_categories, _money, _held, budget_data,
                                         ensure_period_accounts, lock_budget_workspace)
 
 router = APIRouter(prefix="/v1/workspaces/{workspace_id}/budgets", tags=["budgets"])
@@ -32,7 +32,7 @@ async def list_budgets(workspace_id: uuid.UUID, request: Request,
         await ensure_period_accounts(session, workspace_id, None, None, None)
         for project_id in projects:
             await ensure_period_accounts(session, workspace_id, project_id, None, None)
-            for category in sorted(CATEGORIES):
+            for category in sorted(enabled_categories()):
                 await ensure_period_accounts(session, workspace_id, project_id, None, category)
         rows = (await session.execute(select(BudgetAccount).where(BudgetAccount.workspace_id == workspace_id)
             .order_by(BudgetAccount.period_start.desc(), BudgetAccount.scope, BudgetAccount.scope_id,
