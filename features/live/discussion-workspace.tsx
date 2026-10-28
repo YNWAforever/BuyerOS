@@ -1,9 +1,11 @@
 'use client';
-import {useEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
+import {useEffect,useLayoutEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
 import {DiscussionStore} from '@/services/live/discussions';
 import {loadDiscussionContext,type ContextSection} from '@/services/live/discussion-context';
+import {askBuyerOS,replyNotices} from '@/services/live/conversation-reply';
+import {LiveCancelled} from '@/services/live/client';
 import {conversationHomeEnabled,discussionForPath,templateForId} from './conversation-home';
 import {LiveDiscussion} from './discussion';
 import {LiveUnavailable} from './unavailable';
@@ -36,14 +38,24 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
   },[cache.stores,scopeKey,scope.actor,scope.workspace,scope.project]);
   const snapshot=useSyncExternalStore(store.subscribe,store.getSnapshot,store.getSnapshot);
   const [value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[refresh,setRefresh]=useState(0);
+  const [asking,setAsking]=useState(false),[replyState,setReplyState]=useState({key:'',notice:''});
+  const request=useRef<AbortController|null>(null),askingRef=useRef(false);
   const focus=useRef<HTMLDivElement>(null),writing=useRef(false),mounted=useRef(true),route=discussionForPath(pathname,true)!;
   const thread=snapshot.threads.find(item=>item.id===route.id)??null;
+  const selection=JSON.stringify(thread?.sources.map(row=>row.id)??[]);
+  const latest=useRef({pathname,selection,canViewOffer});
+  const replyKey=JSON.stringify([pathname,selection,canViewOffer]);
+  const replyNotice=replyState.key===replyKey?replyState.notice:'';
   const localRoute=route.id.startsWith('local-');
   const readKey=JSON.stringify([identity,canViewOffer,canViewResults]);
   // A permission reduction hides old records during this render, before effects run.
   const context=contextRead?.key===readKey?contextRead.sections:null;
   useEffect(()=>{focus.current?.focus();},[pathname]);
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+  useLayoutEffect(()=>{
+    latest.current={pathname,selection,canViewOffer};
+    return()=>{request.current?.abort();};
+  },[pathname,selection,canViewOffer]);
   useEffect(()=>{
     let active=true;
     let read=cache.reads.get(readKey);
@@ -65,17 +77,38 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
     });
   }
   function send(){
-    if(!current()||!value.trim())return;
+    if(!current()||askingRef.current||!value.trim())return;
     const input=value,clear=()=>setValue(current=>current===input?'':current);
     void write(()=>{
       if(thread){if(store.append(thread.id,input))clear();}
       else{const created=store.create('custom',input);if(created){clear();navigate(`/app/discussions/${created.id}`);}}
     });
   }
+  async function ask(){
+    if(!current()||askingRef.current||writing.current||!canViewOffer||!thread||!thread.sources.length||!value.trim())return;
+    const input=value,sourceIds=thread.sources.map(row=>row.id),controller=new AbortController();
+    request.current=controller;askingRef.current=true;setAsking(true);setReplyState({key:replyKey,notice:''});
+    const stillCurrent=()=>current()&&!controller.signal.aborted&&latest.current.pathname===pathname&&
+      latest.current.selection===selection&&latest.current.canViewOffer;
+    try{
+      const reply=await askBuyerOS(client,session,{enabled:true,question:input,sources:thread.sources,locale,signal:controller.signal});
+      if(!stillCurrent())return;
+      await store.withLocalWrite(stillCurrent,()=>{
+        if(store.appendReply(thread.id,input,reply,sourceIds))setValue(value=>value===input?'':value);
+      });
+    }catch(error){
+      if(stillCurrent()&&!(error instanceof LiveCancelled))setReplyState({key:replyKey,notice:error instanceof Error?error.message:replyNotices.unavailable});
+    }finally{
+      askingRef.current=false;
+      if(current())setAsking(false);
+      if(request.current===controller)request.current=null;
+    }
+  }
   return <div ref={focus} tabIndex={-1} aria-label={t('Discussion workspace')}>
     {localRoute&&!thread?<>{snapshot.notice&&<p role="status">{t(snapshot.notice)}</p>}<LiveUnavailable state="not_found" reason={t('This discussion is not saved for this account and project on this device.')}/></>:<LiveDiscussion
       t={t} locale={locale} thread={thread} threads={snapshot.threads} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
       value={value} onChange={setValue} onSend={send} onTemplate={create} navigate={navigate} notice={snapshot.notice} context={context}
+      onAsk={()=>void ask()} asking={asking} replyNotice={replyNotice} canAsk={canViewOffer}
       onSource={(source,selected)=>{if(thread)void write(()=>{store.select(thread.id,source,selected);});}}
       onRefresh={()=>{if(current()){setContext(null);cache.reads.delete(readKey);setRefresh(value=>value+1);}}}/>}
   </div>;

@@ -3,16 +3,18 @@ import {ArrowUp, FileText, MessageSquare, PanelRight} from 'lucide-react';
 import {guidedTemplates, templateForId} from './conversation-home';
 import type {LocalThread,SelectedSource} from '@/services/live/discussions';
 import type {ContextSection} from '@/services/live/discussion-context';
+import {citationPath} from '@/services/live/discussion-citations';
 
 type Props = {
   t:(value:string)=>string; locale:'en'|'zh-HK'; thread:LocalThread|null; threads:LocalThread[];
   entryTemplate?:string; value:string; notice:string; context:ContextSection[]|null;
   navigate:(path:string)=>void; onTemplate:(id:string)=>void; onChange:(text:string)=>void;
   onSend:()=>void; onSource:(source:SelectedSource,selected:boolean)=>void; onRefresh:()=>void;
+  onAsk?:()=>void; asking?:boolean; replyNotice?:string; canAsk?:boolean;
 };
 
 /** Rendering and local callbacks only. All server reads live in the scope-owned context adapter. */
-export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh}:Props) {
+export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh,onAsk,asking=false,replyNotice='',canAsk=false}:Props) {
   const guidance=templateForId(thread?.templateId??entryTemplate??'custom');
   const open=(destination:string,path:string)=><button type="button" onClick={()=>navigate(path)}>{t(`Open in ${destination}`)}</button>;
   const guidedStep=<article className="live-discussion-message">
@@ -23,12 +25,16 @@ export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,noti
   </article>;
   return <section className="live-discussion" aria-label={t('Discussion')}>
     <div className="live-discussion-thread panel">
-      <header className="live-discussion-chrome"><span className="inline"><MessageSquare size={18} aria-hidden="true"/><b>{thread?.title??t('What would you like to achieve?')}</b></span><span className="pill gray">{t('Guided step · no AI')}</span></header>
+      <header className="live-discussion-chrome"><span className="inline"><MessageSquare size={18} aria-hidden="true"/><b>{thread?.title??t('What would you like to achieve?')}</b></span><span className="pill gray">{t(thread?.messages.some(message=>'kind' in message)?'AI reply · needs review':'Guided step · no AI')}</span></header>
       <p className="live-discussion-notice">{t('Saved on this device only · not shared')}</p>
-      <p className="live-discussion-notice">{t('Messages stay local. Guidance is static; research, approval and sending happen only in their existing work surfaces.')}</p>
+      <p className="live-discussion-notice">{t('Messages stay local. Ask BuyerOS sends your question and selected IDs for source checks. Research, approval and sending stay in their existing work surfaces.')}</p>
       {notice&&<p className="live-discussion-notice" role="status">{t(notice)}</p>}
       {thread?<div className="live-discussion-messages" aria-label={t('Discussion messages')} aria-live="polite" aria-relevant="additions">
-        {thread.messages.map(message=><div key={message.id} className="live-discussion-turn"><article className="live-discussion-message live-discussion-user"><b>{t('You')}</b><p>{message.text}</p></article>{guidedStep}</div>)}
+        {thread.messages.map((message,index)=>'kind' in message?<article key={message.id} className="live-discussion-message">
+          <b>{t('BuyerOS')} · {t('AI reply · needs review')}</b><p>{t('Fixture reply · no live model')}</p><p>{message.text}</p>
+          <div className="live-discussion-suggestions" aria-label={t('Reply citations')}>{message.citations.map(ref=><button key={ref.id} type="button" onClick={()=>navigate(citationPath(ref))}>{t(ref.label)}</button>)}</div>
+          <small>{t('Check the cited sources. This reply does not approve, research or send anything.')}</small>
+        </article>:<div key={message.id} className="live-discussion-turn"><article className="live-discussion-message live-discussion-user"><b>{t('You')}</b><p>{message.text}</p></article>{thread.messages[index+1]&&'kind' in thread.messages[index+1]?null:guidedStep}</div>)}
       </div>:<div className="live-discussion-messages">
         {entryTemplate&&<><p>{t(guidance.prompt)}</p>{guidedStep}<button type="button" onClick={()=>onTemplate(guidance.id)}>{t('Start this discussion')}</button></>}
         <h2>{t('Guided templates')}</h2>
@@ -37,7 +43,11 @@ export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,noti
       <form className="live-discussion-composer" onSubmit={event=>{event.preventDefault();onSend();}}>
         <label htmlFor="discussion-message">{t(thread?'Discussion message':'What would you like to achieve?')}</label>
         <textarea id="discussion-message" rows={3} maxLength={4000} value={value} onChange={event=>onChange(event.target.value)} placeholder={t('Describe your next step. Avoid private buyer details or document text.')}/>
-        <div><small>{t('Send saves your message locally. No AI reply.')}</small><button type="submit" disabled={!value.trim()}><ArrowUp size={16} aria-hidden="true"/>{t('Send')}</button></div>
+        <div><small>{t('Send saves your message locally. No AI reply.')}</small><button type="submit" disabled={asking||!value.trim()}><ArrowUp size={16} aria-hidden="true"/>{t('Send')}</button>
+          {onAsk&&<button type="button" onClick={onAsk} disabled={asking||!canAsk||!value.trim()||!thread?.sources.length||thread.sources.length>20} aria-describedby="discussion-ai-help">{t(asking?'Checking selected sources…':'Ask BuyerOS')}</button>}
+        </div>
+        {onAsk&&<p id="discussion-ai-help"><small>{t('Select 1–20 approved sources to ask BuyerOS. AI may be unavailable; your question stays here.')}</small></p>}
+        <div role="status" aria-live="polite">{asking?t('Checking selected sources…'):replyNotice?t(replyNotice):null}</div>
       </form>
       {!thread&&<section className="live-discussion-continue" aria-label={t('Continue working')}><h2>{t('Continue working')}</h2>
         {!threads.length?<p>{t('No discussions in this project yet.')}</p>:<ul>{threads.map(item=><li key={item.id}><button type="button" onClick={()=>navigate(`/app/discussions/${item.id}`)}><b>{item.title}</b><span>{t(templateForId(item.templateId).title)}</span><time dateTime={new Date(item.updatedAt).toISOString()}>{new Date(item.updatedAt).toLocaleString(locale)}</time></button></li>)}</ul>}

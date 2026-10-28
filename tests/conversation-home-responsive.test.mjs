@@ -41,12 +41,16 @@ for(const conversationHome of [false,true])test(`conversation navigation fits de
 // Exercise real rendering at every width, including long in-memory record contents.
 const {LiveDiscussion}=await import('../features/live/discussion.tsx');
 const sampleThread={id:'local-12345678-1234-4123-8123-123456789012',templateId:'understand-documents',title:'Review documents',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'A long question '+('字'.repeat(100))}],sources:[]};
+const aiProfile='a5000000-0000-4000-8000-000000000001',aiFact='a6000000-0000-4000-8000-000000000001';
+const aiCitation={id:`fact:profile:${aiProfile}:${aiFact}`,label:'Approved offer fact',locator:{surface:'profile',id:aiProfile}};
+sampleThread.sources=[{id:aiCitation.id,label:aiCitation.label}];
+sampleThread.messages.push({id:'m2',kind:'ai',status:'needs_review',fixture:true,text:'A cited fixture reply '+('字'.repeat(100)),citations:[aiCitation]});
 const sampleContext=[{title:'Documents & outputs',items:[{id:'document:d1',label:'Offer document',title:'source'.repeat(40)+'.pdf',status:'parsing',path:'/app/discover/edit?document=d1'}]},{title:'Offer facts',items:[{id:'fact:f1',label:'Candidate offer fact',title:'product',detail:'內容'.repeat(250),status:'candidate',path:'/app/discover/edit'}]}];
 for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in ${locale}`,async()=>{
  const {liveZh}=await import('../features/live/locale.ts');const t=value=>locale==='zh-HK'?(liveZh[value]||value):value;
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
  try{
-  const panel=LiveDiscussion({t,locale,thread:sampleThread,threads:[sampleThread],value:'',notice:'',context:sampleContext,navigate:()=>{},onTemplate:()=>{},onChange:()=>{},onSend:()=>{},onSource:()=>{},onRefresh:()=>{}});
+  const panel=LiveDiscussion({t,locale,thread:sampleThread,threads:[sampleThread],value:'Question',notice:'',context:sampleContext,navigate:()=>{},onTemplate:()=>{},onChange:()=>{},onSend:()=>{},onSource:()=>{},onRefresh:()=>{},onAsk:()=>{},canAsk:true});
   const nav=LiveNavigation({t,navigate:()=>{},pathname:'/app',authorized:true,projectKnown:true,canEdit:true,projectActive:true,canCreate:true,conversationHome:true});
   const frame=LiveFrame({t,pathname:'/app',navigation:nav,footer:null,header:null,children:panel,conversationHome:true});
   const page=await browser.newPage();await page.setContent('<style>'+css+readFileSync('features/live/discussion.css','utf8')+'</style>'+renderToStaticMarkup(frame));
@@ -54,8 +58,75 @@ for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in 
    await page.setViewportSize({width,height:1000});const actual=await page.evaluate(()=>document.documentElement.scrollWidth);
    assert.ok(actual<=width,`${locale} thread viewport ${width}px overflows to ${actual}px`);
    assert.equal(await page.getByRole('textbox').count(),1);assert.equal(await page.getByRole('checkbox').count(),2);
+   assert.equal(await page.getByRole('button',{name:t('Ask BuyerOS'),exact:true}).isEnabled(),true);
+   assert.equal(await page.getByLabel(t('Reply citations')).getByRole('button').count(),1);
   }
  }finally{await browser.close();}
+});
+
+test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF network boundary',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry,profileId,factId,documentId}=await import('./conversation-browser-fixture.mjs');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-ai-browser-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},
+  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),posts=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const ref={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact',locator:{surface:'profile',id:profileId}};
+  const documentRef={id:`document:${documentId}`,label:'Offer document',locator:{surface:'document',id:documentId}};
+  const reply={status:'needs_review',fixture:true,text:'Review the cited approved source before deciding.',citations:[ref,documentRef]};
+  let mode='ok',release,started;let received=new Promise(resolve=>started=resolve);
+  await page.route('**/v1/**',async route=>{
+   const req=route.request();
+   if(req.method()==='POST'){
+    posts.push({path:new URL(req.url()).pathname,body:req.postDataJSON()});started();
+    if(mode==='held')await new Promise(resolve=>release=resolve);
+    if(mode==='unavailable')return route.fulfill({status:503,json:{code:'CONVERSATION_MODEL_UNAVAILABLE',message:'private error'}});
+    if(mode==='source')return route.fulfill({status:422,json:{code:'CONVERSATION_SOURCE_UNAVAILABLE'}});
+    return route.fulfill({json:{data:mode==='invalid'?{...reply,tool_calls:[{name:'research'}]}:reply,data_mode:'live',request_id:'stage2-fixture'}});
+   }
+   const data=contextResponse(new URL(req.url()));return route.fulfill({status:data?200:403,json:{data,data_mode:'live',request_id:'stage2-fixture'}});
+  });
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.getByRole('textbox').fill('Start a local discussion');
+  assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);
+  await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByLabel('Discussion messages',{exact:true}).waitFor();
+  await page.getByRole('checkbox').first().click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[0].checked);
+  await page.getByRole('checkbox').nth(1).click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[1].checked);
+  await page.getByRole('textbox').fill('What should I review?');
+  const ask=()=>page.getByRole('button',{name:'Ask BuyerOS',exact:true});
+  await ask().focus();await page.keyboard.press('Enter');
+  await page.getByText(reply.text,{exact:true}).waitFor();assert.equal(posts.length,1);
+  assert.deepEqual(posts[0].body,{question:'What should I review?',source_ids:[documentRef.id,ref.id],language:'en'});
+  assert.ok(posts.every(row=>row.path.endsWith('/conversation-reply')));
+  let stored=await page.evaluate(()=>Object.values(localStorage).join(''));
+  assert.doesNotMatch(stored,/PRIVATE_FACT_CONTENT|project-evidence.pdf|tool_calls/);
+  await page.reload();await page.getByText(reply.text,{exact:true}).waitFor();
+  const citations=page.getByLabel('Reply citations');
+  await citations.getByRole('button',{name:'Approved offer fact',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.lastDestination),`/app/overview?profile=${profileId}&workspace=a1000000-0000-4000-8000-000000000001&project=a2000000-0000-4000-8000-000000000001`);
+  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
+  await page.getByLabel('Reply citations').getByRole('button',{name:'Offer document',exact:true}).click();
+  assert.match(await page.evaluate(()=>window.lastDestination),new RegExp(`/app/discover/edit\\?document=${documentId}`));
+  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
+  for(const state of ['unavailable','source','invalid']){
+   mode=state;await page.getByRole('textbox').fill('Keep this question');await ask().click();
+   await page.getByText(state==='unavailable'?'BuyerOS AI is unavailable. Your question is still here; you can use the guided step or try later.':state==='source'?'Selected sources are unavailable or not approved. Refresh project context and review your selection.':'The AI reply could not be verified. Review the selected sources and try again.',{exact:true}).waitFor();
+   assert.equal(await page.getByRole('textbox').inputValue(),'Keep this question');
+  }
+  const before=await page.evaluate(()=>Object.values(localStorage).join(''));
+  mode='held';received=new Promise(resolve=>started=resolve);await ask().click();await received;
+  await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();release();
+  await ask().waitFor();assert.equal(await ask().isDisabled(),true);
+  assert.equal(await page.evaluate(()=>Object.values(localStorage).join('')),before);
+  const postCount=posts.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');
+  await page.getByRole('button',{name:'Operations',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).count(),0);assert.equal(posts.length,postCount);
+  assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
 
 test('hydrated Chromium continuity, scope isolation and local actions make zero requests',async t=>{

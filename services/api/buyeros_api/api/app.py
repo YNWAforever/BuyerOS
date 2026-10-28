@@ -59,6 +59,8 @@ async def _lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    import os
+
     app = FastAPI(title="FIMMICK BuyerOS domain API", version="0.1.0", lifespan=_lifespan)
     app.add_exception_handler(ApiError, error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
@@ -102,6 +104,9 @@ def create_app() -> FastAPI:
     app.include_router(quote_detail_router)
     app.include_router(unimplemented_router)
     app.include_router(worker_internal_router)
+    if os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") == "true":
+        from .routes.conversation import router as conversation_router
+        app.include_router(conversation_router)
 
     # This runs inside request correlation and outside route dependencies.
     app.add_middleware(WritePreconditionMiddleware)

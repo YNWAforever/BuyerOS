@@ -68,6 +68,8 @@ export interface LiveRequest {
   chunkSha256?: string;
   idempotencyKey?: string;
   ifMatch?: string;
+  /** Optional flag-gated endpoint: a missing route is local unavailability, not lost workspace access. */
+  missingIsUnavailable?: boolean;
 }
 
 async function bodyOf(response: {json: () => Promise<unknown>}): Promise<Record<string, unknown>> {
@@ -154,7 +156,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
         return {text,contentType};
       });
     },
-    async request<T>({path, method = 'GET', token, scope, signal: parent, body, formData, rawBody, chunkSha256, idempotencyKey, ifMatch}: LiveRequest): Promise<T> {
+    async request<T>({path, method = 'GET', token, scope, signal: parent, body, formData, rawBody, chunkSha256, idempotencyKey, ifMatch, missingIsUnavailable=false}: LiveRequest): Promise<T> {
       const readOnly = ['GET','HEAD','OPTIONS'].includes(method.toUpperCase());
       // Mutations may use the API's 90-second execution budget. A timeout never replays them.
       return withinRequestLifetime(parent, readOnly ? 30_000 : 120_000, async signal => {
@@ -192,7 +194,7 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
           const message = typeof errorBody.message === 'string' ? errorBody.message : 'request failed';
           const headerId = response.headers?.get('X-Request-ID') || '';
           const requestId = typeof errorBody.request_id === 'string' ? errorBody.request_id : headerId;
-          notifyAccessDenied(path, scope, response.status, signal);
+          if(!missingIsUnavailable||response.status!==404)notifyAccessDenied(path, scope, response.status, signal);
           throw new LiveError(message, code, response.status, requestId, errorBody.retryable === true, response.headers?.get('Retry-After') || undefined);
         }
         if (response.status === 204) return undefined as T;

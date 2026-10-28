@@ -1,10 +1,11 @@
 'use client';
+import {exactFields,validGroundedReply,type GroundedReply} from './discussion-citations';
 
 export type DiscussionScope = {actor: string; workspace: string; project: string};
 export type SelectedSource = {id: string; label: string};
 export type LocalThread = {
   id: string; templateId: string; title: string; createdAt: number; updatedAt: number;
-  messages: {id: string; text: string}[]; sources: SelectedSource[];
+  messages: ({id: string; text: string} | ({id:string;kind:'ai'} & GroundedReply))[]; sources: SelectedSource[];
 };
 export type DiscussionSnapshot = {threads: LocalThread[]; notice: string};
 
@@ -55,7 +56,9 @@ function validThread(value: unknown): value is LocalThread {
     || !Array.isArray(value.sources) || value.sources.length > 100) return false;
   const messageIds = new Set<string>(), sourceIds = new Set<string>();
   return value.messages.every(message => {
-    if (!fields(message, ['id', 'text']) || typeof message.id !== 'string' || !localId.test(message.id)
+    const ai=exactFields(message,['id','kind','status','text','citations','fixture'])&&message.kind==='ai'&&
+      validGroundedReply({status:message.status,text:message.text,citations:message.citations,fixture:message.fixture});
+    if ((!fields(message, ['id', 'text'])&&!ai) || typeof message.id !== 'string' || !localId.test(message.id)
       || !validText(message.text) || messageIds.has(message.id)) return false;
     messageIds.add(message.id); return true;
   }) && value.sources.every(source => {
@@ -68,7 +71,10 @@ function byteLength(value: string): number {
 }
 function freezeSnapshot(snapshot: DiscussionSnapshot): DiscussionSnapshot {
   for (const thread of snapshot.threads) {
-    thread.messages.forEach(Object.freeze);
+    thread.messages.forEach(message=>{
+      if('kind' in message){message.citations.forEach(ref=>{Object.freeze(ref.locator);Object.freeze(ref);});Object.freeze(message.citations);}
+      Object.freeze(message);
+    });
     thread.sources.forEach(Object.freeze);
     Object.freeze(thread.messages); Object.freeze(thread.sources); Object.freeze(thread);
   }
@@ -240,5 +246,20 @@ export class DiscussionStore {
     if (selected) sources.push({id: source.id, label: source.label});
     const updated: LocalThread = {...thread, updatedAt: now, sources};
     return this.save(this.snapshot.threads.map(row => row.id === id ? updated : row));
+  }
+
+  /** Save the question and verified fixture response together under the existing scope lock. */
+  appendReply(id:string,text:string,reply:GroundedReply,sourceIds:string[]):boolean{
+    if(!this.active)return false;
+    const thread=this.snapshot.threads.find(row=>row.id===id);
+    if(!thread||!validText(text)||!validGroundedReply(reply)||
+      JSON.stringify(thread.sources.map(row=>row.id))!==JSON.stringify(sourceIds)||
+      reply.citations.some(ref=>!sourceIds.includes(ref.id)))return false;
+    if(thread.messages.length>98)return this.refuse('The local limit of 100 messages in this discussion is full. Existing messages have been kept.');
+    const now=this.nextTime();if(now===null)return false;
+    const ai={id:`local-${globalThis.crypto.randomUUID()}`,kind:'ai' as const,...reply,
+      citations:reply.citations.map(ref=>({...ref,locator:{...ref.locator}}))};
+    const updated:LocalThread={...thread,updatedAt:now,messages:[...thread.messages,{id:`local-${globalThis.crypto.randomUUID()}`,text},ai]};
+    return this.save(this.snapshot.threads.map(row=>row.id===id?updated:row));
   }
 }

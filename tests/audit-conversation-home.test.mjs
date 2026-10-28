@@ -161,6 +161,79 @@ test('OFF controller never consults session, storage or context',async()=>{
  assert.equal(LiveConversation({enabled:false,session,client:null,pathname:'/app',locale:'en',t:x=>x,navigate(){},canViewOffer:true,canViewResults:true}),null);
 });
 
+const stage2Profile='a5000000-0000-4000-8000-000000000001',stage2Fact='a6000000-0000-4000-8000-000000000001';
+const stage2Ref={id:`fact:profile:${stage2Profile}:${stage2Fact}`,label:'Approved offer fact',locator:{surface:'profile',id:stage2Profile}};
+const stage2Reply={text:'Review the cited approved source.',status:'needs_review',fixture:true,citations:[stage2Ref]};
+test('Stage 2 saves and restores only verified AI text and citation refs, under existing caps',async()=>{
+ const {DiscussionStore}=await import('../services/live/discussions.ts');
+ const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
+ const scope={actor:'a',workspace:'w',project:'p'},store=new DiscussionStore(true,scope,storage);
+ const thread=store.create('custom','Review my offer');store.select(thread.id,{id:stage2Ref.id,label:stage2Ref.label},true);
+ assert.equal(store.appendReply(thread.id,'What is approved?',stage2Reply,[stage2Ref.id]),true);
+ const restored=new DiscussionStore(true,scope,storage).getSnapshot().threads[0];
+ assert.equal(restored.messages.length,3);assert.deepEqual(restored.messages[2].citations,[stage2Ref]);
+ assert.equal(restored.messages[2].kind,'ai');assert.equal(Object.isFrozen(restored.messages[2].citations[0].locator),true);
+ assert.equal(store.appendReply(thread.id,'stale selection',stage2Reply,[]),false);
+ for(const extra of [{body:'PRIVATE_BODY'},{value:'PRIVATE_FACT'},{url:'https://foreign.invalid'}]){
+  const bad={...stage2Reply,citations:[{...stage2Ref,...extra}]};assert.equal(store.appendReply(thread.id,'bad',bad,[stage2Ref.id]),false);
+ }
+ assert.equal([...data.values()].some(raw=>/PRIVATE_BODY|PRIVATE_FACT|foreign.invalid/.test(raw)),false);
+ const key=[...data.keys()][0],saved=data.get(key),badSaved=JSON.parse(saved);
+ badSaved.threads[0].messages[2].citations[0].locator.body='PRIVATE_BODY';data.set(key,JSON.stringify(badSaved));
+ assert.equal(new DiscussionStore(true,scope,storage).getSnapshot().threads.length,0);data.set(key,saved);
+ for(let i=3;i<99;i++)assert.equal(store.append(thread.id,'Local note'),true);
+ assert.equal(store.appendReply(thread.id,'over message cap',stage2Reply,[stage2Ref.id]),false);
+ assert.equal(store.getSnapshot().threads[0].messages.length,99);
+});
+
+test('Stage 2 sends only selected IDs and question; OFF, empty, unavailable and stale scope fail closed',async()=>{
+ const {askBuyerOS,replyNotices}=await import('../services/live/conversation-reply.ts');
+ const {SessionScope}=await import('../services/live/session.ts');
+ const {LiveError,LiveCancelled}=await import('../services/live/client.ts');
+ const session=new SessionScope({mode:'live',actor:'a',workspace:'w',project:'p'});session.setToken('fixture');
+ const requests=[],client={request:async request=>{requests.push(request);return stage2Reply;}};
+ const options={enabled:true,question:'What should I review?',sources:[{id:stage2Ref.id,label:stage2Ref.label}],locale:'en',signal:new AbortController().signal};
+ for(const bad of [{enabled:false},{sources:[]}])await assert.rejects(askBuyerOS(client,session,{...options,...bad}));
+ assert.equal(requests.length,0);assert.deepEqual(await askBuyerOS(client,session,options),stage2Reply);
+ assert.equal(requests[0].method,'POST');assert.match(requests[0].path,/\/conversation-reply$/);
+ assert.deepEqual(requests[0].body,{question:options.question,source_ids:[stage2Ref.id],language:'en'});
+ await assert.rejects(askBuyerOS({request:async()=>{throw new LiveError('raw secret','CONVERSATION_MODEL_UNAVAILABLE',503,'',false);}},session,options),{message:replyNotices.unavailable});
+ for(const candidate of [{...stage2Reply,tool_calls:[{}]},{...stage2Reply,citations:[]},{...stage2Reply,citations:[{...stage2Ref,id:stage2Ref.id.replace(stage2Fact,stage2Profile)}]},{...stage2Reply,citations:[{...stage2Ref,locator:{surface:'document',id:stage2Profile}}]}]){
+  await assert.rejects(askBuyerOS({request:async()=>candidate},session,options),{message:replyNotices.invalid});
+ }
+ let resolve;const pending=askBuyerOS({request:()=>new Promise(done=>resolve=done)},session,options);
+ session.next({project:'other'});resolve(stage2Reply);await assert.rejects(pending,LiveCancelled);
+});
+
+test('Stage 2 optional missing API stays non-blocking and genuine permission denial retains the scope guard',async()=>{
+ const {askBuyerOS,replyNotices}=await import('../services/live/conversation-reply.ts');
+ const {SessionScope}=await import('../services/live/session.ts');
+ const {createLiveClient}=await import('../services/live/client.ts');
+ const session=new SessionScope({mode:'live',actor:'a',workspace:'w',project:'p'});session.setToken('fixture');
+ let status=404;const client=createLiveClient(async()=>new Response(JSON.stringify({code:'NOT_FOUND',message:'unavailable'}),{status}));
+ const denied=[];client.subscribeAccessDenied(event=>denied.push(event));
+ const options={enabled:true,question:'Review?',sources:[{id:stage2Ref.id,label:stage2Ref.label}],locale:'en',signal:new AbortController().signal};
+ await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.unavailable});assert.equal(denied.length,0);
+ status=403;await assert.rejects(askBuyerOS(client,session,options),{message:replyNotices.sources});assert.equal(denied.length,1);
+ status=404;await assert.rejects(client.request({path:'/v1/workspaces/w/projects/p',scope:session.identity(),token:session.token()}));assert.equal(denied.length,2);
+});
+
+test('Stage 2 citations use existing guarded navigation, and empty sources disable AI ask',async()=>{
+ const {LiveDiscussion}=await import('../features/live/discussion.tsx');
+ const routes=[],props={t:x=>x,locale:'en',thread:null,threads:[],value:'A question',notice:'',context:[],navigate:path=>routes.push(path),onTemplate(){},onChange(){},onSend(){},onSource(){},onRefresh(){},onAsk(){},canAsk:true};
+ assert.equal(button(LiveDiscussion(props),'Ask BuyerOS').props.disabled,true);
+ const thread={id:'local-12345678-1234-4123-8123-123456789012',templateId:'custom',title:'Discussion',sources:[{id:stage2Ref.id,label:stage2Ref.label}],messages:[{id:'ai',kind:'ai',...stage2Reply}]};
+ const tree=LiveDiscussion({...props,thread});
+ assert.equal(button(tree,'Ask BuyerOS').props.disabled,false);button(tree,'Approved offer fact').props.onClick();
+ assert.equal(routes[0],`/app/overview?profile=${stage2Profile}`);
+ const html=renderToStaticMarkup(tree);assert.match(html,/AI reply · needs review/);assert.match(html,/Fixture reply · no live model/);
+ assert.doesNotMatch(html,/Guided step · no AI/);
+ const {liveZh}=await import('../features/live/locale.ts');const {replyNotices}=await import('../services/live/conversation-reply.ts');
+ for(const notice of Object.values(replyNotices))assert.ok(liveZh[notice]);
+ const backend=readFileSync('services/api/buyeros_api/api/routes/conversation.py','utf8')+readFileSync('services/api/buyeros_api/services/conversation_reply.py','utf8');
+ assert.doesNotMatch(backend,/execute_external|admit_run|quote_lookup|confirm_lookup|httpx|LiveFitDomainRunner|AsyncJob\(/);
+});
+
 test('local discussion selection replaces its deep-link without invoking route transport',async()=>{
  const {navigateLocalDiscussion}=await import('../features/live/conversation-home.ts');
  const entries=[],history={state:{existing:'routing metadata'},replaceState:(...args)=>entries.push(args)};

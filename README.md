@@ -88,7 +88,7 @@ historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
 
-## Conversation home — Stage 1 Preview
+## Conversation home — Stage 2 Preview
 
 `NEXT_PUBLIC_CONVERSATION_HOME === 'true'` opts the **live** workspace into
 Conversation home. Unset (default), `false`, or any other value retains the
@@ -126,17 +126,44 @@ only with the authoritative active reviewer-approved current profile. Document
 candidates always need reviewer approval. Offer context follows the existing
 active-project/operator Offer gate; other retained surfaces keep their own gates.
 
-Every BuyerOS reply is deterministic static **Guided step · no AI** copy in
-English and zh-HK. Templates, Send, source selection and thread navigation make
-no network calls. Project context uses existing GETs only; refreshing the page
+Templates and Send retain deterministic **Guided step · no AI** copy in English
+and zh-HK. These actions, source selection and thread navigation make no network
+calls. Project context uses existing GETs only; refreshing the page
 or changing validated scope may reload context. Offer document links focus the
 existing document row, run links open the existing run, Drafts and Saved results
 remain links to existing work. Overview stays at `/app/overview`, with Offer,
 Research runs, Buyers, Drafts, Results, Settings and Operations retained.
 
-Out of scope: AI/LLM replies or citations; research starts, providers or paid
-calls from chat; enrichment/contact quotes, approval, exports or sending; backend
-or schema changes; server-side discussions, sharing/ACL; SME/GSC/Firecrawl/
+Stage 2 follows roadmap #38: **Ask BuyerOS** is a separate explicit action for
+1–20 selected sources. It sends only the current question, source IDs and language
+through SessionScope. The flag-gated API re-resolves membership, active project,
+approved active/current profile and document retention/provenance under tenant RLS.
+Only selected approved facts or a selected document's reviewer-approved excerpts
+qualify; extraction candidates, model inferences, runs/results, missing/foreign or
+partially unavailable selections fail closed. No source bodies or history travel
+from the browser. Source checks never create a research, quote or enrichment job.
+
+**Live conversation AI remains unavailable.** Existing model receipts/reservations
+are bound to research runs/buyers and cannot fund this operation. The API returns
+`CONVERSATION_MODEL_UNAVAILABLE` (503) after source checks; it has no provider call.
+There is no fixture environment switch or request field: only tests inject fixture
+responses. Fixture replies are labelled **AI reply · needs review** and
+**Fixture reply · no live model**, never approved automatically. This is the
+brief's fixture/unavailable fallback until a separately reviewed atomic budget
+and receipt path exists. Preview stays true, Production stays unset; no environment
+values are changed. The API registers this route only when its same exact flag is
+`true`; an absent route also produces the honest unavailable client state.
+
+Verified replies store only bounded message text plus generic citation IDs,
+labels and code-owned profile/document locators. They restore after refresh under
+the existing local scope key and limits. Unknown fields, URLs, unselected citations,
+tool calls/refusals and malformed output are rejected. Citation buttons use the
+existing guarded navigation. Scope, route, source or permission changes discard
+in-flight replies. Unavailable/error states keep the question in the composer.
+
+Out of scope: live model admission; research starts, providers or paid calls from
+chat (Stage 2b/billing Ask); enrichment/contact quotes, approval, exports or sending;
+schema changes; server-side discussions, sharing/ACL (Stage 3); SME/GSC/Firecrawl/
 DataForSEO, CRM/shared-library connectors or OAuth; Production enablement,
 deployment/promotion, merging, or removal/restyling of retained work surfaces.
 
@@ -145,3 +172,5 @@ Checks: `node --test tests/audit-conversation-home.test.mjs`,
 local Chromium), `pnpm test:core`, `pnpm exec tsc --noEmit`, `pnpm lint`,
 `pnpm build`, and
 `NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.
+API negatives: `cd services/api && uv run --frozen pytest tests/test_conversation_reply.py tests/test_conversation_reply_db.py`
+(database cases require the existing disposable PostgreSQL fixture).

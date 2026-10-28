@@ -22,6 +22,7 @@
 .live-discussion-composer{margin:0 22px 22px;padding:14px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-control)}
 .live-discussion-composer textarea{display:block;resize:none;width:100%;margin:8px 0;padding:10px}
 .live-discussion-composer>div{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.live-discussion-composer>div{flex-wrap:wrap}
 .live-discussion-composer small{color:var(--buyeros-copy);font-size:12px}
 @media(max-width:1200px){.live-discussion{grid-template-columns:minmax(0,1fr)}.live-discussion-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
 @media(max-width:1023px){.live-nav-retained{flex-direction:row;flex-wrap:wrap;min-width:0;flex-shrink:1;border-top:0;margin-top:0;gap:2px}}
