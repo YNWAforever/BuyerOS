@@ -161,9 +161,9 @@ test('OFF controller never consults session, storage or context',async()=>{
  assert.equal(LiveConversation({enabled:false,session,client:null,pathname:'/app',locale:'en',t:x=>x,navigate(){},canViewOffer:true,canViewResults:true}),null);
 });
 
-test('local discussion navigation updates browser history without invoking route transport',async()=>{
+test('local discussion selection replaces its deep-link without invoking route transport',async()=>{
  const {navigateLocalDiscussion}=await import('../features/live/conversation-home.ts');
- const entries=[],history={state:{existing:'routing metadata'},pushState:(...args)=>entries.push(args)};
+ const entries=[],history={state:{existing:'routing metadata'},replaceState:(...args)=>entries.push(args)};
  const target=new URL('https://fixture.invalid/app/discussions/local-12345678-1234-4123-8123-123456789012?workspace=w&project=p');
  assert.equal(navigateLocalDiscussion('/app',target,true,history),true);
  assert.deepEqual(entries,[[history.state,'','/app/discussions/local-12345678-1234-4123-8123-123456789012?workspace=w&project=p']]);

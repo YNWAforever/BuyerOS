@@ -40,10 +40,12 @@ export function discussionForPath(pathname: string, enabled: boolean): Discussio
   return undefined;
 }
 
-/** These routes share the mounted workspace; local thread moves need no RSC request. */
-export function navigateLocalDiscussion(from:string,target:URL,enabled:boolean,history:Pick<History,'state'|'pushState'>):boolean {
+/** These routes share the mounted workspace; selecting a thread needs no RSC request.
+ * Replace this selection's URL: Vinext preserves its traversal index for external
+ * History calls, so pushing here would break the retained dirty-draft Back guard. */
+export function navigateLocalDiscussion(from:string,target:URL,enabled:boolean,history:Pick<History,'state'|'replaceState'>):boolean {
   if(!discussionForPath(from,enabled)||!discussionForPath(target.pathname,enabled))return false;
-  history.pushState(history.state,'',target.pathname+target.search+target.hash);
+  history.replaceState(history.state,'',target.pathname+target.search+target.hash);
   return true;
 }
 

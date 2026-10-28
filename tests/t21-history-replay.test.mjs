@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {loadModule} from './ts-loader.mjs';
 const {SessionScope}=await loadModule('services/live/session.ts');
 const {bindHistoryTransitions}=await loadModule('services/live/history-transition.ts');
+const {navigateLocalDiscussion}=await loadModule('features/live/conversation-home.ts');
+const {createExternalHistoryStatePreservingMetadata}=await import('../node_modules/vinext/dist/server/app-history-state.js');
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 function environment(){
  const source={key:'source-key',url:'https://app.example.test/app/outreach?workspace=A&project=P',index:2};
@@ -111,3 +113,45 @@ for(const proceed of [false,true]){
    }finally{dispose();}
  });
 }
+
+for(const proceed of [false,true])test(`local discussion selections preserve the exact WebKit history target on ${proceed?'approval':'Cancel'}`,async()=>{
+ const browser=new EventTarget(),origin='https://app.example.test';
+ const entries=[{url:origin+'/app/overview',state:{__vinext_historyIndex:0}},
+   {url:origin+'/app',state:{__vinext_historyIndex:1}}];
+ browser.navigator={vendor:'Apple Computer, Inc.',userAgent:'fixture AppleWebKit/owned'};
+ browser.location={origin,href:entries[1].url,pathname:'/app'};
+ class OwnedHistory{
+   cursor=1;
+   get length(){return entries.length;}
+   get state(){return entries[this.cursor].state;}
+   sync(){browser.location.href=entries[this.cursor].url;browser.location.pathname=new URL(browser.location.href).pathname;}
+   replaceState(state,unused,url){entries[this.cursor]={state,url:url?new URL(url,browser.location.href).href:entries[this.cursor].url};this.sync();}
+   pushState(state,unused,url){entries.splice(this.cursor+1);entries.push({state,url:new URL(url,browser.location.href).href});this.cursor++;this.sync();}
+   go(delta){this.cursor+=delta;assert.ok(this.cursor>=0&&this.cursor<this.length);this.sync();
+     const event=new Event('popstate');Object.defineProperty(event,'state',{value:this.state});browser.dispatchEvent(event);}
+ }
+ const history=browser.history=new OwnedHistory();
+ // Use the pinned framework's real external History metadata handling. Full
+ // router commits use its captured native methods and advance a separate index.
+ for(const method of ['pushState','replaceState'])history[method]=function(state,unused,url){
+   OwnedHistory.prototype[method].call(this,createExternalHistoryStatePreservingMetadata(state,this.state),unused,url);
+ };
+ const session=new SessionScope({mode:'live'}),navigated=[];
+ const dispose=bindHistoryTransitions(session,browser,path=>{navigated.push(path);history.replaceState(history.state,'',path);});
+ let decide;
+ try{
+   const first='/app/discussions/local-00000000-0000-4000-8000-000000000001',second='/app/discussions/local-00000000-0000-4000-8000-000000000002';
+   assert.equal(navigateLocalDiscussion('/app',new URL(first,origin),true,history),true);
+   assert.equal(navigateLocalDiscussion(first,new URL(second,origin),true,history),true);
+   OwnedHistory.prototype.pushState.call(history,{__vinext_historyIndex:2},'','/app/outreach');
+   browser.dispatchEvent(new Event('buyeros:routecommitted'));
+   const source=browser.location.href,target=entries[history.cursor-2].url;
+   const decision=new Promise(resolve=>{decide=resolve;});
+   session.registerTransitionGuard(async next=>{const accepted=await decision;if(accepted)await next();return accepted;});
+   history.go(-2);await settle();
+   assert.equal(browser.location.href,source,'restore the dirty editor before asking');
+   decide(proceed);await settle();
+   assert.equal(browser.location.href,proceed?target:source,'replay the exact requested history entry');
+   assert.equal(navigated.length,proceed?1:0);
+ }finally{decide?.(false);dispose();}
+});

@@ -58,18 +58,28 @@ for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in 
  }finally{await browser.close();}
 });
 
-test('hydrated Chromium continuity, scope isolation and local actions make zero requests',async()=>{
- const {createServer}=await import('vite');const {mkdirSync,writeFileSync,rmSync}=await import('node:fs');
+test('hydrated Chromium continuity, scope isolation and local actions make zero requests',async t=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
  const {contextResponse,browserEntry,project,workspace,documentId,runId}=await import('./conversation-browser-fixture.mjs');
- const fixtureDir='work/conversation-browser';mkdirSync(fixtureDir,{recursive:true});writeFileSync(fixtureDir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,resolve:{alias:{'@':root}},server:{host:'127.0.0.1',port:0},appType:'custom'});
- server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head></head><body><div id="root"></div><script type="module" src="/work/conversation-browser/entry.jsx"></script></body></html>');}else next();});
+ mkdirSync('work',{recursive:true});const fixtureDir=mkdtempSync('work/conversation-browser-');writeFileSync(fixtureDir+'/entry.jsx',browserEntry);
+ // This custom HTML entry is invisible to Vite's default HTML scanner. Discovering
+ // React/lucide on demand can invalidate an in-flight module with a 504 before
+ // React mounts. Prebundle the complete dependency set; use a cold, private cache
+ // so prior app builds or test runs cannot hide that startup regression.
+ const server=await createServer({configFile:false,root,cacheDir:resolve(fixtureDir,'node_modules/.vite'),resolve:{alias:{'@':root}},
+  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},
+  server:{host:'127.0.0.1',port:0},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head></head><body><div id="root"></div><script type="module" src="/'+fixtureDir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();const origin=server.resolvedUrls.local[0];
  let browser;
  try{
   browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
   let holdReads=false;const heldReads=[];
-  const page=await browser.newPage();page.setDefaultTimeout(30000);const errors=[],requests=[];page.on('console',message=>{if(message.type()==='error')writeFileSync('work/conversation-browser-console.log',message.text()+'\n',{flag:'a'});});page.on('requestfailed',request=>writeFileSync('work/conversation-browser-console.log',request.url()+' '+request.failure()?.errorText+'\n',{flag:'a'}));page.on('pageerror',error=>{errors.push(error.message);writeFileSync('work/conversation-browser-errors.json',JSON.stringify(errors));});
+  const page=await browser.newPage();page.setDefaultTimeout(30000);const errors=[],requests=[],moduleFailures=[];
+  page.on('console',message=>{if(message.type()==='error')t.diagnostic('Browser console: '+message.text());});
+  page.on('requestfailed',request=>{const failure=request.url()+' '+request.failure()?.errorText;t.diagnostic(failure);if(request.resourceType()==='script')moduleFailures.push(failure);});
+  page.on('response',response=>{if(response.request().resourceType()==='script'&&!response.ok()){const failure=response.status()+' '+response.url();moduleFailures.push(failure);t.diagnostic(failure);}});
+  page.on('pageerror',error=>{errors.push(error.message);t.diagnostic(error.stack??error.message);});
   await page.route('**/v1/**',async route=>{
    if(holdReads)await new Promise(resolve=>heldReads.push(resolve));
    const req=route.request();requests.push({method:req.method(),url:req.url()});const data=contextResponse(new URL(req.url()));
@@ -119,7 +129,7 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   assert.equal(await page.getByText('My next local step',{exact:true}).count(),0);
   await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Second workspace',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
-  assert.deepEqual(errors,[]);writeFileSync('work/conversation-browser-network.json',JSON.stringify({initialReads,requests,errors},null,2));
+  assert.deepEqual(errors,[]);assert.deepEqual(moduleFailures,[],'fixture modules must load cleanly from a cold cache');writeFileSync('work/conversation-browser-network.json',JSON.stringify({initialReads,requests,errors},null,2));
   // Two real tabs begin from the same snapshot. The scope lock makes one save
   // win and the stale writer must keep its composer instead of erasing data.
   const tabs=await browser.newContext(),tabRequests=[];
