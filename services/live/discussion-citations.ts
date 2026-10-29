@@ -1,5 +1,5 @@
 /** Only code-owned locators, never model-provided URLs or source bodies. */
-export type CitationRef = {id:string;label:'Approved offer fact'|'Offer document';locator:{surface:'profile'|'document';id:string}};
+export type CitationRef = {id:string;label:'Approved offer fact'|'Offer document'|'Google Drive item';locator:{surface:'profile'|'document'|'drive';id:string}};
 export type GroundedReply = {status:'needs_review';text:string;citations:CitationRef[];fixture:boolean};
 const uuid='[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 export function exactFields(value:unknown,keys:readonly string[]):value is Record<string,unknown>{
@@ -11,6 +11,7 @@ export function exactFields(value:unknown,keys:readonly string[]):value is Recor
 export function validCitation(value:unknown):value is CitationRef{
   if(!exactFields(value,['id','label','locator'])||typeof value.id!=='string'||
     !exactFields(value.locator,['surface','id'])||typeof value.locator.id!=='string')return false;
+  if(/^drive:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}:[A-Za-z0-9_-]{1,128}$/.test(value.id))return value.label==='Google Drive item'&&value.locator.surface==='drive'&&value.locator.id===value.id;
   const document=new RegExp(`^document:(${uuid})$`).exec(value.id);
   const fact=new RegExp(`^fact:profile:(${uuid}):${uuid}$`).exec(value.id);
   return document?value.label==='Offer document'&&value.locator.surface==='document'&&value.locator.id===document[1]:
@@ -24,6 +25,7 @@ export function validGroundedReply(value:unknown):value is GroundedReply{
 }
 export function citationPath(ref:CitationRef):string{
   if(!validCitation(ref))throw new Error('Invalid citation');
+  if(ref.locator.surface==='drive')return '/app#google-drive';
   return ref.locator.surface==='profile'?`/app/overview?profile=${encodeURIComponent(ref.locator.id)}`:
     `/app/discover/edit?document=${encodeURIComponent(ref.locator.id)}#offer-documents`;
 }

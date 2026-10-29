@@ -197,7 +197,7 @@ def test_purchasing_review_history_is_bounded_complete_and_scope_checked(lead_ap
     assert lead_api.get(path.replace(PROJECT, OTHER_PROJECT), headers=headers()).status_code == 404
 
 
-@pytest.mark.parametrize("head", ["0055_lead_workflow", "0056_policy_activation", "0058_conversation_threads", "9999_unreviewed"])
+@pytest.mark.parametrize("head", ["0055_lead_workflow", "0056_policy_activation", "0059_conversation_connections", "9999_unreviewed"])
 def test_missing_current_or_future_schema_never_bypasses_native_admission(lead_case, head):
     from buyeros_api.api.errors import ApiError
     from buyeros_api.db.session import tenant_session

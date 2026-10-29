@@ -10,7 +10,7 @@ from tests.test_api_projects_db import api
 from tests.test_exports_authorization_db import _buyer_body, _permit
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, _h, quote_case
 
-HEAD = "0058_conversation_threads"
+HEAD = "0059_conversation_connections"
 
 
 def _config():

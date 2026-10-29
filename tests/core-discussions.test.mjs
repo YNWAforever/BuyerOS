@@ -344,3 +344,44 @@ test('removing a local copy is explicit and still respects the stale-tab fence',
   const current=store(true,scope,port);assert.equal(current.remove(thread.id),true);
   assert.equal(store(true,scope,port).getSnapshot().threads.length,0);
 });
+
+test('Stage 4 Drive selections persist IDs and generic labels; Drive reply text stays ephemeral',()=>{
+  const port=storage(),own=store(true,scope,port),thread=own.create('custom','Review approved evidence');
+  const source={id:'drive:12345678-1234-4123-8123-123456789012:file_one',label:'Google Drive item'};
+  assert.equal(own.select(thread.id,source,true),true);
+  assert.deepEqual(store(true,scope,port).getSnapshot().threads[0].sources,[source]);
+  for(const bad of [{...source,label:'private.pdf'},{...source,text:'PRIVATE_DRIVE_BODY'},{...source,id:'drive:unscoped:file'}])assert.equal(own.select(thread.id,bad,true),false);
+  const ref={...source,locator:{surface:'drive',id:source.id}};
+  assert.equal(own.appendReply(thread.id,'Review?',{text:'PRIVATE_DRIVE_BODY',status:'needs_review',fixture:true,citations:[ref]},[source.id]),false);
+  assert.doesNotMatch(JSON.stringify([...port.entries]),/PRIVATE_DRIVE_BODY|private.pdf/);
+});
+
+test('Stage 4 connection adapter validates generic metadata and refuses expanded data classes',async()=>{
+  const {driveStatus}=await loadModule('services/live/conversation-connections.ts');
+  const status={version:1,connected:false,available:false,can_manage:false,folders:[],residency_preference:'HK',metadata_cache_seconds:0};
+  assert.deepEqual(driveStatus(status),status);
+  for(const bad of [{...status,token:'secret'},{...status,version:'1'},{...status,residency_preference:'US'},{...status,metadata_cache_seconds:3600},{...status,connected:true,folders:[{id:'one',label:'private.pdf'}]}])assert.throws(()=>driveStatus(bad));
+});
+
+test('Stage 4 connection intents reuse keys after uncertain writes and carry version preconditions',async()=>{
+  const {ConversationConnections}=await loadModule('services/live/conversation-connections.ts');
+  const {SessionScope}=await loadModule('services/live/session.ts');
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'ws',project:'project'});session.setToken('token');
+  const requests=[];let fail=true;
+  const status={version:2,connected:true,available:true,can_manage:true,folders:[],residency_preference:'HK',metadata_cache_seconds:0};
+  const client={async request(req){requests.push(req);if(fail)throw new Error('uncertain');return status;}};
+  const api=new ConversationConnections(client,session,true);
+  await assert.rejects(api.connect(1));fail=false;assert.deepEqual(await api.connect(1),status);
+  assert.equal(requests[0].idempotencyKey,requests[1].idempotencyKey);assert.equal(requests[0].ifMatch,'"1"');assert.deepEqual(requests[0].body,{});
+  await api.disconnect(2);assert.equal(requests.at(-1).method,'DELETE');assert.ok(requests.at(-1).idempotencyKey);
+});
+
+test('Stage 4 connection OFF and scope transitions reject requests and late data',async()=>{
+  const {ConversationConnections}=await loadModule('services/live/conversation-connections.ts');
+  const {SessionScope}=await loadModule('services/live/session.ts');
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'ws',project:'project'});session.setToken('token');
+  let calls=0,release;const client={request(){calls++;return new Promise(resolve=>release=resolve);}};
+  await assert.rejects(new ConversationConnections(client,session,false).status());assert.equal(calls,0);
+  const api=new ConversationConnections(client,session,true),pending=api.status();session.next({project:'other'});release({});
+  await assert.rejects(pending);await assert.rejects(api.connect(1));assert.equal(calls,1);
+});

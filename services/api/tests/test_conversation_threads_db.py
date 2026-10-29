@@ -109,14 +109,14 @@ def test_owner_cannot_be_grantee(thread_rows):
 
 def test_empty_downgrade_upgrade_repoints_all_receipt_fences(isolated_migrated):
     cfg=config()
-    command.downgrade(cfg,'-1')
+    command.downgrade(cfg,'0057_conversation_model')
     with psycopg.connect(isolated_migrated) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0057_conversation_model'
         assert all(db.execute('SELECT to_regclass(%s)',(table,)).fetchone()[0] is None for table in TABLES)
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
     command.upgrade(cfg,'head')
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0058_conversation_threads'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0059_conversation_connections'
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
 
 
@@ -126,8 +126,8 @@ def test_populated_downgrade_refuses_and_preserves_rls(isolated_seeded):
         db.execute("INSERT INTO users(id,issuer,subject) VALUES(%s,'thread-migration-fixture',%s)",(user,str(user)))
         db.execute("INSERT INTO conversation_threads(id,workspace_id,project_id,owner_user_id,template_id,title) VALUES(%s,%s,%s,%s,'custom','preserved')",(ident,WORKSPACE_A,PROJECT_A,user))
     with pytest.raises(RuntimeError,match='preserve populated'):
-        command.downgrade(config(),'-1')
+        command.downgrade(config(),'0057_conversation_model')
     with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT title FROM conversation_threads WHERE id=%s',(ident,)).fetchone()[0]=='preserved'
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0058_conversation_threads'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0059_conversation_connections'
         assert all(db.execute('SELECT relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(table,)).fetchone()[0] for table in TABLES)
