@@ -449,6 +449,11 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
   await composer.fill('Keep my accepted question');await ask.evaluate(button=>{button.click();button.click();});
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
   assert.equal(await composer.inputValue(),'Keep my accepted question');
+  if(runFailure===503){
+   await page.getByRole('button',{name:'Home',exact:true}).first().click();
+   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Synthetic recovery/}).click();
+   await composer.fill('Keep my accepted question');
+  }
   failNote=false;await ask.evaluate(button=>{button.click();button.click();});
   await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
   await page.getByText(answer,{exact:true}).waitFor();
@@ -462,6 +467,20 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
   failNote=false;await ask.click();
   await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,2,'a title save must not discard an accepted answer and charge a note retry again');
+  if(runFailure===503){
+   const questions=['First unsaved paid answer','Second unsaved paid answer'];
+   failNote=true;
+   for(const question of questions){
+    await composer.fill(question);await ask.click();
+    await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+   }
+   failNote=false;
+   for(const question of questions){
+    await composer.fill(question);await ask.click();
+    await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
+   }
+   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,4,'another accepted question must not replace earlier unsaved paid work');
+  }
   await page.getByRole('button',{name:'Propose research',exact:true}).click();
   await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();
   await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});

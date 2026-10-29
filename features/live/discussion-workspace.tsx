@@ -41,7 +41,7 @@ export function LiveConversation(props:Props){
 }
 function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOffer,canViewResults}:Props){
   const identity=session.identity(),{actor,workspace,project}=session.current();
-  const threadApi=useThreadApi(client,session);
+  const threadApi=useThreadApi(client,session,canViewOffer);
   const [workspaceThreads,setWorkspaceThreads]=useState<ServerSummary[]>([]),[workspaceNotice,setWorkspaceNotice]=useState(''),[workspaceTotal,setWorkspaceTotal]=useState(0);
   const listRead=useRef<Promise<Awaited<ReturnType<ConversationThreads['list']>>>|null>(null);
   async function moreThreads(){try{const page=await threadApi.list(workspaceThreads.length);if(session.isCurrent(identity)){setWorkspaceThreads(rows=>[...rows,...page.items]);setWorkspaceTotal(page.total);}}catch{setWorkspaceNotice('Workspace discussions are unavailable. Your unsaved text is still here.');}}

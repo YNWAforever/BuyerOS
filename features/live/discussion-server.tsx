@@ -13,23 +13,26 @@ import {ShareThread,WorkspaceBadge} from './discussion-sharing';
 import {ConversationResearch} from './conversation-research';
 import {LiveUnavailable} from './unavailable';
 
-export function useThreadApi(client:LiveClient,session:SessionScope){const identity=session.identity();return useMemo(()=>scopedThreadApi(client,session,identity),[client,session,identity]);}
+export function useThreadApi(client:LiveClient,session:SessionScope,canViewOffer:boolean){
+  const identity=session.identity(),api=useMemo(()=>scopedThreadApi(client,session,identity),[client,session,identity]);
+  useLayoutEffect(()=>{if(!canViewOffer)api.forgetReply();},[api,canViewOffer]);
+  return api;
+}
 type Props={client:LiveClient;session:SessionScope;id:string;t:(text:string)=>string;locale:'en'|'zh-HK';navigate:(path:string)=>void;canViewOffer:boolean;canViewResults:boolean};
 export function ServerConversation({client,session,id,t,locale,navigate,canViewOffer,canViewResults}:Props){
-  const api=useThreadApi(client,session),identity=session.identity();
+  const api=useThreadApi(client,session,canViewOffer),identity=session.identity();
   const [thread,setThread]=useState<ServerThread|null>(null),[notice,setNotice]=useState(''),[value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[busy,setBusy]=useState(false),[reply,setReply]=useState<GroundedReply|null>(null);
   const contextKey=JSON.stringify([identity,canViewOffer,canViewResults]);
   const context=contextRead?.key===contextKey?contextRead.sections:null;
   const [missing,setMissing]=useState(false),[stale,setStale]=useState(false),[title,setTitle]=useState(''),[unsavedRun,setUnsavedRun]=useState(false);
   const deleteDialog=useRef<HTMLDialogElement>(null),pending=useRef(false),mounted=useRef(true),focus=useRef<HTMLDivElement>(null),replyAbort=useRef<AbortController|null>(null);
-  const acceptedReply=useRef<{fingerprint:string;answer:GroundedReply}|null>(null);
   useEffect(()=>{mounted.current=true;focus.current?.focus();return()=>{mounted.current=false;replyAbort.current?.abort();};},[]);
-  useLayoutEffect(()=>()=>{replyAbort.current?.abort();acceptedReply.current=null;},[canViewOffer]);
+  useLayoutEffect(()=>()=>{replyAbort.current?.abort();},[canViewOffer]);
   const current=()=>mounted.current&&session.isCurrent(identity)&&!!session.token();
-  function failed(error:unknown){if(!current()||error instanceof LiveCancelled)return;const message=threadNotice(error);setNotice(message);if(message===threadNotices.stale)setStale(true);if(message===threadNotices.missing){setMissing(true);setThread(null);setReply(null);}}
+  function failed(error:unknown){if(!current()||error instanceof LiveCancelled)return;const message=threadNotice(error);setNotice(message);if(message===threadNotices.stale)setStale(true);if(message===threadNotices.missing){api.forgetReply(id);setMissing(true);setThread(null);setReply(null);}}
   useEffect(()=>{
     let active=true;
-    void api.get(id).then(row=>{if(active){setThread(row);setTitle(row.title);}}).catch(error=>{if(active&&!(error instanceof LiveCancelled)){setNotice(threadNotice(error));setMissing(threadNotice(error)===threadNotices.missing);}});
+    void api.get(id).then(row=>{if(active){if(row.access==='viewer')api.forgetReply(id);setThread(row);setTitle(row.title);}}).catch(error=>{if(active&&!(error instanceof LiveCancelled)){if(threadNotice(error)===threadNotices.missing)api.forgetReply(id);setNotice(threadNotice(error));setMissing(threadNotice(error)===threadNotices.missing);}});
     return()=>{active=false;};
   },[api,id]);
   async function refreshContext(){const sections=await loadDiscussionContext(client,session,{enabled:true,canViewOffer,canViewResults,signal:session.controller().signal});if(current())setContext({key:contextKey,sections});}
@@ -40,25 +43,25 @@ export function ServerConversation({client,session,id,t,locale,navigate,canViewO
     try{const result=await action();if(current()){setThread(result);setReply(null);}return current();}
     catch(error){failed(error);return false;}finally{pending.current=false;if(current())setBusy(false);}
   }
-  async function send(){if(!thread||thread.access==='viewer'||!value.trim())return;const input=value;if(await mutate(()=>api.append(thread,input))){if(acceptedReply.current?.fingerprint===JSON.stringify([input,JSON.stringify(thread.sources),locale]))acceptedReply.current=null;setValue(value=>value===input?'':value);}}
+  async function send(){if(!thread||thread.access==='viewer'||!value.trim())return;const input=value;if(await mutate(()=>api.append(thread,input))){api.forgetReply(id,JSON.stringify([input,JSON.stringify(thread.sources),locale]));setValue(value=>value===input?'':value);}}
   async function saveRun(run:RunReference){
     if(!thread)return;
     // Admission has already succeeded. A reference-save failure must not reopen it.
     if(!await mutate(()=>api.run(thread,run))&&current())setUnsavedRun(true);
   }
-  async function recheck(){const latest=await api.get(id);if(current())setThread(latest);if(latest.access==='viewer')throw new Error(threadNotices.stale);return latest;}
+  async function recheck(){const latest=await api.get(id);if(current())setThread(latest);if(latest.access==='viewer'){api.forgetReply(id);throw new Error(threadNotices.stale);}return latest;}
   async function ask(){
     if(!thread||thread.access==='viewer'||!canViewOffer||!value.trim()||pending.current||stale)return;
     const input=value,selection=JSON.stringify(thread.sources),fingerprint=JSON.stringify([input,selection,locale]),controller=new AbortController();replyAbort.current=controller;
     pending.current=true;setBusy(true);setNotice('');
     try{
       const latest=await recheck();if(latest.version!==thread.version)throw new Error(threadNotices.stale);
-      const answer=acceptedReply.current?.fingerprint===fingerprint?acceptedReply.current.answer:await askBuyerOS(client,session,{enabled:true,question:input,sources:thread.sources,locale,signal:controller.signal});
+      const answer=api.acceptedReply(id,fingerprint)??await askBuyerOS(client,session,{enabled:true,question:input,sources:thread.sources,locale,signal:controller.signal});
       if(!current()||controller.signal.aborted)return;
       // A successful paid reply survives a failed note save. Retry only the note.
-      acceptedReply.current={fingerprint,answer};
+      api.retainReply(id,fingerprint,answer);
       const updated=await api.append(thread,input);if(!current()||controller.signal.aborted||selection!==JSON.stringify(updated.sources))return;
-      acceptedReply.current=null;setThread(updated);setReply(answer);setValue(value=>value===input?'':value);
+      api.forgetReply(id,fingerprint);setThread(updated);setReply(answer);setValue(value=>value===input?'':value);
     }catch(error){if(current()&&!(error instanceof LiveCancelled)){const message=error instanceof Error?error.message:'';if(message===threadNotices.stale){setStale(true);setNotice(message);}else if([...Object.values(threadNotices),...Object.values(replyNotices)].some(value=>value===message))setNotice(message);else failed(error);}}
     finally{pending.current=false;if(current())setBusy(false);}
   }

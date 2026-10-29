@@ -3,6 +3,7 @@ import {LiveCancelled,LiveError,type LiveClient} from './client';
 import type {SessionScope} from './session';
 import type {LocalThread,SelectedSource} from './discussions';
 import type {RunReference} from './conversation-research';
+import type {GroundedReply} from './discussion-citations';
 
 export type ServerSummary=Omit<LocalThread,'messages'|'sources'|'runs'>&{version:number;access:'owner'|'editor'|'viewer';shareCount:number};
 export type ServerThread=ServerSummary&LocalThread;
@@ -21,14 +22,26 @@ export function workspaceImport(thread:LocalThread,confirmed:boolean){
 export class ConversationThreads{
   private intents=new Map<string,ActionIntent<unknown>>();
   private imports=new Map<string,ReturnType<typeof workspaceImport>>();
+  // Accepted paid work survives route remounts, never browser/server storage.
+  private acceptedReplies=new Map<string,Map<string,GroundedReply>>();
   private listRead:Promise<{items:ServerSummary[];total:number;offset:number;limit:number}>|null=null;
   private identity:string;
   private root:string;
   constructor(private client:LiveClient,private session:SessionScope,private enabled:boolean){
     this.identity=session.identity();const scope=session.current();
     this.root=`/v1/workspaces/${encodeURIComponent(scope.workspace??'')}/projects/${encodeURIComponent(scope.project??'')}/conversation-threads`;
-    const clear=session.subscribeBeforeClear(()=>{this.intents.clear();this.imports.clear();this.listRead=null;});
-    const unsubscribe=session.subscribe(()=>{if(!session.isCurrent(this.identity)){this.intents.clear();this.imports.clear();this.listRead=null;clear();unsubscribe();}});
+    const clear=session.subscribeBeforeClear(()=>{this.intents.clear();this.imports.clear();this.acceptedReplies.clear();this.listRead=null;});
+    const unsubscribe=session.subscribe(()=>{if(!session.isCurrent(this.identity)){this.intents.clear();this.imports.clear();this.acceptedReplies.clear();this.listRead=null;clear();unsubscribe();}});
+  }
+  acceptedReply(id:string,fingerprint:string){return this.acceptedReplies.get(id)?.get(fingerprint);}
+  retainReply(id:string,fingerprint:string,answer:GroundedReply){
+    if(!this.session.isCurrent(this.identity)||!this.session.token())return;
+    let replies=this.acceptedReplies.get(id);if(!replies){replies=new Map();this.acceptedReplies.set(id,replies);}replies.set(fingerprint,answer);
+  }
+  forgetReply(id?:string,fingerprint?:string){
+    if(id===undefined)this.acceptedReplies.clear();
+    else if(fingerprint===undefined)this.acceptedReplies.delete(id);
+    else {const replies=this.acceptedReplies.get(id);replies?.delete(fingerprint);if(!replies?.size)this.acceptedReplies.delete(id);}
   }
   async request<T>(suffix:string,method='GET',body?:unknown,version?:number):Promise<T>{
     const scope=this.session.current();
