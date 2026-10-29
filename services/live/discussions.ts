@@ -19,7 +19,7 @@ const templates = new Set(['first-project', 'understand-documents', 'research-ma
 const localId = /^local-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const sourceLabels: Record<string, readonly string[]> = {
   document: ['Offer document'], fact: ['Offer fact', 'Approved offer fact', 'Candidate offer fact'],
-  run: ['Research run'], results: ['Results summary'],
+  drive: ['Google Drive item'], run: ['Research run'], results: ['Results summary'],
 };
 const memoryNotice = 'Local storage is unavailable. Discussions are kept only in this tab.';
 
@@ -42,6 +42,7 @@ function validText(value: unknown): value is string {
 function validSource(value: unknown): value is SelectedSource {
   if (!fields(value, ['id', 'label']) || typeof value.id !== 'string' || value.id.length > 200
     || typeof value.label !== 'string' || value.label.length > 80) return false;
+  if(value.id.startsWith('drive:'))return value.label==='Google Drive item'&&/^drive:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}:[A-Za-z0-9_-]{1,128}$/.test(value.id);
   const match = /^(document|fact|run|results):[A-Za-z0-9][A-Za-z0-9._:-]*$/.exec(value.id);
   return !!match && sourceLabels[match[1]].includes(value.label);
 }
@@ -60,7 +61,8 @@ function validThread(value: unknown): value is LocalThread {
   const messageIds = new Set<string>(), sourceIds = new Set<string>();
   return value.messages.every(message => {
     const ai=exactFields(message,['id','kind','status','text','citations','fixture'])&&message.kind==='ai'&&message.fixture===true&&
-      validGroundedReply({status:message.status,text:message.text,citations:message.citations,fixture:message.fixture});
+      validGroundedReply({status:message.status,text:message.text,citations:message.citations,fixture:message.fixture})&&
+      !(message.citations as GroundedReply['citations']).some(ref=>ref.id.startsWith('drive:'));
     if ((!fields(message, ['id', 'text'])&&!ai) || typeof message.id !== 'string' || !localId.test(message.id)
       || !validText(message.text) || messageIds.has(message.id)) return false;
     messageIds.add(message.id); return true;
@@ -262,8 +264,9 @@ export class DiscussionStore {
     if(!this.active)return false;
     const thread=this.snapshot.threads.find(row=>row.id===id);
     if(!thread||!validText(text)||!validGroundedReply(reply)||reply.fixture!==true||
+      sourceIds.some(source=>source.startsWith('drive:'))||
       JSON.stringify(thread.sources.map(row=>row.id))!==JSON.stringify(sourceIds)||
-      reply.citations.some(ref=>!sourceIds.includes(ref.id)))return false;
+      reply.citations.some(ref=>!sourceIds.includes(ref.id)||ref.id.startsWith('drive:')))return false;
     if(thread.messages.length>98)return this.refuse('The local limit of 100 messages in this discussion is full. Existing messages have been kept.');
     const now=this.nextTime();if(now===null)return false;
     const ai={id:`local-${globalThis.crypto.randomUUID()}`,kind:'ai' as const,...reply,

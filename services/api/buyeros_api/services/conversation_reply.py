@@ -41,6 +41,23 @@ async def resolve_sources(session, *, workspace_id, project_id, source_ids, read
     ))).scalar_one_or_none()
     if project is None or project.status != "active":
         raise unavailable_source()
+    drive_ids = [value for value in source_ids if value.startswith('drive:')]
+    if drive_ids:
+        from .conversation_connections import approved_sources
+        drive = await approved_sources(session, workspace_id, project_id, drive_ids, content=True)
+        other_ids = [value for value in source_ids if not value.startswith('drive:')]
+        other = await resolve_sources(session, workspace_id=workspace_id, project_id=project_id,
+            source_ids=other_ids, readonly=readonly) if other_ids else Grounding([], [])
+        sources_by_id = {item['citation']['id']: item for item in [*other.sources, *drive]}
+        sources = [sources_by_id[value] for value in source_ids]
+        excerpts = [text for item in sources for text in item['excerpts']]
+        if sum(len(text.encode('utf-8')) for text in excerpts) > 12000:
+            raise unavailable_source()
+        # Existing model receipts persist basis/excerpts. Drive content must never
+        # enter that path; retain the Stage 2b paid policy/admission defaults.
+        return Grounding([item['citation'] for item in sources], excerpts, sources,
+            profile_id=other.profile_id, profile_hash=other.profile_hash,
+            offer_revision=project.offer_revision, document_ids=other.document_ids, paid_eligible=False)
     profile = (await session.execute(select(IcpVersion).where(
         IcpVersion.workspace_id == workspace_id, IcpVersion.project_id == project_id,
         IcpVersion.id == project.active_icp_version_id,

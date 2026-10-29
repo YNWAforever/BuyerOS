@@ -10,11 +10,10 @@ type Copy={t:(text:string)=>string};
 export function SaveWorkspace({api,thread,t,onRemove,navigate,onSaved}:{api:ConversationThreads;thread:LocalThread;onRemove:()=>void;navigate:(path:string)=>void;onSaved?:(thread:ServerThread)=>void}&Copy){
   const dialog=useRef<HTMLDialogElement>(null),trigger=useRef<HTMLButtonElement>(null),pending=useRef(false);
   const [busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[saved,setSaved]=useState<ServerThread|null>(null);
-  const importSnapshot=useRef<LocalThread|null>(null);
   const mounted=useRef(true);useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   async function save(){
     if(pending.current)return;pending.current=true;setBusy(true);setNotice('');
-    try{importSnapshot.current??=thread;const result=await api.import(importSnapshot.current,true);if(mounted.current){setSaved(result);onSaved?.(result);dialog.current?.close();trigger.current?.focus();}}
+    try{const result=await api.import(thread,true);if(mounted.current){setSaved(result);onSaved?.(result);dialog.current?.close();trigger.current?.focus();}}
     catch(error){if(mounted.current)setNotice(threadNotice(error));}
     finally{pending.current=false;if(mounted.current)setBusy(false);}
   }

@@ -88,11 +88,24 @@ historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
 
-## Conversation home — Stage 3 Preview
+## Conversation home — Stage 4 Connections (Google Drive) Preview
+
+Stage 4 adds admin-managed, read-only Google Drive Connections through a
+Fimmick-owned OAuth/MCP gateway. Admins approve folder IDs; members select only
+approved item IDs with generic labels. Current access is rechecked on selection
+and Ask; disconnect and approval changes invalidate previous Drive references.
+HK residency is preferred and content cache retention is zero. No Drive bodies,
+filenames or tokens are persisted. Drive grounding stays in request memory and
+cannot enter existing paid model receipts; AI admission remains unavailable by
+default. Gateway credentials/Google consent are provisioned separately; missing
+configuration is honestly unavailable. No environment or secret changes are made.
+
+[Stage 4 route, schema, gateway contract and proof details](docs/buyeros/CONVERSATION_CONNECTIONS_STAGE4.md).
+Alembic head is **0059_conversation_connections**; Stage 3's 0058 history below is retained.
 
 `NEXT_PUBLIC_CONVERSATION_HOME === 'true'` opts the **live** workspace into
 Conversation home. Unset (default), `false`, or any other value retains the
-#40 OFF Overview, navigation, guards and reads. Preview is already enabled;
+#41 OFF Overview, navigation, guards and reads. Preview is already enabled;
 this change requires no Vercel environment edits. Production remains unset/OFF.
 
 `/app` and `/app/discussions/new` offer six BuyerOS guided templates and a local
@@ -227,7 +240,7 @@ Preview stays true, Production stays unset, and this change edits no environment
 
 Out of scope: enrichment/contact quotes, approval, exports or sending from chat;
 SME/GSC/Firecrawl/DataForSEO,
-CRM/shared-library connectors or OAuth; paid live Preview/Production smoke or any
+connectors/OAuth beyond the approved Google Drive adapter; paid live Preview/Production smoke or any
 environment edits; Production enablement, deployment/promotion or merging;
 auth/Neon/delivery eligibility changes or removal of retained work surfaces.
 

@@ -537,3 +537,154 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
   heldReads.splice(0).forEach(resolve=>resolve());assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts and OFF parity across sizes/locales',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+css+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),writes=[],reads=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+  let status={version:1,connected:false,available:true,can_manage:true,folders:[],residency_preference:'HK',metadata_cache_seconds:0},uncertain=true,stale=false,denied=false;
+  const source={id:'drive:12345678-1234-4123-8123-123456789012:file_one',label:'Google Drive item'};
+  await page.route('**/v1/**',route=>{
+   const req=route.request(),url=new URL(req.url()),path=url.pathname,method=req.method();
+   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage4-browser'}});
+   if(path.includes('/conversation-connections/')){
+    if(method==='GET'){
+     reads.push(path);if(denied)return route.fulfill({status:404,json:{code:'NOT_FOUND',message:'connection not found'}});
+     if(path.endsWith('/folders'))return ok({items:[{id:'folder_one',label:'Google Drive folder'}]});
+     if(path.endsWith('/items'))return ok({items:status.folders.length?[source]:[]});return ok(status);
+    }
+    writes.push({method,key:req.headers()['idempotency-key'],version:req.headers()['x-buyeros-if-match'],body:method==='DELETE'?undefined:req.postDataJSON()});
+    if(stale)return route.fulfill({status:409,json:{code:'STALE_REVISION',message:'changed'}});
+    if(method==='POST'){
+     status={...status,version:2,connected:true};
+     if(uncertain){uncertain=false;return route.fulfill({status:503,json:{code:'DRIVE_UNAVAILABLE',message:'uncertain'}});}
+    }else if(method==='PUT')status={...status,version:3,folders:[{id:'folder_one',label:'Google Drive folder'}]};
+    else status={...status,version:4,connected:false,folders:[]};return ok(status);
+   }
+   if(path.endsWith('/conversation-reply')){assert.deepEqual(req.postDataJSON().source_ids,[source.id]);return ok({status:'needs_review',fixture:false,text:'EPHEMERAL_DRIVE_ANSWER',citations:[{...source,locator:{surface:'drive',id:source.id}}]});}
+   return ok(contextResponse(url));
+  });
+  await page.goto(server.resolvedUrls.local[0]+'fixture');
+  const drive=page.getByRole('region',{name:'Google Drive',exact:true});
+  await drive.getByRole('button',{name:'Connect Google Drive',exact:true}).click();
+  await drive.getByText('The connection change was not confirmed. Reload Google Drive and compare before retrying.',{exact:true}).waitFor();
+  await drive.getByRole('button',{name:'Connect Google Drive',exact:true}).click();
+  await drive.getByRole('button',{name:'Choose approved folders',exact:true}).click();
+  await drive.getByRole('checkbox').check();
+  for(const language of ['en','zh-HK']){
+   if(language==='zh-HK')await page.getByRole('button',{name:'Change language',exact:true}).click();
+   for(const width of [320,390,480,600,768,820,1023,1024,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`${language} Drive overflows ${width}`);}
+  }
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await drive.getByRole('button',{name:'Save approved folders',exact:true}).focus();await page.keyboard.press('Enter');
+  await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();
+  await drive.getByText('Google Drive item 1',{exact:false}).waitFor();
+  assert.equal(await drive.getByRole('checkbox').isDisabled(),true,'start a discussion before selecting');
+  await page.getByRole('textbox').fill('Review approved Drive evidence');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await drive.getByRole('checkbox').click();await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);await page.getByRole('textbox').fill('What needs review?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
+  await page.getByText('EPHEMERAL_DRIVE_ANSWER',{exact:true}).waitFor();
+  assert.doesNotMatch(await page.evaluate(()=>Object.values(localStorage).join('')),/EPHEMERAL_DRIVE_ANSWER/);
+  assert.equal(writes[0].key,writes[1].key);assert.equal(writes[0].version,'"1"');assert.deepEqual(writes[2].body,{folder_ids:['folder_one']});
+  stale=true;await drive.getByRole('button',{name:'Disconnect Google Drive',exact:true}).click();
+  await drive.getByText('The connection changed. Reload Google Drive before trying again.',{exact:true}).waitFor();
+  stale=false;status={...status,available:false};await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();
+  await drive.getByText('Google Drive is unavailable. Ask a workspace admin to check the connection.',{exact:true}).waitFor();
+  await drive.getByRole('button',{name:'Disconnect Google Drive',exact:true}).click();
+  await drive.getByRole('button',{name:'Connect Google Drive',exact:true}).waitFor();assert.equal(await drive.getByRole('button',{name:'Connect Google Drive',exact:true}).isDisabled(),true);
+  status={...status,connected:true,available:true,can_manage:false,folders:[{id:'folder_one',label:'Google Drive folder'}]};await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();
+  await drive.getByText('Google Drive connected',{exact:true}).waitFor();assert.equal(await drive.getByRole('button',{name:'Disconnect Google Drive',exact:true}).count(),0);
+  denied=true;await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();await drive.getByText('Google Drive access is denied for this workspace.',{exact:true}).waitFor();assert.equal(await drive.getByRole('checkbox').count(),0);
+  const before=reads.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await page.getByRole('region',{name:'Google Drive',exact:true}).count(),0);assert.equal(reads.length,before);
+  assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('Stage 4 workspace discussions can remove every revoked Drive selection while keeping other sources',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry,profileId,factId}=await import('./conversation-browser-fixture.mjs');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-removal-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+css+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),writes=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const id='12345678-1234-4123-8123-123456789012',generation='23456789-1234-4123-8123-123456789012';
+  const drive=[{id:`drive:${generation}:file_one`,label:'Google Drive item'},{id:`drive:${generation}:file_two`,label:'Google Drive item'}];
+  const fact={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact'};
+  let row={id,templateId:'custom',title:'Review revoked Drive sources',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Keep this workspace note'}],sources:[...drive,fact],runs:[],version:1,access:'owner',shareCount:0};
+  await page.route('**/v1/**',route=>{
+   const req=route.request(),url=new URL(req.url()),path=url.pathname;
+   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage4-removal'}});
+   if(path.includes('/conversation-connections/'))return ok({version:4,connected:false,available:false,can_manage:false,folders:[],residency_preference:'HK',metadata_cache_seconds:0});
+   if(path.endsWith('/sources')){
+    const body=req.postDataJSON();writes.push({body,key:req.headers()['idempotency-key'],version:req.headers()['x-buyeros-if-match']});
+    if(body.sources.some(source=>source.id.startsWith('drive:')))return route.fulfill({status:422,json:{code:'CONVERSATION_SOURCE_UNAVAILABLE',message:'selected sources need review'}});
+    row={...row,sources:body.sources,version:row.version+1};return ok(row);
+   }
+   if(path.includes('/conversation-threads'))return ok(path.endsWith('/conversation-threads')?{items:[row],total:1,offset:0,limit:50}:row);
+   return ok(contextResponse(url));
+  });
+  const destination=server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id);
+  await page.goto(destination);await page.getByText('Keep this workspace note',{exact:true}).waitFor();
+  await page.getByText('Selected for this discussion',{exact:false}).click();
+  await page.getByRole('button',{name:'Remove selection',exact:true}).first().click();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  assert.equal(row.sources.length,3,'individual removal is rejected when another Drive reference is revoked');
+  const clear=page.getByRole('button',{name:'Remove all Google Drive selections',exact:true});
+  assert.equal(await clear.count(),1,'revoked Drive references need a removal path that submits no Drive IDs');
+  await clear.focus();await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('details summary')?.textContent?.includes('(1)'));
+  assert.deepEqual(writes.at(-1).body,{sources:[fact]});assert.ok(writes.at(-1).key);assert.equal(writes.at(-1).version,'"1"');
+  assert.deepEqual(row.sources,[fact]);assert.equal(await clear.count(),0);assert.equal(await page.getByRole('button',{name:'Remove selection',exact:true}).count(),1);
+  row={...row,sources:[...drive,fact],version:row.version+1,access:'viewer'};await page.reload();await page.getByText('Selected for this discussion',{exact:false}).click();
+  assert.equal(await clear.isDisabled(),true,'workspace viewers cannot clear selections');
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  assert.equal(await page.getByRole('button',{name:'移除所有 Google Drive 選擇',exact:true}).isDisabled(),true);
+  assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('Stage 4 a definitively rejected Drive import can save after removing the rejected selections',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-import-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),imports=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const source={id:'drive:12345678-1234-4123-8123-123456789012:file_one',label:'Google Drive item'};
+  await page.route('**/v1/**',route=>{
+   const req=route.request(),url=new URL(req.url()),path=url.pathname;
+   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage4-import'}});
+   if(path.includes('/conversation-connections/'))return ok(path.endsWith('/items')?{items:[source]}:{version:3,connected:true,available:true,can_manage:false,folders:[{id:'folder_one',label:'Google Drive folder'}],residency_preference:'HK',metadata_cache_seconds:0});
+   if(req.method()==='POST'&&path.endsWith('/conversation-threads')){
+    const body=req.postDataJSON();imports.push({body,key:req.headers()['idempotency-key']});
+    if(body.sources.length)return route.fulfill({status:422,json:{code:'CONVERSATION_SOURCE_UNAVAILABLE',message:'selected sources need review'}});
+    return ok({id:'12345678-1234-4123-8123-123456789012',version:1,access:'owner',shareCount:0,templateId:body.template_id,title:body.title,messages:body.messages.map((message,index)=>({...message,id:'m'+index})),sources:[],runs:[],createdAt:1,updatedAt:2});
+   }
+   return ok(contextResponse(url));
+  });
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.getByRole('textbox').fill('Keep this local note');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await page.getByRole('region',{name:'Google Drive',exact:true}).getByRole('checkbox').click();
+  await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);
+  await page.getByRole('button',{name:'Save to workspace',exact:true}).click();await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();await page.getByText('Selected for this discussion',{exact:false}).click();
+  await page.getByRole('button',{name:'Remove selection',exact:true}).click();await page.waitForFunction(()=>document.querySelector('details summary')?.textContent?.includes('(0)'));
+  await page.getByRole('button',{name:'Save to workspace',exact:true}).click();await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.live-thread-actions')?.textContent?.includes('Open workspace discussion')||document.querySelector('dialog[open] [role=status]')?.textContent?.includes('unavailable'));
+  assert.equal(await page.getByRole('button',{name:'Open workspace discussion',exact:true}).count(),1,'the retried import must use the updated source selection');
+  assert.equal(imports.length,2);assert.deepEqual(imports[0].body.sources,[source]);assert.deepEqual(imports[1].body.sources,[]);assert.notEqual(imports[0].key,imports[1].key);
+  assert.deepEqual(imports[1].body.messages,[{text:'Keep this local note'}]);assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
+});

@@ -19,9 +19,10 @@ from ...db.models import Membership, User
 from ...services.audit_service import append_audit
 from ...services.membership_directory import directory_search, member_display_name
 from ...settings import get_settings
+from ...services.conversation_connections import approved_sources, SOURCE as DRIVE_SOURCE
 
 router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-threads', tags=['conversation-threads'])
-LABELS = {'document': {'Offer document'}, 'fact': {'Offer fact', 'Approved offer fact', 'Candidate offer fact'}, 'run': {'Research run'}, 'results': {'Results summary'}}
+LABELS = {'drive': {'Google Drive item'}, 'document': {'Offer document'}, 'fact': {'Offer fact', 'Approved offer fact', 'Candidate offer fact'}, 'run': {'Research run'}, 'results': {'Results summary'}}
 TEMPLATES = {'first-project','understand-documents','research-market','review-buyers','check-company','prepare-follow-up','custom'}
 STATUSES = {'draft','queued','running','partial','paused_budget','cancel_requested','cancelled','failed','completed','awaiting_reconciliation'}
 
@@ -42,13 +43,15 @@ class Note(StrictModel):
 
 
 class Source(StrictModel):
-    id: StrictStr = Field(max_length=200, pattern=r'^(document|fact|run|results):[A-Za-z0-9][A-Za-z0-9._:-]*$')
+    id: StrictStr = Field(max_length=200, pattern=r'^(document|fact|run|results|drive):[A-Za-z0-9][A-Za-z0-9._:-]*$')
     label: StrictStr
 
     @model_validator(mode='after')
     def generic_label(self):
         if self.label not in LABELS[self.id.split(':', 1)[0]]:
             raise ValueError('generic source label required')
+        if self.id.startswith('drive:') and not DRIVE_SOURCE.fullmatch(self.id):
+            raise ValueError('invalid Drive reference')
         return self
 
 
@@ -196,6 +199,9 @@ async def list_threads(workspace_id: uuid.UUID, project_id: uuid.UUID, request: 
 @router.post('', status_code=201, operation_id='createConversationThread')
 async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload: ImportThread, request: Request, principal: Principal = Depends(get_principal)):
     async with access(workspace_id, project_id, principal, lock_project=True) as (session, actor):
+        drive_ids = [source.id for source in payload.sources if source.id.startswith('drive:')]
+        if drive_ids:
+            await approved_sources(session, workspace_id, project_id, drive_ids)
         outcome = await intent(session, request, actor, 'createConversationThread', payload.model_dump())
         if outcome.replay:
             row, role = await load(session, workspace_id, project_id, uuid.UUID(outcome.record.resource_id), actor, owner=True)
@@ -259,9 +265,16 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
 async def sources(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.UUID, payload: Sources, request: Request, principal: Principal = Depends(get_principal)):
     async with access(workspace_id, project_id, principal) as (session, actor):
         row, role = await load(session, workspace_id, project_id, thread_id, actor, edit=True, lock=True)
-        bump(row, request)
-        row.sources = [s.model_dump() for s in payload.sources]
-        await session.flush()
+        drive_ids = [source.id for source in payload.sources if source.id.startswith('drive:')]
+        if drive_ids:
+            await approved_sources(session, workspace_id, project_id, drive_ids)
+        outcome = await intent(session, request, actor, 'setConversationThreadSources', payload.model_dump())
+        if not outcome.replay:
+            bump(row, request)
+            row.sources = [s.model_dump() for s in payload.sources]
+            complete_idempotency(outcome, str(row.id))
+            audit(session, row, actor, 'sources_changed')
+            await session.flush()
         result = await data(session, row, role)
     return envelope(result, request.state.request_id)
 

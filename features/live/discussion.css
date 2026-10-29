@@ -69,3 +69,9 @@
 .live-thread-dialog li{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-block:.75rem}
 .live-thread-dialog input,.live-thread-dialog select{max-width:100%;min-width:0}
 .live-thread-dialog button{margin:.25rem}
+
+.live-drive { min-width: 0; overflow-wrap: anywhere; scroll-margin-top: 2rem; }
+.live-drive label { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .5rem 0; }
+.live-drive small { display: block; width: 100%; overflow-wrap: anywhere; }
+.live-drive fieldset { min-width: 0; margin-top: .8rem; }
+.live-drive button { margin: .25rem; max-width: 100%; white-space: normal; }
