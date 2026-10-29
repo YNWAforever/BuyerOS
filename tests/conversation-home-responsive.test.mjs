@@ -404,10 +404,11 @@ test('Stage 3 confirmed import retries once, shares by keyboard, restores and pr
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
 
-test('Stage 3 thread save failures preserve accepted paid work and immediately hide revoked context',async()=>{
+for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserve paid work and permission context (run save ${runFailure})`,async()=>{
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
  const {contextResponse,browserEntry,workspace,project,profileId,factId}=await import('./conversation-browser-fixture.mjs');
- mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-server-recovery-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-server-recovery-');
+ writeFileSync(dir+'/entry.jsx',browserEntry.replace('Revoke offer access</button>','Revoke offer access</button><button onClick={()=>setOfferAccess(true)}>Restore offer access</button>'));
  const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();let browser;
@@ -416,7 +417,7 @@ test('Stage 3 thread save failures preserve accepted paid work and immediately h
   const page=await browser.newPage(),posts=[],errors=[],heldReads=[];page.on('pageerror',error=>errors.push(error.message));
   const id='12345678-1234-4123-8123-123456789012',runId='b4000000-0000-4000-8000-000000000001';
   const ref={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact',locator:{surface:'profile',id:profileId}};
-  const answer='PRIVATE_ACCEPTED_AI_REPLY';let failNote=true,holdContext=false;
+  const answer='PRIVATE_ACCEPTED_AI_REPLY';let failNote=true,holdContext=false,holdNote=false,releaseNote,noteStarted,holdCheck=false,releaseCheck,checkStarted;
   let row={id,templateId:'custom',title:'Synthetic recovery',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Synthetic note'}],sources:[{id:ref.id,label:ref.label}],runs:[],version:1,access:'owner',shareCount:0};
   await page.route('**/v1/**',async route=>{
    const req=route.request(),url=new URL(req.url()),path=url.pathname,method=req.method();
@@ -425,12 +426,18 @@ test('Stage 3 thread save failures preserve accepted paid work and immediately h
     posts.push({path,body:req.postDataJSON(),key:req.headers()['idempotency-key']});
     if(path.endsWith('/conversation-reply'))return ok({status:'needs_review',fixture:false,text:answer,citations:[ref]});
     if(path.includes('/conversation-threads/')){
-     if(path.endsWith('/runs')||failNote)return route.fulfill({status:503,json:{code:'UNAVAILABLE',message:'not saved'}});
-     row={...row,version:row.version+1,messages:[...row.messages,{id:'m2',text:req.postDataJSON().text}]};return ok(row);
+     if(path.endsWith('/runs'))return route.fulfill({status:runFailure,json:{code:runFailure===409?'STALE_REVISION':runFailure===404?'NOT_FOUND':'UNAVAILABLE',message:'not saved'}});
+     if(failNote)return route.fulfill({status:503,json:{code:'UNAVAILABLE',message:'not saved'}});
+     if(holdNote)await new Promise(resolve=>{releaseNote=resolve;noteStarted();});
+     row={...row,version:row.version+1,messages:[...row.messages,{id:'m'+(row.messages.length+1),text:req.postDataJSON().text}]};return ok(row);
     }
     return ok({id:runId,workspace_id:workspace,project_id:project,status:'queued'});
    }
-   if(path.includes('/conversation-threads'))return ok(path.endsWith('/conversation-threads')?{items:[row],total:1,offset:0,limit:50}:row);
+   if(method==='PATCH'&&path.endsWith('/'+id)){row={...row,title:req.postDataJSON().title,version:row.version+1};return ok(row);}
+   if(path.includes('/conversation-threads')){
+    if(holdCheck&&path.endsWith('/'+id))await new Promise(resolve=>{releaseCheck=resolve;checkStarted();});
+    return ok(path.endsWith('/conversation-threads')?{items:[row],total:1,offset:0,limit:50}:row);
+   }
    if(holdContext)await new Promise(resolve=>heldReads.push(resolve));
    if(path.endsWith('/budgets'))return ok({items:[['workspace',workspace,'all'],['project',project,'all'],['category',project,'discovery']].map(([scope,scope_id,category])=>({workspace_id:workspace,scope,scope_id,category,period_start:'2026-01-01T00:00:00Z',period_end:'2099-01-01T00:00:00Z',remaining:{amount:'1.000000',currency:'USD'},effective_state:'active'})),offset:0,limit:100,total:3});
    if(path.includes('pilot-budget'))return ok({id:null,workspace_id:workspace,project_id:project,remaining:null,currency:'USD'});
@@ -439,26 +446,60 @@ test('Stage 3 thread save failures preserve accepted paid work and immediately h
   await page.goto(server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id));
   await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
   const composer=page.getByLabel('Discussion message',{exact:true}),ask=page.getByRole('button',{name:'Ask BuyerOS',exact:true});
-  await composer.fill('Keep my accepted question');await ask.click();
+  await composer.fill('Keep my accepted question');await ask.evaluate(button=>{button.click();button.click();});
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
   assert.equal(await composer.inputValue(),'Keep my accepted question');
-  failNote=false;await ask.click();
+  failNote=false;await ask.evaluate(button=>{button.click();button.click();});
   await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
   await page.getByText(answer,{exact:true}).waitFor();
   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,1,'retrying the note save must reuse the accepted AI answer');
   const notes=posts.filter(post=>post.path.endsWith('/messages'));assert.equal(notes.length,2);assert.equal(notes[0].key,notes[1].key);
+  failNote=true;await composer.fill('Retain my answer across a rename');await ask.click();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  await page.getByLabel('Discussion title',{exact:true}).fill('Renamed recovery');
+  await page.getByRole('button',{name:'Rename discussion',exact:true}).click();
+  await page.getByText('Renamed recovery',{exact:true}).waitFor();
+  failNote=false;await ask.click();
+  await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
+  assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,2,'a title save must not discard an accepted answer and charge a note retry again');
   await page.getByRole('button',{name:'Propose research',exact:true}).click();
   await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();
   await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});
-  await page.getByText('Research was accepted, but its reference could not be saved. Open Research runs.',{exact:true}).waitFor();
+  await page.getByText('Research was accepted, but its reference could not be saved. Open Research runs.',{exact:true}).waitFor({timeout:3000});
   assert.equal(posts.filter(post=>post.path.endsWith('/runs')&&!post.path.includes('/conversation-threads/')).length,1);
   assert.equal(await page.getByRole('button',{name:'Confirm and start research',exact:true}).count(),0,'accepted research must require a new proposal before another paid action');
   assert.doesNotMatch(JSON.stringify(posts.filter(post=>post.path.includes('/conversation-threads/'))),/PRIVATE_ACCEPTED_AI_REPLY|PRIVATE_FACT_CONTENT|project-evidence\.pdf/);
   assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage)),[],'server threads and live replies stay out of localStorage');
-  holdContext=true;await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('#discussion-message')&&Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='Ask BuyerOS').disabled);
-  assert.equal(await page.getByText('project-evidence.pdf',{exact:false}).count(),0,'permission loss hides previous context before pending reads finish');
-  assert.equal(await page.getByText('PRIVATE_FACT_CONTENT',{exact:true}).count(),0);
+  if(runFailure===503){
+   // The paid answer arrives before permission loss; its delayed note response
+   // must not restore it after the permission effect has aborted the request.
+   await page.getByRole('button',{name:'Rename discussion',exact:true}).click();
+   await page.getByText(answer,{exact:true}).waitFor({state:'hidden'});
+   holdNote=true;const noteReceived=new Promise(resolve=>noteStarted=resolve);
+   await composer.fill('Discard this delayed reply after permission loss');await ask.click();await noteReceived;
+   holdContext=true;await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();
+   await page.getByText('project-evidence.pdf',{exact:false}).waitFor({state:'hidden'});
+   releaseNote();holdNote=false;
+   await page.waitForFunction(()=>document.querySelector('#discussion-message')&&Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='Ask BuyerOS')?.disabled);
+   assert.equal(await page.getByText('project-evidence.pdf',{exact:false}).count(),0,'permission loss hides previous context before pending reads finish');
+   assert.equal(await page.getByText('PRIVATE_FACT_CONTENT',{exact:true}).count(),0);
+   holdContext=false;heldReads.splice(0).forEach(resolve=>resolve());
+   await page.getByRole('button',{name:'Restore offer access',exact:true}).click();
+   await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+   assert.equal(await page.getByText(answer,{exact:true}).count(),0,'an aborted in-flight answer cannot reappear after permission restoration');
+   assert.equal(await composer.inputValue(),'Discard this delayed reply after permission loss');
+   await page.reload();await composer.waitFor();
+   const paidCount=posts.filter(post=>post.path.endsWith('/conversation-reply')).length;
+   holdCheck=true;const checkReceived=new Promise(resolve=>checkStarted=resolve);
+   await composer.fill('Leave before the paid request');await ask.click();await checkReceived;
+   await page.getByRole('button',{name:'Home',exact:true}).first().click();
+   await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
+   holdCheck=false;const response=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await response;
+   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();
+   await composer.waitFor();
+   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,paidCount,'unmount during the ACL recheck cannot launch a paid request');
+   assert.equal(await composer.inputValue(),'');
+  }else await page.getByText(runFailure===409?'This discussion changed. Copy any unsaved text before reloading.':'This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();
   heldReads.splice(0).forEach(resolve=>resolve());assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });

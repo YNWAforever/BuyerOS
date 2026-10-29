@@ -20,7 +20,7 @@ export function ServerConversation({client,session,id,t,locale,navigate,canViewO
   const [thread,setThread]=useState<ServerThread|null>(null),[notice,setNotice]=useState(''),[value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[busy,setBusy]=useState(false),[reply,setReply]=useState<GroundedReply|null>(null);
   const contextKey=JSON.stringify([identity,canViewOffer,canViewResults]);
   const context=contextRead?.key===contextKey?contextRead.sections:null;
-  const [missing,setMissing]=useState(false),[stale,setStale]=useState(false),[title,setTitle]=useState('');
+  const [missing,setMissing]=useState(false),[stale,setStale]=useState(false),[title,setTitle]=useState(''),[unsavedRun,setUnsavedRun]=useState(false);
   const deleteDialog=useRef<HTMLDialogElement>(null),pending=useRef(false),mounted=useRef(true),focus=useRef<HTMLDivElement>(null),replyAbort=useRef<AbortController|null>(null);
   const acceptedReply=useRef<{fingerprint:string;answer:GroundedReply}|null>(null);
   useEffect(()=>{mounted.current=true;focus.current?.focus();return()=>{mounted.current=false;replyAbort.current?.abort();};},[]);
@@ -36,14 +36,15 @@ export function ServerConversation({client,session,id,t,locale,navigate,canViewO
   useEffect(()=>{let active=true;void loadDiscussionContext(client,session,{enabled:true,canViewOffer,canViewResults,signal:session.controller().signal}).then(rows=>{if(active)setContext({key:contextKey,sections:rows});}).catch(()=>{if(active)setContext({key:contextKey,sections:[]});});return()=>{active=false;};},[client,session,contextKey,canViewOffer,canViewResults]);
   async function mutate(action:()=>Promise<ServerThread>){
     if(pending.current||stale||!current())return false;pending.current=true;setBusy(true);setNotice('');
-    try{const result=await action();if(current()){setThread(result);setReply(null);acceptedReply.current=null;}return current();}
+    // Title/run writes do not consume an accepted answer whose note still needs saving.
+    try{const result=await action();if(current()){setThread(result);setReply(null);}return current();}
     catch(error){failed(error);return false;}finally{pending.current=false;if(current())setBusy(false);}
   }
-  async function send(){if(!thread||thread.access==='viewer'||!value.trim())return;const input=value;if(await mutate(()=>api.append(thread,input)))setValue(value=>value===input?'':value);}
+  async function send(){if(!thread||thread.access==='viewer'||!value.trim())return;const input=value;if(await mutate(()=>api.append(thread,input))){if(acceptedReply.current?.fingerprint===JSON.stringify([input,JSON.stringify(thread.sources),locale]))acceptedReply.current=null;setValue(value=>value===input?'':value);}}
   async function saveRun(run:RunReference){
     if(!thread)return;
     // Admission has already succeeded. A reference-save failure must not reopen it.
-    if(!await mutate(()=>api.run(thread,run))&&current())setNotice(message=>message===threadNotices.stale||message===threadNotices.missing?message:'Research was accepted, but its reference could not be saved. Open Research runs.');
+    if(!await mutate(()=>api.run(thread,run))&&current())setUnsavedRun(true);
   }
   async function recheck(){const latest=await api.get(id);if(current())setThread(latest);if(latest.access==='viewer')throw new Error(threadNotices.stale);return latest;}
   async function ask(){
@@ -56,15 +57,17 @@ export function ServerConversation({client,session,id,t,locale,navigate,canViewO
       if(!current()||controller.signal.aborted)return;
       // A successful paid reply survives a failed note save. Retry only the note.
       acceptedReply.current={fingerprint,answer};
-      const updated=await api.append(thread,input);if(!current()||selection!==JSON.stringify(updated.sources))return;
+      const updated=await api.append(thread,input);if(!current()||controller.signal.aborted||selection!==JSON.stringify(updated.sources))return;
       acceptedReply.current=null;setThread(updated);setReply(answer);setValue(value=>value===input?'':value);
     }catch(error){if(current()&&!(error instanceof LiveCancelled)){const message=error instanceof Error?error.message:'';if(message===threadNotices.stale){setStale(true);setNotice(message);}else if([...Object.values(threadNotices),...Object.values(replyNotices)].some(value=>value===message))setNotice(message);else failed(error);}}
     finally{pending.current=false;if(current())setBusy(false);}
   }
-  if(missing)return <><p role="status">{t(notice)}</p><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/></>;
+  const runSaveNotice=unsavedRun?<p role="status">{t('Research was accepted, but its reference could not be saved. Open Research runs.')}</p>:null;
+  if(missing)return <>{runSaveNotice}<p role="status">{t(notice)}</p><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/></>;
   if(!thread)return <p role="status">{t(notice||'Loading workspace discussion…')}</p>;
   const editable=thread.access!=='viewer'&&!stale;
   return <div ref={focus} tabIndex={-1} aria-label={t('Discussion workspace')}>
+    {runSaveNotice}
     <div className="live-thread-actions"><WorkspaceBadge thread={thread} t={t}/><button type="button" onClick={()=>window.location.reload()}>{t('Reload discussion')}</button>
       {thread.access==='owner'&&<><ShareThread api={api} thread={thread} t={t} onChange={setThread} onError={failed}/>
         <form onSubmit={event=>{event.preventDefault();void mutate(()=>api.request<ServerThread>(`/${thread.id}`,'PATCH',{title},thread.version));}}><label>{t('Discussion title')}<input maxLength={80} value={title} onChange={event=>setTitle(event.target.value)}/></label><button type="submit" disabled={busy||stale||!title.trim()}>{t('Rename discussion')}</button></form>
