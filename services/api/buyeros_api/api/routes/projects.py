@@ -128,10 +128,10 @@ async def create_project(
         session.add(project)
         await session.flush()
         # Every new project begins with zero approved spend in every constrained scope.
-        from ...services.budget_service import CATEGORIES, ensure_period_accounts, lock_budget_workspace
+        from ...services.budget_service import enabled_categories, ensure_period_accounts, lock_budget_workspace
         await lock_budget_workspace(session, workspace_id)
         await ensure_period_accounts(session, workspace_id, project.id, None, None)
-        for category in sorted(CATEGORIES):
+        for category in sorted(enabled_categories()):
             await ensure_period_accounts(session, workspace_id, project.id, None, category)
         data = _project_data(project)
         complete_idempotency(outcome, str(project.id), response={"http_status": 201, "version": project.version, "data": data})

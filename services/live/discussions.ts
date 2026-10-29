@@ -1,11 +1,12 @@
 'use client';
+import {validRunReference,type RunReference} from './conversation-research';
 import {exactFields,validGroundedReply,type GroundedReply} from './discussion-citations';
 
 export type DiscussionScope = {actor: string; workspace: string; project: string};
 export type SelectedSource = {id: string; label: string};
 export type LocalThread = {
   id: string; templateId: string; title: string; createdAt: number; updatedAt: number;
-  messages: ({id: string; text: string} | ({id:string;kind:'ai'} & GroundedReply))[]; sources: SelectedSource[];
+  messages: ({id: string; text: string} | ({id:string;kind:'ai'} & GroundedReply))[]; sources: SelectedSource[]; runs?: RunReference[];
 };
 export type DiscussionSnapshot = {threads: LocalThread[]; notice: string};
 
@@ -45,7 +46,8 @@ function validSource(value: unknown): value is SelectedSource {
   return !!match && sourceLabels[match[1]].includes(value.label);
 }
 function validThread(value: unknown): value is LocalThread {
-  if (!fields(value, ['id', 'templateId', 'title', 'createdAt', 'updatedAt', 'messages', 'sources'])
+  if ((!fields(value, ['id', 'templateId', 'title', 'createdAt', 'updatedAt', 'messages', 'sources'])
+      && !fields(value, ['id', 'templateId', 'title', 'createdAt', 'updatedAt', 'messages', 'sources', 'runs']))
     || typeof value.id !== 'string' || !localId.test(value.id)
     || typeof value.templateId !== 'string' || !templates.has(value.templateId)
     || typeof value.title !== 'string' || !value.title.trim() || value.title.length > 80
@@ -53,10 +55,11 @@ function validThread(value: unknown): value is LocalThread {
     || !Number.isSafeInteger(value.updatedAt) || (value.updatedAt as number) < (value.createdAt as number)
     || (value.updatedAt as number) > MAX_TIMESTAMP
     || !Array.isArray(value.messages) || !value.messages.length || value.messages.length > 100
-    || !Array.isArray(value.sources) || value.sources.length > 100) return false;
+    || !Array.isArray(value.sources) || value.sources.length > 100
+    || (value.runs!==undefined&&(!Array.isArray(value.runs)||value.runs.length>100||!value.runs.every(validRunReference)||new Set(value.runs.map(row=>row.id)).size!==value.runs.length))) return false;
   const messageIds = new Set<string>(), sourceIds = new Set<string>();
   return value.messages.every(message => {
-    const ai=exactFields(message,['id','kind','status','text','citations','fixture'])&&message.kind==='ai'&&
+    const ai=exactFields(message,['id','kind','status','text','citations','fixture'])&&message.kind==='ai'&&message.fixture===true&&
       validGroundedReply({status:message.status,text:message.text,citations:message.citations,fixture:message.fixture});
     if ((!fields(message, ['id', 'text'])&&!ai) || typeof message.id !== 'string' || !localId.test(message.id)
       || !validText(message.text) || messageIds.has(message.id)) return false;
@@ -75,6 +78,7 @@ function freezeSnapshot(snapshot: DiscussionSnapshot): DiscussionSnapshot {
       if('kind' in message){message.citations.forEach(ref=>{Object.freeze(ref.locator);Object.freeze(ref);});Object.freeze(message.citations);}
       Object.freeze(message);
     });
+    thread.runs?.forEach(Object.freeze);if(thread.runs)Object.freeze(thread.runs);
     thread.sources.forEach(Object.freeze);
     Object.freeze(thread.messages); Object.freeze(thread.sources); Object.freeze(thread);
   }
@@ -252,7 +256,7 @@ export class DiscussionStore {
   appendReply(id:string,text:string,reply:GroundedReply,sourceIds:string[]):boolean{
     if(!this.active)return false;
     const thread=this.snapshot.threads.find(row=>row.id===id);
-    if(!thread||!validText(text)||!validGroundedReply(reply)||
+    if(!thread||!validText(text)||!validGroundedReply(reply)||reply.fixture!==true||
       JSON.stringify(thread.sources.map(row=>row.id))!==JSON.stringify(sourceIds)||
       reply.citations.some(ref=>!sourceIds.includes(ref.id)))return false;
     if(thread.messages.length>98)return this.refuse('The local limit of 100 messages in this discussion is full. Existing messages have been kept.');
@@ -262,4 +266,17 @@ export class DiscussionStore {
     const updated:LocalThread={...thread,updatedAt:now,messages:[...thread.messages,{id:`local-${globalThis.crypto.randomUUID()}`,text},ai]};
     return this.save(this.snapshot.threads.map(row=>row.id===id?updated:row));
   }
+  /** Financial result references only: strip every other server field before saving. */
+  saveRun(id:string,run:RunReference):boolean{
+    if(!this.active||!validRunReference(run))return false;
+    const thread=this.snapshot.threads.find(row=>row.id===id);if(!thread)return false;
+    const existing=thread.runs??[];
+    if(existing.some(row=>row.id===run.id&&row.status===run.status))return true;
+    if(!existing.some(row=>row.id===run.id)&&existing.length>=100)return this.refuse('The local run reference limit is full. Open Research runs.');
+    const now=this.nextTime();if(now===null)return false;
+    const ref:RunReference={id:run.id,label:'Research run',status:run.status};
+    const runs=existing.some(row=>row.id===run.id)?existing.map(row=>row.id===run.id?ref:row):[...existing,ref];
+    return this.save(this.snapshot.threads.map(row=>row.id===id?{...thread,updatedAt:now,runs}:row));
+  }
+
 }

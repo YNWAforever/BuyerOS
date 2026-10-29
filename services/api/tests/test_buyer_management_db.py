@@ -261,7 +261,7 @@ def test_0014_migration_owns_preset_rls_and_disposable_rollback(isolated_migrate
         ).fetchone()[0] == "0014_buyer_management"
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0056_policy_activation"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0057_conversation_model"
 
 
 def test_list_filter_freezes_membership_and_refreezes_after_remove(api, seeded):

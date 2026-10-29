@@ -88,11 +88,11 @@ historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
 
-## Conversation home — Stage 2 Preview
+## Conversation home — Stage 2b Preview
 
 `NEXT_PUBLIC_CONVERSATION_HOME === 'true'` opts the **live** workspace into
 Conversation home. Unset (default), `false`, or any other value retains the
-#35/#37 OFF Overview, navigation, guards and reads. Preview is already enabled;
+#39 OFF Overview, navigation, guards and reads. Preview is already enabled;
 this change requires no Vercel environment edits. Production remains unset/OFF.
 
 `/app` and `/app/discussions/new` offer six BuyerOS guided templates and a local
@@ -143,34 +143,66 @@ qualify; extraction candidates, model inferences, runs/results, missing/foreign 
 partially unavailable selections fail closed. No source bodies or history travel
 from the browser. Source checks never create a research, quote or enrichment job.
 
-**Live conversation AI remains unavailable.** Existing model receipts/reservations
-are bound to research runs/buyers and cannot fund this operation. The API returns
-`CONVERSATION_MODEL_UNAVAILABLE` (503) after source checks; it has no provider call.
-There is no fixture environment switch or request field: only tests inject fixture
-responses. Fixture replies are labelled **AI reply · needs review** and
-**Fixture reply · no live model**, never approved automatically. This is the
-brief's fixture/unavailable fallback until a separately reviewed atomic budget
-and receipt path exists. Preview stays true, Production stays unset; no environment
-values are changed. The API registers this route only when its same exact flag is
-`true`; an absent route also produces the honest unavailable client state.
+**Research from a discussion requires an explicit confirmation.** Propose research
+loads the current approved profile, ledger budget remaining, and any configured
+shared pilot cap. The confirmation sheet shows maximum USD cost, target companies
+and every run limit. Confirm calls the existing `startResearch` / `startRun`
+endpoint with an Idempotency-Key; `admit_run` still checks permission, capability,
+provider, approved ICP, current policy and budget. Known refusals are localized in
+en/zh-HK and cannot imply success. An uncertain request retains its original key;
+check Research runs before retrying. Only run IDs, generic labels and statuses
+are saved in local threads (at most 100 references). Refresh run status reads the
+existing snapshot; run links retain existing partial results, timeouts, cancel and
+safe retry controls. Templates, Send and AI outputs never start research.
 
-Verified replies store only bounded message text plus generic citation IDs,
-labels and code-owned profile/document locators. They restore after refresh under
-the existing local scope key and limits. Unknown fields, URLs, unselected citations,
-tool calls/refusals and malformed output are rejected. Citation buttons use the
-existing guarded navigation. Scope, route, source or permission changes discard
-in-flight replies. Unavailable/error states keep the question in the composer.
+**Live conversation admission remains OFF by default.** `ROUTE.route_id=None`
+and the separate code-owned conversation `REGISTRATION=None` return
+`CONVERSATION_MODEL_UNAVAILABLE` (503), even if a fit provider is selected. There
+is no environment/request fixture or conversation route selector. Activation
+requires a separately reviewed conversation registration/account/contract, paid
+admission and dispatch switches, current membership, approved selected sources,
+exact `research.model` policy with selected document IDs, and approved budgets.
+Facts without an approved document policy scope remain blocked.
 
-Out of scope: live model admission; research starts, providers or paid calls from
-chat (Stage 2b/billing Ask); enrichment/contact quotes, approval, exports or sending;
-schema changes; server-side discussions, sharing/ACL (Stage 3); SME/GSC/Firecrawl/
-DataForSEO, CRM/shared-library connectors or OAuth; Production enablement,
-deployment/promotion, merging, or removal/restyling of retained work surfaces.
+Alembic **0057_conversation_model** adds a tenant-fenced API-only receipt
+transition function and conversation document/profile retention dependencies;
+it does not seed approvals, accounts, prices, selection or work. The new
+`conversation` budget category starts at zero through existing account creation
+and is exposed only with the feature flag. Maximum liability is code-owned
+**USD 0.100000**. Preparation atomically reserves through `reserve_operation`
+(including shared pilot accounting), inserts a ProviderOperation, a terminal
+`conversation.model` outbox fence that workers cannot claim, and a model receipt.
+The new `conversation-basis.v1` has no run/buyer/company requirement. A second
+short transaction rechecks authority and commits one claim before any external
+await. No DB transaction/lock spans model HTTP. The route has no tools, 6,000 input
+and 1,000 output tokens, a 30-second deadline and no repair/retry loop. Output must
+be `needs_review`, with citations strictly within the selected source IDs.
+
+Unknown, timeout, cancelled and received operations all retain their original
+hold until authoritative billing reconciliation; token counts never settle
+money. Concurrent reservations cannot exceed workspace/project/category or pilot
+limits; same-key replays cannot submit twice. Conversation receipts use the
+existing private retention/erasure boundary, capped at one day and the shortest
+selected document retention. Populated 0057 downgrade refuses to erase liability;
+empty downgrade restores the 0056 fences and dependency function.
+
+Live reply text stays in memory only and is not saved in localStorage. Only test
+fixture replies may restore bounded text and generic citation locators. Unknown
+fields, URLs, unselected citations, tools/refusals and malformed output are
+rejected. Citation buttons use guarded navigation. Scope, route, source or
+permission changes discard in-flight replies. Error states keep the question.
+Preview stays true, Production stays unset, and this change edits no environments.
+
+Out of scope: enrichment/contact quotes, approval, exports or sending from chat;
+server-side discussions, sharing/ACL (Stage 3); SME/GSC/Firecrawl/DataForSEO,
+CRM/shared-library connectors or OAuth; paid live Preview/Production smoke or any
+environment edits; Production enablement, deployment/promotion or merging;
+auth/Neon/delivery eligibility changes or removal of retained work surfaces.
 
 Checks: `node --test tests/audit-conversation-home.test.mjs`,
 `node --test tests/conversation-home-responsive.test.mjs` (compiled Vercel CSS +
 local Chromium), `pnpm test:core`, `pnpm exec tsc --noEmit`, `pnpm lint`,
 `pnpm build`, and
 `NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.
-API negatives: `cd services/api && uv run --frozen pytest tests/test_conversation_reply.py tests/test_conversation_reply_db.py`
+API negatives: `cd services/api && uv run --frozen pytest tests/test_conversation_reply.py tests/test_conversation_reply_db.py tests/test_conversation_model.py tests/test_conversation_admission_db.py tests/test_conversation_research_db.py`
 (database cases require the existing disposable PostgreSQL fixture).

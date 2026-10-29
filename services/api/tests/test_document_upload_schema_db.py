@@ -99,5 +99,5 @@ def test_populated_upload_downgrade_is_atomic_and_retains_force_rls(api, seeded,
     with pytest.raises(RuntimeError, match='downgrade blocked'):
         command.downgrade(cfg, '0052_private_document_storage')
     with psycopg.connect(seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone() == ('0056_policy_activation',)
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone() == ('0057_conversation_model',)
         assert db.execute("SELECT relforcerowsecurity FROM pg_class WHERE relname='document_uploads'").fetchone() == (True,)

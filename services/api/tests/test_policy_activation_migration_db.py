@@ -23,7 +23,7 @@ def test_0056_accepts_disabled_runtime_inspection_but_not_an_unknown_future_head
                                   enabled=False, reason="Future head must stay rejected")
     finally:
         with psycopg.connect(isolated_migrated) as db:
-            db.execute("UPDATE alembic_version SET version_num='0056_policy_activation'")
+            db.execute("UPDATE alembic_version SET version_num='0057_conversation_model'")
 
 
 def schema_member(db, workspace):
@@ -53,7 +53,7 @@ def schema_authority(db):
 def test_0055_upgrade_adds_three_tables_with_forced_rls_and_exact_privileges(isolated_migrated, record_property):
     with psycopg.connect(isolated_migrated) as db:
         record_property("actual_server_version_num", db.execute("SHOW server_version_num").fetchone()[0])
-        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0056_policy_activation",)
+        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0057_conversation_model",)
         for name in TABLES:
             assert db.execute(
                 "SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid=to_regclass(%s)",
@@ -129,5 +129,5 @@ def test_empty_downgrade_keeps_hardening_and_repeated_upgrade_is_noop(isolated_m
     command.upgrade(config, "head")
     command.upgrade(config, "head")
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0056_policy_activation"
+        assert db.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0057_conversation_model"
         assert db.execute("SELECT count(*) FROM policy_activation_requests").fetchone()[0] == 0

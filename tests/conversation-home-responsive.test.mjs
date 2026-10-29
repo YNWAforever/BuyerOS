@@ -69,7 +69,7 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
  const {contextResponse,browserEntry,profileId,factId,documentId}=await import('./conversation-browser-fixture.mjs');
  mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-ai-browser-');writeFileSync(dir+'/entry.jsx',browserEntry);
  const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},
-  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0},appType:'custom'});
+  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();let browser;
  try{
@@ -139,7 +139,7 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
  // so prior app builds or test runs cannot hide that startup regression.
  const server=await createServer({configFile:false,root,cacheDir:resolve(fixtureDir,'node_modules/.vite'),resolve:{alias:{'@':root}},
   optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},
-  server:{host:'127.0.0.1',port:0},appType:'custom'});
+  server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head></head><body><div id="root"></div><script type="module" src="/'+fixtureDir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();const origin=server.resolvedUrls.local[0];
  let browser;
@@ -252,4 +252,80 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   assert.deepEqual(await persisted(),beforeQueued);assert.ok(tabRequests.every(method=>method==='GET'));
   await tabs.close();
  }finally{await browser?.close();await server.close();rmSync(fixtureDir,{recursive:true,force:true});}
+});
+
+test('Stage 2b keyboard confirmation, localized gate failures, run continuity and live reply privacy',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry,workspace,project,profileId,factId}=await import('./conversation-browser-fixture.mjs');
+ const {researchNotices}=await import('../services/live/conversation-research.ts');
+ const {liveZh}=await import('../features/live/locale.ts');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-paid-browser-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},
+  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),posts=[],errors=[];let gate=null,status='queued';
+  page.on('pageerror',error=>errors.push(error.message));
+  const runId='b4000000-0000-4000-8000-000000000001';
+  const ref={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact',locator:{surface:'profile',id:profileId}};
+  await page.route('**/v1/**',async route=>{
+   const req=route.request(),url=new URL(req.url());
+   if(req.method()==='POST'){
+    posts.push({path:url.pathname,body:req.postDataJSON(),key:req.headers()['idempotency-key']});
+    if(url.pathname.endsWith('/conversation-reply'))return route.fulfill({json:{data:{status:'needs_review',fixture:false,text:'PRIVATE_LIVE_MODEL_FACT_BODY',citations:[ref]},data_mode:'live',request_id:'paid-fixture'}});
+    if(gate)return route.fulfill({status:gate==='403'?403:gate==='STALE_REVISION'?412:gate==='CAPABILITY_DISABLED'||gate==='PROVIDER_UNAVAILABLE'?503:409,json:{code:gate==='403'?'PERMISSION_DENIED':gate,message:'private server details'}});
+    return route.fulfill({json:{data:{id:runId,workspace_id:workspace,project_id:project,status,buyers:'PRIVATE_BUYER_BODY'},data_mode:'live',request_id:'paid-fixture'}});
+   }
+   let data;
+   if(url.pathname.endsWith('/budgets')){
+    data={items:[['workspace',workspace,'all'],['project',project,'all'],['category',project,'discovery']].map(([scope,scope_id,category])=>({workspace_id:workspace,scope,scope_id,category,period_start:'2026-01-01T00:00:00Z',period_end:'2099-01-01T00:00:00Z',remaining:{amount:'1.000000',currency:'USD'},effective_state:'active'})),offset:0,limit:100,total:3};
+   }else if(url.pathname.includes('pilot-budget'))data={id:null,workspace_id:workspace,project_id:project,remaining:null,currency:'USD'};
+   else if(url.pathname.endsWith('/runs/'+runId))data={id:runId,workspace_id:workspace,project_id:project,status};
+   else{data=contextResponse(url);if(url.pathname.endsWith('/icp-versions')&&url.searchParams.get('limit')==='100')data={...data,limit:100};}
+   return route.fulfill({status:data?200:403,json:{data,data_mode:'live',request_id:'paid-fixture'}});
+  });
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
+  await page.getByRole('textbox').fill('Research these approved sources');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByRole('button',{name:'Propose research',exact:true}).waitFor();assert.equal(posts.length,0);
+  const propose=()=>page.getByRole('button',{name:'Propose research',exact:true});
+  await propose().focus();await page.keyboard.press('Enter');await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor();
+  assert.equal(posts.length,0,'proposal and review GETs must not start research');
+  for(const width of [320,390,768,1024,1440]){
+   await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width);
+   const box=await page.getByRole('dialog').boundingBox();assert.ok(box.width<=width&&box.height<=900);
+  }
+  assert.equal(await page.getByRole('dialog').getByText('Budget remaining · USD 1.000000',{exact:true}).count(),1);
+  await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'hidden'});assert.equal(posts.length,0);
+  for(const locale of ['en','zh-HK']){
+   if(locale==='zh-HK')await page.getByRole('button',{name:'Change language',exact:true}).click();
+   const t=value=>locale==='en'?value:(liveZh[value]||value);
+   for(const code of ['CAPABILITY_DISABLED','PROVIDER_UNAVAILABLE','POLICY_BLOCKED','BUDGET_LIMIT','STALE_REVISION','403']){
+    gate=code;await page.getByRole('button',{name:t('Propose research'),exact:true}).click();await page.getByRole('dialog').waitFor();
+    if(code==='CAPABILITY_DISABLED')for(const width of [320,390,768,1024,1440]){
+     await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,locale+' confirmation overflow');
+     const bounds=await page.getByRole('dialog').boundingBox();assert.ok(bounds.width<=width&&bounds.height<=900);
+    }
+    const before=posts.length;await page.getByRole('button',{name:t('Confirm and start research'),exact:true}).focus();await page.keyboard.press('Enter');
+    const expected=code==='403'?researchNotices.forbidden:researchNotices[code];await page.getByRole('dialog').getByText(t(expected),{exact:true}).waitFor();
+    assert.equal(posts.length,before+1);assert.ok(posts.at(-1).key);assert.ok(posts.every(row=>row.path.endsWith('/runs')));
+    await page.getByRole('button',{name:t('Back to discussion'),exact:true}).click();
+   }
+  }
+  await page.getByRole('button',{name:'Change language',exact:true}).click();gate=null;
+  await propose().click();await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();
+  await page.getByText(runId,{exact:true}).waitFor();assert.equal(posts.at(-1).body.icp_version_id,profileId);
+  assert.equal(posts.at(-1).body.max_cost.amount,'0.500000');assert.equal(posts.at(-1).body.limits.max_duration_seconds,300);
+  assert.equal(new Set(posts.map(row=>row.key)).size,posts.length,'each confirmed, known-rejected intent gets a new key');
+  status='partial';await page.getByRole('button',{name:'Refresh run status',exact:true}).click();await page.locator('.live-conversation-research').getByText('partial',{exact:true}).waitFor();
+  await page.reload();await page.getByText(runId,{exact:true}).waitFor();await page.locator('.live-conversation-research').getByText('partial',{exact:true}).waitFor();
+  await page.getByRole('checkbox').nth(1).click();await page.getByRole('textbox').fill('Which source supports this?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
+  await page.getByText('PRIVATE_LIVE_MODEL_FACT_BODY',{exact:true}).waitFor();
+  assert.doesNotMatch(await page.evaluate(()=>Object.values(localStorage).join('')),/PRIVATE_LIVE_MODEL_FACT_BODY|PRIVATE_BUYER_BODY|PRIVATE_FACT_CONTENT/);
+  const count=posts.length;await page.reload();await page.getByText(runId,{exact:true}).waitFor();assert.equal(await page.getByText('PRIVATE_LIVE_MODEL_FACT_BODY',{exact:true}).count(),0);assert.equal(posts.length,count);
+  await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await propose().count(),0);assert.equal(posts.length,count);
+  assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });

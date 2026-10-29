@@ -1,6 +1,6 @@
 /** Only code-owned locators, never model-provided URLs or source bodies. */
 export type CitationRef = {id:string;label:'Approved offer fact'|'Offer document';locator:{surface:'profile'|'document';id:string}};
-export type GroundedReply = {status:'needs_review';text:string;citations:CitationRef[];fixture:true};
+export type GroundedReply = {status:'needs_review';text:string;citations:CitationRef[];fixture:boolean};
 const uuid='[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 export function exactFields(value:unknown,keys:readonly string[]):value is Record<string,unknown>{
   if(!value||typeof value!=='object'||Array.isArray(value))return false;
@@ -17,7 +17,7 @@ export function validCitation(value:unknown):value is CitationRef{
     !!fact&&value.label==='Approved offer fact'&&value.locator.surface==='profile'&&value.locator.id===fact[1];
 }
 export function validGroundedReply(value:unknown):value is GroundedReply{
-  return exactFields(value,['status','text','citations','fixture'])&&value.status==='needs_review'&&value.fixture===true&&
+  return exactFields(value,['status','text','citations','fixture'])&&value.status==='needs_review'&&typeof value.fixture==='boolean'&&
     typeof value.text==='string'&&!!value.text.trim()&&value.text.length<=4000&&Array.isArray(value.citations)&&
     value.citations.length>=1&&value.citations.length<=20&&value.citations.every(validCitation)&&
     new Set(value.citations.map(row=>row.id)).size===value.citations.length;

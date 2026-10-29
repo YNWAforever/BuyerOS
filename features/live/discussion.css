@@ -47,3 +47,15 @@
 .live-discussion-suggestions{margin:12px 0}
 .live-discussion-suggestions button{white-space:normal;text-align:left}
 @media(max-width:480px){.live-discussion-templates{grid-template-columns:minmax(0,1fr)}.live-discussion-composer>div{flex-wrap:wrap}.live-discussion-continue{padding:0 16px 16px}}
+/* Stage 2b paid confirmation, contained within the flag-gated conversation. */
+.live-conversation-research,.live-discussion-ephemeral{padding:16px 22px;overflow-wrap:anywhere}
+.live-conversation-research article{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.live-conversation-research code{display:block;width:100%;overflow-wrap:anywhere;white-space:normal}
+.live-research-confirm{max-width:min(620px,calc(100vw - 32px));width:100%;max-height:calc(100dvh - 32px);overflow:auto;padding:24px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-control);color:var(--buyeros-ink);background:var(--buyeros-surface);overflow-wrap:anywhere}
+.live-research-confirm::backdrop{background:#0006}
+.live-research-confirm label{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.live-research-confirm input{width:100%;min-width:0;max-width:100%}
+.live-research-confirm dl>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+.live-research-confirm dt{overflow-wrap:anywhere;min-width:0}
+.live-research-confirm dd{margin:0}
+.live-research-confirm button{white-space:normal;margin:8px 8px 0 0}

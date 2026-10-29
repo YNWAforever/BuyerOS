@@ -202,7 +202,7 @@ test('Stage 2 sends only selected IDs and question; OFF, empty, unavailable and 
   await assert.rejects(askBuyerOS({request:async()=>candidate},session,options),{message:replyNotices.invalid});
  }
  let resolve;const pending=askBuyerOS({request:()=>new Promise(done=>resolve=done)},session,options);
- session.next({project:'other'});resolve(stage2Reply);await assert.rejects(pending,LiveCancelled);
+ await Promise.resolve();session.next({project:'other'});resolve(stage2Reply);await assert.rejects(pending,LiveCancelled);
 });
 
 test('Stage 2 optional missing API stays non-blocking and genuine permission denial retains the scope guard',async()=>{
@@ -251,4 +251,74 @@ test('local discussion selection replaces its deep-link without invoking route t
   assert.equal(navigateLocalDiscussion(from,to,enabled,history),false);
  }
  assert.equal(entries.length,1);
+});
+
+test('Stage 2b requires explicit research confirmation and reuses the gated run contract',async()=>{
+ const {confirmResearch,conversationLimits,researchNotice,researchNotices}=await import('../services/live/conversation-research.ts');
+ const {SessionScope}=await import('../services/live/session.ts');
+ const {LiveError}=await import('../services/live/client.ts');
+ const {liveZh}=await import('../features/live/locale.ts');
+ const workspace='a1000000-0000-4000-8000-000000000001',project='a2000000-0000-4000-8000-000000000001',run='a4000000-0000-4000-8000-000000000001';
+ const session=new SessionScope({mode:'live',actor:'fixture',workspace,project});session.setToken('fixture');
+ const calls=[];let failure=null;
+ const client={request:async req=>{calls.push(req);if(failure)throw failure;return {id:run,workspace_id:workspace,project_id:project,status:'queued',buyers:'PRIVATE_BUYER_BODY'};}};
+ const options={enabled:true,confirmed:true,review:{profileId:stage2Profile,profileNumber:1,remaining:'1.000000'},maxCost:'0.500000',target:10};
+ for(const changes of [{enabled:false},{confirmed:false},{maxCost:'2.000000'},{target:101}])await assert.rejects(confirmResearch(client,session,{...options,...changes}));
+ assert.equal(calls.length,0);
+ failure=new LiveError('raw private error','REQUEST_TIMEOUT',0,'',true);
+ await assert.rejects(confirmResearch(client,session,options));const unknownKey=calls[0].idempotencyKey;
+ failure=null;assert.deepEqual(await confirmResearch(client,session,options),{id:run,label:'Research run',status:'queued'});
+ assert.equal(calls[1].idempotencyKey,unknownKey);
+ assert.match(calls[0].path,/\/projects\/[^/]+\/runs$/);assert.equal(calls[0].method,'POST');
+ assert.deepEqual(calls[0].body,{icp_version_id:stage2Profile,target_companies:10,max_cost:{amount:'0.500000',currency:'USD'},limits:conversationLimits});
+ for(const code of ['CAPABILITY_DISABLED','PROVIDER_UNAVAILABLE','POLICY_BLOCKED','BUDGET_LIMIT','STALE_REVISION']){
+  failure=new LiveError('raw private error',code,code==='STALE_REVISION'?412:409,'',false);
+  await assert.rejects(confirmResearch(client,session,options));const rejected=calls.at(-1).idempotencyKey;
+  assert.equal(researchNotice(failure),researchNotices[code]);assert.ok(liveZh[researchNotices[code]]);
+  failure=null;await confirmResearch(client,session,options);assert.notEqual(calls.at(-1).idempotencyKey,rejected);
+ }
+ assert.equal(researchNotice(new LiveError('private','PERMISSION_DENIED',403,'',false)),researchNotices.forbidden);
+ for(const value of Object.values(researchNotices))assert.ok(liveZh[value],value);
+});
+
+test('Stage 2b persists only generic run references and never live model bodies',async()=>{
+ const {DiscussionStore}=await import('../services/live/discussions.ts');
+ const saved=new Map(),storage={getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)};
+ const scope={actor:'fixture',workspace:'workspace',project:'project'};
+ const store=new DiscussionStore(true,scope,storage),thread=store.create('research-market','Review a research scope');
+ const run={id:'a4000000-0000-4000-8000-000000000001',label:'Research run',status:'queued'};
+ assert.equal(store.saveRun(thread.id,{...run,body:'PRIVATE_BUYER_BODY'}),false);
+ assert.equal(store.saveRun(thread.id,run),true);
+ assert.equal(store.saveRun(thread.id,{...run,status:'partial'}),true);
+ store.select(thread.id,{id:stage2Ref.id,label:stage2Ref.label},true);
+ assert.equal(store.appendReply(thread.id,'Review?',{...stage2Reply,fixture:false,text:'PRIVATE_FACT_BODY'},[stage2Ref.id]),false);
+ const restored=new DiscussionStore(true,scope,storage);
+ assert.deepEqual(restored.getSnapshot().threads[0].runs,[{...run,status:'partial'}]);
+ assert.doesNotMatch([...saved.values()].join(''),/PRIVATE_BUYER_BODY|PRIVATE_FACT_BODY/);
+ const {liveZh}=await import('../features/live/locale.ts');
+ for(const file of ['features/live/conversation-research.tsx'])for(const [,text] of readFileSync(file,'utf8').matchAll(/\bt\('([^']+)'\)/g))assert.ok(liveZh[text],text);
+});
+
+test('Stage 2b retains an uncertain research key through a later permission denial',async()=>{
+ const {confirmResearch}=await import('../services/live/conversation-research.ts');
+ const {SessionScope}=await import('../services/live/session.ts');
+ const {LiveError}=await import('../services/live/client.ts');
+ const workspace='a1000000-0000-4000-8000-000000000001',project='a2000000-0000-4000-8000-000000000001';
+ const run='a4000000-0000-4000-8000-000000000001',accepted=new Map(),keys=[];
+ const session=new SessionScope({mode:'live',actor:'fixture',workspace,project});session.setToken('fixture');
+ let permitted=true,loseResponse=true;
+ const client={request:async req=>{
+  keys.push(req.idempotencyKey);
+  if(!permitted)throw new LiveError('permission revoked','PERMISSION_DENIED',403,'',false);
+  if(!accepted.has(req.idempotencyKey))accepted.set(req.idempotencyKey,{id:accepted.size?crypto.randomUUID():run,workspace_id:workspace,project_id:project,status:'queued'});
+  if(loseResponse){loseResponse=false;throw new LiveError('response lost','REQUEST_TIMEOUT',0,'',true);}
+  return accepted.get(req.idempotencyKey);
+ }};
+ const options={enabled:true,confirmed:true,review:{profileId:stage2Profile,profileNumber:1,remaining:'1.000000'},maxCost:'0.500000',target:10};
+ await assert.rejects(confirmResearch(client,session,options));
+ permitted=false;await assert.rejects(confirmResearch(client,session,options));
+ permitted=true;
+ assert.deepEqual(await confirmResearch(client,session,options),{id:run,label:'Research run',status:'queued'});
+ assert.equal(new Set(keys).size,1,'a later denial cannot prove that the original request was never accepted');
+ assert.equal(accepted.size,1,'retry after permission restoration must not admit a second run');
 });

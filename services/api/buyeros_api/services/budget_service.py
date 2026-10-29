@@ -11,7 +11,12 @@ from ..db.icp import Project
 
 ZERO = Decimal("0.000000")
 UNIT = Decimal("0.000001")
-CATEGORIES = frozenset({"discovery", "extraction", "assessment", "contact_lookup", "draft_generation", "delivery"})
+CATEGORIES = frozenset({"discovery", "extraction", "assessment", "contact_lookup", "draft_generation", "delivery", "conversation"})
+def enabled_categories():
+    import os
+    return CATEGORIES if os.environ.get('NEXT_PUBLIC_CONVERSATION_HOME') == 'true' else CATEGORIES - {'conversation'}
+
+
 RANK = {"workspace": 0, "project": 1, "run": 2, "category": 3}
 
 

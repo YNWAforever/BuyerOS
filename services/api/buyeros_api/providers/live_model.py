@@ -34,6 +34,10 @@ def _requirement_claims(items):
     return requirement_claims(items)
 
 def _basis(basis):
+    if isinstance(basis,dict) and basis.get('schema')=='conversation-basis.v1':
+        from .conversation_model import validate_basis
+        validate_basis(basis)
+        return {}
     if not isinstance(basis,dict) or basis.get('schema')!='model-basis.v1' or len(canonical_json(basis))>MAX_INPUT_BYTES:raise ValueError('bounded frozen model basis required')
     for key in ['workspace_id','project_id','run_id','buyer_id','company_id','actor_id','icp_version_id']:_canonical_uuid(basis.get(key))
     if type(basis.get('offer_revision')) is not int or basis['offer_revision']<1 or not isinstance(basis.get('icp_hash'),str) or not re.fullmatch(r'(?:sha256:)?[0-9a-f]{64}',basis['icp_hash']):raise ValueError('versioned offer/ICP required')
@@ -58,6 +62,9 @@ def _current_source(item,basis,now):
         and hashlib.sha256(item['source_excerpt'].encode()).hexdigest()==item['source_hash'] and item['excerpt'] in item['source_excerpt'])
 
 def validate_live_proposal(proposal:dict,basis:dict,*,now:datetime|None=None)->dict:
+    if isinstance(basis,dict) and basis.get('schema')=='conversation-basis.v1':
+        from .conversation_model import validate_proposal
+        return validate_proposal(proposal,basis)
     now=now or datetime.now(timezone.utc)
     if now.tzinfo is None:raise ValueError('aware validation time required')
     evidence=_basis(basis)
@@ -102,11 +109,13 @@ class ResponsesModelClient:
             any(type(v) is not int for v in [route.max_input_tokens,route.max_output_tokens,route.deadline_seconds,route.repair_limit])):raise ValueError('verified code-owned model route required')
         # Do not send private expired/foreign source prose to any provider.
         if any(not _current_source(item,basis,now) for item in evidence.values()):raise ValueError('model input has noncurrent or unverified source')
+        from .conversation_model import prompt_schema
+        prompt,schema=prompt_schema(basis)
         payload={'model':self.model_id,'store':False,'tools':[],'tool_choice':'none','parallel_tool_calls':False,
             'max_output_tokens':route.max_output_tokens,
-            'input':[{'role':'developer','content':PROMPT+' Prompt version: '+route.prompt_version},
+            'input':[{'role':'developer','content':prompt+' Prompt version: '+route.prompt_version},
                      {'role':'user','content':canonical_json({'untrusted_source_data':basis}).decode()}],
-            'text':{'format':{'type':'json_schema','name':'buyeros_fit_proposal_v1','strict':True,'schema':PROPOSAL_SCHEMA}}}
+            'text':{'format':{'type':'json_schema','name':'buyeros_fit_proposal_v1','strict':True,'schema':schema}}}
         tokens=self.token_counter(payload)
         if type(tokens) is not int or tokens<1 or tokens>route.max_input_tokens or len(canonical_json(payload))>MAX_INPUT_BYTES:raise ValueError('input token/byte budget exceeded')
         try:

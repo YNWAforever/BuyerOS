@@ -19,6 +19,20 @@ DEFAULT_MODEL_ID='kimi-k3'
 BYTES_PER_TOKEN_FLOOR=3
 
 
+def model_payload(basis:dict,route:ModelRoute,model_id:str)->dict:
+    from .conversation_model import prompt_schema
+    prompt,schema=prompt_schema(basis)
+    system=(prompt+' Prompt version: '+route.prompt_version+
+            ' Reply with one JSON object only, matching this JSON schema: '+json.dumps(schema,separators=(',',':')))
+    payload={'model':model_id,'max_tokens':route.max_output_tokens,'stream':False,
+            'response_format':{'type':'json_object'},
+            'messages':[{'role':'system','content':system},
+                        {'role':'user','content':canonical_json({'untrusted_source_data':basis}).decode()}]}
+    if basis.get('schema')=='conversation-basis.v1':
+        payload.update(tools=[],tool_choice='none',parallel_tool_calls=False)
+    return payload
+
+
 class OpenCodeGoModelClient:
     def __init__(self,*,api_key:str,http:httpx.AsyncClient,model_id:str=DEFAULT_MODEL_ID):
         if not isinstance(api_key,str) or not 1<=len(api_key)<=4096 or any(ord(c)<33 or ord(c)>126 for c in api_key):raise ValueError('server-only model credential required')
@@ -26,12 +40,7 @@ class OpenCodeGoModelClient:
         self._api_key,self.http,self.model_id=api_key,http,model_id
 
     def _payload(self,basis:dict,route:ModelRoute)->dict:
-        system=(PROMPT+' Prompt version: '+route.prompt_version+
-                ' Reply with one JSON object only, matching this JSON schema: '+json.dumps(PROPOSAL_SCHEMA,separators=(',',':')))
-        return {'model':self.model_id,'max_tokens':route.max_output_tokens,'stream':False,
-                'response_format':{'type':'json_object'},
-                'messages':[{'role':'system','content':system},
-                            {'role':'user','content':canonical_json({'untrusted_source_data':basis}).decode()}]}
+        return model_payload(basis,route,self.model_id)
 
     async def complete(self,basis:dict,route:ModelRoute)->dict:
         evidence=_basis(basis);now=datetime.now(timezone.utc)
@@ -41,7 +50,7 @@ class OpenCodeGoModelClient:
         # Do not send private expired/foreign source prose to any provider.
         if any(not _current_source(item,basis,now) for item in evidence.values()):raise ValueError('model input has noncurrent or unverified source')
         payload=self._payload(basis,route);size=len(canonical_json(payload))
-        if size>MAX_INPUT_BYTES or math.ceil(size/BYTES_PER_TOKEN_FLOOR)>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
+        if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema')=='conversation-basis.v1' else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
         try:
             async with asyncio.timeout(route.deadline_seconds):
                 async with self.http.stream('POST',ENDPOINT,json=payload,headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json'},
@@ -52,12 +61,13 @@ class OpenCodeGoModelClient:
                         if len(raw)+len(chunk)>MAX_RESPONSE_BYTES:raise ModelResponseUnknown('model response exceeds byte budget')
                         raw.extend(chunk)
             body=json.loads(raw)
+            if basis.get('schema')=='conversation-basis.v1' and (not isinstance(body,dict) or body.get('model')!=self.model_id):raise ModelResponseUnknown('frozen conversation model changed')
             choices=body.get('choices') if isinstance(body,dict) else None
             if (not isinstance(body.get('id'),str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,240}',body['id'])
                 or not isinstance(choices,list) or len(choices)!=1 or not isinstance(choices[0],dict)
                 or choices[0].get('finish_reason')!='stop'):raise ModelResponseUnknown('model response incomplete or unverified')
             message=choices[0].get('message')
-            if (not isinstance(message,dict) or message.get('role')!='assistant' or message.get('tool_calls')
+            if (not isinstance(message,dict) or message.get('role')!='assistant' or message.get('tool_calls') or message.get('function_call') or message.get('refusal')
                 or not isinstance(message.get('content'),str)):raise ModelResponseUnknown('model tool/foreign role output blocked')
             text=message['content'].strip()
             if text.startswith('```'):text=re.sub(r'^```(?:json)?\s*|\s*```$','',text)

@@ -29,7 +29,7 @@ from ..api.errors import ApiError
 from ..db.budget import BudgetAccount, BudgetReservation, BudgetReservationAllocation, CostEvent
 from ..db.icp import Project
 from ..db.runs import ContactPoint
-from .budget_service import CATEGORIES, ZERO, UNIT
+from .budget_service import enabled_categories, ZERO, UNIT
 from .policy_service import evaluate_current_policy, policy_workspace_lock
 
 DENOMINATOR = ("Distinct project companies first accepted in the UTC half-open period "
@@ -154,7 +154,7 @@ async def get_usage(session, *, workspace_id, project_id, from_utc, to_utc, as_o
     held_by={name:Decimal(value) for name,value in held_rows}
     categories=[{"category": name, "settled": _signed(settled_by.get(name,ZERO)),
                  "reserved": _unsigned(held_by.get(name,ZERO))}
-                for name in sorted(CATEGORIES)]
+                for name in sorted(enabled_categories())]
     total_settled=sum(settled_by.values(),ZERO)
     total_reserved=sum(held_by.values(),ZERO)
     account=(await session.execute(select(BudgetAccount).where(
