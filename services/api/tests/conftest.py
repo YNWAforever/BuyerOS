@@ -201,6 +201,9 @@ def seeded(migrated):
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         # A failing test may leave members before its teardown; workspace
         # deletion must not cascade the whole shared-fixture session.
+        conn.execute("DELETE FROM conversation_threads WHERE workspace_id IN (%s, %s)",
+                     ("11111111-1111-4111-8111-111111111111",
+                      "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM memberships WHERE workspace_id IN (%s, %s)",
                      ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM projects WHERE workspace_id IN (%s, %s)",

@@ -107,6 +107,8 @@ def create_app() -> FastAPI:
     if os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") == "true":
         from .routes.conversation import router as conversation_router
         app.include_router(conversation_router)
+        from .routes.conversation_threads import router as conversation_threads_router
+        app.include_router(conversation_threads_router)
 
     # This runs inside request correlation and outside route dependencies.
     app.add_middleware(WritePreconditionMiddleware)
@@ -124,7 +126,11 @@ def create_app() -> FastAPI:
         marker = request_correlation.set(request.state.request_id)
         bucket_marker = request_rate_bucket.set(classify_request(request.method, request.url.path))
         try:
-            if (request.method == "GET" and request.url.path.startswith("/v1/")
+            if ("/conversation-threads" in request.url.path
+                    and os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") != "true"):
+                response = JSONResponse(status_code=404,
+                    content=error_body(request, code="NOT_FOUND", message="request failed"))
+            elif (request.method == "GET" and request.url.path.startswith("/v1/")
                     and not get_settings().live_read_enabled):
                 response = JSONResponse(
                     status_code=503,
@@ -137,6 +143,8 @@ def create_app() -> FastAPI:
         finally:
             request_rate_bucket.reset(bucket_marker)
             request_correlation.reset(marker)
+        if "/conversation-threads" in request.url.path:
+            response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request.state.request_id
         return response
 

@@ -11,6 +11,7 @@ from . import (  # noqa: F401
     buyers,
     buyer_imports,
     contact,
+    conversation_threads,
     drafts,
     delivery,
     icp,

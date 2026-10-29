@@ -223,6 +223,11 @@ export class DiscussionStore {
     return this.save([thread, ...this.snapshot.threads]) ? thread : null;
   }
 
+  remove(id: string): boolean {
+    if (!this.active || !this.snapshot.threads.some(row => row.id === id)) return false;
+    return this.save(this.snapshot.threads.filter(row => row.id !== id));
+  }
+
   append(id: string, text: string): boolean {
     if (!this.active) return false;
     const thread = this.snapshot.threads.find(row => row.id === id);

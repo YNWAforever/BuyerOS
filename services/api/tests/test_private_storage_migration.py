@@ -28,7 +28,7 @@ def test_private_storage_empty_roundtrip_and_populated_refusal(isolated_migrated
         with pytest.raises(RuntimeError, match="retain private document bytes"):
             command.downgrade(config, "0051_buyer_imports")
         with psycopg.connect(dsn) as db:
-            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0057_conversation_model",)
+            assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0058_conversation_threads",)
             assert bytes(db.execute("SELECT body FROM private_document_objects WHERE id=%s", (object_id,)).fetchone()[0]) == b"hello"
             db.execute("DELETE FROM private_document_objects WHERE id=%s", (object_id,))
         command.downgrade(config, "0051_buyer_imports")

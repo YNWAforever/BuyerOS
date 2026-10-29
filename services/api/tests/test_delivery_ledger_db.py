@@ -10,7 +10,7 @@ from tests.test_lookup_quotes_db import quote_case,WORKSPACE_A
 from tests.test_api_tenant_isolation import WORKSPACE_B
 from tests.test_delivery_preparation_db import approved,prepare
 
-HEAD='0057_conversation_model';PREVIOUS='0047_c61_legacy_source_privacy'
+HEAD='0058_conversation_threads';PREVIOUS='0047_c61_legacy_source_privacy'
 TABLES=('delivery_messages','delivery_events','delivery_liabilities')
 
 def config():

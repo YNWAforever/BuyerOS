@@ -322,3 +322,34 @@ test('Stage 2b retains an uncertain research key through a later permission deni
  assert.equal(new Set(keys).size,1,'a later denial cannot prove that the original request was never accepted');
  assert.equal(accepted.size,1,'retry after permission restoration must not admit a second run');
 });
+
+test('Stage 3 server routes, badges and read-only composer remain flag gated',async()=>{
+ const {discussionForPath}=await import('../features/live/conversation-home.ts');
+ const id='12345678-1234-4123-8123-123456789012',path='/app/discussions/s/'+id;
+ assert.equal(discussionForPath(path,false),undefined);assert.equal(discussionForPath(path,true).id,'s/'+id);
+ const {LiveDiscussion}=await import('../features/live/discussion.tsx');
+ const thread={id,templateId:'custom',title:'Workspace note',createdAt:1,updatedAt:2,messages:[{id:'one',text:'Synthetic'}],sources:[],version:1,access:'viewer',shareCount:0};
+ const base={t:x=>x,locale:'en',thread,threads:[],value:'',notice:'',context:[],navigate:()=>{},onTemplate:()=>{},onChange:()=>{},onSend:()=>{},onSource:()=>{},onRefresh:()=>{},storageKind:'workspace',readOnly:true,onAsk:()=>{},canAsk:false};
+ const tree=LiveDiscussion(base),html=renderToStaticMarkup(tree);
+ assert.match(html,/Saved to this workspace/);assert.doesNotMatch(html,/Messages stay local|Send saves your message locally/);
+ assert.equal(nodes(tree).find(node=>node.type==='textarea').props.disabled,true);assert.equal(button(tree,'Ask BuyerOS').props.disabled,true);
+ const home=renderToStaticMarkup(LiveDiscussion({...base,thread:null,workspaceThreads:[thread]}));
+ assert.match(home,/Shared with you/);assert.match(home,/Viewer/);
+ for(const access of ['owner','editor','viewer']){
+  const copy=renderToStaticMarkup(LiveDiscussion({...base,thread:null,workspaceThreads:[{...thread,access,shareCount:access==='owner'?2:0}]}));
+  assert.match(copy,new RegExp(access==='owner'?'Shared with':access==='editor'?'Editor':'Viewer'));
+ }
+});
+
+test('Stage 3 save/share dialogs use native keyboard modal controls and localized privacy copy',async()=>{
+ const {SaveWorkspace,ShareThread}=await import('../features/live/discussion-sharing.tsx');
+ const {createElement}=await import('react');const {liveZh}=await import('../features/live/locale.ts');
+ const thread={id:'server',templateId:'custom',title:'Workspace note',createdAt:1,updatedAt:2,messages:[{id:'one',text:'Synthetic'}],sources:[],version:1,access:'owner',shareCount:0};
+ for(const locale of ['en','zh-HK']){
+  const t=value=>locale==='en'?value:liveZh[value]||value;
+  const html=renderToStaticMarkup(createElement(SaveWorkspace,{api:{},thread,t,onRemove:()=>{},navigate:()=>{}}));
+  assert.match(html,/<dialog[^>]+aria-labelledby="save-workspace-title"/);assert.ok(html.includes(t('Confirm workspace save')));
+  const shares=renderToStaticMarkup(createElement(ShareThread,{api:{},thread,t,onChange:()=>{},onError:()=>{}}));
+  assert.match(shares,/<dialog[^>]+aria-labelledby="share-thread-title"/);assert.ok(shares.includes(t('Share role')));
+ }
+});
