@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import {LiveCancelled} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
@@ -16,14 +16,14 @@ export function ConversationResearch({client,session,store,thread,t,navigate,sav
   const mounted=useRef(true),pending=useRef(false),dialog=useRef<HTMLDialogElement>(null),proposal=useRef<HTMLButtonElement>(null);
   const identity=session.identity();
   const current=()=>mounted.current&&session.isCurrent(identity)&&!!session.token();
-  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+  useLayoutEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   useEffect(()=>{
     if(review){dialog.current?.showModal();dialog.current?.querySelector<HTMLButtonElement>('button')?.focus();}
   },[review]);
   async function propose(){
     if(pending.current||!current())return;
     pending.current=true;setBusy(true);setNotice('');
-    try{await beforeResearch?.();const value=await reviewResearch(client,session,true,session.controller().signal);if(current())setReview(value);}
+    try{await beforeResearch?.();if(!current())return;const value=await reviewResearch(client,session,true,session.controller().signal);if(current())setReview(value);}
     catch(error){if(current()&&!(error instanceof LiveCancelled))setNotice(error instanceof Error&&error.message===researchNotices.context?error.message:researchNotice(error));}
     finally{pending.current=false;if(current())setBusy(false);}
   }
@@ -41,6 +41,7 @@ export function ConversationResearch({client,session,store,thread,t,navigate,sav
     pending.current=true;setBusy(true);setNotice('');
     try{
       await beforeResearch?.();
+      if(!current())return;
       const run=await confirmResearch(client,session,{enabled:true,confirmed:true,review,maxCost:cost(maxCost)??maxCost,target});
       await save(run);if(current()){dialog.current?.close();setReview(null);proposal.current?.focus();}
     }catch(error){if(current()&&!(error instanceof LiveCancelled))setNotice(researchNotice(error));}

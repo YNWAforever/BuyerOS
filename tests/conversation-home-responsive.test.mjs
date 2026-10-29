@@ -499,6 +499,21 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
    await composer.waitFor();
    assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,paidCount,'unmount during the ACL recheck cannot launch a paid request');
    assert.equal(await composer.inputValue(),'');
+   for(const exit of ['permission','thread']){
+    await page.getByRole('button',{name:'Propose research',exact:true}).click();
+    holdCheck=true;const confirmCheck=new Promise(resolve=>checkStarted=resolve);
+    await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();await confirmCheck;
+    // Simulate an external permission update or route change while the modal
+    // is waiting for its ACL response, before any paid admission has started.
+    await page.getByRole('button',{name:exit==='permission'?'Revoke offer access':'Home',exact:true}).first().evaluate(button=>button.click());
+    await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});
+    holdCheck=false;const checked=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await (await checked).finished();
+    if(exit==='permission')await page.getByRole('button',{name:'Restore offer access',exact:true}).click();
+    else await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();
+    await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.equal(posts.filter(post=>post.path.endsWith('/runs')&&!post.path.includes('/conversation-threads/')).length,1,`${exit} unmount during the research ACL recheck must not start paid research`);
+   }
   }else await page.getByText(runFailure===409?'This discussion changed. Copy any unsaved text before reloading.':'This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();
   heldReads.splice(0).forEach(resolve=>resolve());assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
