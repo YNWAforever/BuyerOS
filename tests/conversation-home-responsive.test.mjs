@@ -329,3 +329,77 @@ test('Stage 2b keyboard confirmation, localized gate failures, run continuity an
   assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+test('Stage 3 confirmed import retries once, shares by keyboard, restores and preserves stale text',async()=>{
+ const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
+ const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
+ mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-server-browser-');writeFileSync(dir+'/entry.jsx',browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+readFileSync('features/live/discussion.css','utf8')+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();let browser;
+ try{
+  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+  const page=await browser.newPage(),posts=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const id='12345678-1234-4123-8123-123456789012',member={member_id:'22345678-1234-4123-8123-123456789012',display_name:'Synthetic colleague'};
+  let row=null,grants=[],uncertain=true,stale=false,access='owner',forbidden=false;
+  await page.route('**/v1/**',async route=>{
+   const req=route.request(),url=new URL(req.url()),path=url.pathname,method=req.method();
+   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage3-synthetic'}});
+   if(!path.includes('/conversation-threads'))return ok(contextResponse(url));
+   if(method==='GET'){
+    if(path.endsWith('/conversation-threads'))return ok({items:row?[{...row,access}]:[],offset:0,limit:50,total:row?1:0});
+    if(forbidden)return route.fulfill({status:404,json:{code:'NOT_FOUND',message:'discussion not found'}});
+    if(path.endsWith('/share-recipients'))return ok({items:[member],offset:0,limit:25});
+    if(path.endsWith('/shares'))return ok({items:grants,version:row.version});
+    return ok({...row,access});
+   }
+   posts.push({path,method,body:req.postData()?req.postDataJSON():null,key:req.headers()['idempotency-key'],version:req.headers()['x-buyeros-if-match']});
+   if(path.endsWith('/conversation-threads')){
+    row??={id,templateId:'custom',title:'Synthetic workspace note',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Synthetic workspace note'}],sources:[],runs:[],version:1,access:'owner',shareCount:0};
+    if(uncertain){uncertain=false;return route.fulfill({status:503,json:{code:'UNAVAILABLE',message:'uncertain'}});}return ok(row);
+   }
+   if(path.endsWith('/messages')){
+    if(stale)return route.fulfill({status:409,json:{code:'STALE_REVISION',message:'changed'}});
+    row={...row,version:row.version+1,messages:[...row.messages,{id:'m2',text:req.postDataJSON().text}]};return ok(row);
+   }
+   if(path.includes('/shares/')){
+    grants=method==='DELETE'?[]:[{...member,role:req.postDataJSON().role,active:true}];row={...row,version:row.version+1,shareCount:grants.length};return ok(row);
+   }
+   throw new Error('unexpected thread write '+path);
+  });
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.getByRole('textbox').fill('Synthetic workspace note');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByLabel('Discussion messages',{exact:true}).waitFor();assert.equal(posts.length,0,'local notes never auto-upload');
+  await page.getByRole('button',{name:'Save to workspace',exact:true}).click();assert.equal(posts.length,0,'opening confirmation cannot import');
+  await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByRole('button',{name:'Open workspace discussion',exact:true}).waitFor();
+  assert.equal(posts.length,2);assert.equal(posts[0].key,posts[1].key);assert.deepEqual(posts[0].body,{confirmed:true,template_id:'custom',title:'Synthetic workspace note',messages:[{text:'Synthetic workspace note'}],sources:[],runs:[]});
+  assert.match(await page.evaluate(()=>Object.values(localStorage).join('')),/Synthetic workspace note/);
+  await page.getByRole('button',{name:'Open workspace discussion',exact:true}).click();await page.getByText('Saved to this workspace · visible to you and people you share with',{exact:true}).waitFor();
+  await page.reload();await page.getByRole('button',{name:'Share discussion',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Share discussion',exact:true}).focus();await page.keyboard.press('Enter');
+  await page.getByRole('dialog',{name:'Share discussion',exact:true}).waitFor();
+  for(const width of [320,390,480,600,768,820,1023,1024,1440]){
+   await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`share dialog overflows ${width}`);
+  }
+  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByRole('button',{name:'共用討論',exact:true}).focus();await page.keyboard.press('Enter');
+  await page.getByRole('dialog',{name:'共用討論',exact:true}).waitFor();
+  for(const width of [320,390,480,600,768,820,1023,1024,1440]){
+   await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`zh-HK share dialog overflows ${width}`);
+  }
+  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Change language',exact:true}).click();await page.getByRole('button',{name:'Share discussion',exact:true}).click();
+  await page.getByLabel('Find workspace member').fill('Synthetic');await page.getByRole('button',{name:'Search members',exact:true}).click();
+  await page.getByLabel('Share role',{exact:true}).selectOption('editor');await page.getByRole('button',{name:'Share with member',exact:true}).click();await page.getByRole('button',{name:'Make viewer',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Make viewer',exact:true}).click();await page.getByRole('button',{name:'Make editor',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Revoke access',exact:true}).click();await page.getByRole('button',{name:'Make editor',exact:true}).waitFor({state:'detached'});
+  await page.keyboard.press('Escape');assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).evaluate(node=>document.activeElement===node),true);
+  stale=true;await page.getByLabel('Discussion message',{exact:true}).fill('Keep this unsaved text');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByText('This discussion changed. Copy any unsaved text before reloading.',{exact:true}).waitFor();assert.equal(await page.getByLabel('Discussion message',{exact:true}).inputValue(),'Keep this unsaved text');
+  access='viewer';stale=false;await page.reload();await page.getByText('Shared with you',{exact:false}).waitFor();
+  assert.equal(await page.getByLabel('Discussion message',{exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Propose research',exact:true}).count(),0);assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0);
+  forbidden=true;await page.reload();await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();assert.equal(await page.getByLabel('Discussion messages',{exact:true}).count(),0);
+  const before=posts.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Save to workspace',exact:true}).count(),0);assert.equal(posts.length,before);
+  assert.deepEqual(errors,[]);
+ }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
+});

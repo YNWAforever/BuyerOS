@@ -73,7 +73,7 @@ def test_buyer_source_check_model_has_independent_persisted_fields():
 
 def test_buyer_source_check_migration_advances_schema_receipt_fences(isolated_migrated):
     with psycopg.connect(isolated_migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0057_conversation_model"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0058_conversation_threads"
         assert conn.execute(
             "SELECT public.buyeros_search_receipts_writable(), "
             "public.buyeros_model_receipts_writable(), "

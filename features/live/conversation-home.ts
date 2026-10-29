@@ -34,6 +34,7 @@ export function discussionForPath(pathname: string, enabled: boolean): Discussio
   if (!enabled) return undefined;
   if (pathname === '/app') return {id:'home',title:'Discussions'};
   if (pathname === '/app/discussions/new') return {id:'new',title:'New discussion'};
+  if(/^\/app\/discussions\/s\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(pathname))return {id:'s/'+pathname.split('/')[4],title:'Discussion'};
   const legacy=illustrativeDiscussions.find(item => pathname === `/app/discussions/${item.id}`);
   if(legacy)return legacy;
   if(/^\/app\/discussions\/local-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(pathname))return {id:pathname.split('/')[3],title:'Discussion'};

@@ -8,6 +8,18 @@ _WRITERS = frozenset({"operator", "workspace_admin"})
 
 # Transcribed from the contract's `x-permitted-roles`, for the operations P9 implements.
 OPERATION_ROLES: dict[str, frozenset[str]] = {
+    "listConversationThreads": _VIEWERS,
+    "createConversationThread": _VIEWERS,
+    "getConversationThread": _VIEWERS,
+    "renameConversationThread": _VIEWERS,
+    "appendConversationThreadMessage": _VIEWERS,
+    "setConversationThreadSources": _VIEWERS,
+    "appendConversationThreadRun": _VIEWERS,
+    "deleteConversationThread": _VIEWERS,
+    "searchConversationThreadRecipients": _VIEWERS,
+    "listConversationThreadShares": _VIEWERS,
+    "putConversationThreadShare": _VIEWERS,
+    "revokeConversationThreadShare": _VIEWERS,
     "listWorkspaces": _VIEWERS,
     "listProjects": _VIEWERS,
     "getProject": _VIEWERS,

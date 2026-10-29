@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
 
-HEAD = "0057_conversation_model"
+HEAD = "0058_conversation_threads"
 
 
 def _config():

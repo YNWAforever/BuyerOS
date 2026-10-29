@@ -88,21 +88,21 @@ historical evidence and open activation decisions. Dated status tables,
 [DEVELOPER_HANDOFF.md](DEVELOPER_HANDOFF.md), and the original architecture proposals
 refer to their recorded commits; use the guides above and current source for commands.
 
-## Conversation home — Stage 2b Preview
+## Conversation home — Stage 3 Preview
 
 `NEXT_PUBLIC_CONVERSATION_HOME === 'true'` opts the **live** workspace into
 Conversation home. Unset (default), `false`, or any other value retains the
-#39 OFF Overview, navigation, guards and reads. Preview is already enabled;
+#40 OFF Overview, navigation, guards and reads. Preview is already enabled;
 this change requires no Vercel environment edits. Production remains unset/OFF.
 
 `/app` and `/app/discussions/new` offer six BuyerOS guided templates and a local
 composer. `/app/discussions/<localId>` restores messages and selected source
-references after refresh. Continue working lists only the current actor,
-workspace and project's discussions, newest first. The two Stage 0 example
+references after refresh. Continue working lists device discussions plus owned and explicitly shared workspace
+discussions for the current actor, workspace and project, newest first. The two Stage 0 example
 bookmarks remain template entry pages. All destination buttons use the existing
 guarded navigation with workspace/project and any selected record IDs.
 
-Messages are **saved on this device only, not shared**. A versioned, strictly
+New discussions still default to **saved on this device only, not shared**. A versioned, strictly
 validated `buyeros.discussions.v1:<actor>:<workspace>:<project>` key uses encoded
 scope components. Limits: 256 KiB UTF-8 per scope, 30 threads, 100 messages and
 100 selected sources per thread, 4,000 characters per message. Invalid, foreign,
@@ -116,6 +116,38 @@ Source selections persist only IDs and generic labels; filenames, document conte
 fact values, buyer records and draft bodies are never copied into the store.
 Do not enter private buyer details, draft bodies or document text into messages.
 
+**Save to workspace** opens an explicit per-thread confirmation. It imports only
+user notes, title, template ID, source IDs/generic labels and run IDs/labels/status;
+AI replies and citations are excluded. No existing device thread is auto-uploaded.
+The device copy stays until you explicitly remove it after a successful save.
+Uncertain saves retain the same request key and import snapshot for retry in this
+session. Workspace threads reopen at `/app/discussions/s/<uuid>` after refresh or
+in another signed-in browser. Device and workspace storage are clearly badged.
+
+Workspace threads are private until their owner shares them with named active
+members of the same workspace with project-view permission. `viewer` can read;
+`editor` can append notes and references. Only the owner can rename, share, change
+roles, revoke or hard delete. Workspace admins cannot override a private thread.
+Membership, project access and current shares are rechecked on every request and
+before replay; revoked/deactivated access returns 404 without exposing existence.
+Viewers cannot Ask/research into shared threads. Editor Ask and research retain
+the existing Offer/startRun gates; only notes and run references are persisted.
+
+Server limits: 200 owned threads per actor/project, 25 shares per thread, title
+80 characters, 100 notes/sources/run references, 4,000 characters per note.
+`Idempotency-Key` fences imports, appends and grants. `If-Match` fences mutations;
+stale writes ask you to copy unsaved text and reload, and unavailable writes keep
+the composer text. Thread caches/intents are scope-bound and cleared on sign-out
+or scope change. The new API returns 404 when the flag is not exactly `true`.
+
+Alembic **0058_conversation_threads**, after historical 0057, adds three FORCE RLS
+tables with tenant/project composite FKs and API-only least-privilege grants.
+Source/run refs use bounded, DB-validated JSONB so reference replacement is atomic
+with the thread version; notes and shares have separate relational rows. All three
+receipt-writable fences now point to 0058. Empty downgrade restores 0057; populated
+downgrade refuses to erase user data. No seeded data, worker grants or admission
+changes. [Stage 3 API and schema details](docs/buyeros/CONVERSATION_THREADS_STAGE3.md).
+
 Documents & outputs reads existing project records with current permissions:
 offer documents/extraction state, candidate and approved facts, recent runs with
 authoritative statuses, and the current UTC month's Results counts. Reads are
@@ -126,7 +158,7 @@ only with the authoritative active reviewer-approved current profile. Document
 candidates always need reviewer approval. Offer context follows the existing
 active-project/operator Offer gate; other retained surfaces keep their own gates.
 
-Templates and Send retain deterministic **Guided step · no AI** copy in English
+For device threads, templates and Send retain deterministic **Guided step · no AI** copy in English
 and zh-HK. These actions, source selection and thread navigation make no network
 calls. Project context uses existing GETs only; refreshing the page
 or changing validated scope may reload context. Offer document links focus the
@@ -194,7 +226,7 @@ permission changes discard in-flight replies. Error states keep the question.
 Preview stays true, Production stays unset, and this change edits no environments.
 
 Out of scope: enrichment/contact quotes, approval, exports or sending from chat;
-server-side discussions, sharing/ACL (Stage 3); SME/GSC/Firecrawl/DataForSEO,
+SME/GSC/Firecrawl/DataForSEO,
 CRM/shared-library connectors or OAuth; paid live Preview/Production smoke or any
 environment edits; Production enablement, deployment/promotion or merging;
 auth/Neon/delivery eligibility changes or removal of retained work surfaces.
@@ -204,5 +236,5 @@ Checks: `node --test tests/audit-conversation-home.test.mjs`,
 local Chromium), `pnpm test:core`, `pnpm exec tsc --noEmit`, `pnpm lint`,
 `pnpm build`, and
 `NEXT_PUBLIC_CONVERSATION_HOME=true node scripts/run-vercel.mjs build`.
-API negatives: `cd services/api && uv run --frozen pytest tests/test_conversation_reply.py tests/test_conversation_reply_db.py tests/test_conversation_model.py tests/test_conversation_admission_db.py tests/test_conversation_research_db.py`
+API/DB checks: `cd services/api && uv run --frozen pytest tests/test_conversation_threads_db.py tests/test_conversation_threads_api.py tests/test_conversation_reply.py tests/test_conversation_reply_db.py tests/test_conversation_model.py tests/test_conversation_admission_db.py tests/test_conversation_research_db.py`
 (database cases require the existing disposable PostgreSQL fixture).

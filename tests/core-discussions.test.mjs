@@ -292,3 +292,43 @@ test('stale appends and source changes preserve both persisted and tab-only work
     assert.match(stale.getSnapshot().notice,/another tab/i);
   }
 });
+
+test('Stage 3 requires explicit import confirmation and strips all AI/context bodies',async()=>{
+  const {workspaceImport,ConversationThreads}=await loadModule('services/live/conversation-threads.ts');
+  const {SessionScope}=await loadModule('services/live/session.ts');
+  const thread={...validThread(),sources:[{id:'document:one',label:'Offer document',text:'DOCUMENT_BODY'}],runs:[{id:'00000000-0000-4000-8000-000000000001',label:'Research run',status:'queued',text:'RUN_BODY'}]};
+  thread.messages.push({id:'ai',kind:'ai',text:'LIVE_AI_BODY',citations:[{text:'CITATION_BODY'}]});
+  assert.throws(()=>workspaceImport(thread,false),/confirmation/);
+  const body=workspaceImport(thread,true);
+  assert.deepEqual(body.messages,[{text:'A question'}]);assert.deepEqual(body.sources,[{id:'document:one',label:'Offer document'}]);
+  assert.doesNotMatch(JSON.stringify(body),/LIVE_AI_BODY|CITATION_BODY|DOCUMENT_BODY|RUN_BODY/);
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'workspace',project:'project'});session.setToken('test');
+  let calls=0;const api=new ConversationThreads({request:async()=>{calls++;return {}; }},session,true);
+  assert.equal(calls,0,'constructing or listing local threads cannot auto-upload');
+  assert.throws(()=>api.import(thread,false),/confirmation/);assert.equal(calls,0);
+  await api.import(thread,true);assert.equal(calls,1);
+});
+
+test('Stage 3 uncertain writes retain the key and version; scope changes fence late results',async()=>{
+  const {ConversationThreads}=await loadModule('services/live/conversation-threads.ts');
+  const {SessionScope}=await loadModule('services/live/session.ts');
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'workspace',project:'project'});session.setToken('test');
+  const calls=[];let fail=true;
+  const api=new ConversationThreads({request:async options=>{calls.push(options);if(fail)throw new Error('offline');return {id:'server'};}},session,true);
+  const thread={...validThread(),version:7};
+  await assert.rejects(()=>api.append(thread,'Unsaved note'),/offline/);fail=false;
+  await api.append(thread,'Unsaved note');
+  assert.equal(calls[0].idempotencyKey,calls[1].idempotencyKey);assert.equal(calls[0].ifMatch,'"7"');
+  assert.deepEqual(calls[0].body,{text:'Unsaved note'});
+  session.next({project:'other'});await assert.rejects(()=>api.get('server'),/scope changed/);assert.equal(calls.length,2);
+  const disabled=new ConversationThreads({request:()=>assert.fail('OFF networking')},session,false);
+  await assert.rejects(()=>disabled.list(),/scope changed/);
+});
+
+test('removing a local copy is explicit and still respects the stale-tab fence',()=>{
+  const port=storage(),own=store(true,scope,port),thread=own.create('custom','Keep until removed');
+  const other=store(true,scope,port);other.append(thread.id,'Another tab');
+  assert.equal(own.remove(thread.id),false);assert.equal(own.getSnapshot().threads.length,1);
+  const current=store(true,scope,port);assert.equal(current.remove(thread.id),true);
+  assert.equal(store(true,scope,port).getSnapshot().threads.length,0);
+});

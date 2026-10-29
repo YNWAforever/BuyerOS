@@ -9,8 +9,8 @@ import {hasUncertainResearch} from '@/services/live/runs';
 
 const limitLabels:Record<string,string>={query_rounds:'Query rounds',max_queries_per_run:'Queries per run',max_results:'Maximum results',max_pages:'Maximum pages',max_page_bytes:'Bytes per page',max_duration_seconds:'Time limit (seconds)',max_model_tokens:'Model token limit',provider_concurrency:'Concurrent provider calls'};
 function cost(value:string){if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(value))return null;const [whole,fraction='']=value.split('.');return `${whole}.${fraction.padEnd(6,'0')}`;}
-type Props={client:LiveClient;session:SessionScope;store:DiscussionStore;thread:LocalThread;t:(text:string)=>string;navigate:(path:string)=>void};
-export function ConversationResearch({client,session,store,thread,t,navigate}:Props){
+type Props={client:LiveClient;session:SessionScope;store?:DiscussionStore;saveRun?:(run:RunReference)=>Promise<void>;beforeResearch?:()=>Promise<void>;thread:LocalThread;t:(text:string)=>string;navigate:(path:string)=>void};
+export function ConversationResearch({client,session,store,thread,t,navigate,saveRun,beforeResearch}:Props){
   const [review,setReview]=useState<ResearchReview|null>(null),[maxCost,setMaxCost]=useState('0.500000'),[target,setTarget]=useState(10);
   const [busy,setBusy]=useState(false),[notice,setNotice]=useState('');
   const mounted=useRef(true),pending=useRef(false),dialog=useRef<HTMLDialogElement>(null),proposal=useRef<HTMLButtonElement>(null);
@@ -23,13 +23,15 @@ export function ConversationResearch({client,session,store,thread,t,navigate}:Pr
   async function propose(){
     if(pending.current||!current())return;
     pending.current=true;setBusy(true);setNotice('');
-    try{const value=await reviewResearch(client,session,true,session.controller().signal);if(current())setReview(value);}
+    try{await beforeResearch?.();const value=await reviewResearch(client,session,true,session.controller().signal);if(current())setReview(value);}
     catch(error){if(current()&&!(error instanceof LiveCancelled))setNotice(error instanceof Error&&error.message===researchNotices.context?error.message:researchNotice(error));}
     finally{pending.current=false;if(current())setBusy(false);}
   }
   function close(){if(pending.current)return;dialog.current?.close();setReview(null);proposal.current?.focus();}
   async function save(ref:RunReference){
     if(!current())return;
+    if(saveRun){await saveRun(ref);return;}
+    if(!store)return;
     let saved=false;
     await store.withLocalWrite(current,()=>{saved=store.saveRun(thread.id,ref);});
     if(current()&&!saved)setNotice('Research was accepted, but its reference could not be saved. Open Research runs.');
@@ -38,6 +40,7 @@ export function ConversationResearch({client,session,store,thread,t,navigate}:Pr
     if(!review||pending.current||!current())return;
     pending.current=true;setBusy(true);setNotice('');
     try{
+      await beforeResearch?.();
       const run=await confirmResearch(client,session,{enabled:true,confirmed:true,review,maxCost:cost(maxCost)??maxCost,target});
       await save(run);if(current()){dialog.current?.close();setReview(null);proposal.current?.focus();}
     }catch(error){if(current()&&!(error instanceof LiveCancelled))setNotice(researchNotice(error));}

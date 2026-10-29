@@ -1,7 +1,10 @@
 'use client';
-import {useEffect,useLayoutEffect,useMemo,useRef,useState,useSyncExternalStore} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
+import {ConversationThreads,type ServerSummary} from '@/services/live/conversation-threads';
+import {ServerConversation,useThreadApi} from './discussion-server';
+import {SaveWorkspace} from './discussion-sharing';
 import {DiscussionStore} from '@/services/live/discussions';
 import {loadDiscussionContext,type ContextSection} from '@/services/live/discussion-context';
 import {askBuyerOS,replyNotices} from '@/services/live/conversation-reply';
@@ -22,22 +25,29 @@ function resources(session:SessionScope){
   }
   return {stores:stores.get(session)!,reads:reads.get(session)!};
 }
+function discussionStoreFor(stores:Map<string,DiscussionStore>,key:string,scope:{actor:string;workspace:string;project:string}){
+  const cached=stores.get(key);if(cached)return cached;
+  let storage:Storage|undefined;try{storage=window.localStorage;}catch{/* Notice comes from the store. */}
+  const created=new DiscussionStore(true,scope,storage);stores.set(key,created);return created;
+}
 type Props={enabled:boolean;session:SessionScope;client:LiveClient;pathname:string;locale:'en'|'zh-HK';t:(value:string)=>string;navigate:(path:string)=>void;canViewOffer:boolean;canViewResults:boolean};
 export function LiveConversation(props:Props){
   if(!conversationHomeEnabled(props.enabled?'true':undefined)||!discussionForPath(props.pathname,true))return null;
   const snapshot=props.session.getSnapshot();
   if(!snapshot.authenticated||!snapshot.scope.workspace||!snapshot.scope.project)return null;
+  const route=discussionForPath(props.pathname,true)!;
+  if(route.id.startsWith('s/'))return <ServerConversation key={snapshot.identity+route.id} {...props} id={route.id.slice(2)}/>;
   return <ScopedConversation key={snapshot.identity} {...props}/>;
 }
 function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOffer,canViewResults}:Props){
-  const identity=session.identity(),scope=session.current();
-  const cache=resources(session),scopeKey=JSON.stringify([scope.actor,scope.workspace,scope.project]);
-  const store=useMemo(()=>{
-    const cached=cache.stores.get(scopeKey);if(cached)return cached;
-    let storage:Storage|undefined;try{storage=window.localStorage;}catch{/* Notice comes from the store. */}
-    const created=new DiscussionStore(true,{actor:scope.actor,workspace:scope.workspace!,project:scope.project!},storage);
-    cache.stores.set(scopeKey,created);return created;
-  },[cache.stores,scopeKey,scope.actor,scope.workspace,scope.project]);
+  const identity=session.identity(),{actor,workspace,project}=session.current();
+  const threadApi=useThreadApi(client,session);
+  const [workspaceThreads,setWorkspaceThreads]=useState<ServerSummary[]>([]),[workspaceNotice,setWorkspaceNotice]=useState(''),[workspaceTotal,setWorkspaceTotal]=useState(0);
+  const listRead=useRef<Promise<Awaited<ReturnType<ConversationThreads['list']>>>|null>(null);
+  async function moreThreads(){try{const page=await threadApi.list(workspaceThreads.length);if(session.isCurrent(identity)){setWorkspaceThreads(rows=>[...rows,...page.items]);setWorkspaceTotal(page.total);}}catch{setWorkspaceNotice('Workspace discussions are unavailable. Your unsaved text is still here.');}}
+  useEffect(()=>{let active=true;if(!listRead.current)listRead.current=threadApi.list();void listRead.current.then(page=>{if(active){setWorkspaceThreads(page.items);setWorkspaceTotal(page.total);}}).catch(()=>{if(active)setWorkspaceNotice('Workspace discussions are unavailable. Your unsaved text is still here.');});return()=>{active=false;};},[threadApi]);
+  const cache=resources(session),scopeKey=JSON.stringify([actor,workspace,project]);
+  const store=discussionStoreFor(cache.stores,scopeKey,{actor,workspace:workspace!,project:project!});
   const snapshot=useSyncExternalStore(store.subscribe,store.getSnapshot,store.getSnapshot);
   const [value,setValue]=useState(''),[contextRead,setContext]=useState<{key:string;sections:ContextSection[]}|null>(null),[refresh,setRefresh]=useState(0);
   const [liveReply,setLiveReply]=useState<{threadId:string;selection:string;reply:GroundedReply}|null>(null);
@@ -109,8 +119,9 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
     }
   }
   return <div ref={focus} tabIndex={-1} aria-label={t('Discussion workspace')}>
+    {thread&&<SaveWorkspace key={thread.id} api={threadApi} thread={thread} t={t} navigate={navigate} onSaved={saved=>{setWorkspaceThreads(rows=>[saved,...rows.filter(row=>row.id!==saved.id)]);setWorkspaceTotal(total=>total+1);}} onRemove={()=>void write(()=>{if(store.remove(thread.id))navigate('/app');})}/>}
     {localRoute&&!thread?<>{snapshot.notice&&<p role="status">{t(snapshot.notice)}</p>}<LiveUnavailable state="not_found" reason={t('This discussion is not saved for this account and project on this device.')}/></>:<LiveDiscussion
-      t={t} locale={locale} thread={thread} threads={snapshot.threads} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
+      t={t} locale={locale} thread={thread} threads={snapshot.threads} workspaceThreads={workspaceThreads} workspaceNotice={workspaceNotice} onMoreThreads={workspaceThreads.length<workspaceTotal?()=>void moreThreads():undefined} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
       value={value} onChange={setValue} onSend={send} onTemplate={create} navigate={navigate} notice={snapshot.notice} context={context}
       research={thread&&canViewOffer?<ConversationResearch key={thread.id} client={client} session={session} store={store} thread={thread} t={t} navigate={navigate}/>:null}
       liveReply={canViewOffer&&liveReply?.threadId===thread?.id&&liveReply?.selection===selection?liveReply?.reply:undefined}

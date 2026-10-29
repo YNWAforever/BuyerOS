@@ -9,6 +9,7 @@ export function contextResponse(url){
  const common={workspace_id:workspace,project_id:project,data_mode:'live',version:1};
  const fact={id:factId,field:'product',value:'PRIVATE_FACT_CONTENT',provenance:'document_excerpt',source_document_id:documentId,approved:true};
  const page=(items,limit)=>({items,total:items.length,limit,offset:0});
+ if(url.pathname.endsWith('/conversation-threads'))return page([],50);
  if(url.pathname.endsWith('/offer-documents'))return page([{...common,id:documentId,filename:'project-evidence.pdf',status:'ready',fact_candidates:[fact]}],20);
  if(url.pathname.endsWith('/icp-versions'))return page([{...common,id:profileId,number:1,status:'approved',is_current:true,basis_status:'current',basis_offer_revision:1,approved_by:'reviewer',approved_at:'2026-10-01T00:00:00Z',offer_facts:[fact]}],20);
  if(url.pathname.endsWith('/runs'))return page([{...common,id:runId,created_at:'2026-10-01T00:00:00Z',status:'awaiting_reconciliation',company_count:30}],10);
