@@ -45,7 +45,7 @@ jobs:
           mkdir -p test-results
           pnpm test:core --test-reporter=junit --test-reporter-destination=test-results/core-client.xml
           python scripts/check-required-tests.py --junit test-results/core-client.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==84, 'missing, duplicate or file-only core client execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==86, 'missing, duplicate or file-only core client execution'"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -619,13 +619,13 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3288 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3290 --discovery-only
       - name: Prepare owned marketing intake fixture
         working-directory: services/api
         run: uv run --frozen python tools/run_marketing_intake.py --github-env --receipt artifacts/marketing-api.target.json
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3288 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3290 --junit services/api/artifacts/tests.xml
       - name: Clean owned marketing intake fixture
         if: ${{ always() && hashFiles('services/api/artifacts/marketing-api.target.json') != '' }}
         working-directory: services/api

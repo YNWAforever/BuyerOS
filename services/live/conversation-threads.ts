@@ -21,7 +21,7 @@ export function workspaceImport(thread:LocalThread,confirmed:boolean){
 /** No browser storage. A scope transition aborts requests and clears all intents. */
 export class ConversationThreads{
   private intents=new Map<string,ActionIntent<unknown>>();
-  private imports=new Map<string,ReturnType<typeof workspaceImport>>();
+  private imports=new Map<string,{body:ReturnType<typeof workspaceImport>;uncertain:boolean}>();
   // Accepted paid work survives route remounts, never browser/server storage.
   private acceptedReplies=new Map<string,Map<string,GroundedReply>>();
   private listRead:Promise<{items:ServerSummary[];total:number;offset:number;limit:number}>|null=null;
@@ -66,8 +66,18 @@ export class ConversationThreads{
   get(id:string){return this.request<ServerThread>('/'+encodeURIComponent(id));}
   import(thread:LocalThread,confirmed:boolean){
     if(confirmed!==true)throw new Error('Explicit confirmation required');
-    let body=this.imports.get(thread.id);if(!body){body=workspaceImport(thread,confirmed);this.imports.set(thread.id,body);}
-    return this.request<ServerThread>('','POST',body).then(result=>{this.imports.delete(thread.id);return result;});
+    let snapshot=this.imports.get(thread.id);
+    if(!snapshot){snapshot={body:workspaceImport(thread,confirmed),uncertain:false};this.imports.set(thread.id,snapshot);}
+    const attempt=snapshot;
+    return this.request<ServerThread>('','POST',attempt.body).then(result=>{this.imports.delete(thread.id);return result;},error=>{
+      if(this.imports.get(thread.id)===attempt){
+        // A first definitive source rejection cannot have created a thread. An
+        // earlier unknown result may have committed before sources were revoked.
+        if(!attempt.uncertain&&error instanceof LiveError&&error.status===422&&error.code==='CONVERSATION_SOURCE_UNAVAILABLE')this.imports.delete(thread.id);
+        else attempt.uncertain=true;
+      }
+      throw error;
+    });
   }
   append(thread:ServerThread,text:string){return this.request<ServerThread>(`/${thread.id}/messages`,'POST',{text},thread.version);}
   sources(thread:ServerThread,sources:SelectedSource[]){return this.request<ServerThread>(`/${thread.id}/sources`,'PUT',{sources:sources.map(({id,label})=>({id,label}))},thread.version);}

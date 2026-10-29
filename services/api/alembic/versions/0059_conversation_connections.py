@@ -90,10 +90,14 @@ def upgrade():
 
 def downgrade():
     op.execute('ALTER TABLE conversation_drive_connections NO FORCE ROW LEVEL SECURITY')
+    # The migration owner must see references across all tenants. A refusal
+    # rolls this back; a safe downgrade restores the retained table's FORCE RLS.
+    op.execute('ALTER TABLE conversation_threads NO FORCE ROW LEVEL SECURITY')
     db=op.get_bind()
     if (db.execute(sa.text('SELECT EXISTS(SELECT 1 FROM conversation_drive_connections)')).scalar_one()
         or db.execute(sa.text("SELECT EXISTS(SELECT 1 FROM conversation_threads t, jsonb_array_elements(t.sources) s WHERE s->>'id' LIKE 'drive:%')")).scalar_one()):
         raise RuntimeError('0059 downgrade blocked: preserve populated Drive connections/references')
+    op.execute('ALTER TABLE conversation_threads FORCE ROW LEVEL SECURITY')
     op.execute('DROP TABLE conversation_drive_connections')
     op.execute('DROP FUNCTION public.buyeros_drive_folders_valid(jsonb)')
     # Restore the historical validator after proving no Drive references remain.

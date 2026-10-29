@@ -3,6 +3,7 @@ export const liveZh: Record<string,string> = {
   "Google Drive": "Google Drive",
   "Google Drive folder": "Google Drive 資料夾",
   "Google Drive item": "Google Drive 項目",
+  "Remove all Google Drive selections": "移除所有 Google Drive 選擇",
   "Read-only · Fimmick OAuth · approved folders only": "唯讀 · Fimmick OAuth · 僅限已核准資料夾",
   "HK residency preferred. File content is used only in request memory; no content cache.": "優先採用香港資料駐留。檔案內容僅於請求期間使用，不會快取。",
   "Loading Google Drive…": "正在載入 Google Drive…",

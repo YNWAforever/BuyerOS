@@ -195,6 +195,8 @@ def test_thread_import_and_source_selection_only_approved_ids_replay_and_revoke(
     assert client.delete(PATH,headers=headers(version=3)).status_code==200
     assert client.put(path,headers=h,json={'sources':[source]}).status_code==422
     assert client.post(ROOT+'/conversation-threads',headers=headers(OPERATOR),json=body).status_code==422
+    cleared=client.put(path,headers=headers(OPERATOR,version=2),json={'sources':[]})
+    assert cleared.status_code==200 and cleared.json()['data']['sources']==[]
 
 
 def test_disconnect_works_during_gateway_outage_and_runtime_flag_kills_all_paths(connection_api,monkeypatch):

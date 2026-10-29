@@ -13,14 +13,14 @@ type Props = {
   t:(value:string)=>string; locale:'en'|'zh-HK'; thread:LocalThread|null; threads:LocalThread[];
   entryTemplate?:string; value:string; notice:string; context:ContextSection[]|null;
   navigate:(path:string)=>void; onTemplate:(id:string)=>void; onChange:(text:string)=>void;
-  onSend:()=>void; onSource:(source:SelectedSource,selected:boolean)=>void; onRefresh:()=>void;
+  onSend:()=>void; onSource:(source:SelectedSource,selected:boolean)=>void; onRefresh:()=>void; onClearDrive?:()=>void;
   storageKind?:'device'|'workspace';readOnly?:boolean;workspaceThreads?:ServerSummary[];workspaceNotice?:string;onMoreThreads?:()=>void;
   connections?:ReactNode; research?:ReactNode; liveReply?:GroundedReply;
   onAsk?:()=>void; asking?:boolean; replyNotice?:string; canAsk?:boolean;
 };
 
 /** Rendering and local callbacks only. All server reads live in the scope-owned context adapter. */
-export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh,connections,research,liveReply,onAsk,asking=false,replyNotice='',canAsk=false,storageKind='device',readOnly=false,workspaceThreads=[],workspaceNotice='',onMoreThreads}:Props) {
+export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh,onClearDrive,connections,research,liveReply,onAsk,asking=false,replyNotice='',canAsk=false,storageKind='device',readOnly=false,workspaceThreads=[],workspaceNotice='',onMoreThreads}:Props) {
   const guidance=templateForId(thread?.templateId??entryTemplate??'custom');
   const open=(destination:string,path:string)=><button type="button" onClick={()=>navigate(path)}>{t(`Open in ${destination}`)}</button>;
   const guidedStep=<article className="live-discussion-message">
@@ -82,6 +82,7 @@ export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,noti
         </section>)}
         {thread&&<details><summary>{t('Selected for this discussion')} ({thread.sources.length})</summary>
           {thread.sources.length===0?<p>{t('No sources selected.')}</p>:<ul>{thread.sources.map(source=><li key={source.id}>{t(source.label)} <button type="button" disabled={readOnly} onClick={()=>onSource(source,false)}>{t('Remove selection')}</button></li>)}</ul>}
+          {onClearDrive&&thread.sources.some(source=>source.id.startsWith('drive:'))&&<button type="button" disabled={readOnly||asking} onClick={onClearDrive}>{t('Remove all Google Drive selections')}</button>}
           <p>{t('A saved selection does not grant access. Current project permissions apply.')}</p>
         </details>}
       </section>

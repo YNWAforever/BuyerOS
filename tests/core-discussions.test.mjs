@@ -385,3 +385,24 @@ test('Stage 4 connection OFF and scope transitions reject requests and late data
   const api=new ConversationConnections(client,session,true),pending=api.status();session.next({project:'other'});release({});
   await assert.rejects(pending);await assert.rejects(api.connect(1));assert.equal(calls,1);
 });
+
+for(const priorUncertain of [false,true])test(`Stage 4 rejected Drive imports allow edited retries only without an uncertain earlier save (${priorUncertain?'uncertain':'definitive'})`,async()=>{
+  const {ConversationThreads}=await loadModule('services/live/conversation-threads.ts');
+  const {SessionScope}=await loadModule('services/live/session.ts');
+  const {LiveError}=await loadModule('services/live/client.ts');
+  const session=new SessionScope({mode:'live',actor:'actor',workspace:'workspace',project:'project'});session.setToken('test');
+  const source={id:'drive:12345678-1234-4123-8123-123456789012:file_one',label:'Google Drive item'};
+  const thread={...validThread(),sources:[source]},calls=[];
+  const api=new ConversationThreads({request:async request=>{
+    calls.push(request);
+    if(priorUncertain&&calls.length===1)throw new Error('response lost');
+    if(calls.length===(priorUncertain?2:1))throw new LiveError('selected sources need review','CONVERSATION_SOURCE_UNAVAILABLE',422,'rejected',false);
+    return {id:'saved'};
+  }},session,true);
+  if(priorUncertain)await assert.rejects(()=>api.import(thread,true),/response lost/);
+  await assert.rejects(()=>api.import(thread,true),/selected sources need review/);
+  await api.import({...thread,sources:[]},true);
+  assert.deepEqual(calls.at(-1).body.sources,priorUncertain?[source]:[]);
+  if(priorUncertain)assert.ok(calls.every(call=>call.idempotencyKey===calls[0].idempotencyKey));
+  else assert.notEqual(calls[0].idempotencyKey,calls[1].idempotencyKey);
+});
