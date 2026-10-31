@@ -292,7 +292,7 @@ def test_populated_migration_rollback_refuses_to_erase_receipt_or_hold(paid_case
     with pytest.raises(RuntimeError,match='preserve conversation'):
         command.downgrade(cfg,'0056_policy_activation')
     with psycopg.connect(dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0058_conversation_threads',)
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0059_conversation_connections',)
         assert db.execute('SELECT state FROM model_receipts WHERE id=%s',(ref,)).fetchone()==('prepared',)
         assert db.execute('SELECT remaining_hold FROM budget_reservations WHERE workspace_id=%s',(WS,)).fetchone()==(Decimal('0.100000'),)
         assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname='model_receipts'").fetchone()==(True,True)

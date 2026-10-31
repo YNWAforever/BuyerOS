@@ -1,4 +1,5 @@
 'use client';
+import {DriveConnections} from './conversation-connections';
 import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import {LiveCancelled} from '@/services/live/client';
@@ -80,6 +81,8 @@ export function ServerConversation({client,session,id,t,locale,navigate,canViewO
     </div>
     <LiveDiscussion thread={thread} threads={[]} t={t} locale={locale} value={value} onChange={setValue} onSend={()=>void send()} notice={notice} context={context} navigate={navigate} onTemplate={()=>{}} onRefresh={()=>void refreshContext()} onSource={(source,selected)=>{if(editable)void mutate(()=>api.sources(thread,selected?[...thread.sources.filter(row=>row.id!==source.id),source]:thread.sources.filter(row=>row.id!==source.id)));}}
       storageKind="workspace" readOnly={!editable} asking={busy} onAsk={()=>void ask()} canAsk={editable&&canViewOffer} liveReply={canViewOffer?reply??undefined:undefined}
+      onClearDrive={()=>void mutate(()=>api.sources(thread,thread.sources.filter(source=>!source.id.startsWith('drive:'))))}
+      connections={<DriveConnections key={identity+thread.id} client={client} session={session} t={t} selected={thread.sources} readOnly={!editable||busy} onSource={(source,selected)=>void mutate(()=>api.sources(thread,selected?[...thread.sources,source]:thread.sources.filter(row=>row.id!==source.id)))}/>}
       research={editable&&canViewOffer?<ConversationResearch key={thread.id} client={client} session={session} thread={thread} t={t} navigate={navigate} beforeResearch={async()=>{try{const latest=await recheck();if(latest.version!==thread.version)throw new Error(threadNotices.stale);}catch(error){failed(error);throw error;}}} saveRun={saveRun}/>:thread.runs?.length?<section aria-label={t('Research from this discussion')}>{thread.runs.map(run=><article key={run.id}><b>{t(run.label)}</b> <span>{t(run.status)}</span><button type="button" onClick={()=>navigate(`/app/discover/${encodeURIComponent(run.id)}`)}>{t('Open run · results, timeouts, cancel & retry')}</button></article>)}</section>:null}/>
   </div>;
 }

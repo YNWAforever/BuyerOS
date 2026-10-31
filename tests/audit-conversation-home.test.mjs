@@ -353,3 +353,16 @@ test('Stage 3 save/share dialogs use native keyboard modal controls and localize
   assert.match(shares,/<dialog[^>]+aria-labelledby="share-thread-title"/);assert.ok(shares.includes(t('Share role')));
  }
 });
+
+test('Stage 4 citations navigate within BuyerOS and all Connections copy has zh-HK coverage',async()=>{
+ const {validCitation,citationPath}=await import('../services/live/discussion-citations.ts');
+ const {liveZh}=await import('../features/live/locale.ts');
+ const id='drive:12345678-1234-4123-8123-123456789012:file_one';
+ const ref={id,label:'Google Drive item',locator:{surface:'drive',id}};
+ assert.equal(validCitation(ref),true);assert.equal(citationPath(ref),'/app#google-drive');
+ assert.equal(validCitation({...ref,locator:{surface:'drive',id:'https://public.invalid'}}),false);
+ for(const file of ['features/live/conversation-connections.tsx','services/live/conversation-connections.ts']){
+  const source=readFileSync(file,'utf8');for(const [,value] of source.matchAll(/(?:\bt\(|unavailable:|denied:|stale:|uncertain:)'([^']+)'/g))assert.ok(liveZh[value],value);
+ }
+ const source=readFileSync('features/live/discussion.tsx','utf8');assert.doesNotMatch(source,/Not connected · later|Shared library \/ CRM/);
+});

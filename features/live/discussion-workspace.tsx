@@ -1,4 +1,5 @@
 'use client';
+import {DriveConnections} from './conversation-connections';
 import {useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
@@ -107,8 +108,9 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
       const reply=await askBuyerOS(client,session,{enabled:true,question:input,sources:thread.sources,locale,signal:controller.signal});
       if(!stillCurrent())return;
       await store.withLocalWrite(stillCurrent,()=>{
-        const saved=reply.fixture?store.appendReply(thread.id,input,reply,sourceIds):store.append(thread.id,input);
-        if(saved){if(!reply.fixture)setLiveReply({threadId:thread.id,selection,reply});setValue(value=>value===input?'':value);}
+        const ephemeral= !reply.fixture||sourceIds.some(id=>id.startsWith('drive:'));
+        const saved=!ephemeral?store.appendReply(thread.id,input,reply,sourceIds):store.append(thread.id,input);
+        if(saved){if(ephemeral)setLiveReply({threadId:thread.id,selection,reply});setValue(value=>value===input?'':value);}
       });
     }catch(error){
       if(stillCurrent()&&!(error instanceof LiveCancelled))setReplyState({key:replyKey,notice:error instanceof Error?error.message:replyNotices.unavailable});
@@ -123,6 +125,7 @@ function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOf
     {localRoute&&!thread?<>{snapshot.notice&&<p role="status">{t(snapshot.notice)}</p>}<LiveUnavailable state="not_found" reason={t('This discussion is not saved for this account and project on this device.')}/></>:<LiveDiscussion
       t={t} locale={locale} thread={thread} threads={snapshot.threads} workspaceThreads={workspaceThreads} workspaceNotice={workspaceNotice} onMoreThreads={workspaceThreads.length<workspaceTotal?()=>void moreThreads():undefined} entryTemplate={['prepare-follow-up','review-buyers'].includes(route.id)?route.id:undefined}
       value={value} onChange={setValue} onSend={send} onTemplate={create} navigate={navigate} notice={snapshot.notice} context={context}
+      connections={<DriveConnections key={identity+(thread?.id??'home')} client={client} session={session} t={t} selected={thread?.sources??[]} readOnly={!thread} onSource={(source,selected)=>{if(thread)void write(()=>{store.select(thread.id,source,selected);});}}/>}
       research={thread&&canViewOffer?<ConversationResearch key={thread.id} client={client} session={session} store={store} thread={thread} t={t} navigate={navigate}/>:null}
       liveReply={canViewOffer&&liveReply?.threadId===thread?.id&&liveReply?.selection===selection?liveReply?.reply:undefined}
       onAsk={()=>void ask()} asking={asking} replyNotice={replyNotice} canAsk={canViewOffer}

@@ -13,14 +13,14 @@ type Props = {
   t:(value:string)=>string; locale:'en'|'zh-HK'; thread:LocalThread|null; threads:LocalThread[];
   entryTemplate?:string; value:string; notice:string; context:ContextSection[]|null;
   navigate:(path:string)=>void; onTemplate:(id:string)=>void; onChange:(text:string)=>void;
-  onSend:()=>void; onSource:(source:SelectedSource,selected:boolean)=>void; onRefresh:()=>void;
+  onSend:()=>void; onSource:(source:SelectedSource,selected:boolean)=>void; onRefresh:()=>void; onClearDrive?:()=>void;
   storageKind?:'device'|'workspace';readOnly?:boolean;workspaceThreads?:ServerSummary[];workspaceNotice?:string;onMoreThreads?:()=>void;
-  research?:ReactNode; liveReply?:GroundedReply;
+  connections?:ReactNode; research?:ReactNode; liveReply?:GroundedReply;
   onAsk?:()=>void; asking?:boolean; replyNotice?:string; canAsk?:boolean;
 };
 
 /** Rendering and local callbacks only. All server reads live in the scope-owned context adapter. */
-export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh,research,liveReply,onAsk,asking=false,replyNotice='',canAsk=false,storageKind='device',readOnly=false,workspaceThreads=[],workspaceNotice='',onMoreThreads}:Props) {
+export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,notice,context,navigate,onTemplate,onChange,onSend,onSource,onRefresh,onClearDrive,connections,research,liveReply,onAsk,asking=false,replyNotice='',canAsk=false,storageKind='device',readOnly=false,workspaceThreads=[],workspaceNotice='',onMoreThreads}:Props) {
   const guidance=templateForId(thread?.templateId??entryTemplate??'custom');
   const open=(destination:string,path:string)=><button type="button" onClick={()=>navigate(path)}>{t(`Open in ${destination}`)}</button>;
   const guidedStep=<article className="live-discussion-message">
@@ -82,13 +82,14 @@ export function LiveDiscussion({t,locale,thread,threads,entryTemplate,value,noti
         </section>)}
         {thread&&<details><summary>{t('Selected for this discussion')} ({thread.sources.length})</summary>
           {thread.sources.length===0?<p>{t('No sources selected.')}</p>:<ul>{thread.sources.map(source=><li key={source.id}>{t(source.label)} <button type="button" disabled={readOnly} onClick={()=>onSource(source,false)}>{t('Remove selection')}</button></li>)}</ul>}
+          {onClearDrive&&thread.sources.some(source=>source.id.startsWith('drive:'))&&<button type="button" disabled={readOnly||asking} onClick={onClearDrive}>{t('Remove all Google Drive selections')}</button>}
           <p>{t('A saved selection does not grant access. Current project permissions apply.')}</p>
         </details>}
       </section>
       <section className="panel"><h2>{t('Connections / Available context')}</h2><ul className="live-discussion-connections">
         <li><b>{t('BuyerOS project records')}</b><p>{t('Available with existing project permissions.')}</p></li>
         <li><b>{t('Web research')}</b><p>{t('Propose research in this discussion or open Research runs. Scope and budget confirmation are required.')}</p>{open('Research runs','/app/runs')}</li>
-        <li><b>{t('Shared library / CRM')}</b><p>{t('Not connected · later')}</p></li>
+        <li id="google-drive">{connections??<><b>{t('Google Drive')}</b><p>{t('Google Drive is unavailable. Ask a workspace admin to check the connection.')}</p></>}</li>
       </ul></section>
       <section className="panel"><h2>{t('Templates')}</h2><p>{t('Continue preparing follow-ups in existing Drafts.')}</p>{open('Drafts','/app/outreach')}</section>
       <section className="panel"><h2 className="inline"><PanelRight size={18} aria-hidden="true"/>{t('Saved results')}</h2><p>{t('View existing project results in Results.')}</p>{open('Results','/app/results')}</section>

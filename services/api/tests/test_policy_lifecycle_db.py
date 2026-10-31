@@ -243,4 +243,4 @@ def test_0015_policy_upgrade_and_safe_downgrade_on_disposable_db(isolated_migrat
         assert conn.execute("SELECT count(*) FROM information_schema.columns WHERE table_name='policy_decisions' AND column_name='subject_id'").fetchone()[0] == 0
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0058_conversation_threads"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0059_conversation_connections"
