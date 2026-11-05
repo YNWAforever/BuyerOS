@@ -1,5 +1,6 @@
 'use client';
 import {DriveConnections} from './conversation-connections';
+import {GuidedSales} from './sales-skills/workspace';
 import {useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
@@ -38,6 +39,7 @@ export function LiveConversation(props:Props){
   if(!snapshot.authenticated||!snapshot.scope.workspace||!snapshot.scope.project)return null;
   const route=discussionForPath(props.pathname,true)!;
   if(route.id.startsWith('s/'))return <ServerConversation key={snapshot.identity+route.id} {...props} id={route.id.slice(2)}/>;
+  if(route.id==='home'||route.id==='new')return <><GuidedSales key={snapshot.identity+route.id} {...props}/><details><summary>{props.t('Device discussions')}</summary><ScopedConversation key={snapshot.identity} {...props}/></details></>;
   return <ScopedConversation key={snapshot.identity} {...props}/>;
 }
 function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOffer,canViewResults}:Props){

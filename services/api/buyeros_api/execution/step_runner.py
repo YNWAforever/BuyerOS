@@ -6,7 +6,7 @@ from buyeros_api.api.worker_schemas import JobEnvelope, StepOutcome
 from buyeros_api.db.session import tenant_session
 
 LOCAL_EVENTS = frozenset({'bulk.mutate', 'draft.generate', 'fetch.evidence',
-                         'offer.parse', 'offer.delete', 'offer.fetch', 'source.delete', 'delivery.submit'})
+                         'offer.parse', 'offer.delete', 'offer.fetch', 'source.delete', 'delivery.submit', 'sales.step', 'xverum.step'})
 
 
 @dataclass
@@ -72,6 +72,14 @@ async def execute_claimed(engine, envelope, step_key, owner, *, adapter=None, ch
             result = outcome('done', 'OK') if state in {'done', 'duplicate'} else outcome('blocked', 'INVALID_INTENT')
             execution.finish(result)
             return result
+
+    if event_type == 'xverum.step':
+        from ..services.xverum_dispatch import execute_claimed as execute_xverum
+        return await execute_xverum(engine, execution)
+
+    if event_type == 'sales.step':
+        from .sales_tasks import execute_claimed as execute_sales
+        return await execute_sales(engine, execution)
 
     if event_type == 'delivery.submit':
         from .delivery_runner import execute_delivery_claimed

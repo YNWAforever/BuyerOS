@@ -5,7 +5,7 @@ const {SessionScope}=await loadModule('services/live/session.ts');
 const {bindHistoryTransitions}=await loadModule('services/live/history-transition.ts');
 const {navigateLocalDiscussion}=await loadModule('features/live/conversation-home.ts');
 const {createExternalHistoryStatePreservingMetadata}=await import('../node_modules/vinext/dist/server/app-history-state.js');
-const settle=()=>new Promise(resolve=>setImmediate(resolve));
+const settle=()=>new Promise(resolve=>setTimeout(resolve,10));
 function environment(){
  const source={key:'source-key',url:'https://app.example.test/app/outreach?workspace=A&project=P',index:2};
  const target={key:'target-key',url:'https://app.example.test/app?workspace=A&project=P',index:1};
@@ -35,7 +35,7 @@ test('T21 approved same-document traversal replays one verified history delta wi
  try{
    const original=e.event();e.nav.dispatchEvent(original);assert.equal(original.defaultPrevented,true);
    assert.deepEqual(e.calls.go,[]);allow();await settle();
-   assert.deepEqual(e.calls.go,[-1]);assert.equal(e.calls.traverse,0);assert.equal(e.browser.location.href,e.target.url);
+   assert.deepEqual(e.calls.go,[-1]);assert.equal(e.calls.traverse,1);assert.equal(e.browser.location.href,e.target.url);
  }finally{dispose();}
 });
 test('T21 Cancel never replays a canceled history traversal',async()=>{
@@ -76,7 +76,7 @@ test('T21 an unexpected replay destination is canceled before it can change scop
    e.nav.dispatchEvent(wrong);blocked=wrong.defaultPrevented;
  };
  const dispose=bindHistoryTransitions(session,e.browser);
- try{e.nav.dispatchEvent(e.event());await settle();assert.equal(blocked,true);assert.equal(e.browser.location.href,e.source.url);assert.equal(e.calls.traverse,0);}
+ try{e.nav.dispatchEvent(e.event());await settle();assert.equal(blocked,true);assert.equal(e.browser.location.href,e.source.url);assert.equal(e.calls.traverse,1);}
  finally{dispose();}
 });
 for(const proceed of [false,true]){

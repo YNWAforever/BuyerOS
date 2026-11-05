@@ -1,7 +1,5 @@
 """Flag-gated private notes. ACL is resolved before every read, write and replay."""
-import os
 import uuid
-from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -10,15 +8,16 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_
 from sqlalchemy import exists, func, or_, select
 
 from ..auth import Principal, get_principal
-from ..deps import load_membership, permission_for_roles, tenant_scoped
+from ..deps import permission_for_roles
 from ..errors import ApiError, envelope
 from ..idempotency import begin_idempotency, complete_idempotency, if_match_version
 from ...db.conversation_threads import ConversationThread as Thread, ConversationThreadMessage as Message, ConversationThreadShare as Share
-from ...db.icp import Project
+from ...db.sales_tasks import ConversationThreadPreference as ThreadPreference
 from ...db.models import Membership, User
 from ...services.audit_service import append_audit
 from ...services.membership_directory import directory_search, member_display_name
-from ...settings import get_settings
+from ...services.conversation_access import access, load, not_found, shared, thread_scope
+from ...services.sales_tasks import ensure_thread_deletable
 from ...services.conversation_connections import approved_sources, SOURCE as DRIVE_SOURCE
 
 router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-threads', tags=['conversation-threads'])
@@ -107,49 +106,9 @@ class Grant(StrictModel):
     role: Literal['viewer', 'editor']
 
 
-def not_found():
-    return ApiError(404, 'NOT_FOUND', 'discussion not found')
-
-
-@asynccontextmanager
-async def access(workspace_id, project_id, principal, *, lock_project=False):
-    if os.environ.get('NEXT_PUBLIC_CONVERSATION_HOME') != 'true':
-        raise not_found()
-    if not get_settings().live_read_enabled:
-        raise ApiError(503, 'READ_DISABLED', 'live reads are temporarily disabled')
-    async with tenant_scoped(workspace_id) as session:
-        member = await load_membership(session, principal=principal, workspace_id=workspace_id)
-        if not permission_for_roles(member['roles'], 'getProject'):
-            raise not_found()
-        query = select(Project).where(Project.workspace_id == workspace_id, Project.id == project_id)
-        if lock_project:
-            query = query.with_for_update()
-        if (await session.execute(query)).scalar_one_or_none() is None:
-            raise not_found()
-        yield session, member['user_id']
-
-
-def thread_scope(workspace_id, project_id):
-    return (Thread.workspace_id == workspace_id, Thread.project_id == project_id)
-
-
-def shared(actor):
-    return exists(select(Share.id).where(Share.workspace_id == Thread.workspace_id, Share.thread_id == Thread.id, Share.grantee_user_id == actor))
-
-
-async def load(session, workspace_id, project_id, thread_id, actor, *, owner=False, edit=False, lock=False):
-    query = select(Thread).where(*thread_scope(workspace_id, project_id), Thread.id == thread_id,
-        Thread.owner_user_id == actor if owner else or_(Thread.owner_user_id == actor, shared(actor)))
-    if lock:
-        query = query.with_for_update()
-    row = (await session.execute(query)).scalar_one_or_none()
-    if row is None:
-        raise not_found()
-    role = 'owner' if row.owner_user_id == actor else (await session.execute(select(Share.role).where(
-        Share.workspace_id == workspace_id, Share.thread_id == row.id, Share.grantee_user_id == actor))).scalar_one_or_none()
-    if role is None or (owner and role != 'owner') or (edit and role not in {'owner','editor'}):
-        raise not_found()
-    return row, role
+class Preference(StrictModel):
+    pinned: StrictBool
+    archived: StrictBool
 
 
 async def data(session, row, role, *, full=True):
@@ -184,15 +143,30 @@ def bump(row, request):
 
 
 @router.get('', operation_id='listConversationThreads')
-async def list_threads(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal), offset: int = Query(0, ge=0, le=10000), limit: int = Query(50, ge=1, le=100)):
+async def list_threads(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal), offset: int = Query(0, ge=0, le=10000), limit: int = Query(50, ge=1, le=100), q: str = Query('', max_length=200), pinned: bool | None = None, archived: bool | None = None):
     async with access(workspace_id, project_id, principal) as (session, actor):
         predicate = (*thread_scope(workspace_id, project_id), or_(Thread.owner_user_id == actor, shared(actor)))
+        if q.strip():
+            # Auto-escape wildcard characters: this is literal title/note search.
+            predicate += (or_(Thread.title.icontains(q.strip(), autoescape=True), exists(select(Message.id).where(
+                Message.workspace_id == Thread.workspace_id, Message.project_id == Thread.project_id,
+                Message.thread_id == Thread.id, Message.text.icontains(q.strip(), autoescape=True)))),)
+        preference_scope = (ThreadPreference.workspace_id == Thread.workspace_id,
+            ThreadPreference.thread_id == Thread.id, ThreadPreference.actor_id == actor)
+        for column, value in ((ThreadPreference.pinned, pinned), (ThreadPreference.archived, archived)):
+            if value is not None:
+                marked = exists(select(ThreadPreference.id).where(*preference_scope, column.is_(True)))
+                predicate += (marked if value else ~marked,)
         total = (await session.execute(select(func.count()).select_from(Thread).where(*predicate))).scalar_one()
         rows = (await session.execute(select(Thread).where(*predicate).order_by(Thread.updated_at.desc(), Thread.id).offset(offset).limit(limit))).scalars().all()
         items = []
         for row in rows:
             _, role = await load(session, workspace_id, project_id, row.id, actor)
-            items.append(await data(session, row, role, full=False))
+            item = await data(session, row, role, full=False)
+            pref = (await session.execute(select(ThreadPreference).where(ThreadPreference.workspace_id == workspace_id,
+                ThreadPreference.thread_id == row.id, ThreadPreference.actor_id == actor))).scalar_one_or_none()
+            item.update(pinned=bool(pref and pref.pinned), archived=bool(pref and pref.archived))
+            items.append(item)
     return envelope({'items': items, 'total': total, 'offset': offset, 'limit': limit}, request.state.request_id)
 
 
@@ -253,7 +227,7 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
             bump(row, request)
             count = (await session.execute(select(func.count()).select_from(Message).where(Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one()
             if count >= 100:
-                raise ApiError(409, 'MESSAGE_LIMIT', 'discussion message limit reached')
+                raise ApiError(409, 'MESSAGE_LIMIT', '100-note limit reached; start another discussion and keep your unsaved note')
             session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id, owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text))
             complete_idempotency(outcome, str(row.id))
             await session.flush()
@@ -300,10 +274,26 @@ async def runs(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.U
 async def delete(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)):
     async with access(workspace_id, project_id, principal) as (session, actor):
         row, _ = await load(session, workspace_id, project_id, thread_id, actor, owner=True, lock=True)
+        await ensure_thread_deletable(session, workspace_id, thread_id)
         bump(row, request)
         audit(session, row, actor, 'deleted')
         await session.delete(row)
     return envelope({'id': str(thread_id)}, request.state.request_id)
+
+
+@router.put('/{thread_id}/preferences', operation_id='setConversationThreadPreferences')
+async def preferences(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.UUID, payload: Preference, request: Request, principal: Principal = Depends(get_principal)):
+    async with access(workspace_id, project_id, principal) as (session, actor):
+        row, _ = await load(session, workspace_id, project_id, thread_id, actor, lock=True)
+        pref = (await session.execute(select(ThreadPreference).where(ThreadPreference.workspace_id == workspace_id,
+            ThreadPreference.thread_id == thread_id, ThreadPreference.actor_id == actor))).scalar_one_or_none()
+        if pref is None:
+            pref = ThreadPreference(workspace_id=workspace_id, project_id=project_id, thread_id=thread_id,
+                owner_user_id=row.owner_user_id, actor_id=actor)
+            session.add(pref)
+        pref.pinned, pref.archived = payload.pinned, payload.archived
+        await session.flush()
+    return envelope(payload.model_dump(), request.state.request_id)
 
 
 @router.get('/{thread_id}/share-recipients', operation_id='searchConversationThreadRecipients')

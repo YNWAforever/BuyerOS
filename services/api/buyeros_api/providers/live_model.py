@@ -34,6 +34,10 @@ def _requirement_claims(items):
     return requirement_claims(items)
 
 def _basis(basis):
+    if isinstance(basis,dict) and basis.get('schema')=='sales-basis.v1':
+        from ..sales.model import validate_basis
+        validate_basis(basis)
+        return {}
     if isinstance(basis,dict) and basis.get('schema')=='conversation-basis.v1':
         from .conversation_model import validate_basis
         validate_basis(basis)
@@ -64,6 +68,9 @@ def _current_source(item,basis,now):
 def validate_live_proposal(proposal:dict,basis:dict,*,now:datetime|None=None)->dict:
     if isinstance(basis,dict) and basis.get('schema')=='conversation-basis.v1':
         from .conversation_model import validate_proposal
+        return validate_proposal(proposal,basis)
+    if isinstance(basis,dict) and basis.get('schema')=='sales-basis.v1':
+        from ..sales.model import validate_proposal
         return validate_proposal(proposal,basis)
     now=now or datetime.now(timezone.utc)
     if now.tzinfo is None:raise ValueError('aware validation time required')
@@ -104,6 +111,8 @@ class ResponsesModelClient:
 
     async def complete(self,basis:dict,route:ModelRoute)->dict:
         evidence=_basis(basis);now=datetime.now(timezone.utc)
+        if basis.get('schema')=='sales-basis.v1':
+            raise ValueError('sales transport requires the retained OpenCode Go client')
         if (not isinstance(route,ModelRoute) or route.permitted_tools or not route.route_id or
             not re.fullmatch(r'[A-Za-z0-9._-]{1,80}',route.prompt_version) or
             any(type(v) is not int for v in [route.max_input_tokens,route.max_output_tokens,route.deadline_seconds,route.repair_limit])):raise ValueError('verified code-owned model route required')

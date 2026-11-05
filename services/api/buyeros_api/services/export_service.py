@@ -292,7 +292,7 @@ async def load_actor_export(session, *, workspace_id, actor_id, export_id):
     return job
 
 
-async def authorize_export_content(session, *, workspace_id, actor_id, export_id) -> dict:
+async def authorize_export_content(session, *, workspace_id, actor_id, export_id, _metadata_only=False) -> dict:
     job = await load_actor_export(session, workspace_id=workspace_id,
                                   actor_id=actor_id, export_id=export_id)
     if job.state != "ready":
@@ -301,12 +301,29 @@ async def authorize_export_content(session, *, workspace_id, actor_id, export_id
         raise ApiError(403, "POLICY_BLOCKED", "export expired")
     manifest = job.selection_manifest
     await policy_workspace_lock(session, workspace_id)
+    if job.kind=='sales_output':
+        # Sales reads take the USD gate too: acquire it before project/thread locks.
+        from .xverum_dispatch import gates
+        await gates(session,workspace_id)
     await _current_export_member(session, workspace_id=workspace_id, actor_id=actor_id)
     project = (await session.execute(select(Project).where(
         Project.workspace_id == workspace_id, Project.id == job.project_id,
     ).with_for_update())).scalar_one_or_none()
     if project is None or project.status != "active":
         raise ApiError(412, "STALE_REVISION", "export project changed")
+    if job.kind == 'sales_output':
+        from ..sales.contracts import Scope
+        from ..sales.rendering import output_text, render_pdf, render_markdown
+        output=await authorized_sales_revision(session,Scope(workspace_id=workspace_id,project_id=job.project_id,actor_id=actor_id),
+            uuid.UUID(manifest['output_id']),manifest['revision'])
+        if (manifest.get('approved_by')!=str(actor_id) or manifest.get('format')!=job.format
+            or manifest.get('output_digest')!=_hash(output.model_dump(mode='json'))):
+            raise ApiError(403,'POLICY_BLOCKED','export approval basis changed')
+        if _metadata_only: return {'job':job}
+        text=output_text(output)
+        body=render_pdf(text) if job.format=='pdf' else render_markdown(text)
+        return {'body':body,'media_type':'application/pdf' if job.format=='pdf' else 'text/markdown; charset=utf-8',
+            'filename':f'buyeros-output-{output.id}-r{output.revision}.'+('pdf' if job.format=='pdf' else 'md'),'job':job}
     if job.kind == "buyer_csv":
         if (manifest.get("purpose") != job.policy_purpose
                 or manifest.get("include_contact_data") != job.include_contact_data
@@ -349,3 +366,101 @@ async def authorize_export_content(session, *, workspace_id, actor_id, export_id
                 "filename": f"buyeros-draft-{job.id}.txt" if job.format == "text" else None,
                 "job": job}
     raise ApiError(403, "POLICY_BLOCKED", "export manifest is unsupported")
+
+
+async def sales_export_companies(session,scope,output,*,seen=frozenset()):
+    """Exact saved dependencies, including uncited selections and native-only reports.
+
+    Read authority is necessary but does not confer export-purpose permission.
+    Never filter the approved document to work around a denied subject.
+    """
+    from ..db.buyers import ListMembership
+    from ..db.sales_outputs import SalesOutputVersion
+    from ..sales.contracts import SourceRef, NativeRef
+    from .sales_outputs import get_output
+    from .sales_native import read_native
+    identity=(output.id,output.revision)
+    if identity in seen or len(seen)>=32: raise ValueError('invalid export dependency graph')
+    version=(await session.execute(select(SalesOutputVersion).where(
+        SalesOutputVersion.workspace_id==scope.workspace_id,SalesOutputVersion.output_id==output.id,
+        SalesOutputVersion.revision==output.revision))).scalar_one()
+    refs=[SourceRef.model_validate(r) for r in version.source_refs]
+    natives=list(output.native_refs)
+    children={(d.id,d.revision) for d in output.dependencies}
+    buyer_ids=set();companies=set()
+    for ref in refs:
+        if ref.kind=='output': children.add((ref.id,ref.version))
+        elif ref.kind in {'buyer','run'}:
+            natives.append(NativeRef(surface=ref.kind,id=ref.id,revision=ref.version))
+        elif ref.kind=='provider_evidence':
+            from .xverum_dispatch import resolve_evidence
+            evidence=await resolve_evidence(session,scope,ref)
+            buyer_ids.add(uuid.UUID(evidence['buyer_id']))
+    for ref in natives:
+        row=await read_native(session,scope,ref)
+        if ref.surface=='buyer': companies.add(row.company_id)
+        elif ref.surface=='draft': buyer_ids.add(row.buyer_id)
+        elif ref.surface=='list':
+            buyer_ids.update((await session.scalars(select(ListMembership.buyer_id).where(
+                ListMembership.workspace_id==scope.workspace_id,ListMembership.project_id==scope.project_id,
+                ListMembership.list_id==row.id))).all())
+        elif ref.surface=='run':
+            companies.update((await session.scalars(select(Evidence.company_id).where(
+                Evidence.workspace_id==scope.workspace_id,Evidence.project_id==scope.project_id,
+                Evidence.run_id==row.id))).all())
+    for buyer_id in buyer_ids:
+        company=await session.scalar(select(ProjectBuyer.company_id).where(
+            ProjectBuyer.workspace_id==scope.workspace_id,ProjectBuyer.project_id==scope.project_id,
+            ProjectBuyer.id==buyer_id))
+        if company is None: raise ValueError('export subject unavailable')
+        companies.add(company)
+    for child_id,child_revision in children:
+        child=await get_output(session,scope,child_id,child_revision)
+        if child.availability!='available': raise ValueError('export dependency unavailable')
+        companies.update(await sales_export_companies(session,scope,child,seen=seen|{identity}))
+    return companies
+
+
+async def authorized_sales_revision(session,scope,output_id,revision):
+    from .sales_outputs import get_output
+    try:
+        output=await get_output(session,scope,output_id,revision)
+        if output.availability!='available' or output.kind=='report_export':
+            raise ValueError('export requires available saved content')
+        for company_id in await sales_export_companies(session,scope,output):
+            gate=await evaluate_current_policy(session,{'workspace_id':scope.workspace_id,
+                'project_id':scope.project_id,'company_id':company_id},'export_accounts',datetime.now(timezone.utc))
+            if not gate['allowed']: raise ValueError('native account export policy unavailable')
+    except (ValueError,ApiError) as exc:
+        raise ApiError(403,'POLICY_BLOCKED','saved output authority unavailable') from exc
+    return output
+
+
+async def export_output(session,scope,output_id,revision,format):
+    """Called only by the explicit human approval command, never by model actions.
+
+    Native ExportJob manifest is the immutable actor/revision/format approval receipt.
+    Native draft approval remains separately required by the existing draft route.
+    """
+    from ..sales.contracts import NativeRef
+    from ..sales.rendering import output_text, render_pdf, render_markdown
+    from .xverum_dispatch import gates
+    if format not in {'markdown','pdf'}: raise ValueError('unsupported export format')
+    await gates(session,scope.workspace_id)
+    await _current_export_member(session,workspace_id=scope.workspace_id,actor_id=scope.actor_id)
+    output=await authorized_sales_revision(session,scope,output_id,revision)
+    text=output_text(output)
+    # Fail unsupported glyph/size before persisting any approval or export.
+    render_pdf(text) if format=='pdf' else render_markdown(text)
+    manifest={'output_id':str(output.id),'revision':output.revision,'format':format,
+        'approved_by':str(scope.actor_id),'output_digest':_hash(output.model_dump(mode='json'))}
+    job=ExportJob(workspace_id=scope.workspace_id,project_id=scope.project_id,actor_user_id=scope.actor_id,
+        kind='sales_output',scope_hash=_hash(manifest),state='ready',expires_at=datetime.now(timezone.utc)+EXPORT_LIFETIME,
+        selection_manifest=manifest,format=format,include_contact_data=False,record_count=1,requested_record_count=1,
+        redaction_summary={'excluded_records':[]})
+    session.add(job);await session.flush()
+    append_audit(session,workspace_id=scope.workspace_id,actor_id=scope.actor_id,action='export.approved',
+        entity_type='export_job',entity_id=job.id,detail_digest='sha256:'+job.scope_hash)
+    append_audit(session,workspace_id=scope.workspace_id,actor_id=scope.actor_id,action='export.created',
+        entity_type='export_job',entity_id=job.id,detail_digest='sha256:'+job.scope_hash)
+    return NativeRef(surface='export',id=job.id,revision=revision)

@@ -119,6 +119,16 @@ export function createLiveClient(fetchImpl: typeof fetch = fetch, baseUrl = '', 
     for (const listener of accessListeners) listener({workspace, scope});
   }
   return {
+    async downloadContent({path,token,scope,signal:parent}:Pick<LiveRequest,'path'|'token'|'scope'|'signal'>):Promise<Blob>{
+      return withinRequestLifetime(parent,30_000,async signal=>{
+        const response=await send(path,{method:'GET',headers:{Accept:'application/pdf, text/markdown, text/plain',...(token?{Authorization:`Bearer ${token}`}:{})},signal},token,scope,true);
+        if(!response.ok){const error=await bodyOf(response);guardRequest(signal);notifyAccessDenied(path,scope,response.status,signal);throw new LiveError(typeof error.message==='string'?error.message:'Export unavailable',typeof error.code==='string'?error.code:'UNKNOWN_ERROR',response.status,'',false);}
+        const type=response.headers.get('Content-Type')?.split(';')[0]??'';
+        if(!['application/pdf','text/markdown','text/plain'].includes(type))throw new LiveError('Invalid export','INVALID_CONTENT',response.status,'',false);
+        if(Number(response.headers.get('Content-Length'))>10_000_000)throw new LiveError('Export too large','INVALID_CONTENT',response.status,'',false);
+        const blob=await response.blob();guardRequest(signal);if(blob.size>10_000_000)throw new LiveError('Export too large','INVALID_CONTENT',response.status,'',false);return blob;
+      });
+    },
     setAuthRecovery(value: AuthRecovery | undefined) {authRecovery = value;},
     subscribeAccessDenied(listener: (event: AccessDenied) => void): () => void {
       accessListeners.add(listener);

@@ -62,9 +62,9 @@ export function bindHistoryTransitions(session:SessionScope,browser:Window=windo
        }
        const delta=current.targetIndex-current.sourceIndex;
        if(!delta||Math.abs(delta)>=browser.history.length)throw new LiveCancelled('history changed');
-       // A canceled traverseTo tracker can remain rejected in WebKit. Replay
-       // the verified native history delta, while the next navigate event must
-       // still match the exact approved key. No route or guard is bypassed.
+       // Replay the exact reviewed entry after the canceled event settles.
+       // Some engines retain an aborted tracker; only that failure may fall
+       // back to the already verified delta, with the same destination fence.
        await new Promise<void>((resolve,reject)=>{
          let complete=false;
          const cleanup=()=>{
@@ -77,12 +77,20 @@ export function bindHistoryTransitions(session:SessionScope,browser:Window=windo
          const arrived=()=>{
            if(early.currentEntry?.key===key&&browser.location.href===target.href)finish();
          };
-         const failed=()=>finish(new LiveCancelled('history traversal failed'));
+         // The canceled original traversal may emit navigateerror after consent.
+         // Only the matching replay's navigate event (which clears allowed) owns failures.
+         const failed=()=>{if(allowed===null)finish(new LiveCancelled('history traversal failed'));};
          stopReplay=cause=>finish(cause);allowed=key;
          early.addEventListener('navigatesuccess',arrived);
          early.addEventListener('navigateerror',failed);
          browser.addEventListener('popstate',arrived);
-         try{browser.history.go(delta);}catch(cause){finish(cause);}
+         const rejected=(cause:unknown)=>{
+           if(cause instanceof DOMException&&cause.name==='AbortError'&&allowed===key&&!disposed){
+             try{const now=capture(key,target.href);if(now?.sourceKey!==current.sourceKey||now?.sourceIndex!==current.sourceIndex||now?.targetIndex!==current.targetIndex)throw new LiveCancelled('history changed');browser.history.go(delta);return;}catch(error){finish(error);return;}
+           }
+           finish(cause);
+         };
+         setTimeout(()=>{if(complete||disposed)return;try{void early.traverseTo(key).finished.then(arrived,rejected);}catch(cause){rejected(cause);}},0);
        });
      }).catch(cause=>{allowed=null;if(!(cause instanceof LiveCancelled))console.error('Guarded traversal could not complete.');});
    };

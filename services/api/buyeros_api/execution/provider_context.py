@@ -90,6 +90,14 @@ async def terminal_business_outcome(session, row, *, include_running=False):
         return None
     payload = row.payload or {}
     unknown = None
+    if row.event_type == 'xverum.step':
+        from ..db.xverum import XverumReceiptRow
+        receipt=await session.get(XverumReceiptRow,uuid.UUID(payload['step_id']))
+        if receipt is None or receipt.outbox_id!=row.id:return outcome('blocked','INVALID_INTENT')
+        if receipt.dispatch_state in {'dispatched','outcome_unknown'}:
+            return outcome('reconcile','PROVIDER_UNKNOWN')
+        if receipt.dispatch_state in {'settled','cancelled'}:return outcome('done','OK')
+        return outcome('retry_later','IN_PROGRESS')
     if row.event_type in {'run.discover', 'research.reconcile', 'run.fit'}:
         run_id = uuid.UUID(payload['run_id'])
         run = (await session.execute(select(SearchRun).where(SearchRun.id == run_id))).scalar_one_or_none()

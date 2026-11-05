@@ -26,6 +26,9 @@ import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
 import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope,navigateLocalDiscussion} from './conversation-home';
 import {LiveConversation} from './discussion-workspace';
+import {useSalesCapability} from './sales-skills/capability';
+import {SalesDocuments} from './sales-skills/documents';
+import {documentsForPath} from './conversation-home';
 import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
 import {liveZh} from './locale';
@@ -44,7 +47,8 @@ export function LiveWorkspace() {
   const {session, client, auth, authError, authBootstrap, draftRecovery} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
-  const conversationHome=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME);
+  const salesEnabled=useSalesCapability(client,session);
+  const conversationHome=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME)&&salesEnabled;
   const discussion=discussionForPath(pathname,conversationHome);
   const overviewRoute=isLiveOverviewRoute(pathname,conversationHome);
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
@@ -306,6 +310,7 @@ export function LiveWorkspace() {
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
+    {authorized&&projectKnown&&documentsForPath(pathname)&&<SalesDocuments admissionEnabled={conversationHome} key={snapshot.identity+pathname} {...{session,client,t,navigate,pathname}}/>}
     {authorized && projectKnown && overviewRoute && <>
       <LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/>
       <PilotBudgetPanel key={`pilot-summary-${snapshot.identity}`} locale={locale} isAdmin={canArchive} summary/>
@@ -323,10 +328,10 @@ export function LiveWorkspace() {
     {authorized && canEdit && projectKnown && projectActive && pathname === '/app/discover/edit' && <LiveOfferWizard key={`edit-${workspace}-${project}`} mode="edit" projectId={project!} onSaved={saved} t={t} focusDocument={conversationHome?requested('document')??undefined:undefined}/>}
     {authorized && projectKnown && pathname === '/app/results' && <LiveResults key={`results-${workspace}-${project}`} locale={locale} canReview={canApprove} canEdit={canEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId??null:null} t={t}/>}
     {authorized && projectKnown && pathname === '/app/discover' && <LiveBuyers locale={locale} canReview={canApprove} canEdit={canBuyerEdit} canQuote={canEdit} canAssign={canCreate} canImport={canCreate} ownMembershipId={workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.membershipId:null}/>}
-    {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
+    {authorized && projectKnown && (pathname === '/app/runs' || /^\/app\/discover\/[^/]+$/.test(pathname) && !['new','edit'].includes(pathname.split('/')[3])) && <LiveRunProgress locale={locale} key={`runs-${workspace}-${project}-${pathname}`} runId={pathname.startsWith('/app/discover/')?pathname.split('/')[3]:undefined} canStart={canEdit&&projectActive} canReview={canApprove&&projectActive} t={t} onOpenBuyers={()=>navigate('/app/discover')}/>}
     {authorized && projectKnown && pathname === '/app/outreach' && <><LeadPreparationsPanel key={`preparations-${workspace}-${project}`} locale={locale} canEdit={canEdit&&projectActive} canReview={canApprove&&projectActive}/><LiveDraftEditor key={`drafts-${workspace}-${project}`} locale={locale} canGenerate={canEdit&&projectActive} canReviewSender={canApprove&&projectActive} canRequestReview={canBuyerEdit&&projectActive} canApprove={canApprove&&projectActive} canExport={canBuyerEdit&&projectActive}/></>}
     {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} roles={roles} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
     {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} onOpenOverview={conversationHome?()=>navigate('/app/overview'):undefined} t={t}/>}
-    {authorized && !discussion && !overviewRoute && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
+    {authorized && !documentsForPath(pathname) && !discussion && !overviewRoute && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
   </LiveFrame>;
 }

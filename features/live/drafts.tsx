@@ -1,4 +1,5 @@
 'use client';
+import {NativeSalesLinks} from './sales-skills/native-links';
 import {useLayoutEffect,useEffect,useEffectEvent,useMemo,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import {readDraftApproval,type ApprovalFilter} from '@/services/live/work-queue';
@@ -341,6 +342,7 @@ export function LiveDraftEditor({locale,canGenerate,canReviewSender,canRequestRe
   const recipients=context?.buyer.contacts.filter(contact=>contact.access_state==='visible'&&contact.value
     &&contact.validity==='provider_marked_valid'&&contact.checked_at&&contact.retention_until)||[];
   return <section className="panel live-draft-editor" aria-label={t('Drafts')}>
+    {draft&&<NativeSalesLinks surface="draft" id={draft.id} revision={draft.version} locale={locale}/>}
     {choosing&&<DraftDirtyDialog decide={decide} canSave={canGenerate} t={t}/>}
     <h2>{t('Drafts')}</h2><p>{t('Prepare a grounded draft; delivery is disabled.')}</p>
     {error&&<p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}

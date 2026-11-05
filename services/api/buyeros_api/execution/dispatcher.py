@@ -81,10 +81,11 @@ async def claim_outbox_rows(
                    SELECT id FROM outbox_events
                     WHERE ({predicate})
                       AND (state='ready' OR (runtime_backend=:backend AND runtime_epoch=:epoch))
+                      AND (event_type NOT IN ('sales.step','xverum.step') OR :backend='cloudflare')
                       AND NOT EXISTS (SELECT 1 FROM worker_steps s WHERE s.outbox_id=outbox_events.id
                                       AND s.state IN ('running','reconcile'))
                       AND (:paid_dispatch_enabled OR event_type NOT IN
-                           ('provider.external', 'run.discover', 'contact.lookup', 'delivery.submit'))
+                           ('provider.external', 'run.discover', 'contact.lookup', 'delivery.submit', 'sales.step', 'xverum.step'))
                       AND (:delivery_dispatch_enabled OR event_type<>'delivery.submit')
                       AND (:reconciliation_enabled OR event_type NOT IN
                            ('provider.reconcile', 'research.reconcile', 'contact.reconcile'))

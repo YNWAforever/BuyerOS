@@ -14524,12 +14524,15 @@ components:
           - buyer_csv
           - draft_text
           - bulk_failure_csv
+          - sales_output
         format:
           type: string
           enum:
           - csv
           - text
           - clipboard
+          - markdown
+          - pdf
         record_count: *id008
         expires_at: *id004
         download_url:

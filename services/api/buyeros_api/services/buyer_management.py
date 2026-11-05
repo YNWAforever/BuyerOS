@@ -37,6 +37,48 @@ async def get_list(session, *, workspace_id, list_id, lock=False):
     return item
 
 
+async def update_buyer_note(session, buyer, expected_version, note):
+    """Shared canonical note edit; ownership changes remain in the native endpoint."""
+    if buyer.version != expected_version:
+        raise ApiError(412,'STALE_REVISION','buyer changed; reload it')
+    buyer.note=note
+    buyer.version+=1
+    await session.flush()
+    await session.refresh(buyer)
+    return buyer
+
+
+async def reviewed_provider_fields(session, scope, buyer):
+    """Native buyer extension: only current reviewed business facts, never contacts.
+
+    Private provider source authority is not flattened into general buyer access.
+    Unsupported native scalar columns live in the reviewed enrichment record;
+    each returned fact retains the exact source and applied buyer revision.
+    """
+    from ..db.xverum_enrichment import XverumEnrichment
+    from .xverum_enrichment import load_record, validate_record
+    from .xverum_dispatch import gates
+    from sqlalchemy import text
+    await gates(session,scope.workspace_id)
+    if not await session.scalar(text("SELECT to_regclass('public.xverum_enrichments')")):
+        return []
+    rows=list((await session.scalars(select(XverumEnrichment).where(
+        XverumEnrichment.workspace_id==scope.workspace_id,XverumEnrichment.project_id==scope.project_id,
+        XverumEnrichment.buyer_id==buyer.id,XverumEnrichment.actor_id==scope.actor_id,
+        XverumEnrichment.applied.is_not(None)).order_by(XverumEnrichment.created_at.desc()).limit(20))).all())
+    result=[]
+    for row in rows:
+        try:
+            row=await load_record(session,scope,row.id)
+            proposal,_,_,_=await validate_record(session,scope,row)
+        except (ApiError,ValueError):
+            continue
+        result.append({'proposal_id':str(row.id),'buyer_revision':row.applied['native']['revision'],
+            'provider':'xverum','fields':row.applied['business_fields'],
+            'sources':[r.model_dump(mode='json') for r in proposal.source_refs]})
+    return result
+
+
 async def change_memberships(session, *, item, actor_user_id, selection: dict, operation: str) -> dict:
     pairs = await _resolve_items(
         session, workspace_id=item.workspace_id, project_id=item.project_id,

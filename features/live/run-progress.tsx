@@ -1,4 +1,5 @@
 'use client';
+import {NativeSalesLinks} from './sales-skills/native-links';
 
 import {useCallback,useEffect,useId,useMemo,useRef,useState} from 'react';
 import {useRouter} from 'next/navigation';
@@ -26,8 +27,8 @@ function nextStep(status:Run['status']):string {
   return 'No new research work will start.';
 }
 
-export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}: {
-  runId?:string;canStart:boolean;canReview?:boolean;t:(text:string)=>string;onOpenBuyers:()=>void;
+export function LiveRunProgress({runId,canStart,canReview=false,t,locale='en',onOpenBuyers}: {
+  locale?:'en'|'zh-HK';runId?:string;canStart:boolean;canReview?:boolean;t:(text:string)=>string;onOpenBuyers:()=>void;
 }) {
   const {session,client}=useWorkspaceSession(),{apiBaseUrl}=useDataMode(),router=useRouter();
   const snapshot=useSessionSnapshot(),scope=session.current(),workspace=scope.workspace,project=scope.project;
@@ -139,6 +140,7 @@ export function LiveRunProgress({runId,canStart,canReview=false,t,onOpenBuyers}:
   }
   if(!ctx)return <section className="panel" role="status">{t('Choose a project to view runs.')}</section>;
   return <section className="panel live-runs" aria-label={t('Research runs')}>
+    {runId&&<NativeSalesLinks surface="run" id={runId} locale={locale}/>}
     <div className="inline spread"><h2>{t('Research runs')}</h2>{runId&&<button type="button" onClick={()=>router.push(`/app/runs?${new URLSearchParams({workspace:ctx.workspaceId,project:ctx.projectId})}`)}>{t('All runs')}</button>}</div>
     {detailError&&<p role="alert">{t(detailError)}</p>}
     {!runId&&<>

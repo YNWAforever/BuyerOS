@@ -15,6 +15,7 @@ import {LiveBuyerManagementControls} from './buyer-management-controls';
 import {BulkJobPanel,LiveBulkActions,isAsyncJob} from './bulk-actions';
 import {liveZh} from './locale';
 import {BulkManifestMaintenance} from './bulk-manifest';
+import {NativeSalesLinks} from './sales-skills/native-links';
 import {startNewManifest} from '@/services/live/bulk-manifests';
 
 const reviewStatuses=['accepted','rejected','needs_information'] as const;
@@ -42,7 +43,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
   const [selected,setSelected]=useState<Record<string,number>>({});
   const [allFiltered,setAllFiltered]=useState(false);
   const [excluded,setExcluded]=useState<string[]>([]);
-  const [detailId,setDetailId]=useState<string|null>(null);
+  const [detailId,setDetailId]=useState<string|null>(()=>typeof window==='undefined'?null:new URLSearchParams(window.location.search).get('buyer'));
   const [status,setStatus]=useState<(typeof reviewStatuses)[number]>('accepted');
   const [reason,setReason]=useState('');
   const [busy,setBusy]=useState(false);
@@ -160,6 +161,7 @@ export function LiveBuyerResults({canReview=false,canEdit=false,canQuote=false,c
   const index=page?.items.findIndex(buyer=>buyer.id===detailId)??-1;
   const current=index>=0?page?.items[index]:undefined;
   return <section ref={buyerRoot} className="panel live-buyer-results" aria-label={t('Buyer results')}>
+    {detailId&&<NativeSalesLinks surface="buyer" id={detailId} locale={locale}/>}
     <div className="inline spread"><h2>{t('Buyers')}</h2><span>{snapshot?t('{count} in snapshot').replace('{count}',String(snapshot.total)):t('Loading snapshot...')}</span></div>
     {canImport&&<LiveBuyerImport onImported={onCommitted} t={t}/>}
     <div className="inline" role="group" aria-label={t('Buyer filters')}>

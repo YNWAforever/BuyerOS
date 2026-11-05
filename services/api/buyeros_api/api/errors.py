@@ -45,9 +45,18 @@ async def error_handler(request: Request, exc: ApiError) -> JSONResponse:
 
 async def validation_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Every non-2xx must use the contract envelope, not FastAPI's default `detail` shape."""
+    message = 'request validation failed'
+    from fastapi.exceptions import RequestValidationError
+    if '/conversation-threads' in request.url.path and isinstance(exc, RequestValidationError):
+        for error in exc.errors():
+            location = error.get('loc', ())
+            if location and location[-1] == 'text' and error.get('type') in {'string_too_long','value_error'}:
+                message = 'Notes allow up to 4,000 characters; shorten the note and remove unsupported characters before retrying'
+            elif location == ('body','messages') and error.get('type') == 'too_long':
+                message = 'Import up to 100 notes at a time; keep the remaining notes in another discussion'
     return JSONResponse(
         status_code=422,
-        content=error_body(request, code="INVALID_REQUEST", message="request validation failed"),
+        content=error_body(request, code="INVALID_REQUEST", message=message),
     )
 
 

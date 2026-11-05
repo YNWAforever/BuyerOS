@@ -1307,3 +1307,61 @@ jobs:
           name: buyeros-c61-evidence-checker-discovery
           path: artifacts/c61/ci-evidence-checker-discovery.json
           if-no-files-found: error
+
+  guided-sales-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: python -m pip install uv==0.11.27
+      - run: uv sync --frozen
+        working-directory: services/api
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Reject inherited targets before provisioning
+        run: services/api/.venv/bin/python -m pytest services/api/tests/test_sales_runner.py services/api/tests/test_policy_activation_target.py -q
+      - name: Generated contracts and bilingual typed selection
+        run: |
+          node scripts/generate-sales-api.mjs --check
+          node scripts/generate-api-types.mjs --check
+          node --test tests/sales-contracts.test.mjs tests/sales-skills-client.test.mjs tests/sales-typed-aliases.test.mjs tests/t21-history-replay.test.mjs
+      - name: Prepare PostgreSQL image on verified local engine
+        run: services/api/.venv/bin/python services/api/tools/run_sales_isolated.py --prepare-local-image
+      - name: Owned nonbillable API producer and native regressions
+        run: services/api/.venv/bin/python services/api/tools/run_sales_isolated.py --allocate-owned --evidence outputs/guided-sales/owned
+      - name: Responsive fixture browser and actual shell history
+        env:
+          SALES_TEST_EVIDENCE_DIR: outputs/guided-sales/browser
+        run: |
+          pnpm exec playwright test --config playwright.sales-skills.config.ts --grep-invert 'fix1 owned|fix1 full shell history'
+          TASK13_FULL_SHELL=1 pnpm exec playwright test --config playwright.sales-skills.config.ts --grep 'fix1 full shell history'
+      - name: Build portable API font artifact
+        run: |
+          uv build --directory services/api --wheel --offline --out-dir ../../outputs/guided-sales/wheel
+          python - <<'PY'
+          import hashlib,json,pathlib,zipfile
+          wheel=next(pathlib.Path('outputs/guided-sales/wheel').glob('*.whl'))
+          with zipfile.ZipFile(wheel) as artifact:
+              prefix='buyeros_api/sales/fonts/'
+              source=json.loads(artifact.read(prefix+'SOURCE.json'))
+              assert hashlib.sha256(artifact.read(prefix+'BuyerOSHK-Regular.ttf')).hexdigest()==source['sha256']
+              for name in ('LICENSE','NOTICE.txt','prepare_font.py'): assert artifact.read(prefix+name)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: guided-sales-nonbillable-fixtures
+          path: outputs/guided-sales/
+          if-no-files-found: error

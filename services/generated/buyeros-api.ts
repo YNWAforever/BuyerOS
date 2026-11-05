@@ -3609,9 +3609,9 @@ export interface components {
             /** @enum {string} */
             status: "queued" | "running" | "ready" | "failed" | "revoked" | "expired";
             /** @enum {string} */
-            kind: "buyer_csv" | "draft_text" | "bulk_failure_csv";
+            kind: "buyer_csv" | "draft_text" | "bulk_failure_csv" | "sales_output";
             /** @enum {string} */
-            format?: "csv" | "text" | "clipboard";
+            format?: "csv" | "text" | "clipboard" | "markdown" | "pdf";
             record_count: number;
             /** Format: date-time */
             expires_at?: string;

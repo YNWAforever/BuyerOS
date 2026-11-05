@@ -38,7 +38,7 @@ def test_force_rls_policy_and_exact_grants(migrated,table):
         policy=db.execute('SELECT qual,with_check FROM pg_policies WHERE tablename=%s AND policyname=%s',(table,'tenant_isolation')).fetchone()
         assert policy and all("NULLIF(current_setting('app.workspace_id'" in value for value in policy)
         for verb in ['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']:
-            assert not db.execute('SELECT has_table_privilege(%s,%s,%s)',('buyeros_worker',table,verb)).fetchone()[0]
+            assert db.execute('SELECT has_table_privilege(%s,%s,%s)',('buyeros_worker',table,verb)).fetchone()[0] == (verb=='SELECT' and table in {'conversation_threads','conversation_thread_shares'})
             expected=verb in ({'SELECT','INSERT'} if table=='conversation_thread_messages' else {'SELECT','INSERT','UPDATE','DELETE'})
             assert db.execute('SELECT has_table_privilege(%s,%s,%s)',('buyeros_api',table,verb)).fetchone()[0]==expected
 
@@ -116,7 +116,7 @@ def test_empty_downgrade_upgrade_repoints_all_receipt_fences(isolated_migrated):
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
     command.upgrade(cfg,'head')
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0059_conversation_connections'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0065_sales_lifecycle'
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
 
 
@@ -129,5 +129,5 @@ def test_populated_downgrade_refuses_and_preserves_rls(isolated_seeded):
         command.downgrade(config(),'0057_conversation_model')
     with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT title FROM conversation_threads WHERE id=%s',(ident,)).fetchone()[0]=='preserved'
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0059_conversation_connections'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0065_sales_lifecycle'
         assert all(db.execute('SELECT relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(table,)).fetchone()[0] for table in TABLES)

@@ -1,0 +1,124 @@
+{
+  "repository": "https://github.com/zubair-trabzada/ai-sales-team-claude",
+  "commit": "efef8b8a4ce8c93d8d6b4af9d1423db38f0de2ce",
+  "license": "MIT",
+  "source_receipt": ".superpowers/sdd/2026-11-05-guided-sales-skills-xverum/upstream-source.json",
+  "sources": {
+    "LICENSE": {
+      "blob": "29ee5a8fcf6955a864e044eab4d34b7dcbdc3912",
+      "sha256": "7bb0e4a490394cd2e1beab4d5886fd9cab237527144cc931170e4f29cf1872cc",
+      "bytes": 1072,
+      "audit": "Preserve MIT notice verbatim.",
+      "treatment": "notice preserved"
+    },
+    "sales/SKILL.md": {
+      "blob": "af6ab41f11487bb9b6d0f15edf9a119a59ed2005",
+      "sha256": "7dcfda113c6fe5ef81fe1a0213c621eb8a2f3da7deaa8a7ca696766e5af3388c",
+      "bytes": 6059,
+      "audit": "Replace command routing/ambient files with selected context; quick is bounded research.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-prospect/SKILL.md": {
+      "blob": "d4745be01b5db9d812c10a712e7aa2dba84263c7",
+      "sha256": "cde22e02648496e4be4709de3509664632c20943ea40dc0db4bb9c0d19c69905",
+      "bytes": 24646,
+      "audit": "Remove analyze_prospect.py, simultaneous subagents and neutral-score fallback; bound native orchestration.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-research/SKILL.md": {
+      "blob": "78b59f7eef7258076d8e47c98baec476a3efcae4",
+      "sha256": "ee7aebad8e92a2e72b927d7ec10458de67d05ab2cf010ed209231f761572a7a2",
+      "bytes": 19999,
+      "audit": "Replace web/file tool assumptions with approved research references; no inferred confirmed budget.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-qualify/SKILL.md": {
+      "blob": "cda3613207c7f2932579b0fa6881c4801ed31b19",
+      "sha256": "53ace1f294fc0d9c97141d703ad637dd8d1caf7b143da86e8775bc4c57f305da",
+      "bytes": 23043,
+      "audit": "Keep BANT/MEDDIC advisory; no inferred authority or fabricated scores.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-contacts/SKILL.md": {
+      "blob": "b0e6555aae7ad429a383f1e2a14324e394f9f9c6",
+      "sha256": "9ba62980975a839a551fb38b290f357ff43cba86c3940d9cb5bd56deb77119ed",
+      "bytes": 24930,
+      "audit": "Remove email guessing and personal background; use staged allowlisted Xverum proposals.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-outreach/SKILL.md": {
+      "blob": "f64a58f97ddb8c8f72fe74e5dfbc932c811a4994",
+      "sha256": "7ff6623a6c616b60f3639f37d39758d4941f814b16a4b8256dc923daeb7e3516",
+      "bytes": 29571,
+      "audit": "Keep draft frameworks; remove sending/scheduling and autonomous multichannel actions.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-followup/SKILL.md": {
+      "blob": "3aad02ee37f004371590005a21fb0b8dcac30a83",
+      "sha256": "f4322dbb2a803dfb17791059315a7d01cafd125a75976da89508f4da2ed68c65",
+      "bytes": 20182,
+      "audit": "Use selected interaction; cadence advice only, no SMS/phone/social execution.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-prep/SKILL.md": {
+      "blob": "e4882724fde021cf89a5ec6a69d1bf44690c0a52",
+      "sha256": "ee7af83548e6829c4dba17d883c51c4105ccdcfc73e4cd4a90e1092c07b6c7fb",
+      "bytes": 16353,
+      "audit": "Use selected attendees and cited brief; no invented named participants.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-proposal/SKILL.md": {
+      "blob": "78eb7142fe5f0b912ae9c58063bef04d8ac56187",
+      "sha256": "3d151041000d27f6ec8375c137cfc596d9c2e503d3c087a532462c52401de97c",
+      "bytes": 25257,
+      "audit": "Require verified commercial terms; no invented tiers/ROI or automatic follow-up.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-objections/SKILL.md": {
+      "blob": "91113545d34b7e88acca08bb90339d89e12eb163",
+      "sha256": "bc06f78baf9fd4483ed7ce9c0bb6d6d890b45e1ca2accbb6640c292e661c6ef8",
+      "bytes": 40900,
+      "audit": "Keep paired responses/walk-away criteria; remove invented proof-point examples.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-icp/SKILL.md": {
+      "blob": "c7b6bddb7fe2af8d830bc0cde92f54e60c06ee3b",
+      "sha256": "5393c85a02acc7b3813828a8a36ff652177b143e6a1e4d97e1008ca9ceab35fd",
+      "bytes": 20687,
+      "audit": "Require cited criteria and native approval; no invented market or budget facts.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-competitors/SKILL.md": {
+      "blob": "5859587f1eff581be2277009a890d3663d7f4f59",
+      "sha256": "32ddccb7c5f4136ec4bdbfb7cc6fc20ac8802b75b2e5a3f91622c256291b99f7",
+      "bytes": 17729,
+      "audit": "Keep balanced evidence/switching costs; remove ambient retrieval and manipulative traps.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-report/SKILL.md": {
+      "blob": "1d9e55cf4d062bcb23eef855faa69acda3aa7da1",
+      "sha256": "0bc3e72f1fbb521c5a4e333648191b4ae2870979fbf4746cf85e7ae1adb5c2e6",
+      "bytes": 12679,
+      "audit": "Replace file scanning/stage inference with selected canonical records and explicit unavailable inputs.",
+      "treatment": "concepts adapted as native text; never executed"
+    },
+    "skills/sales-report-pdf/SKILL.md": {
+      "blob": "dce1aa5a2a2fecf8d2268325ae588160e2cf925e",
+      "sha256": "2e5bdaa2313482ec5385a03e98d8d7f8aad95c50c9b4b81933a4557d354d5733",
+      "bytes": 10237,
+      "audit": "Exclude generate_pdf_report.py/reportlab installation; export exact saved native report revision.",
+      "treatment": "concepts adapted as native text; never executed"
+    }
+  },
+  "excluded_artifacts": [
+    "installer scripts",
+    "scripts/analyze_prospect.py",
+    "scripts/generate_pdf_report.py",
+    "upstream executable agents",
+    "external templates and dependencies"
+  ],
+  "audit_scope": "All 15 prepared source texts inventoried and hashed; workflow/rules/embedded output templates inspected as untrusted text. No upstream executable/template artifact imported.",
+  "provider_tool_reference": "https://ask.xverum.com/docs/mcp-server",
+  "provider_tool_note": "Approved spec names four tools and business-email capability; official reference supplies get_email_xverum. Documentation read only; no account connection/provider invocation."
+}
+

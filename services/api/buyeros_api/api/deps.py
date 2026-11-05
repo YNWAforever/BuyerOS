@@ -8,6 +8,16 @@ _WRITERS = frozenset({"operator", "workspace_admin"})
 
 # Transcribed from the contract's `x-permitted-roles`, for the operations P9 implements.
 OPERATION_ROLES: dict[str, frozenset[str]] = {
+    "listXverumConnections": _VIEWERS,
+    "useXverumConnection": _WRITERS,
+    "createXverumQuote": _WRITERS,
+    "approveXverumQuote": _WRITERS,
+    "getXverumQuote": _WRITERS,
+    "getXverumReceipt": _WRITERS,
+    "reconcileXverumReceipt": frozenset({"workspace_admin"}),
+    "assignXverumConnection": frozenset({"workspace_admin"}),
+    "rotateXverumConnection": frozenset({"workspace_admin"}),
+    "disconnectXverumConnection": frozenset({"workspace_admin"}),
     "getConversationDrive": _VIEWERS,
     "listConversationDriveItems": _VIEWERS,
     "listConversationDriveFolders": frozenset({"workspace_admin"}),

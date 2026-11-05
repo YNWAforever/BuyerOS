@@ -10,7 +10,7 @@ import json
 import uuid
 from datetime import datetime
 
-from sqlalchemy import null, or_, select, update
+from sqlalchemy import null, or_, select, update, text
 
 from ..api.errors import ApiError
 from ..db.buyers import Evidence, FitAssessment, SourceDocument
@@ -109,6 +109,12 @@ async def _expire_contact(session, subject_id: uuid.UUID, policy_version: str, n
         raise ApiError(404, "NOT_FOUND", "retention subject not found")
     if contact.retention_expires_at is None or contact.retention_expires_at > now:
         raise ApiError(409, "POLICY_BLOCKED", "contact retention has not expired")
+    from .sales_retention import invalidate_retained_subject
+    from ..db.buyers import ProjectBuyer
+    projects=(await session.scalars(select(ProjectBuyer.project_id).where(
+        ProjectBuyer.workspace_id==contact.workspace_id,ProjectBuyer.company_id==contact.company_id).distinct())).all()
+    for project_id in projects:
+        await invalidate_retained_subject(session,contact.workspace_id,project_id,contact.id)
     if contact.validity == "unavailable" and contact.normalized_value.startswith("expired+"):
         from .lead_retention import redact_lead_subject
         await redact_lead_subject(session, workspace_id=contact.workspace_id,
@@ -186,6 +192,10 @@ async def expire_subject_data(
 ) -> dict:
     if not policy_version or len(policy_version) > 64:
         raise ApiError(422, "INVALID_REQUEST", "policy version is required")
+    from ..execution.sales_tasks import lock_authority
+    workspace_id=await session.scalar(text("SELECT NULLIF(current_setting('app.workspace_id',true),'')::uuid"))
+    if workspace_id is not None:
+        await lock_authority(session,workspace_id)
     if subject_type == "person":
         from .lead_retention import redact_lead_subject
         person = await session.scalar(select(Person).where(Person.id == subject_id))
@@ -214,6 +224,8 @@ async def expire_subject_data(
         raise ApiError(404, "NOT_FOUND", "retention subject not found")
     if row.retention_until is None or row.retention_until > now:
         raise ApiError(409, "POLICY_BLOCKED", "source retention has not expired")
+    from .sales_retention import invalidate_retained_subject
+    await invalidate_retained_subject(session,row.workspace_id,row.project_id,row.id)
     if row.excerpt is None and row.canonical_url.startswith("https://redacted.invalid/"):
         from .lead_retention import redact_lead_subject
         await redact_lead_subject(session, workspace_id=row.workspace_id,

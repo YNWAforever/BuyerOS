@@ -64,6 +64,9 @@ export class ConversationThreads{
     if(offset===0)this.listRead=read;return read;
   }
   get(id:string){return this.request<ServerThread>('/'+encodeURIComponent(id));}
+  create(title:string){return this.request<ServerThread>('','POST',{confirmed:true,template_id:'custom',title,messages:[],sources:[],runs:[]});}
+  search(q='',archived=false,offset=0){return this.request<{items:(ServerSummary&{pinned:boolean;archived:boolean})[];total:number}>(`?q=${encodeURIComponent(q)}&archived=${archived}&offset=${offset}&limit=50`);}
+  preferences(id:string,pinned:boolean,archived:boolean){return this.request(`/${id}/preferences`,'PUT',{pinned,archived});}
   import(thread:LocalThread,confirmed:boolean){
     if(confirmed!==true)throw new Error('Explicit confirmation required');
     let snapshot=this.imports.get(thread.id);
