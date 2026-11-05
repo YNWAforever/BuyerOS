@@ -150,7 +150,7 @@ def test_three_real_prospect_children_are_saved_and_recursively_revoked(core_cas
             db.execute('UPDATE xverum_stages SET task_id=NULL,thread_id=NULL,task_revision=NULL,context_digest=NULL,intake_hash=NULL WHERE task_id=%s',(getattr(c,'task',None),))
             db.execute('DELETE FROM worker_steps WHERE outbox_id IN(SELECT outbox_id FROM xverum_receipts WHERE workspace_id=%s)',(c.ws,))
             db.execute('UPDATE xverum_quotes SET source_receipt_id=NULL,source_digest=NULL WHERE workspace_id=%s',(c.ws,))
-            for table in ('xverum_enrichments','xverum_tool_receipts','xverum_stages','xverum_reconciliations',
+            for table in ('xverum_enrichment_dependencies','xverum_enrichments','xverum_tool_receipts','xverum_stages','xverum_reconciliations',
                 'xverum_credit_settlements','xverum_receipts','xverum_credit_reservations','xverum_quotes',
                 'xverum_project_assignments','xverum_connections','xverum_tariffs','xverum_credit_limits',
                 'xverum_credit_accounts','sales_content_tombstones'):

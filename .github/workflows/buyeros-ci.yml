@@ -214,6 +214,7 @@ jobs:
     env:
       BUYEROS_TEST_DATABASE_URL: postgresql://buyeros:buyeros@127.0.0.1:5432/buyeros_test_api
       BUYEROS_STRICT_INTEGRATION: '1'
+      SALES_TEST_EVIDENCE_DIR: ${{ github.workspace }}/services/api/artifacts/sales-browser
     steps:
       - uses: actions/checkout@v4
         with:
@@ -228,6 +229,7 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -619,13 +621,13 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3290 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 3923 --discovery-only
       - name: Prepare owned marketing intake fixture
         working-directory: services/api
         run: uv run --frozen python tools/run_marketing_intake.py --github-env --receipt artifacts/marketing-api.target.json
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3290 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 3923 --junit services/api/artifacts/tests.xml
       - name: Clean owned marketing intake fixture
         if: ${{ always() && hashFiles('services/api/artifacts/marketing-api.target.json') != '' }}
         working-directory: services/api
@@ -644,6 +646,7 @@ jobs:
             services/api/artifacts/tests.xml
             services/api/artifacts/c61-full-discovery.txt
             services/api/artifacts/policy-*.json
+            services/api/artifacts/sales-browser/
           if-no-files-found: error
 
   worker:

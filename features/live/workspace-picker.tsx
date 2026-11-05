@@ -47,8 +47,9 @@ export function LiveWorkspace() {
   const {session, client, auth, authError, authBootstrap, draftRecovery} = useWorkspaceSession();
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
-  const salesEnabled=useSalesCapability(client,session);
-  const conversationHome=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME)&&salesEnabled;
+  const conversationEnabled=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME);
+  const salesEnabled=useSalesCapability(client,session,conversationEnabled);
+  const conversationHome=conversationEnabled&&salesEnabled;
   const discussion=discussionForPath(pathname,conversationHome);
   const overviewRoute=isLiveOverviewRoute(pathname,conversationHome);
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});

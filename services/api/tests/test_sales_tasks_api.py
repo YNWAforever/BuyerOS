@@ -221,6 +221,7 @@ def test_offline_sales_readiness_requires_exact_head_and_new_relations():
         'public.xverum_credit_limits','public.xverum_tariffs','public.xverum_quotes',
         'public.xverum_credit_reservations','public.xverum_receipts','public.xverum_credit_settlements',
         'public.xverum_stages','public.xverum_tool_receipts','public.xverum_reconciliations','public.xverum_enrichments',
+        'public.xverum_enrichment_dependencies',
         'public.sales_financial_evidence','public.sales_accounting_receipts','public.sales_content_tombstones'}
     assert len(required['required_functions']) == 3
 

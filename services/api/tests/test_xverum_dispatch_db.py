@@ -588,9 +588,14 @@ def test_populated_dispatch_downgrade_preserves_proof(dispatch_case):
 def test_missing_dispatch_table_fails_boolean_readiness(dispatch_case):
     c=dispatch_case
     with psycopg.connect(c.dsn) as db:
-        db.execute('DROP TABLE xverum_tool_receipts')
+        assert db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0]
+        # Hide only the expected relation name; 0065 dependencies retain their
+        # real FK to its OID. Rollback restores the complete schema and grants.
+        db.execute('ALTER TABLE xverum_tool_receipts RENAME TO fixture_missing_tool_receipts')
+        assert db.execute("SELECT to_regclass('public.xverum_tool_receipts')").fetchone()==(None,)
         assert not db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0]
         db.rollback()
+        assert db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0]
 
 
 def select_receipt(c, receipt):

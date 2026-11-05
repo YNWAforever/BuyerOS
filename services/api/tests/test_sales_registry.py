@@ -175,7 +175,7 @@ def test_quote_cannot_turn_search_into_detail_or_float_credits():
 def test_provenance_matches_pinned_source_blobs():
     import hashlib
     r = registry()
-    upstream = json.loads((ROOT / ".superpowers/sdd/2026-11-05-guided-sales-skills-xverum/upstream-source.json").read_text(encoding="utf-8"))
+    upstream = json.loads((Path(__file__).resolve().parent / "fixtures/upstream-source.json").read_text(encoding="utf-8"))
     provenance = json.loads((ROOT / "services/api/buyeros_api/sales/provenance.json").read_text(encoding="utf-8"))
     assert provenance["commit"] == "efef8b8a4ce8c93d8d6b4af9d1423db38f0de2ce"
     for source in upstream["files"]:

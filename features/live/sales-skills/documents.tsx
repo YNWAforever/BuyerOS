@@ -26,7 +26,7 @@ export function SalesDocuments({
   native?: S["NativeRef"];
 } & Omit<SalesProps, "locale">) {
   const admissionAllowed =
-    useSalesCapability(client, session) && admissionEnabled;
+    useSalesCapability(client, session, admissionEnabled) && admissionEnabled;
   const identity = session.identity(),
     api = salesOutputs(client, session);
   const [canEdit, setCanEdit] = useState(false);

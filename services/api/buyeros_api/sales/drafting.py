@@ -123,7 +123,7 @@ async def save_formal_draft(session,scope,output_id,recipient_id,expected_revisi
         await edit_draft(session,workspace_id=scope.workspace_id,draft=draft,expected_version=draft.state_version,
             changes={'subject':message.subject,'body':message.body})
         result=NativeRef(surface='draft',id=draft.id,revision=draft.state_version)
-    await link_native_action(session,scope,identity,saved,result,key)
+    await link_native_action(session,scope,identity,saved,result,key,before=context,target=result)
     complete_idempotency(operation,str(result.id),response=result.model_dump(mode='json'))
     await session.flush()
     return result

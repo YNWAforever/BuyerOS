@@ -235,7 +235,7 @@ async def test_five_allowlisted_pinned_reference_examples(fixture,tool,args):
     from pathlib import Path
     import re
     m=owner()
-    reference=Path(__file__).resolve().parents[3]/'.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/xverum-tools-reference.json'
+    reference=Path(__file__).resolve().parent/'fixtures/xverum-tools-reference.json'
     pinned=json.loads(reference.read_text(encoding='utf-8'))
     assert pinned['commit']=='f54a7f1ee1be5a4507b417d63a3b91cd6326f91e'
     section=pinned['content'].split('## `'+tool+'`')[1].split('\n## `')[0]

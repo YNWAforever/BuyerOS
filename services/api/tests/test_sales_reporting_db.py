@@ -229,7 +229,7 @@ def test_remaining_documents_and_pipeline_saved(core_case):
             assert client.get(base+'/versions/1',headers=headers()).json()['data']==saved
 
 
-def test_pdf_exports_the_selected_revision(core_case):
+def test_pdf_exports_the_selected_revision(core_case,tmp_path):
     client,dsn,buyer,contact=core_case
     from tests.test_exports_authorization_db import _permit
     with psycopg.connect(dsn) as db: _permit(db,'export_accounts')
@@ -246,10 +246,9 @@ def test_pdf_exports_the_selected_revision(core_case):
     url=f'/v1/workspaces/{WORKSPACE_A}/exports/{native["id"]}/content'
     content=client.get(url,headers=headers())
     assert content.status_code==200 and content.content.startswith(b'%PDF')
-    from pathlib import Path
     from pypdf import PdfReader
     from io import BytesIO
-    evidence=Path(__file__).resolve().parents[3]/'.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-12-evidence'
+    evidence=tmp_path
     (evidence/'authorized-zhHK.pdf').write_bytes(content.content)
     text='\n'.join(p.extract_text() for p in PdfReader(BytesIO(content.content)).pages)
     assert '香港銷售會議' in text
