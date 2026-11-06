@@ -4,6 +4,12 @@ const noBrowserChange=()=>()=>{};
 const inBrowser=()=>true;
 const onServer=()=>false;
 const copy:Record<string,string>={
+ 'Verify email':'驗證電郵','Verification code':'驗證碼','Resend verification code':'重新發送驗證碼',
+ 'Email verified. You can now sign in.':'電郵已驗證，現在可以登入。',
+ 'Account created. Enter the six-digit verification code from your email.':'帳戶已建立，請輸入電郵中的六位數驗證碼。',
+ 'Enter the six-digit verification code from your email.':'請輸入電郵中的六位數驗證碼。',
+ 'That code is invalid or expired. Check the email and code, or request a new code.':'驗證碼無效或已過期。請檢查電郵地址及驗證碼，或索取新的驗證碼。',
+ 'If this account needs verification, a new code will arrive shortly. Check your spam folder too.':'如該帳戶需要驗證，你將很快收到新的驗證碼。請同時查看垃圾郵件。',
  'Forgot password?':'忘記密碼？','Create account':'建立帳戶','Resend verification email':'重新發送驗證電郵',
  'Reset password':'重設密碼','Send reset link':'發送重設連結','Save new password':'儲存新密碼','Send verification email':'發送驗證電郵',
  'Name':'姓名','New password':'新密碼','Confirm password':'確認密碼','Use 8–128 characters.':'請使用 8 至 128 個字元。',

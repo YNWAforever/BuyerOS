@@ -36,11 +36,27 @@ test('new account validates confirmation and explains verification and workspace
  await page.getByLabel('New password',{exact:true}).fill('synthetic-password');await page.getByLabel('Confirm password',{exact:true}).fill('different-password');
  await page.getByRole('button',{name:'Create account'}).click();await expect(page.getByRole('alert')).toHaveText('Passwords do not match.');expect(calls).toBe(0);
  await page.getByLabel('Confirm password',{exact:true}).fill('synthetic-password');await page.getByRole('button',{name:'Create account'}).click();
- await expect(page.getByRole('status')).toContainText('Check your email to verify your account');expect(calls).toBe(1);
- await page.getByRole('link',{name:'Resend verification email'}).click();
+ await expect(page.getByRole('heading',{name:'Verify email'})).toBeVisible();expect(calls).toBe(1);
+ await expect(page.getByLabel('Email',{exact:true})).toHaveValue('synthetic@example.test');
  await page.route('**/api/auth/send-verification-email',route=>route.fulfill({json:{status:true}}));
- await page.getByLabel('Email',{exact:true}).fill('synthetic@example.test');await page.getByRole('button',{name:'Send verification email'}).click();
+ await page.getByRole('button',{name:'Resend verification code'}).click();
  await expect(page.getByRole('status')).toContainText('If this account needs verification');
+ await page.route('**/api/auth/email-otp/verify-email',async route=>{expect(route.request().postDataJSON()).toEqual({email:'synthetic@example.test',otp:'123456'});await route.fulfill({json:{status:true}});});
+ await page.getByLabel('Verification code',{exact:true}).fill('123456');await page.getByRole('button',{name:'Verify email',exact:true}).click();
+ await expect(page.getByRole('status')).toHaveText('Email verified. You can now sign in.');
+ expect(await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}))).not.toContain('123456');
+});
+test('verification supports existing accounts, invalid codes, resend, and Traditional Chinese',async({page})=>{
+ let calls=0;
+ await page.route('**/api/auth/email-otp/verify-email',async route=>{calls++;await route.fulfill({status:400,json:{code:'INVALID_OTP'}});});
+ await page.goto('/auth/verify-email');await page.getByRole('combobox',{name:'Language'}).selectOption('zh-HK');
+ await page.getByLabel('電郵',{exact:true}).fill('synthetic@example.test');await page.getByLabel('驗證碼',{exact:true}).fill('123456');
+ await page.getByRole('button',{name:'驗證電郵',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('驗證碼無效或已過期');expect(calls).toBe(1);
+ await expect(page.getByLabel('驗證碼',{exact:true})).toHaveValue('');
+ await page.route('**/api/auth/send-verification-email',route=>route.fulfill({json:{status:true}}));
+ await page.getByRole('button',{name:'重新發送驗證碼'}).click();
+ await expect(page.getByRole('status')).toContainText('收到新的驗證碼');
 });
 test('reset link is scrubbed, rejects duplicate tokens, and handles expired and successful resets',async({page})=>{
  await page.goto('/auth/reset-password?token=one&token=two');await expect(page.getByRole('alert')).toContainText('missing or invalid');
