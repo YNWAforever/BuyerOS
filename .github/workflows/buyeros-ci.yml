@@ -96,6 +96,10 @@ jobs:
       - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-config.xml tests/neon-production-config.test.mjs tests/neon-auth-boundary.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-config.xml
       - run: node --conditions=react-server --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-sdk.xml tests/neon-auth-server-production.test.mjs
+      - name: Verify password recovery and registration boundaries
+        run: |
+          node --test tests/auth-recovery.test.mjs
+          node --conditions=react-server --test tests/auth-recovery-sdk.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-sdk.xml
       - run: pnpm exec tsc --noEmit
       - run: pnpm lint
@@ -129,6 +133,7 @@ jobs:
           pnpm exec playwright test --config playwright.neon-runtime-built.config.ts --list --reporter=json > artifacts/c61/ci-neon-session-native-discovery.json
           python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --discovery-only
       - run: pnpm exec playwright test --config playwright.neon-runtime-built.config.ts
+      - run: pnpm exec playwright test --config playwright.auth-recovery.config.ts
       - run: python scripts/check-required-tests.py --playwright-discovery artifacts/c61/ci-neon-session-native-discovery.json --expected-count 9 --expected-file neon-session-production.spec.ts --expected-file neon-security-production.spec.ts --junit test-results/neon-session.xml
       - uses: actions/upload-artifact@v4
         if: always()
@@ -140,6 +145,8 @@ jobs:
             artifacts/c61/ci-neon-session-native-discovery.json
             test-results/neon-session.xml
             test-results/neon-session/
+            test-results/auth-recovery.xml
+            test-results/auth-recovery/
           if-no-files-found: error
       - name: Verify T21 public and synthetic auth contracts on the emitted artifact
         env:
