@@ -69,8 +69,8 @@ def _require_disposable_test_dsn(dsn: str) -> None:
         )
 
 
-def _clear_project_dependents(conn) -> None:
-    """Reset every project-owned table child before replacing shared projects."""
+def _clear_workspace_dependents(conn) -> None:
+    """Reset every tenant table child before replacing shared workspaces."""
     from psycopg import sql
 
     conn.execute(
@@ -89,12 +89,14 @@ def _clear_project_dependents(conn) -> None:
         WITH RECURSIVE dependents(relid, depth, path) AS (
           SELECT conrelid, 1, ARRAY[confrelid, conrelid]
           FROM pg_constraint
-          WHERE contype='f' AND confrelid='public.projects'::regclass
+          WHERE contype='f' AND confrelid='public.workspaces'::regclass
+            AND connamespace='public'::regnamespace
           UNION ALL
           SELECT con.conrelid, current.depth + 1, current.path || con.conrelid
           FROM dependents current
           JOIN pg_constraint con ON con.confrelid=current.relid AND con.contype='f'
           WHERE NOT con.conrelid=ANY(current.path)
+            AND con.connamespace='public'::regnamespace
         )
         SELECT current.relid, namespace.nspname, relation.relname, max(current.depth)
         FROM dependents current
@@ -118,7 +120,7 @@ def _clear_project_dependents(conn) -> None:
         elif "project_id" in columns:
             predicate = sql.SQL("project_id")
         else:
-            raise RuntimeError(f"project-dependent fixture table has no tenant key: {schema}.{table}")
+            raise RuntimeError(f"workspace-dependent fixture table has no tenant key: {schema}.{table}")
         conn.execute(
             sql.SQL("DELETE FROM {}.{} WHERE {} IN (%s, %s)").format(
                 sql.Identifier(schema), sql.Identifier(table), predicate
@@ -245,7 +247,7 @@ def seeded(migrated):
                 if conn.execute("SELECT to_regclass(%s)", ("public." + table,)).fetchone()[0]:
                     conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
                                  _SHARED_WORKSPACES)
-        _clear_project_dependents(conn)
+        _clear_workspace_dependents(conn)
         conn.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s, %s)",
                      _SHARED_WORKSPACES)
         conn.execute("DELETE FROM workspace_preferences WHERE workspace_id IN (%s, %s)",
