@@ -370,4 +370,3 @@ def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypat
     with pytest.raises(ValueError,match='unexpectedly assigned aliases'): runtime.stage(123,output)
     assert not output.exists()
     assert not (tmp_path/'.vercel/.env.production.local').exists()
-
