@@ -194,9 +194,10 @@ def test_fix1_original_allocator_failure_branches_are_exact_owned(monkeypatch, f
     def unavailable(_):
         raise RuntimeError('mock startup timeout')
     monkeypatch.setattr(conftest, '_unavailable', unavailable)
+    allocator = getattr(conftest, '_unowned_start_container', conftest._start_container)
     with pytest.raises(ValueError if fail_create else RuntimeError,
                        match='unverified' if fail_create else 'mock startup timeout'):
-        conftest._start_container()
+        allocator()
     removals = [command for command in commands if command[3] == 'rm']
     if fail_create:
         assert not removals and not records

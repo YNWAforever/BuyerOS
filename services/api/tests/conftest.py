@@ -48,6 +48,10 @@ DB_NAME = "buyeros_test_api"
 API_ROLE = "buyeros_api"
 API_ROLE_PASSWORD = "test-only"
 _MIGRATED_DSN: str | None = None
+_SHARED_WORKSPACES = (
+    "11111111-1111-4111-8111-111111111111",
+    "22222222-2222-4222-8222-222222222222",
+)
 
 
 def _require_disposable_test_dsn(dsn: str) -> None:
@@ -62,6 +66,64 @@ def _require_disposable_test_dsn(dsn: str) -> None:
     ):
         raise pytest.UsageError(
             "destructive fixtures require a disposable loopback buyeros_test_* database"
+        )
+
+
+def _clear_project_dependents(conn) -> None:
+    """Reset every project-owned table child before replacing shared projects."""
+    from psycopg import sql
+
+    conn.execute(
+        "UPDATE projects SET active_icp_version_id=NULL, "
+        "active_sender_identity_version_id=NULL WHERE workspace_id IN (%s, %s)",
+        _SHARED_WORKSPACES,
+    )
+    if conn.execute("SELECT to_regclass('public.sales_tasks')").fetchone()[0]:
+        # The thread delete guard permits only settled/discarded discussions.
+        conn.execute(
+            "UPDATE sales_tasks SET state='cancelled' WHERE workspace_id IN (%s, %s)",
+            _SHARED_WORKSPACES,
+        )
+    dependents = conn.execute(
+        """
+        WITH RECURSIVE dependents(relid, depth, path) AS (
+          SELECT conrelid, 1, ARRAY[confrelid, conrelid]
+          FROM pg_constraint
+          WHERE contype='f' AND confrelid='public.projects'::regclass
+          UNION ALL
+          SELECT con.conrelid, current.depth + 1, current.path || con.conrelid
+          FROM dependents current
+          JOIN pg_constraint con ON con.confrelid=current.relid AND con.contype='f'
+          WHERE NOT con.conrelid=ANY(current.path)
+        )
+        SELECT current.relid, namespace.nspname, relation.relname, max(current.depth)
+        FROM dependents current
+        JOIN pg_class relation ON relation.oid=current.relid
+        JOIN pg_namespace namespace ON namespace.oid=relation.relnamespace
+        GROUP BY current.relid, namespace.nspname, relation.relname
+        ORDER BY max(current.depth) DESC, namespace.nspname, relation.relname
+        """
+    ).fetchall()
+    for relid, schema, table, _ in dependents:
+        columns = {
+            row[0]
+            for row in conn.execute(
+                "SELECT attname FROM pg_attribute "
+                "WHERE attrelid=%s AND attnum>0 AND NOT attisdropped",
+                (relid,),
+            )
+        }
+        if "workspace_id" in columns:
+            predicate = sql.SQL("workspace_id")
+        elif "project_id" in columns:
+            predicate = sql.SQL("project_id")
+        else:
+            raise RuntimeError(f"project-dependent fixture table has no tenant key: {schema}.{table}")
+        conn.execute(
+            sql.SQL("DELETE FROM {}.{} WHERE {} IN (%s, %s)").format(
+                sql.Identifier(schema), sql.Identifier(table), predicate
+            ),
+            _SHARED_WORKSPACES,
         )
 
 
@@ -182,34 +244,25 @@ def seeded(migrated):
                           "policy_controller_authorities", "idempotency_records", "policy_decisions"):
                 if conn.execute("SELECT to_regclass(%s)", ("public." + table,)).fetchone()[0]:
                     conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
-                                 ("11111111-1111-4111-8111-111111111111",
-                                  "22222222-2222-4222-8222-222222222222"))
+                                 _SHARED_WORKSPACES)
+        _clear_project_dependents(conn)
         conn.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         conn.execute("DELETE FROM workspace_preferences WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         conn.execute("DELETE FROM audit_events WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
-        conn.execute("UPDATE projects SET active_icp_version_id = NULL WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
-        conn.execute("DELETE FROM icp_versions WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         for table in ("budget_reservation_allocations", "cost_events", "budget_reservations", "budget_accounts"):
             conn.execute(f"DELETE FROM {table} WHERE workspace_id IN (%s, %s)",
-                         ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
-        conn.execute("DELETE FROM offer_documents WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                         _SHARED_WORKSPACES)
         # A failing test may leave members before its teardown; workspace
         # deletion must not cascade the whole shared-fixture session.
-        conn.execute("DELETE FROM conversation_threads WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111",
-                      "22222222-2222-4222-8222-222222222222"))
         conn.execute("DELETE FROM memberships WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         conn.execute("DELETE FROM projects WHERE workspace_id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         conn.execute("DELETE FROM workspaces WHERE id IN (%s, %s)",
-                     ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"))
+                     _SHARED_WORKSPACES)
         conn.execute(
             "INSERT INTO workspaces(id, name, data_mode) VALUES (%s, 'A', 'live'), (%s, 'B', 'live')",
             ("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"),
@@ -272,7 +325,12 @@ def isolated_migration_cluster():
     from alembic import command
     from alembic.config import Config
     from buyeros_api.settings import get_settings
-    name,dsn=_start_container()
+    configured = os.environ.get("BUYEROS_TEST_MIGRATION_CLUSTER_URL")
+    if configured:
+        _require_disposable_test_dsn(configured)
+        name, dsn = None, configured
+    else:
+        name, dsn = _start_container()
     prior={k:os.environ.get(k) for k in ['BUYEROS_DATABASE_URL','BUYEROS_DATABASE_MIGRATION_URL']}
     try:
         os.environ['BUYEROS_DATABASE_URL']=dsn;os.environ['BUYEROS_DATABASE_MIGRATION_URL']=dsn;get_settings.cache_clear()
@@ -287,7 +345,9 @@ def isolated_migration_cluster():
         for k,v in prior.items():
             if v is None:os.environ.pop(k,None)
             else:os.environ[k]=v
-        get_settings.cache_clear();_docker('rm','-f',name)
+        get_settings.cache_clear()
+        if name:
+            _docker('rm','-f',name)
 
 
 @pytest.fixture

@@ -150,6 +150,11 @@ def directory_case(migrated, monkeypatch):
         get_settings.cache_clear()
 
 
+@pytest.fixture
+def isolated_directory_case(isolated_migrated, monkeypatch):
+    yield from directory_case.__wrapped__(isolated_migrated, monkeypatch)
+
+
 def test_directory_queries_bounded_with_unrelated_workspaces(directory_case):
     case = directory_case
     visible, member = case['add'](0)
