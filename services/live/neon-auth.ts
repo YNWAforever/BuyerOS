@@ -160,7 +160,25 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
       || !Number.isFinite(age) || age < 0 || age > 600_000 || value.returnPath !== normalizeReturnPath(value.returnPath)) throw new Error('Invalid return transaction');
     return value;
   }
-  function callbackUrl(): string {return env.location.origin + '/auth/callback?state=' + encodeURIComponent(transaction().state);}
+  function freshTransaction(path = '/app') {
+    const tx = {state: env.crypto.randomUUID(), returnPath: normalizeReturnPath(path), createdAt: env.now()};
+    env.storage.setItem(transactionKey, JSON.stringify(tx));
+    return tx;
+  }
+  // Only an explicit sign-in action may start a new transaction. Callback validation stays strict.
+  function callbackUrl(): string {
+    let tx;
+    try {tx = transaction();} catch {tx = freshTransaction();}
+    return env.location.origin + '/auth/callback?state=' + encodeURIComponent(tx.state);
+  }
+  function validEmail(email: string) {
+    if (email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) throw new Error('Invalid email');
+    return email.trim();
+  }
+  function validPassword(password: string) {
+    if (password.length < 8 || password.length > 128) throw new Error('Password must be 8–128 characters');
+  }
+  const verificationCallback = env.location.origin + '/auth/sign-in?verified=1';
   return {
     provider: 'neon', initialize,
     async signIn(path) {
@@ -173,6 +191,27 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
       const callbackURL = callbackUrl();
       await request('/sign-in/email', {email: email.trim(), password, callbackURL});
       env.location.assign(callbackURL);
+    },
+    async signUpEmail(name, email, password) {
+      const address = validEmail(email); validPassword(password);
+      if (!name.trim() || name.length > 200 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('Name required');
+      const result = await request('/sign-up/email', {name: name.trim(), email: address, password, callbackURL: verificationCallback});
+      if (typeof (result as {token?: unknown} | null)?.token === 'string' && (result as {token: string}).token) {
+        freshTransaction(); env.location.assign(callbackUrl()); return 'signed-in';
+      }
+      return 'verify-email';
+    },
+    async requestPasswordReset(email) {
+      await request('/request-password-reset', {email: validEmail(email), redirectTo: env.location.origin + '/auth/reset-password'});
+    },
+    async resetPassword(resetToken, newPassword) {
+      validPassword(newPassword);
+      if (!resetToken || resetToken.length > 4096 || /[\s\u0000-\u001f\u007f]/.test(resetToken)) throw new Error('Invalid reset link');
+      await request('/reset-password', {token: resetToken, newPassword});
+      clear('invalidated'); env.storage.removeItem(transactionKey);
+    },
+    async sendVerificationEmail(email) {
+      await request('/send-verification-email', {email: validEmail(email), callbackURL: verificationCallback});
     },
     async signInGoogle() {
       const callbackURL = callbackUrl();

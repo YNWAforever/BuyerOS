@@ -17,6 +17,10 @@ export interface AuthAdapter {
   dispose?(): void;
   signInEmail?(email: string, password: string): Promise<void>;
   signInGoogle?(): Promise<void>;
+  signUpEmail?(name: string, email: string, password: string): Promise<'verify-email' | 'signed-in'>;
+  requestPasswordReset?(email: string): Promise<void>;
+  resetPassword?(token: string, newPassword: string): Promise<void>;
+  sendVerificationEmail?(email: string): Promise<void>;
 }
 export interface AuthConfig {issuer: string; clientId: string; audience: string; clientSecret?: never;}
 interface AuthEnvironment {

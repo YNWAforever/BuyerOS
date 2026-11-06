@@ -4,6 +4,21 @@ const noBrowserChange=()=>()=>{};
 const inBrowser=()=>true;
 const onServer=()=>false;
 const copy:Record<string,string>={
+ 'Forgot password?':'忘記密碼？','Create account':'建立帳戶','Resend verification email':'重新發送驗證電郵',
+ 'Reset password':'重設密碼','Send reset link':'發送重設連結','Save new password':'儲存新密碼','Send verification email':'發送驗證電郵',
+ 'Name':'姓名','New password':'新密碼','Confirm password':'確認密碼','Use 8–128 characters.':'請使用 8 至 128 個字元。',
+ 'Please wait…':'請稍候…','Checking reset link…':'正在檢查重設連結…','Back to sign in':'返回登入','Request a new reset link':'索取新的重設連結',
+ 'Passwords do not match.':'兩次輸入的密碼不相符。',
+ 'Too many attempts. Please wait and try again.':'嘗試次數過多，請稍後再試。',
+ 'This reset link may have expired or already been used. Request a new link.':'此重設連結可能已過期或已使用，請索取新連結。',
+ 'This reset link is missing or invalid. Request a new link.':'重設連結遺失或無效，請索取新連結。',
+ 'Could not create the account. If you already have an account, sign in or reset your password. Otherwise, try again or contact your administrator.':'未能建立帳戶。如已有帳戶，請登入或重設密碼；否則請重試或聯絡管理員。',
+ 'Could not send the email. Try again later or contact your administrator.':'未能發送電郵，請稍後再試或聯絡管理員。',
+ 'Password updated. Sign in with your new password.':'密碼已更新，請使用新密碼登入。',
+ 'Check your email to verify your account, then return to sign in.':'請查看電郵並驗證帳戶，然後返回登入。',
+ 'If this email has an eligible account, a password reset link will arrive shortly. Check your spam folder too.':'如該電郵有符合條件的帳戶，你將很快收到密碼重設連結。請同時查看垃圾郵件。',
+ 'If this account needs verification, a verification email will arrive shortly. Check your spam folder too.':'如該帳戶需要驗證，你將很快收到驗證電郵。請同時查看垃圾郵件。',
+ 'Use your invited work email. Creating an account does not grant workspace access; an administrator must invite you.':'請使用獲邀的工作電郵。建立帳戶不會自動獲得工作區權限，須由管理員邀請。',
  'Neon sign-in configuration is unavailable. Ask an administrator to restore sign-in.':'Neon 登入設定暫不可用。請要求管理員恢復登入。',
  'Sign-in provider configuration is unavailable. Ask an administrator to restore sign-in.':'登入服務設定暫不可用。請要求管理員恢復登入。',
  'Sign-in configuration unavailable. Ask an administrator to restore sign-in.':'登入設定暫不可用。請要求管理員恢復登入。',

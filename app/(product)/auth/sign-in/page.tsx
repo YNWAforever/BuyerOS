@@ -1,5 +1,5 @@
 'use client';
-import {useRef,useState,useSyncExternalStore,type FormEvent} from 'react';
+import {useRef,useState,type FormEvent} from 'react';
 import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {neonSignInDiagnostic} from '@/services/live/neon-auth';
 import {describeSignInFailure,signInFailureMessage,type SignInReason} from '@/services/live/sign-in-failure';
@@ -9,15 +9,6 @@ import {useAuthLocale} from '@/features/live/auth-locale';
 const emailMissing = 'Enter the work email on your invitation.';
 const emailFormat = 'Enter a complete email address, such as name@company.com.';
 const passwordMissing = 'Enter the password for this BuyerOS account.';
-function signInIsLinked(): boolean {
-  try {
-    if (new URLSearchParams(window.location.search).get('state')) return true;
-    const raw = sessionStorage.getItem('buyeros-neon-return');
-    if (!raw || raw.length > 4096) return false;
-    const value = JSON.parse(raw) as {state?: unknown};
-    return typeof value.state === 'string' && value.state.length > 0;
-  } catch { return false; }
-}
 
 export default function NeonSignInPage(){
  const {auth,authBootstrap}=useWorkspaceSession(),{t,picker,locale}=useAuthLocale();
@@ -25,7 +16,6 @@ export default function NeonSignInPage(){
  const [failure,setFailure]=useState<SignInReason|null>(null),[fieldError,setFieldError]=useState<string|null>(null);
  const submitting=useRef(false);
  const [support,setSupport]=useState<ReturnType<typeof neonSignInDiagnostic>|null>(null);
- const linked=useSyncExternalStore(()=>()=>{},signInIsLinked,()=>true);
  async function submit(action:()=>Promise<void>,context:'email'|'google'='email'){
    if(submitting.current)return;submitting.current=true;setBusy(true);setFailure(null);setFieldError(null);setSupport(null);
    try{await action();}catch(cause){setPassword('');setFailure(describeSignInFailure(cause,context));setSupport(neonSignInDiagnostic(cause));}
@@ -55,7 +45,6 @@ export default function NeonSignInPage(){
    <section className="panel live-signin-card"><LiveBrand/><h1>{t('Sign in')}</h1>
    {authBootstrap.kind==='initializing'?<p role="status">{t('Initializing sign-in…')}</p>:!ready?<p role="alert">{t('Neon sign-in is unavailable. Choose Start again, or ask an administrator if this continues.')}</p>:<>
      <p className="live-auth-lead">{t('Enter the work email on your invitation and its password.')}</p>
-     {!linked&&<p className="live-auth-hint">{t('This page is not linked to a sign-in yet. Choose Start again, then Sign in. You will enter the invited work email and its password.')}</p>}
      <form className="live-auth-form" aria-busy={busy} aria-describedby={alertText?'sign-in-error':undefined} onKeyDown={event=>{if(event.key==='Enter')prepareValidity();}} onSubmit={event=>{event.preventDefault();setFieldError(null);void submit(()=>auth!.signInEmail!(email,password));}}>
        <div className="live-auth-field">
          <label htmlFor="sign-in-email">{t('Email')}</label>
@@ -69,6 +58,9 @@ export default function NeonSignInPage(){
        </div>
        <button className="live-primary" type="submit" disabled={busy} onMouseDown={prepareValidity} onKeyDown={event=>{if(event.key==='Enter'||event.key===' ')prepareValidity();}}>{t('Sign in with email')}</button>
      </form>
+     <p><a href="/auth/forgot-password">{t('Forgot password?')}</a></p>
+     <p><a href="/auth/sign-up">{t('Create account')}</a></p>
+     {failure==='unverified_email'&&<p><a href="/auth/verify-email">{t('Resend verification email')}</a></p>}
      <div className="live-auth-secondary">
        <p className="live-auth-or">{t('or')}</p>
        <p className="live-auth-hint">{t('Only for accounts created with Google.')}</p>
