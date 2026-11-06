@@ -173,9 +173,20 @@ async def drain_pending(session, workspace_id):
     due=(await session.execute(text(POLICY_DUE+' ORDER BY t.id LIMIT 1'),dict(ws=workspace_id))).first()
     if due:
         await tombstone(session,workspace_id,due.project_id,due.id,'source')
-    row=(await session.execute(text('''SELECT target_id,project_id FROM sales_content_tombstones
-      WHERE workspace_id=:ws AND kind='source' AND completed_at IS NULL
-      ORDER BY created_at,id LIMIT 1'''),dict(ws=workspace_id))).first()
+    # Disconnect queues every receipt for a reusable connection. Prefer a root
+    # with unerased review bodies so an unrelated expired provider stage cannot
+    # consume the one bounded content page.
+    row=(await session.execute(text('''SELECT x.target_id,x.project_id FROM sales_content_tombstones x
+      WHERE x.workspace_id=:ws AND x.kind='source' AND x.completed_at IS NULL
+      ORDER BY EXISTS(
+        SELECT 1 FROM xverum_tool_receipts t
+        JOIN xverum_enrichment_dependencies d
+          ON d.workspace_id=t.workspace_id AND d.source_id=t.id
+        JOIN xverum_enrichments e
+          ON e.workspace_id=d.workspace_id AND e.id=d.enrichment_id
+        WHERE t.workspace_id=x.workspace_id AND t.stage_id=x.target_id
+          AND e.proposal<>'{}'::jsonb
+      ) DESC,x.created_at,x.id LIMIT 1'''),dict(ws=workspace_id))).first()
     if row is None:
         return 0
     ids=await purge_page(session,workspace_id,row.project_id,row.target_id)
