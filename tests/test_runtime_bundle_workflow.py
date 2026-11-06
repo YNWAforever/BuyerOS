@@ -1,5 +1,6 @@
 """Owned adapters exercise stage refusals and approval validation without external writes."""
 import copy
+import os
 import importlib.util
 from pathlib import Path
 import sys
@@ -221,6 +222,26 @@ def test_runtime_environment_rejects_libpq_target_overrides_and_paid_activation(
         path.write_text(base+key+'="true"\n')
         with pytest.raises(ValueError): runtime.runtime_env(path)
 
+
+def test_unreadable_vercel_secrets_use_protected_bindings(tmp_path,monkeypatch):
+    runtime=runtime_module();path=tmp_path/'production.env'
+    path.write_text('BUYEROS_DATABASE_URL=""\nBUYEROS_RELEASE_PROBE_TOKEN=""\n')
+    monkeypatch.setenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL','postgresql://buyeros_api:fixture@ep-owned.neon.tech/buyer')
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN','owned-probe-token')
+    values=runtime.runtime_env(path)
+    assert values['BUYEROS_DATABASE_URL']==os.environ['BUYEROS_SCHEMA_CHECK_DATABASE_URL']
+    assert values['BUYEROS_RELEASE_PROBE_TOKEN']=='owned-probe-token'
+    monkeypatch.delenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL')
+    with pytest.raises(ValueError):runtime.runtime_env(path)
+
+
+def test_readable_production_binding_cannot_be_overridden(tmp_path,monkeypatch):
+    runtime=runtime_module();path=tmp_path/'production.env'
+    path.write_text('BUYEROS_DATABASE_URL="postgresql://user:fixture@ep-actual.neon.tech/buyer"\nBUYEROS_RELEASE_PROBE_TOKEN="actual-token"\n')
+    monkeypatch.setenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL','postgresql://user:fixture@ep-other.neon.tech/buyer')
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN','wrong-token')
+    with pytest.raises(ValueError):runtime.runtime_env(path)
+
 def test_binding_collector_refuses_changed_effective_configuration():
     from test_release_readiness import candidate
     runtime=runtime_module();collector=runtime.load_script('collect-runtime-binding.py');manifest,_=candidate()
@@ -349,3 +370,4 @@ def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypat
     with pytest.raises(ValueError,match='unexpectedly assigned aliases'): runtime.stage(123,output)
     assert not output.exists()
     assert not (tmp_path/'.vercel/.env.production.local').exists()
+
