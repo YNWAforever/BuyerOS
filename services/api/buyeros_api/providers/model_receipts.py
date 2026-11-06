@@ -44,6 +44,9 @@ class PostgresModelReceipts:
         intent=ProviderIntent(request.key,'model',request.market,request.language,request.role);bound=self.capability.max_liability
         if request.model_id!=self.model_id or request.route!=self.route or request.market not in self.capability.markets or request.language not in self.capability.languages or request.role not in self.capability.roles:raise ValueError('model scope outside frozen contract')
         basis=request.basis
+        if basis.get('schema')=='sales-basis.v1':
+            # Never let sales fall through FIT's operation/outbox authority.
+            raise ValueError('sales durable admission is unselected; Task5 reservation required')
         if basis['workspace_id']!=str(self.workspace_id):raise ValueError('foreign model basis')
         conversation=basis.get('schema')=='conversation-basis.v1'
         if conversation:
@@ -179,3 +182,15 @@ class PostgresModelReceipts:
                         project_id=uuid.UUID(request.basis['project_id']),
                         source_ids=[item['source_id'] for item in request.basis['evidence']])
             return saved
+
+
+def sales_usage_receipt(result, request):
+    """Content-free usage provenance for the future durable owner, not a supplier bill."""
+    from ..sales.contracts import SalesModelResult, SalesModelRequest
+    result = SalesModelResult.model_validate(result.model_dump(mode='json'))
+    request = SalesModelRequest.model_validate(request.model_dump(mode='json'))
+    if result.model_id != request.model_id or result.prompt_version != request.route or result.usage.cost is not None:
+        raise ValueError('sales usage is not final supplier billing')
+    return {'task_id':str(request.task_id),'step_id':str(request.step_id),
+        'context_digest':request.context.digest,'model_id':result.model_id,'prompt_version':result.prompt_version,
+        'provider_ref':result.provider_ref,'usage':result.usage.model_dump(mode='json')}

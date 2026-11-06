@@ -10,6 +10,7 @@ import psycopg
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+from alembic.script import ScriptDirectory
 
 from buyeros_api.api.deps import async_database_url
 from buyeros_api.api.errors import ApiError
@@ -292,7 +293,7 @@ def test_populated_migration_rollback_refuses_to_erase_receipt_or_hold(paid_case
     with pytest.raises(RuntimeError,match='preserve conversation'):
         command.downgrade(cfg,'0056_policy_activation')
     with psycopg.connect(dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==('0059_conversation_connections',)
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==(ScriptDirectory.from_config(cfg).get_current_head(),)
         assert db.execute('SELECT state FROM model_receipts WHERE id=%s',(ref,)).fetchone()==('prepared',)
         assert db.execute('SELECT remaining_hold FROM budget_reservations WHERE workspace_id=%s',(WS,)).fetchone()==(Decimal('0.100000'),)
         assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname='model_receipts'").fetchone()==(True,True)

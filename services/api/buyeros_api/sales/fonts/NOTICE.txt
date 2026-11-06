@@ -1,0 +1,7 @@
+This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.
+
+http://scripts.sil.org/OFL
+
+© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+
+BuyerOS HK Regular is a modified derivative of Noto Sans HK Sans2.004, instantiated at weight 400 and renamed by the BuyerOS project. Distributed under SIL OFL 1.1 in LICENSE. See SOURCE.json for source and derivation hashes. No upstream endorsement is implied.

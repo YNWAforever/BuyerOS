@@ -193,13 +193,24 @@ def test_live_model_pg_receipt_survives_restart_without_new_submission(discovery
                 service=Path(__file__).resolve().parents[2]/'api';config=Config(str(service/'alembic.ini'));config.set_main_option('script_location',str(service/'alembic'))
                 monkeypatch.setenv('BUYEROS_DATABASE_URL',owner_dsn);get_settings.cache_clear()
                 try:
-                    with pytest.raises(RuntimeError,match='preserve controller policy history'):
+                    lifecycle_tables=('sales_financial_evidence','sales_accounting_receipts','sales_content_tombstones','xverum_enrichment_dependencies')
+                    with psycopg.connect(owner_dsn) as db:
+                        original_head=db.execute('SELECT version_num FROM alembic_version').fetchone()[0]
+                        lifecycle_counts=tuple(db.execute(f'SELECT count(*) FROM {table}').fetchone()[0] for table in lifecycle_tables)
+                    # A shared run may retain lifecycle evidence from earlier
+                    # fixtures; a fresh run reaches the controller-policy guard.
+                    refusal=('0065 downgrade blocked: preserve financial and purge tombstones' if any(lifecycle_counts)
+                             else '0056 downgrade blocked: preserve controller policy history')
+                    with pytest.raises(RuntimeError,match='^'+refusal+'$'):
                         command.downgrade(config,'0040_c61_search_receipts')
                     assert await store.get(ref)==saved
                     # Independent negative marker simulation, not a successful
                     # physical rollback: current retained history forbids that.
                     with psycopg.connect(owner_dsn) as db:
-                        original_head=db.execute('SELECT version_num FROM alembic_version').fetchone()[0]
+                        assert db.execute('SELECT version_num FROM alembic_version').fetchone()==(original_head,)
+                        assert tuple(db.execute(f'SELECT count(*) FROM {table}').fetchone()[0] for table in lifecycle_tables)==lifecycle_counts
+                        for table in lifecycle_tables:
+                            assert db.execute('SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',('public.'+table,)).fetchone()==(True,True)
                         db.execute("UPDATE alembic_version SET version_num='0040_c61_search_receipts'")
                     try:
                         with pytest.raises(ValueError,match='0041'):await api_store.prepare(request,operation_id=operation,outbox_id=outbox)

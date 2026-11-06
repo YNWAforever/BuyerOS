@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/notofonts/noto-cjk",
+  "release": "Sans2.004",
+  "commit": "523d033d6cb47f4a80c58a35753646f5c3608a78",
+  "path": "Sans/Variable/TTF/Subset/NotoSansHK-VF.ttf",
+  "source_sha256": "70172afd2cf0e045182787219b949e7798253982a36e364114757c09efd55477",
+  "distributed_file": "BuyerOSHK-Regular.ttf",
+  "sha256": "beac1bcbe253ab183aa120983f1777a39c8c620326744d1bc402da4000d1e39a",
+  "license": "SIL Open Font License 1.1",
+  "license_source": "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/LICENSE",
+  "distributed_font": "Modified derivative: Hong Kong regional subset TTF instantiated once at wght=400 with fonttools==4.68.0. Family and PostScript names changed to BuyerOS HK / BuyerOSHK-Regular. No glyph subsetting in the distributed derivative. PDF embeds a subset at render time.",
+  "derivation": "prepare_font.py pinned-source.ttf BuyerOSHK-Regular.ttf; timestamps retained; source copyright and OFL retained; no upstream script executed.",
+  "derivation_documentation": "https://fonttools.readthedocs.io/en/latest/varLib/instancer.html",
+  "renderer": "fpdf2==2.8.5",
+  "renderer_documentation": "https://py-pdf.github.io/fpdf2/Unicode.html"
+}

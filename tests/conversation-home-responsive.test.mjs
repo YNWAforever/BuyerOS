@@ -18,7 +18,17 @@ registerHooks({resolve(specifier,context,next){
  if(url.startsWith(rootUrl)&&/\.tsx?$/.test(url))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText};
  return next(url,context);
 }});
-const {chromium}=await import('@playwright/test');
+const {chromium,expect}=await import('@playwright/test');
+
+// Device discussions and workspace notes now live behind native disclosures.
+// Use the visible control rather than forcing hidden descendants or changing UI defaults.
+async function openDiscussion(page){
+ await page.locator('.live-discussion').waitFor({state:'attached'});
+ const disclosure=page.locator('details').filter({has:page.locator('.live-discussion')}).first();
+ if(await disclosure.count()&&!await disclosure.evaluate(node=>node.open))await disclosure.locator(':scope > summary').click();
+ await page.locator('.live-discussion').waitFor();
+}
+
 const {LiveNavigation}=await import('../features/live/navigation.tsx');
 const {LiveFrame}=await import('../features/live/shell.tsx');
 const cssDir='.vercel/output/static/_next/static/css';
@@ -90,13 +100,13 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
    }
    const data=contextResponse(new URL(req.url()));return route.fulfill({status:data?200:403,json:{data,data_mode:'live',request_id:'stage2-fixture'}});
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await page.getByRole('textbox').fill('Start a local discussion');
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.locator('.live-discussion').getByRole('textbox').fill('Start a local discussion');
   assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);
   await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByLabel('Discussion messages',{exact:true}).waitFor();
   await page.getByRole('checkbox').first().click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[0].checked);
   await page.getByRole('checkbox').nth(1).click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[1].checked);
-  await page.getByRole('textbox').fill('What should I review?');
+  await page.locator('.live-discussion').getByRole('textbox').fill('What should I review?');
   const ask=()=>page.getByRole('button',{name:'Ask BuyerOS',exact:true});
   await ask().focus();await page.keyboard.press('Enter');
   await page.getByText(reply.text,{exact:true}).waitFor();assert.equal(posts.length,1);
@@ -104,18 +114,18 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
   assert.ok(posts.every(row=>row.path.endsWith('/conversation-reply')));
   let stored=await page.evaluate(()=>Object.values(localStorage).join(''));
   assert.doesNotMatch(stored,/PRIVATE_FACT_CONTENT|project-evidence.pdf|tool_calls/);
-  await page.reload();await page.getByText(reply.text,{exact:true}).waitFor();
+  await page.reload();await openDiscussion(page);await page.getByText(reply.text,{exact:true}).waitFor();
   const citations=page.getByLabel('Reply citations');
   await citations.getByRole('button',{name:'Approved offer fact',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.lastDestination),`/app/overview?profile=${profileId}&workspace=a1000000-0000-4000-8000-000000000001&project=a2000000-0000-4000-8000-000000000001`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
   await page.getByLabel('Reply citations').getByRole('button',{name:'Offer document',exact:true}).click();
   assert.match(await page.evaluate(()=>window.lastDestination),new RegExp(`/app/discover/edit\\?document=${documentId}`));
-  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
   for(const state of ['unavailable','source','invalid']){
-   mode=state;await page.getByRole('textbox').fill('Keep this question');await ask().click();
+   mode=state;await page.locator('.live-discussion').getByRole('textbox').fill('Keep this question');await ask().click();
    await page.getByText(state==='unavailable'?'BuyerOS AI is unavailable. Your question is still here; you can use the guided step or try later.':state==='source'?'Selected sources are unavailable or not approved. Refresh project context and review your selection.':'The AI reply could not be verified. Review the selected sources and try again.',{exact:true}).waitFor();
-   assert.equal(await page.getByRole('textbox').inputValue(),'Keep this question');
+   assert.equal(await page.locator('.live-discussion').getByRole('textbox').inputValue(),'Keep this question');
   }
   const before=await page.evaluate(()=>Object.values(localStorage).join(''));
   mode='held';received=new Promise(resolve=>started=resolve);await ask().click();await received;
@@ -160,45 +170,63 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   await page.goto(origin+'fixture?flag=off');await page.getByRole('button',{name:'Home',exact:true}).waitFor();
   assert.equal(await page.getByRole('textbox').count(),0);assert.equal(requests.length,0);assert.deepEqual(await page.evaluate(()=>window.discussionStorageEvents),[]);
   assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('buyeros.discussions'))),[]);
-  await page.goto(origin+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor().catch(async error=>{writeFileSync('work/conversation-browser-error.html',await page.content());writeFileSync('work/conversation-browser-requests.json',JSON.stringify(requests,null,2));throw error;});
+  await page.goto(origin+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor().catch(async error=>{writeFileSync('work/conversation-browser-error.html',await page.content());writeFileSync('work/conversation-browser-requests.json',JSON.stringify(requests,null,2));throw error;});
   const initialReads=requests.length;assert.ok(initialReads>=5);assert.ok(requests.every(req=>req.method==='GET'));
   const templates=['Guide my first project','Understand my documents','Research a market','Review & shortlist buyers','Check a company','Prepare a follow-up'];
   const destinations=[['Offer','/app/discover/edit'],['Offer','/app/discover/edit'],['Research runs','/app/runs'],['Buyers','/app/discover'],['Buyers','/app/discover'],['Drafts','/app/outreach']];
+  // Guided home owns fresh entry reads; device edits still own no network calls.
+  const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
+  const usage=new URL(requests.find(row=>new URL(row.url).pathname.endsWith('/usage')).url).search;
+  const entryReads=['','','/offer-documents?offset=0&limit=20','/icp-versions?offset=0&limit=20','/runs?offset=0&limit=10','/usage'+usage,'/sales-outputs?limit=50&offset=0','/sales-tasks/native-sources','/sales/skills','/conversation-threads?q=&archived=false&offset=0&limit=50'].map(path=>'GET '+prefix+path).sort();
+  let homeReads=0;
+  async function enterHome(){
+   const alreadyHome=await page.locator('#fixture-path').textContent()==='/app',before=requests.length;
+   await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
+   if(!alreadyHome){
+    await expect.poll(()=>requests.length).toBe(before+entryReads.length);
+    assert.deepEqual(requests.slice(before).map(row=>row.method+' '+new URL(row.url).pathname+new URL(row.url).search).sort(),entryReads,'home entry performs only its explicit read set');
+    homeReads+=entryReads.length;
+   }else assert.equal(requests.length,before,'staying on loaded home must not fetch');
+  }
   for(const [index,name] of templates.entries()){
-   await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('button',{name,exact:false}).click();
-   await page.getByRole('textbox').fill('My next local step');await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByText('My next local step',{exact:true}).waitFor();
+   await enterHome();const localReads=requests.length;await page.getByRole('button',{name,exact:false}).click();
+   await page.waitForFunction(()=>document.querySelector('#fixture-path')?.textContent?.startsWith('/app/discussions/local-'));
+   await page.locator('.live-discussion').getByRole('textbox').fill('My next local step');await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByText('My next local step',{exact:true}).waitFor();
    assert.match(await page.locator('#fixture-path').textContent(),/^\/app\/discussions\/local-/);
+   assert.equal(requests.length,localReads,'template creation and local Send must not fetch');
    const [label,path]=destinations[index];await page.locator('.live-discussion-thread').getByRole('button',{name:'Open in '+label,exact:true}).first().click();
    assert.equal(await page.evaluate(()=>window.lastDestination),path+'?workspace='+workspace+'&project='+project);
-   await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();
+   await enterHome();const reopenReads=requests.length;await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();await openDiscussion(page);
+   assert.equal(requests.length,reopenReads,'reopening a device discussion must not fetch');
   }
-  assert.equal(requests.length,initialReads,'template, route and Send actions must not fetch');
+  writeFileSync('work/conversation-browser-action-network.json',JSON.stringify({initialReads,requests},null,2));
+  assert.equal(requests.length,initialReads+homeReads,'only explicit guided-home entry reads are allowed; device actions must not fetch');
   await page.getByRole('button',{name:'Change language',exact:true}).click();await page.getByText('只儲存於此裝置 · 不會共用',{exact:true}).waitFor();await page.getByRole('button',{name:'Change language',exact:true}).click();
   // The DOM gets real values, while selections only persist generic labels and IDs.
   await page.getByRole('checkbox').first().click();
   await page.waitForFunction(()=>document.querySelector('input[type=checkbox]').checked);
   const stored=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage).filter(([k])=>k.startsWith('buyeros.discussions'))));
   const serialized=JSON.stringify(stored);assert.ok(!serialized.includes('PRIVATE_FACT_CONTENT'));assert.ok(!serialized.includes('project-evidence.pdf'));assert.ok(serialized.includes(documentId));
-  await page.reload();await page.getByText('My next local step',{exact:true}).waitFor();await page.getByText('project-evidence.pdf',{exact:false}).waitFor();assert.equal(await page.getByRole('checkbox').first().isChecked(),true);
+  await page.reload();await openDiscussion(page);await page.getByText('My next local step',{exact:true}).waitFor();await page.getByText('project-evidence.pdf',{exact:false}).waitFor();assert.equal(await page.getByRole('checkbox').first().isChecked(),true);
   // Scope reads may occur here; actions on the loaded scope remain entirely local.
-  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
   assert.equal(await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('listitem').count(),6);
   await page.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   await page.getByRole('combobox',{name:'Fixture project'}).selectOption(project);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('listitem').first().waitFor();
   // Every source destination preserves record IDs; navigation callback supplies scope.
   await page.getByRole('region',{name:'Recent research runs',exact:true}).getByRole('button',{name:'Open source',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.lastDestination),`/app/discover/${runId}?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
   await page.getByRole('region',{name:'Documents & outputs',exact:true}).last().getByRole('button',{name:'Open source',exact:true}).first().click();
   assert.equal(await page.evaluate(()=>window.lastDestination),`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
   holdReads=true;await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();
   await page.getByText('project-evidence.pdf',{exact:false}).waitFor({state:'hidden',timeout:2000});
   holdReads=false;heldReads.forEach(resolve=>resolve());
-  await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();
+  await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();await openDiscussion(page);
   await page.getByRole('button',{name:'Second actor',exact:true}).click();await page.getByText('This discussion is not saved for this account and project on this device.',{exact:true}).waitFor();
   assert.equal(await page.getByText('My next local step',{exact:true}).count(),0);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Second workspace',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
   assert.deepEqual(errors,[]);assert.deepEqual(moduleFailures,[],'fixture modules must load cleanly from a cold cache');writeFileSync('work/conversation-browser-network.json',JSON.stringify({initialReads,requests,errors},null,2));
   // Two real tabs begin from the same snapshot. The scope lock makes one save
@@ -209,34 +237,34 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
    return route.fulfill({status:data?200:403,json:data?{data,data_mode:'live',request_id:'multitab-fixture'}:{error:{code:'PERMISSION_DENIED'},request_id:'multitab-fixture'}});
   });
   const a=await tabs.newPage(),b=await tabs.newPage();
-  for(const tab of [a,b]){await tab.goto(origin+'fixture');await tab.getByText('project-evidence.pdf',{exact:false}).waitFor();}
+  for(const tab of [a,b]){await tab.goto(origin+'fixture');await openDiscussion(tab);await tab.getByText('project-evidence.pdf',{exact:false}).waitFor();}
   const tabReadCount=tabRequests.length;
-  await a.getByRole('textbox').fill('Question in tab A');await b.getByRole('textbox').fill('Question in tab B');
+  await a.locator('.live-discussion').getByRole('textbox').fill('Question in tab A');await b.locator('.live-discussion').getByRole('textbox').fill('Question in tab B');
   await Promise.all([a.getByRole('button',{name:'Send',exact:true}).click(),b.getByRole('button',{name:'Send',exact:true}).click()]);
   const conflict='Saved discussions changed in another tab. Changes were not saved. Copy any unsaved work before reloading.';
   await Promise.any([a.getByText(conflict,{exact:true}).waitFor(),b.getByText(conflict,{exact:true}).waitFor()]);
-  const winner=(await a.getByRole('textbox').inputValue())===''?a:b,loser=winner===a?b:a;
+  const winner=(await a.locator('.live-discussion').getByRole('textbox').inputValue())===''?a:b,loser=winner===a?b:a;
   const persisted=()=>winner.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('buyeros.discussions'))[1]));
   const firstSave=await persisted();assert.equal(firstSave.threads.length,1);
-  assert.match(await loser.getByRole('textbox').inputValue(),/^Question in tab [AB]$/);
+  assert.match(await loser.locator('.live-discussion').getByRole('textbox').inputValue(),/^Question in tab [AB]$/);
   assert.equal(tabRequests.length,tabReadCount,'simultaneous local saves must not fetch');
-  await loser.reload();await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await loser.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();
-  await winner.getByRole('textbox').fill('Saved in the winner');await winner.getByRole('button',{name:'Send',exact:true}).click();
+  await loser.reload();await openDiscussion(loser);await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await loser.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(loser);
+  await winner.locator('.live-discussion').getByRole('textbox').fill('Saved in the winner');await winner.getByRole('button',{name:'Send',exact:true}).click();
   await winner.getByText('Saved in the winner',{exact:true}).waitFor();
-  await loser.getByRole('textbox').fill('Keep this unsaved message');await loser.getByRole('button',{name:'Send',exact:true}).click();
+  await loser.locator('.live-discussion').getByRole('textbox').fill('Keep this unsaved message');await loser.getByRole('button',{name:'Send',exact:true}).click();
   await loser.getByText(conflict,{exact:true}).waitFor();
-  assert.equal(await loser.getByRole('textbox').inputValue(),'Keep this unsaved message');
+  assert.equal(await loser.locator('.live-discussion').getByRole('textbox').inputValue(),'Keep this unsaved message');
   await loser.getByRole('checkbox').first().click();
   await loser.waitForFunction(()=>!document.querySelector('input[type=checkbox]').checked);
   assert.deepEqual((await persisted()).threads[0].messages.map(row=>row.text),[firstSave.threads[0].messages[0].text,'Saved in the winner']);
   assert.deepEqual((await persisted()).threads[0].sources,[]);
   // A queued write must recheck its actor/project before running under the lock.
-  await loser.reload();await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await loser.reload();await openDiscussion(loser);await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
   await winner.evaluate(()=>{window.fixtureLockHeld=false;void navigator.locks.request(Object.keys(localStorage).find(key=>key.startsWith('buyeros.discussions')),async()=>{window.fixtureLockHeld=true;await new Promise(resolve=>window.releaseFixtureLock=resolve);});});
   await winner.waitForFunction(()=>window.fixtureLockHeld);
   const beforeQueued=await persisted();
-  await loser.getByRole('textbox').fill('Must not enter the old scope');await loser.getByRole('button',{name:'Send',exact:true}).click();
+  await loser.locator('.live-discussion').getByRole('textbox').fill('Must not enter the old scope');await loser.getByRole('button',{name:'Send',exact:true}).click();
   await winner.waitForFunction(async()=> (await navigator.locks.query()).pending.length>0);
   await loser.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');
   await loser.getByText('This discussion is not saved for this account and project on this device.',{exact:true}).waitFor();
@@ -245,8 +273,8 @@ test('hydrated Chromium continuity, scope isolation and local actions make zero 
   assert.deepEqual(await persisted(),beforeQueued);
   // Unsupported lock capability must not fall back to unsafe persistent writes.
   const unlocked=await tabs.newPage();await unlocked.addInitScript(()=>Object.defineProperty(navigator,'locks',{value:undefined}));
-  await unlocked.goto(origin+'fixture');await unlocked.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await unlocked.getByRole('textbox').fill('Memory only');await unlocked.getByRole('button',{name:'Send',exact:true}).click();
+  await unlocked.goto(origin+'fixture');await openDiscussion(unlocked);await unlocked.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await unlocked.locator('.live-discussion').getByRole('textbox').fill('Memory only');await unlocked.getByRole('button',{name:'Send',exact:true}).click();
   await unlocked.getByLabel('Discussion messages',{exact:true}).getByText('Memory only',{exact:true}).waitFor();
   await unlocked.getByText('Local storage is unavailable. Discussions are kept only in this tab.',{exact:true}).waitFor();
   assert.deepEqual(await persisted(),beforeQueued);assert.ok(tabRequests.every(method=>method==='GET'));
@@ -286,9 +314,9 @@ test('Stage 2b keyboard confirmation, localized gate failures, run continuity an
    else{data=contextResponse(url);if(url.pathname.endsWith('/icp-versions')&&url.searchParams.get('limit')==='100')data={...data,limit:100};}
    return route.fulfill({status:data?200:403,json:{data,data_mode:'live',request_id:'paid-fixture'}});
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
   await page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
-  await page.getByRole('textbox').fill('Research these approved sources');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.locator('.live-discussion').getByRole('textbox').fill('Research these approved sources');await page.getByRole('button',{name:'Send',exact:true}).click();
   await page.getByRole('button',{name:'Propose research',exact:true}).waitFor();assert.equal(posts.length,0);
   const propose=()=>page.getByRole('button',{name:'Propose research',exact:true});
   await propose().focus();await page.keyboard.press('Enter');await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor();
@@ -320,11 +348,11 @@ test('Stage 2b keyboard confirmation, localized gate failures, run continuity an
   assert.equal(posts.at(-1).body.max_cost.amount,'0.500000');assert.equal(posts.at(-1).body.limits.max_duration_seconds,300);
   assert.equal(new Set(posts.map(row=>row.key)).size,posts.length,'each confirmed, known-rejected intent gets a new key');
   status='partial';await page.getByRole('button',{name:'Refresh run status',exact:true}).click();await page.locator('.live-conversation-research').getByText('partial',{exact:true}).waitFor();
-  await page.reload();await page.getByText(runId,{exact:true}).waitFor();await page.locator('.live-conversation-research').getByText('partial',{exact:true}).waitFor();
-  await page.getByRole('checkbox').nth(1).click();await page.getByRole('textbox').fill('Which source supports this?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
+  await page.reload();await openDiscussion(page);await page.getByText(runId,{exact:true}).waitFor();await page.locator('.live-conversation-research').getByText('partial',{exact:true}).waitFor();
+  await page.getByRole('checkbox').nth(1).click();await page.locator('.live-discussion').getByRole('textbox').fill('Which source supports this?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
   await page.getByText('PRIVATE_LIVE_MODEL_FACT_BODY',{exact:true}).waitFor();
   assert.doesNotMatch(await page.evaluate(()=>Object.values(localStorage).join('')),/PRIVATE_LIVE_MODEL_FACT_BODY|PRIVATE_BUYER_BODY|PRIVATE_FACT_CONTENT/);
-  const count=posts.length;await page.reload();await page.getByText(runId,{exact:true}).waitFor();assert.equal(await page.getByText('PRIVATE_LIVE_MODEL_FACT_BODY',{exact:true}).count(),0);assert.equal(posts.length,count);
+  const count=posts.length;await page.reload();await openDiscussion(page);await page.getByText(runId,{exact:true}).waitFor();assert.equal(await page.getByText('PRIVATE_LIVE_MODEL_FACT_BODY',{exact:true}).count(),0);assert.equal(posts.length,count);
   await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await propose().count(),0);assert.equal(posts.length,count);
   assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
@@ -367,16 +395,16 @@ test('Stage 3 confirmed import retries once, shares by keyboard, restores and pr
    }
    throw new Error('unexpected thread write '+path);
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await page.getByRole('textbox').fill('Synthetic workspace note');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.locator('.live-discussion').getByRole('textbox').fill('Synthetic workspace note');await page.getByRole('button',{name:'Send',exact:true}).click();
   await page.getByLabel('Discussion messages',{exact:true}).waitFor();assert.equal(posts.length,0,'local notes never auto-upload');
   await page.getByRole('button',{name:'Save to workspace',exact:true}).click();assert.equal(posts.length,0,'opening confirmation cannot import');
   await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByRole('button',{name:'Open workspace discussion',exact:true}).waitFor();
   assert.equal(posts.length,2);assert.equal(posts[0].key,posts[1].key);assert.deepEqual(posts[0].body,{confirmed:true,template_id:'custom',title:'Synthetic workspace note',messages:[{text:'Synthetic workspace note'}],sources:[],runs:[]});
   assert.match(await page.evaluate(()=>Object.values(localStorage).join('')),/Synthetic workspace note/);
-  await page.getByRole('button',{name:'Open workspace discussion',exact:true}).click();await page.getByText('Saved to this workspace · visible to you and people you share with',{exact:true}).waitFor();
-  await page.reload();await page.getByRole('button',{name:'Share discussion',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Open workspace discussion',exact:true}).click();await openDiscussion(page);await page.getByText('Saved to this workspace · visible to you and people you share with',{exact:true}).waitFor();
+  await page.reload();await openDiscussion(page);await page.getByRole('button',{name:'Share discussion',exact:true}).waitFor();
   await page.getByRole('button',{name:'Share discussion',exact:true}).focus();await page.keyboard.press('Enter');
   await page.getByRole('dialog',{name:'Share discussion',exact:true}).waitFor();
   for(const width of [320,390,480,600,768,820,1023,1024,1440]){
@@ -396,7 +424,7 @@ test('Stage 3 confirmed import retries once, shares by keyboard, restores and pr
   await page.keyboard.press('Escape');assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).evaluate(node=>document.activeElement===node),true);
   stale=true;await page.getByLabel('Discussion message',{exact:true}).fill('Keep this unsaved text');await page.getByRole('button',{name:'Send',exact:true}).click();
   await page.getByText('This discussion changed. Copy any unsaved text before reloading.',{exact:true}).waitFor();assert.equal(await page.getByLabel('Discussion message',{exact:true}).inputValue(),'Keep this unsaved text');
-  access='viewer';stale=false;await page.reload();await page.getByText('Shared with you',{exact:false}).waitFor();
+  access='viewer';stale=false;await page.reload();await openDiscussion(page);await page.getByText('Shared with you',{exact:false}).waitFor();
   assert.equal(await page.getByLabel('Discussion message',{exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Propose research',exact:true}).count(),0);assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0);
   forbidden=true;await page.reload();await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();assert.equal(await page.getByLabel('Discussion messages',{exact:true}).count(),0);
   const before=posts.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Save to workspace',exact:true}).count(),0);assert.equal(posts.length,before);
@@ -443,15 +471,15 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
    if(path.includes('pilot-budget'))return ok({id:null,workspace_id:workspace,project_id:project,remaining:null,currency:'USD'});
    let data=contextResponse(url);if(path.endsWith('/icp-versions')&&url.searchParams.get('limit')==='100')data={...data,limit:100};return ok(data);
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id));
+  await page.goto(server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id));await openDiscussion(page);
   await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
   const composer=page.getByLabel('Discussion message',{exact:true}),ask=page.getByRole('button',{name:'Ask BuyerOS',exact:true});
   await composer.fill('Keep my accepted question');await ask.evaluate(button=>{button.click();button.click();});
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
   assert.equal(await composer.inputValue(),'Keep my accepted question');
   if(runFailure===503){
-   await page.getByRole('button',{name:'Home',exact:true}).first().click();
-   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Synthetic recovery/}).click();
+   await page.getByRole('button',{name:'Home',exact:true}).first().click();await openDiscussion(page);
+   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Synthetic recovery/}).click();await openDiscussion(page);
    await composer.fill('Keep my accepted question');
   }
   failNote=false;await ask.evaluate(button=>{button.click();button.click();});
@@ -507,14 +535,14 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
    await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
    assert.equal(await page.getByText(answer,{exact:true}).count(),0,'an aborted in-flight answer cannot reappear after permission restoration');
    assert.equal(await composer.inputValue(),'Discard this delayed reply after permission loss');
-   await page.reload();await composer.waitFor();
+   await page.reload();await openDiscussion(page);await composer.waitFor();
    const paidCount=posts.filter(post=>post.path.endsWith('/conversation-reply')).length;
    holdCheck=true;const checkReceived=new Promise(resolve=>checkStarted=resolve);
    await composer.fill('Leave before the paid request');await ask.click();await checkReceived;
-   await page.getByRole('button',{name:'Home',exact:true}).first().click();
+   await page.getByRole('button',{name:'Home',exact:true}).first().click();await openDiscussion(page);
    await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
    holdCheck=false;const response=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await response;
-   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();
+   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();await openDiscussion(page);
    await composer.waitFor();
    assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,paidCount,'unmount during the ACL recheck cannot launch a paid request');
    assert.equal(await composer.inputValue(),'');
@@ -528,7 +556,8 @@ for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserv
     await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});
     holdCheck=false;const checked=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await (await checked).finished();
     if(exit==='permission')await page.getByRole('button',{name:'Restore offer access',exact:true}).click();
-    else await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();
+    else {await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();}
+    await openDiscussion(page);
     await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
     await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     assert.equal(posts.filter(post=>post.path.endsWith('/runs')&&!post.path.includes('/conversation-threads/')).length,1,`${exit} unmount during the research ACL recheck must not start paid research`);
@@ -542,7 +571,7 @@ test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts a
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
  const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
  mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-');writeFileSync(dir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+css+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();let browser;
  try{
@@ -570,7 +599,7 @@ test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts a
    if(path.endsWith('/conversation-reply')){assert.deepEqual(req.postDataJSON().source_ids,[source.id]);return ok({status:'needs_review',fixture:false,text:'EPHEMERAL_DRIVE_ANSWER',citations:[{...source,locator:{surface:'drive',id:source.id}}]});}
    return ok(contextResponse(url));
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);
   const drive=page.getByRole('region',{name:'Google Drive',exact:true});
   await drive.getByRole('button',{name:'Connect Google Drive',exact:true}).click();
   await drive.getByText('The connection change was not confirmed. Reload Google Drive and compare before retrying.',{exact:true}).waitFor();
@@ -586,8 +615,8 @@ test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts a
   await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();
   await drive.getByText('Google Drive item 1',{exact:false}).waitFor();
   assert.equal(await drive.getByRole('checkbox').isDisabled(),true,'start a discussion before selecting');
-  await page.getByRole('textbox').fill('Review approved Drive evidence');await page.getByRole('button',{name:'Send',exact:true}).click();
-  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await drive.getByRole('checkbox').click();await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);await page.getByRole('textbox').fill('What needs review?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
+  await page.locator('.live-discussion').getByRole('textbox').fill('Review approved Drive evidence');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await drive.getByRole('checkbox').click();await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);await page.locator('.live-discussion').getByRole('textbox').fill('What needs review?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
   await page.getByText('EPHEMERAL_DRIVE_ANSWER',{exact:true}).waitFor();
   assert.doesNotMatch(await page.evaluate(()=>Object.values(localStorage).join('')),/EPHEMERAL_DRIVE_ANSWER/);
   assert.equal(writes[0].key,writes[1].key);assert.equal(writes[0].version,'"1"');assert.deepEqual(writes[2].body,{folder_ids:['folder_one']});
@@ -609,7 +638,7 @@ test('Stage 4 workspace discussions can remove every revoked Drive selection whi
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
  const {contextResponse,browserEntry,profileId,factId}=await import('./conversation-browser-fixture.mjs');
  mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-removal-');writeFileSync(dir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+css+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();let browser;
  try{
@@ -632,7 +661,7 @@ test('Stage 4 workspace discussions can remove every revoked Drive selection whi
    return ok(contextResponse(url));
   });
   const destination=server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id);
-  await page.goto(destination);await page.getByText('Keep this workspace note',{exact:true}).waitFor();
+  await page.goto(destination);await openDiscussion(page);await page.getByText('Keep this workspace note',{exact:true}).waitFor();
   await page.getByText('Selected for this discussion',{exact:false}).click();
   await page.getByRole('button',{name:'Remove selection',exact:true}).first().click();
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
@@ -640,10 +669,10 @@ test('Stage 4 workspace discussions can remove every revoked Drive selection whi
   const clear=page.getByRole('button',{name:'Remove all Google Drive selections',exact:true});
   assert.equal(await clear.count(),1,'revoked Drive references need a removal path that submits no Drive IDs');
   await clear.focus();await page.keyboard.press('Enter');
-  await page.waitForFunction(()=>document.querySelector('details summary')?.textContent?.includes('(1)'));
+  await page.waitForFunction(()=>document.querySelector('.live-discussion details summary')?.textContent?.includes('(1)'));
   assert.deepEqual(writes.at(-1).body,{sources:[fact]});assert.ok(writes.at(-1).key);assert.equal(writes.at(-1).version,'"1"');
   assert.deepEqual(row.sources,[fact]);assert.equal(await clear.count(),0);assert.equal(await page.getByRole('button',{name:'Remove selection',exact:true}).count(),1);
-  row={...row,sources:[...drive,fact],version:row.version+1,access:'viewer'};await page.reload();await page.getByText('Selected for this discussion',{exact:false}).click();
+  row={...row,sources:[...drive,fact],version:row.version+1,access:'viewer'};await page.reload();await openDiscussion(page);await page.getByText('Selected for this discussion',{exact:false}).click();
   assert.equal(await clear.isDisabled(),true,'workspace viewers cannot clear selections');
   await page.getByRole('button',{name:'Change language',exact:true}).click();
   assert.equal(await page.getByRole('button',{name:'移除所有 Google Drive 選擇',exact:true}).isDisabled(),true);
@@ -655,7 +684,7 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
  const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
  mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-import-');writeFileSync(dir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();let browser;
  try{
@@ -673,14 +702,14 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
    }
    return ok(contextResponse(url));
   });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await page.getByRole('textbox').fill('Keep this local note');await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.locator('.live-discussion').getByRole('textbox').fill('Keep this local note');await page.getByRole('button',{name:'Send',exact:true}).click();
   await page.getByLabel('Discussion messages',{exact:true}).waitFor();await page.getByRole('region',{name:'Google Drive',exact:true}).getByRole('checkbox').click();
   await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);
   await page.getByRole('button',{name:'Save to workspace',exact:true}).click();await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Cancel',exact:true}).click();await page.getByText('Selected for this discussion',{exact:false}).click();
-  await page.getByRole('button',{name:'Remove selection',exact:true}).click();await page.waitForFunction(()=>document.querySelector('details summary')?.textContent?.includes('(0)'));
+  await page.getByRole('button',{name:'Remove selection',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.live-discussion details summary')?.textContent?.includes('(0)'));
   await page.getByRole('button',{name:'Save to workspace',exact:true}).click();await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('.live-thread-actions')?.textContent?.includes('Open workspace discussion')||document.querySelector('dialog[open] [role=status]')?.textContent?.includes('unavailable'));
   assert.equal(await page.getByRole('button',{name:'Open workspace discussion',exact:true}).count(),1,'the retried import must use the updated source selection');

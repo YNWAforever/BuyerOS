@@ -170,6 +170,7 @@ def api(seeded, monkeypatch):
         )
         owner.execute("DELETE FROM sender_identity_versions WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.execute("DELETE FROM icp_versions WHERE workspace_id = %s", (WORKSPACE_A,))
+        owner.execute("DELETE FROM sales_content_tombstones WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.execute("DELETE FROM projects WHERE workspace_id = %s", (WORKSPACE_A,))
         owner.close()
 

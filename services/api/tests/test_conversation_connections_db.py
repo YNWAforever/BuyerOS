@@ -10,7 +10,7 @@ from tests.test_conversation_threads_db import config
 from tests.test_buyer_review_db import WORKSPACE_A,WORKSPACE_B,PROJECT_A,PROJECT_B
 
 TABLE='conversation_drive_connections'
-HEAD='0059_conversation_connections'
+HEAD='0065_sales_lifecycle'
 
 
 @pytest.fixture
@@ -101,6 +101,13 @@ def test_populated_downgrade_refuses_and_keeps_force_rls(isolated_seeded,kind):
 def test_non_bypass_owner_downgrade_checks_hidden_references_and_preserves_rls(isolated_seeded,monkeypatch,retained_reference):
     from buyeros_api.settings import get_settings
     dsn=isolated_seeded
+    # This is the 0059 Drive-owner regression, not ownership of the 0060 sales
+    # objects. Stage the empty owned clone before installing the restricted role.
+    command.downgrade(config(),'0059_conversation_connections')
+    legacy_head='0059_conversation_connections'
+    with psycopg.connect(dsn) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]==legacy_head
+        assert db.execute("SELECT to_regclass('public.sales_tasks')").fetchone()[0] is None
     role='drive_owner_'+uuid.uuid4().hex[:12]
     thread_id,user=uuid.uuid4(),uuid.uuid4()
     source=[{'id':f'drive:{uuid.uuid4()}:file_one','label':'Google Drive item'}]
@@ -131,7 +138,7 @@ def test_non_bypass_owner_downgrade_checks_hidden_references_and_preserves_rls(i
         else:
             command.downgrade(config(),'0058_conversation_threads')
         with psycopg.connect(dsn) as db:
-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]==(HEAD if retained_reference else '0058_conversation_threads')
+            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]==(legacy_head if retained_reference else '0058_conversation_threads')
             assert db.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid='conversation_threads'::regclass").fetchone()==(True,True)
             if retained_reference:
                 assert db.execute('SELECT sources FROM conversation_threads WHERE id=%s',(thread_id,)).fetchone()[0]==source

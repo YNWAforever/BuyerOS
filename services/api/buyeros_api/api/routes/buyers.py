@@ -120,6 +120,10 @@ async def get_buyer(
         data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
         if set(membership["roles"]) & {"operator", "reviewer", "workspace_admin"}:
             data["contacts"] = await contact_detail(session, workspace_id=workspace_id, buyer=buyer)
+            from ...sales.contracts import Scope
+            from ...services.buyer_management import reviewed_provider_fields
+            data['reviewed_enrichment']=await reviewed_provider_fields(session,
+                Scope(workspace_id=workspace_id,project_id=buyer.project_id,actor_id=membership['user_id']),buyer)
     return envelope(data, request.state.request_id)
 
 
@@ -263,11 +267,9 @@ async def update_buyer(
                 if owner is None:
                     raise ApiError(422, "INVALID_REQUEST", "owner_membership_id is not an active member")
                 buyer.owner_user_id = owner.user_id
-        if "note" in payload.model_fields_set:
-            buyer.note = payload.note
-        buyer.version += 1
-        await session.flush()
-        await session.refresh(buyer)
+        from ...services.buyer_management import update_buyer_note
+        await update_buyer_note(session,buyer,expected_version,
+            payload.note if 'note' in payload.model_fields_set else buyer.note)
         data = await view(session, workspace_id=workspace_id, buyer=buyer, company=company)
         complete_idempotency(outcome, str(buyer.id), response=data)
         response.headers["ETag"] = f'"{buyer.version}"'

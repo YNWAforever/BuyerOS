@@ -7,7 +7,7 @@ from sqlalchemy import event,text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 from tests.conftest import runtime_role_dsn
-from tests.test_workspace_listing_db import directory_case
+from tests.test_workspace_listing_db import directory_case, isolated_directory_case
 
 FUNCTION='public.buyeros_workspace_directory(uuid,bigint,integer)'
 
@@ -90,13 +90,13 @@ def test_directory_function_enforces_pagination_at_database_boundary(directory_c
             runtime.execute('SELECT public.buyeros_workspace_directory(%s,%s,%s)',(case['users'][0],offset,limit))
 
 
-def test_directory_optional_expansion_round_trip_preserves_canonical_rows(directory_case,monkeypatch):
+def test_directory_optional_expansion_round_trip_preserves_canonical_rows(isolated_directory_case,monkeypatch):
     from alembic import command
     from alembic.config import Config
     from alembic.script import ScriptDirectory
     from buyeros_api.settings import get_settings
     from tests.conftest import ALEMBIC_INI,SERVICE_ROOT
-    case=directory_case;case['add'](0);case['add'](1)
+    case=isolated_directory_case;case['add'](0);case['add'](1)
     config=Config(str(ALEMBIC_INI));config.set_main_option('script_location',str(SERVICE_ROOT/'alembic'))
     def snapshot():
         with psycopg.connect(case['dsn']) as owner:

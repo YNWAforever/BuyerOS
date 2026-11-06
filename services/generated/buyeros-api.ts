@@ -2859,6 +2859,26 @@ export interface components {
             owner_membership_id: string | null;
             note: string;
             evidence_count: number;
+            reviewed_enrichment?: {
+                /** Format: uuid */
+                proposal_id: string;
+                buyer_revision: number;
+                /** @enum {string} */
+                provider: "xverum";
+                fields: {
+                    [key: string]: string | number | null;
+                };
+                sources: {
+                    /** Format: uuid */
+                    id: string;
+                    version: number;
+                    /** @enum {string} */
+                    kind: "project_fact" | "profile" | "buyer" | "document" | "output" | "run" | "provider_evidence" | "drive";
+                    locator: string;
+                    /** @enum {string} */
+                    retention_class: "durable" | "metadata_only" | "zero_content";
+                }[];
+            }[];
         };
         BuyerFilters: {
             q?: string;
@@ -3609,9 +3629,9 @@ export interface components {
             /** @enum {string} */
             status: "queued" | "running" | "ready" | "failed" | "revoked" | "expired";
             /** @enum {string} */
-            kind: "buyer_csv" | "draft_text" | "bulk_failure_csv";
+            kind: "buyer_csv" | "draft_text" | "bulk_failure_csv" | "sales_output";
             /** @enum {string} */
-            format?: "csv" | "text" | "clipboard";
+            format?: "csv" | "text" | "clipboard" | "markdown" | "pdf";
             record_count: number;
             /** Format: date-time */
             expires_at?: string;

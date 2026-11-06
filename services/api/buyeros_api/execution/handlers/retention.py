@@ -136,6 +136,10 @@ async def expire_due_sources(engine, now, *, policy_version: str, limit: int = 1
         if remaining <= 0:
             break
         async with tenant_session(engine, workspace_id) as session:
+            from ..sales_tasks import lock_authority
+            from ...services.sales_retention import drain_pending
+            await lock_authority(session,workspace_id)
+            await drain_pending(session,workspace_id)
             source_ids = list((await session.execute(
                 select(SourceDocument.id).where(
                     SourceDocument.workspace_id == workspace_id,

@@ -79,5 +79,8 @@ def validate_proposal(proposal, basis):
 
 
 def prompt_schema(basis):
+    if basis.get('schema') == 'sales-basis.v1':
+        from ..sales.model import prompt_schema as sales_prompt_schema
+        return sales_prompt_schema(basis)
     from .live_model import PROMPT as FIT_PROMPT, PROPOSAL_SCHEMA as FIT_SCHEMA
     return (PROMPT, PROPOSAL_SCHEMA) if basis.get('schema') == SCHEMA else (FIT_PROMPT, FIT_SCHEMA)

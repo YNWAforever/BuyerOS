@@ -39,3 +39,8 @@ export async function readExportContent(client:LiveClient,session:SessionScope,i
   if(!ctx.isCurrent())throw new LiveCancelled('scope changed');
   return result;
 }
+export async function downloadExport(client:LiveClient,session:SessionScope,id:string){
+  const ctx=buyerOperationContext(session);await getExport(client,session,id);
+  const blob=await client.downloadContent({path:`/v1/workspaces/${encodeURIComponent(ctx.workspace)}/exports/${encodeURIComponent(id)}/content`,token:session.token(),scope:ctx.identity,signal:ctx.signal});
+  if(!ctx.isCurrent())throw new LiveCancelled('scope changed');return blob;
+}

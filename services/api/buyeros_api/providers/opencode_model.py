@@ -22,13 +22,18 @@ BYTES_PER_TOKEN_FLOOR=3
 def model_payload(basis:dict,route:ModelRoute,model_id:str)->dict:
     from .conversation_model import prompt_schema
     prompt,schema=prompt_schema(basis)
+    if basis.get('schema')=='sales-basis.v1':
+        from ..sales.model import wire_basis
+        source_data=wire_basis(basis)
+    else:
+        source_data=basis
     system=(prompt+' Prompt version: '+route.prompt_version+
             ' Reply with one JSON object only, matching this JSON schema: '+json.dumps(schema,separators=(',',':')))
     payload={'model':model_id,'max_tokens':route.max_output_tokens,'stream':False,
             'response_format':{'type':'json_object'},
             'messages':[{'role':'system','content':system},
-                        {'role':'user','content':canonical_json({'untrusted_source_data':basis}).decode()}]}
-    if basis.get('schema')=='conversation-basis.v1':
+                        {'role':'user','content':canonical_json({'untrusted_source_data':source_data}).decode()}]}
+    if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'}:
         payload.update(tools=[],tool_choice='none',parallel_tool_calls=False)
     return payload
 
@@ -49,8 +54,13 @@ class OpenCodeGoModelClient:
             any(type(v) is not int for v in [route.max_input_tokens,route.max_output_tokens,route.deadline_seconds,route.repair_limit])):raise ValueError('verified code-owned model route required')
         # Do not send private expired/foreign source prose to any provider.
         if any(not _current_source(item,basis,now) for item in evidence.values()):raise ValueError('model input has noncurrent or unverified source')
+        if basis.get('schema')=='sales-basis.v1':
+            from ..sales.model import ROUTE
+            from dataclasses import replace
+            if route != replace(ROUTE,route_id=ROUTE.prompt_version) or basis['request']['model_id'] != self.model_id:
+                raise ValueError('exact bounded sales route/model required')
         payload=self._payload(basis,route);size=len(canonical_json(payload))
-        if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema')=='conversation-basis.v1' else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
+        if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
         try:
             async with asyncio.timeout(route.deadline_seconds):
                 async with self.http.stream('POST',ENDPOINT,json=payload,headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json'},
@@ -61,7 +71,7 @@ class OpenCodeGoModelClient:
                         if len(raw)+len(chunk)>MAX_RESPONSE_BYTES:raise ModelResponseUnknown('model response exceeds byte budget')
                         raw.extend(chunk)
             body=json.loads(raw)
-            if basis.get('schema')=='conversation-basis.v1' and (not isinstance(body,dict) or body.get('model')!=self.model_id):raise ModelResponseUnknown('frozen conversation model changed')
+            if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} and (not isinstance(body,dict) or body.get('model')!=self.model_id):raise ModelResponseUnknown('frozen conversation model changed')
             choices=body.get('choices') if isinstance(body,dict) else None
             if (not isinstance(body.get('id'),str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,240}',body['id'])
                 or not isinstance(choices,list) or len(choices)!=1 or not isinstance(choices[0],dict)

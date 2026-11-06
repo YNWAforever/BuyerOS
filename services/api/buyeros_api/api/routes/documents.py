@@ -228,6 +228,8 @@ async def delete_offer_document(
     version = if_match_version(if_match)
     async with tenant_scoped(workspace_id) as session:
         member = await _authorize(session, principal, workspace_id, "deleteOfferDocument")
+        from ...execution.sales_tasks import lock_authority
+        await lock_authority(session,workspace_id)
         outcome = await begin_idempotency(
             session, workspace_id=workspace_id, actor_id=member["user_id"],
             operation_id="deleteOfferDocument", key=idempotency_key,
@@ -286,6 +288,10 @@ async def delete_offer_document(
                     source.object_key, source.excerpt = None, None
             row.version += 1
             await session.flush()
+            from ...services.sales_retention import invalidate_source
+            from ...sales.contracts import Scope
+            await invalidate_source(session,Scope(workspace_id=workspace_id,project_id=project_id,
+                actor_id=member['user_id']),str(document_id),'source_deleted')
             from ...services.lead_retention import redact_lead_subject
             await redact_lead_subject(session, workspace_id=workspace_id, subject_type="offer_document",
                                      subject_id=row.id, now=datetime.now(timezone.utc))

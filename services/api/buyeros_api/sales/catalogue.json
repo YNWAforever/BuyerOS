@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "template_skills": {
+    "first-project": "first-project",
+    "understand-documents": "understand-documents",
+    "research-market": "sales-research",
+    "review-buyers": "review-buyers",
+    "check-company": "sales-research",
+    "prepare-follow-up": "sales-followup",
+    "custom": "sales-prospect"
+  },
+  "skills": [
+    {
+      "id": "sales-prospect",
+      "version": "1",
+      "output_kind": "research_report",
+      "allowed_actions": [
+        "tasks.plan",
+        "research.read"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "bounded_orchestration",
+      "upstream_hash": "d4745be01b5db9d812c10a712e7aa2dba84263c7",
+      "playbook": "sales-prospect.md"
+    },
+    {
+      "id": "sales-research",
+      "version": "1",
+      "output_kind": "research_report",
+      "allowed_actions": [
+        "research.read"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "78b59f7eef7258076d8e47c98baec476a3efcae4",
+      "playbook": "sales-research.md"
+    },
+    {
+      "id": "sales-quick",
+      "version": "1",
+      "output_kind": "research_report",
+      "allowed_actions": [
+        "research.read"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "af6ab41f11487bb9b6d0f15edf9a119a59ed2005",
+      "playbook": "sales-research.md",
+      "alias_of": "sales-research",
+      "max_sources": 3
+    },
+    {
+      "id": "sales-qualify",
+      "version": "1",
+      "output_kind": "qualification_assessment",
+      "allowed_actions": [
+        "buyers.review",
+        "lists.propose"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "cda3613207c7f2932579b0fa6881c4801ed31b19",
+      "playbook": "sales-qualify.md"
+    },
+    {
+      "id": "sales-contacts",
+      "version": "1",
+      "output_kind": "enrichment_proposal",
+      "allowed_actions": [
+        "search_company_xverum",
+        "search_people_xverum",
+        "enrich_company_xverum",
+        "enrich_person_xverum",
+        "get_email_xverum"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model_and_provider_credits",
+      "upstream_hash": "b0e6555aae7ad429a383f1e2a14324e394f9f9c6",
+      "playbook": "sales-contacts.md"
+    },
+    {
+      "id": "sales-outreach",
+      "version": "1",
+      "output_kind": "outreach_preparation",
+      "allowed_actions": [
+        "drafts.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "f64a58f97ddb8c8f72fe74e5dfbc932c811a4994",
+      "playbook": "sales-outreach.md"
+    },
+    {
+      "id": "sales-followup",
+      "version": "1",
+      "output_kind": "followup_preparation",
+      "allowed_actions": [
+        "drafts.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "3aad02ee37f004371590005a21fb0b8dcac30a83",
+      "playbook": "sales-followup.md"
+    },
+    {
+      "id": "sales-prep",
+      "version": "1",
+      "output_kind": "meeting_brief",
+      "allowed_actions": [
+        "documents.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "e4882724fde021cf89a5ec6a69d1bf44690c0a52",
+      "playbook": "sales-prep.md"
+    },
+    {
+      "id": "sales-proposal",
+      "version": "1",
+      "output_kind": "sales_proposal",
+      "allowed_actions": [
+        "documents.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "78eb7142fe5f0b912ae9c58063bef04d8ac56187",
+      "playbook": "sales-proposal.md"
+    },
+    {
+      "id": "sales-objections",
+      "version": "1",
+      "output_kind": "objection_playbook",
+      "allowed_actions": [
+        "documents.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "91113545d34b7e88acca08bb90339d89e12eb163",
+      "playbook": "sales-objections.md"
+    },
+    {
+      "id": "sales-icp",
+      "version": "1",
+      "output_kind": "profile_proposal",
+      "allowed_actions": [
+        "profile.propose"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "c7b6bddb7fe2af8d830bc0cde92f54e60c06ee3b",
+      "playbook": "sales-icp.md"
+    },
+    {
+      "id": "sales-competitors",
+      "version": "1",
+      "output_kind": "competitive_document",
+      "allowed_actions": [
+        "research.read",
+        "documents.prepare"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "5859587f1eff581be2277009a890d3663d7f4f59",
+      "playbook": "sales-competitors.md"
+    },
+    {
+      "id": "sales-report",
+      "version": "1",
+      "output_kind": "pipeline_report",
+      "allowed_actions": [
+        "reports.read"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": "1d9e55cf4d062bcb23eef855faa69acda3aa7da1",
+      "playbook": "sales-report.md"
+    },
+    {
+      "id": "sales-report-pdf",
+      "version": "1",
+      "output_kind": "report_export",
+      "allowed_actions": [
+        "reports.export"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "export",
+      "upstream_hash": "dce1aa5a2a2fecf8d2268325ae588160e2cf925e",
+      "playbook": "sales-report-pdf.md"
+    },
+    {
+      "id": "first-project",
+      "version": "1",
+      "output_kind": "project_setup",
+      "allowed_actions": [
+        "profile.propose"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": null,
+      "playbook": "first-project.md"
+    },
+    {
+      "id": "understand-documents",
+      "version": "1",
+      "output_kind": "document_understanding",
+      "allowed_actions": [
+        "documents.read"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": null,
+      "playbook": "understand-documents.md"
+    },
+    {
+      "id": "review-buyers",
+      "version": "1",
+      "output_kind": "buyer_review",
+      "allowed_actions": [
+        "buyers.review",
+        "lists.propose"
+      ],
+      "languages": [
+        "en",
+        "zh-HK"
+      ],
+      "budget_class": "model",
+      "upstream_hash": null,
+      "playbook": "review-buyers.md"
+    }
+  ]
+}
+

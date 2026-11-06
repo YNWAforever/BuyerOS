@@ -42,6 +42,9 @@ from .routes.settings import router as settings_router
 from .routes.workspaces import router as workspaces_router
 from .routes.usage import router as usage_router
 from .routes.worker_internal import router as worker_internal_router
+from .routes.sales_tasks import router as sales_tasks_router
+from .routes.sales_outputs import router as sales_outputs_router
+from .routes.xverum import router as xverum_router
 from .unimplemented import router as unimplemented_router
 from .write_precondition import WritePreconditionMiddleware
 from buyeros_api.settings import get_settings
@@ -104,6 +107,11 @@ def create_app() -> FastAPI:
     app.include_router(quote_detail_router)
     app.include_router(unimplemented_router)
     app.include_router(worker_internal_router)
+    from .routes.sales_tasks import catalogue_router
+    app.include_router(catalogue_router)
+    app.include_router(sales_tasks_router)
+    app.include_router(sales_outputs_router)
+    app.include_router(xverum_router)
     if os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") == "true":
         from .routes.conversation import router as conversation_router
         app.include_router(conversation_router)
@@ -127,8 +135,15 @@ def create_app() -> FastAPI:
         from ..services.api_rate_limit import classify_request, request_rate_bucket
         marker = request_correlation.set(request.state.request_id)
         bucket_marker = request_rate_bucket.set(classify_request(request.method, request.url.path))
+        sales_path = '/sales-tasks' in request.url.path or '/sales-outputs' in request.url.path or '/xverum/' in request.url.path
         try:
-            if (("/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path)
+            from ..services.conversation_access import sales_enabled
+            parts = request.url.path.split('/')
+            sales_admission = request.method == 'POST' and request.url.path.rstrip('/').endswith('/sales-tasks')
+            if sales_admission and (len(parts) < 4 or not sales_enabled(parts[3])):
+                response = JSONResponse(status_code=404,
+                    content=error_body(request, code="NOT_FOUND", message="request failed"))
+            elif (("/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path)
                     and os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") != "true"):
                 response = JSONResponse(status_code=404,
                     content=error_body(request, code="NOT_FOUND", message="request failed"))
@@ -142,10 +157,14 @@ def create_app() -> FastAPI:
                 )
             else:
                 response = await call_next(request)
+        except Exception as exc:
+            if not sales_path:
+                raise
+            response = await internal_error_handler(request, exc)
         finally:
             request_rate_bucket.reset(bucket_marker)
             request_correlation.reset(marker)
-        if "/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path:
+        if sales_path or "/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path:
             response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request.state.request_id
         return response

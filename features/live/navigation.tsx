@@ -33,6 +33,7 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
       <div className="nav-label" aria-hidden="true">{t('Follow up')}</div>
       {item('Drafts',Mail,'/app/outreach',pathname==='/app/outreach',!projectKnown)}
       {item('Results',ChartNoAxesCombined,'/app/results',pathname==='/app/results',!projectKnown)}
+      {conversationHome&&item('Documents',FilePenLine,'/app/documents',pathname.startsWith('/app/documents'),!projectKnown)}
     </div>
     <div className="live-nav-group" role="group" aria-label={t('Manage')}>
       <div className="nav-label" aria-hidden="true">{t('Manage')}</div>

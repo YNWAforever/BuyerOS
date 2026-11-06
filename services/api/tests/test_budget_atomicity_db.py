@@ -189,6 +189,7 @@ def test_0018_empty_downgrade_upgrade_and_force_rls(isolated_migrated):
     migrated = isolated_migrated
     from alembic import command
     from alembic.config import Config
+    from alembic.script import ScriptDirectory
     from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
     with psycopg.connect(migrated, autocommit=True) as conn:
         for table in ("budget_reservation_allocations", "cost_events", "budget_reservations", "budget_accounts"):
@@ -212,7 +213,7 @@ def test_0018_empty_downgrade_upgrade_and_force_rls(isolated_migrated):
         conn.execute("DELETE FROM workspaces WHERE id=%s", (legacy_workspace,))
     command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0059_conversation_connections"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == ScriptDirectory.from_config(config).get_current_head()
         assert conn.execute("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='budget_reservation_allocations'").fetchone() == (True, True)
 
 

@@ -75,3 +75,13 @@
 .live-drive small { display: block; width: 100%; overflow-wrap: anywhere; }
 .live-drive fieldset { min-width: 0; margin-top: .8rem; }
 .live-drive button { margin: .25rem; max-width: 100%; white-space: normal; }
+.sales-workspace{max-width:1200px;margin:auto;padding:clamp(12px,3vw,32px);overflow-wrap:anywhere;color:inherit}
+.sales-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(240px,1fr);gap:24px;align-items:start}
+.sales-layout>*,.sales-workspace label{min-width:0}
+.sales-layout aside,.sales-output{background:var(--background,#fff);border:1px solid #dce5dd;border-radius:12px;padding:18px}
+.sales-workspace label{display:block;margin:12px 0}.sales-workspace label>input:not([type=checkbox]),.sales-workspace textarea,.sales-workspace select{display:block;width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid #a9b9b0;border-radius:8px;background:inherit;color:inherit;font:inherit}
+.sales-workspace textarea{min-height:100px;resize:vertical}.sales-workspace button{min-height:44px;padding:8px 12px;margin:4px;border:1px solid #c9d8ce;border-radius:8px;background:#f1f6f1;color:#203b30;font:inherit;cursor:pointer}.sales-workspace button:disabled{opacity:.55;cursor:default}
+.sales-workspace :focus-visible{outline:3px solid #487b61;outline-offset:3px}.sales-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:24px 0}.sales-cards button{text-align:left;margin:0;padding:18px}.sales-workspace dd{margin:4px 0 14px}.sales-workspace dt{font-weight:600}.sales-workspace fieldset{min-width:0}.sales-workspace [role=alert]{border-left:3px solid #a6632b;padding:12px}
+@media(max-width:900px){.sales-layout{grid-template-columns:1fr}.sales-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.sales-cards{grid-template-columns:1fr}.sales-workspace{padding:12px}}
+
+.sales-workspace h1{font-size:clamp(24px,3vw,36px);line-height:1.2;overflow-wrap:normal}

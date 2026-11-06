@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 import psycopg
 import pytest
+from alembic.script import ScriptDirectory
 from alembic import command
 from alembic.config import Config
 
@@ -41,7 +42,7 @@ def test_0035_empty_round_trip_default_off_and_limited_api_privileges(monkeypatc
             assert db.execute("SELECT to_regclass('worker_runtime_probe')").fetchone()[0] is None
         command.upgrade(config(), 'head')
         with psycopg.connect(dsn) as db:
-            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0059_conversation_connections'
+            assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == ScriptDirectory.from_config(config()).get_current_head()
     finally:
         get_settings.cache_clear()
         _docker('rm', '-f', name)
@@ -59,7 +60,7 @@ def test_populated_rollback_preserves_unknown_holds(migrated, worker_runtime):
     with pytest.raises(RuntimeError, match='retained operational recovery/probe evidence'):
         invoke_revision(migrated,config(),'0035_worker_recovery_probe')
     with psycopg.connect(migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0059_conversation_connections'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == ScriptDirectory.from_config(config()).get_current_head()
         assert db.execute('SELECT state,remaining_hold FROM budget_reservations WHERE operation_id=%s', (case['job'],)).fetchone() == before
         assert db.execute("SELECT status FROM provider_operations WHERE job_id=%s", (case['job'],)).fetchone()[0] == 'submitting'
         assert db.execute('SELECT count(*) FROM cost_events WHERE workspace_id=%s', (case['envelope'].workspace_id,)).fetchone()[0] == 0

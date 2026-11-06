@@ -29,6 +29,7 @@ export const illustrativeDiscussions = [
 ] as const;
 
 export type DiscussionRoute = {id:string;title:string};
+export function documentsForPath(pathname:string):boolean{return /^\/app\/documents(?:\/[0-9a-f-]{36}(?:\/versions\/[1-9][0-9]*)?)?$/.test(pathname);}
 
 export function discussionForPath(pathname: string, enabled: boolean): DiscussionRoute | undefined {
   if (!enabled) return undefined;

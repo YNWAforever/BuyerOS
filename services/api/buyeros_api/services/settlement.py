@@ -114,3 +114,31 @@ async def release_unsubmitted_operation(session, operation_id) -> None:
     reservation.remaining_hold = ZERO
     reservation.state = "released"
     await session.flush()
+
+
+async def settle_known_portion(session, operation_id, actual, released_bound, external_event_id):
+    """Commit one evidenced portion; unresolved and queued liability remains held.
+
+    The caller owns the exact immutable child evidence and parent CAS. This native
+    owner owns account allocation, origin-period cost events and reservation locks.
+    """
+    _event_id(external_event_id)
+    actual, released_bound = _money(actual), _money(released_bound, positive=True)
+    reservation = await _operation(session, operation_id)
+    existing = await _event(session, reservation.workspace_id, external_event_id)
+    if existing:
+        raise ApiError(409, 'IDEMPOTENCY_CONFLICT', 'portion already accounted')
+    if reservation.state != 'active' or actual > released_bound or released_bound > reservation.remaining_hold:
+        raise ApiError(409, 'BUDGET_LIMIT', 'portion exceeds unresolved liability')
+    for account in await _accounts(session, reservation):
+        account.settled_spend += actual
+    reservation.remaining_hold -= released_bound
+    if reservation.remaining_hold == ZERO:
+        reservation.state = 'settled'
+    event = CostEvent(workspace_id=reservation.workspace_id, operation_id=operation_id,
+        external_event_id=external_event_id, kind='commit', amount=actual,
+        pricing_version=reservation.price_version, occurred_at=reservation.origin_period_start,
+        recorded_at=datetime.now(timezone.utc))
+    session.add(event)
+    await session.flush()
+    return event.id

@@ -30,6 +30,8 @@ def schema_contract():
             'required_revisions': ['0039_c61_user_identities'], 'compatible_heads': ['0050_c61_delivery_authorizations'],
             'required_relations': {'public.user_identities': ['user_id']},
             'required_functions': ['public.buyeros_workspace_directory(uuid,bigint,integer)'],
+            # Reviewed digests cover the full model dump, including optional defaults.
+            'required_catalog_functions': [], 'required_triggers': [],
             'required_privileges': [{'relation': 'public.user_identities', 'columns': ['user_id'], 'privilege': 'SELECT'}],
             'required_rls': ['public.memberships'], 'runtime_role_policy': {'role': 'buyeros_api', 'superuser': False, 'bypass_rls': False},
             'target': target, 'target_receipt': copy.deepcopy(target), 'evidence_mode': 'candidate_runtime', 'statement_timeout_ms': 5000}
@@ -56,6 +58,7 @@ class RuntimePacketTests(unittest.TestCase):
             result = load().prepare(directory, self.environment)
             self.assertEqual(result, {'source_sha': 'a'*40, 'publish': False})
             self.assertEqual(json.loads((directory/'api-contract.json').read_text()), self.api)
+            self.assertEqual(json.loads((directory/'schema-contract.json').read_text()), self.schema)
             for path in directory.iterdir():
                 for token in TOKENS.values(): self.assertNotIn(token, path.read_text())
 
@@ -92,7 +95,12 @@ class RuntimePacketTests(unittest.TestCase):
         self.reject()
 
     def test_reviewed_contract_digest_cannot_drift(self):
-        self.environment['BUYEROS_G0_CONTRACT_SHA256'] = '3'*64; self.reject()
+        for key in ('BUYEROS_G0_CONTRACT_SHA256', 'BUYEROS_SCHEMA_CONTRACT_SHA256'):
+            with self.subTest(contract=key):
+                reviewed_digest = self.environment[key]
+                self.environment[key] = '3'*64
+                self.reject()
+                self.environment[key] = reviewed_digest
 
     def test_read_scope_reference_is_required(self):
         self.environment['BUYEROS_RUNTIME_READ_SCOPE_SHA256'] = ''; self.reject()

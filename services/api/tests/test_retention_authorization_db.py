@@ -20,6 +20,13 @@ WS_B = uuid.UUID("22222222-2222-4222-8222-222222222222")
 PROJECT_A = uuid.UUID("a0000000-0000-4000-8000-000000000001")
 
 
+@pytest.fixture
+def seeded(isolated_seeded):
+    # Native retention now creates durable sales tombstones. Each test owns a
+    # cloned DB; never erase production retention evidence for fixture cleanup.
+    return isolated_seeded
+
+
 def test_source_expiry_hides_content_and_queues_one_tenant_object_deletion(seeded):
     source_a, source_b = uuid.uuid4(), uuid.uuid4()
     company_id, evidence_id, export_id = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
@@ -394,7 +401,7 @@ def test_contact_retention_migration_rolls_back_and_forward_on_empty_disposable_
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0059_conversation_connections"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0065_sales_lifecycle"
         assert conn.execute("SELECT count(*) FROM information_schema.columns "
                             "WHERE table_name='contact_points' AND column_name='retention_expires_at'").fetchone()[0] == 1
 
@@ -458,7 +465,7 @@ def test_rate_window_migration_empty_rollback_and_rls(isolated_migrated):
     finally:
         command.upgrade(config, "head")
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0059_conversation_connections"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0065_sales_lifecycle"
         assert conn.execute("SELECT relrowsecurity,relforcerowsecurity FROM pg_class "
                             "WHERE relname='api_rate_windows'").fetchone() == (True, True)
         assert conn.execute("SELECT has_table_privilege('buyeros_api','api_rate_windows','DELETE')").fetchone()[0] is False
@@ -482,7 +489,7 @@ def test_rate_window_migration_refuses_populated_rollback(isolated_migrated):
         with pytest.raises(RuntimeError, match="retained API rate windows"):
             command.downgrade(config, "0032_contact_retention")
         with psycopg.connect(migrated) as conn:
-            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0059_conversation_connections"
+            assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0065_sales_lifecycle"
     finally:
         with psycopg.connect(migrated, autocommit=True) as conn:
             conn.execute("DELETE FROM api_rate_windows WHERE workspace_id=%s AND actor_id=%s",

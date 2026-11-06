@@ -27,7 +27,7 @@ def contract(dsn, **changes):
     parsed = urlsplit(dsn)
     data = dict(contract_version='buyeros.schema-contract.v1', source_sha=SHA,
         required_revisions=['0038_c61_workspace_directory','0039_c61_user_identities'],
-        compatible_heads=['0059_conversation_connections'],
+        compatible_heads=['0065_sales_lifecycle'],
         required_relations={'public.user_identities':['issuer','subject','user_id','status'],
                             'public.memberships':['id','workspace_id','user_id','roles','active']},
         required_functions=['public.buyeros_workspace_directory(uuid,bigint,integer)'],
@@ -65,7 +65,7 @@ def inspect(dsn, data=None, statements=None):
 def test_expanded_compatible_schema_is_allowed(readiness_db):
     result=inspect(readiness_db)
     assert result.compatible is True and result.target_match is True
-    assert result.observed_heads == ['0059_conversation_connections']
+    assert result.observed_heads == ['0065_sales_lifecycle']
     assert result.blockers == []
 
 def test_runtime_receipt_has_unambiguous_checks_for_promotion(readiness_db):
@@ -118,7 +118,7 @@ def test_same_head_wrong_target_is_blocked(readiness_db):
     data=contract(readiness_db)
     data['target']['metadata_receipt_sha256']='c'*64
     result=inspect(readiness_db,data)
-    assert result.observed_heads == ['0059_conversation_connections']
+    assert result.observed_heads == ['0065_sales_lifecycle']
     assert result.target_match is False and result.compatible is False
 
 
@@ -262,3 +262,41 @@ def test_explicit_function_contract_rejects_unsafe_input(requirement):
                     required_functions=[requirement])
     with pytest.raises(ValidationError):
         SchemaContract.model_validate(data)
+
+
+def test_review_r3_sales_contract_covers_selected_columns_and_write_privileges():
+    from buyeros_api.services.schema_readiness import SchemaContract, with_sales_requirements
+    from buyeros_api.db.sales_tasks import SalesTask, SalesTaskEvent, SalesTaskDependency, ConversationThreadPreference
+    from buyeros_api.db.conversation_threads import ConversationThread
+    expected = with_sales_requirements(SchemaContract.model_validate(contract('postgresql://fixture@127.0.0.1:5432/buyeros_test_contract')))
+    for model in (SalesTask,SalesTaskEvent,SalesTaskDependency,ConversationThreadPreference,ConversationThread):
+        relation = 'public.'+model.__tablename__
+        assert set(model.__table__.columns.keys()) <= set(expected.required_relations[relation])
+        assert any(p.relation == relation and p.privilege == 'SELECT' and
+            set(model.__table__.columns.keys()) <= set(p.columns) for p in expected.required_privileges)
+    for relation, privilege, column in [
+        ('sales_tasks','INSERT','arguments'), ('sales_tasks','UPDATE','event_sequence'),
+        ('sales_task_events','INSERT','payload'), ('sales_task_dependencies','INSERT','source_id'),
+        ('conversation_thread_preferences','INSERT','actor_id'), ('conversation_thread_preferences','UPDATE','pinned'),
+        ('conversation_threads','UPDATE','version'), ('conversation_threads','DELETE','id'),
+    ]:
+        assert any(p.relation == 'public.'+relation and p.privilege == privilege and column in p.columns for p in expected.required_privileges)
+
+
+def test_review_r3_sales_contract_requires_event_and_delete_guards():
+    from buyeros_api.services.schema_readiness import SchemaContract, with_sales_requirements
+    expected = with_sales_requirements(SchemaContract.model_validate(contract('postgresql://fixture@127.0.0.1:5432/buyeros_test_contract')))
+    functions = {f.signature:f for f in expected.required_catalog_functions}
+    validator = functions['public.buyeros_sales_event_valid(text,jsonb)']
+    assert validator.execute and not validator.security_definer and validator.volatility == 'i'
+    guard = functions['public.buyeros_sales_delete_guard()']
+    assert not guard.security_definer and guard.volatility == 'v' and guard.return_type == 'trigger'
+    assert any(t.relation == 'public.conversation_threads' and t.name == 'sales_thread_delete_guard'
+        and t.function == guard.signature and t.trigger_type == 11 for t in expected.required_triggers)
+
+
+@pytest.mark.parametrize('privilege',['SELECT','INSERT','UPDATE','DELETE'])
+def test_review_r3_supported_privileges_remain_data_not_probe_writes(privilege):
+    from buyeros_api.services.schema_readiness import RequiredPrivilege
+    parsed = RequiredPrivilege(relation='public.sales_tasks',columns=['id'],privilege=privilege)
+    assert parsed.privilege == privilege

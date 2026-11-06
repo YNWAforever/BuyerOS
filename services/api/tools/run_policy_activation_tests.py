@@ -25,6 +25,8 @@ class OwnedFixturePlugin:
             return
         if id(module) in self.patched:
             return
+        if not hasattr(module, "_unowned_start_container"):
+            module._unowned_start_container = module._start_container
         original = module._docker
         factory = self.factory
         def owned_docker(*args):
