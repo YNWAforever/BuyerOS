@@ -196,6 +196,7 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
       const address = validEmail(email); validPassword(password);
       if (!name.trim() || name.length > 200 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('Name required');
       const result = await request('/sign-up/email', {name: name.trim(), email: address, password, callbackURL: verificationCallback});
+      if ((result as {user?: {emailVerified?: unknown}} | null)?.user?.emailVerified === false) return 'verify-email';
       if (typeof (result as {token?: unknown} | null)?.token === 'string' && (result as {token: string}).token) {
         freshTransaction(); env.location.assign(callbackUrl()); return 'signed-in';
       }
@@ -212,6 +213,11 @@ export function createNeonAuthAdapter(config: PublicNeonConfig, provided?: NeonE
     },
     async sendVerificationEmail(email) {
       await request('/send-verification-email', {email: validEmail(email), callbackURL: verificationCallback});
+    },
+    async verifyEmailCode(email, code) {
+      const address = validEmail(email), otp = code.trim();
+      if (!/^[0-9]{6}$/.test(otp)) throw new Error('Enter the six-digit verification code');
+      await request('/email-otp/verify-email', {email: address, otp});
     },
     async signInGoogle() {
       const callbackURL = callbackUrl();

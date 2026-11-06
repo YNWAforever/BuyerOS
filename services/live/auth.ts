@@ -21,6 +21,7 @@ export interface AuthAdapter {
   requestPasswordReset?(email: string): Promise<void>;
   resetPassword?(token: string, newPassword: string): Promise<void>;
   sendVerificationEmail?(email: string): Promise<void>;
+  verifyEmailCode?(email: string, code: string): Promise<void>;
 }
 export interface AuthConfig {issuer: string; clientId: string; audience: string; clientSecret?: never;}
 interface AuthEnvironment {

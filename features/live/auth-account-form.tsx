@@ -4,11 +4,15 @@ import {useWorkspaceSession} from '@/features/providers/workspace-session';
 import {LiveBrand} from './shell';
 import {useAuthLocale} from './auth-locale';
 import {neonSignInDiagnostic} from '@/services/live/neon-auth';
+import {VerifyEmailForm} from './auth-verify-email';
 
 type Mode='register'|'forgot'|'reset'|'verify';
 const titles:Record<Mode,string>={register:'Create account',forgot:'Forgot password?',reset:'Reset password',verify:'Resend verification email'};
 const actions:Record<Mode,string>={register:'Create account',forgot:'Send reset link',reset:'Save new password',verify:'Send verification email'};
 export function AuthAccountForm({mode}:{mode:Mode}){
+ return mode==='verify'?<VerifyEmailForm/>:<AccountForm mode={mode}/>;
+}
+function AccountForm({mode}:{mode:Exclude<Mode,'verify'>}){
  const {auth,authBootstrap}=useWorkspaceSession(),{t,picker}=useAuthLocale();
  const [name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState('');
  const [busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState('');
@@ -33,7 +37,6 @@ export function AuthAccountForm({mode}:{mode:Mode}){
     const result=await auth!.signUpEmail!(name,email,password);
     if(result==='signed-in')return;
    }else if(mode==='forgot')await auth!.requestPasswordReset!(email);
-   else if(mode==='verify')await auth!.sendVerificationEmail!(email);
    else await auth!.resetPassword!(resetToken??'',password);
    setDone(true);
   }catch(cause){
@@ -42,6 +45,7 @@ export function AuthAccountForm({mode}:{mode:Mode}){
   }finally{submitting.current=false;setBusy(false);setPassword('');setConfirm('');}
  }
  const confirmation=mode==='reset'?'Password updated. Sign in with your new password.':mode==='register'?'Check your email to verify your account, then return to sign in.':mode==='forgot'?'If this email has an eligible account, a password reset link will arrive shortly. Check your spam folder too.':'If this account needs verification, a verification email will arrive shortly. Check your spam folder too.';
+ if(mode==='register'&&done)return <VerifyEmailForm initialEmail={email} fromSignup/>;
  return <main className="main-shell live-workspace live-signin">
   <header className="live-signin-top">{picker}</header>
   <section className="panel live-signin-card"><LiveBrand/><h1>{t(titles[mode])}</h1>

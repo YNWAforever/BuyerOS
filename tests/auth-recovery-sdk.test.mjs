@@ -20,6 +20,7 @@ const {neonAuthHandlers}=await import('../lib/auth/neon-boundary.ts');
 const route=()=>neonAuthHandlers(environment,config=>createNeonAuth(config).handler());
 const context=path=>({params:Promise.resolve({path:path.split('/')})});
 for (const [path,body] of [
+ ['email-otp/verify-email',{email:'synthetic@example.test',otp:'123456'}],
  ['sign-up/email',{name:'Synthetic',email:'synthetic@example.test',password:'synthetic-password',callbackURL:origin+'/auth/sign-in?verified=1'}],
  ['request-password-reset',{email:'synthetic@example.test',redirectTo:origin+'/auth/reset-password'}],
  ['reset-password',{token:'synthetic-reset-token',newPassword:'synthetic-new-password'}],

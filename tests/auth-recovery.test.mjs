@@ -8,6 +8,21 @@ function fixture(){
  const auth=createNeonAuthAdapter({authPath:'/api/auth',socialInitOrigin:'https://ep-fixture.neonauth.us-east-2.aws.neon.tech',socialInitPath:'/neondb/auth/sign-in/social/init'},env);
  return {auth,env,entries,calls,location};
 }
+test('unverified signup stays on code entry even when the provider creates a cookie session',async()=>{
+ const f=fixture();f.env.fetch=async()=>Response.json({token:'fixture-session',user:{emailVerified:false}});
+ assert.equal(await f.auth.signUpEmail('Buyer','buyer@example.test','fixture-password'),'verify-email');
+ assert.equal(f.entries.size,0);assert.equal(f.location.href,'https://app.example.test/auth/sign-in?state=old-link');
+});
+test('email code verification posts only the email and code without storing either',async()=>{
+ const f=fixture();await f.auth.verifyEmailCode(' buyer@example.test ',' 123456 ');
+ assert.equal(f.calls[0].url,'/api/auth/email-otp/verify-email');
+ assert.deepEqual(f.calls[0].body,{email:'buyer@example.test',otp:'123456'});
+ assert.equal(f.entries.size,0);assert.equal(f.auth.subject(),'');
+});
+test('malformed verification codes never reach the provider',async()=>{
+ const f=fixture();for(const code of ['', '12345', '1234567', 'abcdef'])await assert.rejects(f.auth.verifyEmailCode('buyer@example.test',code));
+ assert.equal(f.calls.length,0);
+});
 test('direct or expired sign-in creates a fresh local transaction; callback still rejects foreign state',async()=>{
  for(const stored of [null,'invalid JSON',JSON.stringify({state:crypto.randomUUID(),returnPath:'/app?workspace=old',createdAt:1})]){
   const f=fixture();if(stored)f.entries.set('buyeros-neon-return',stored);
