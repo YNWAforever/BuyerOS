@@ -99,13 +99,17 @@ def _api_valid(api, source, contract, maximum):
 
 
 def _human_canary(canary):
+    from protected_release import review_policy,reviewer_allowed,SOLO_OWNER_ID
+    policy=review_policy()
     if (canary.get('human_signoff') is not True
             or any(type(canary.get(key)) is not int or canary[key] <= 0
                    for key in ('reviewer_id','initiator_id','approval_run_id'))
-            or canary['reviewer_id'] == canary['initiator_id']
+            or not reviewer_allowed(canary['reviewer_id'],canary['initiator_id'])
+            or canary.get('review_policy','independent-v1')!=policy
+            or (policy=='solo-owner-v1' and canary.get('release_owner_id')!=SOLO_OWNER_ID)
             or any(not _digest(canary.get(key)) for key in ('browser_canary_sha256','approval_comment_sha256',
                                                           'api_observation_sha256','schema_observation_sha256'))):
-        raise ValueError('verified non-self human browser signoff required')
+        raise ValueError('verified policy-compliant human browser signoff required')
 
 
 def compose_workspace_receipts(manifest: dict, protected_receipts: dict, *, schema_observation: dict,

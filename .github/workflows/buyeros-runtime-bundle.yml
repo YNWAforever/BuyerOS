@@ -12,6 +12,8 @@ on:
         default: false
 permissions:
   contents: read
+env:
+  BUYEROS_RELEASE_REVIEW_POLICY: ${{ vars.BUYEROS_RELEASE_REVIEW_POLICY || 'independent-v1' }}
 concurrency:
   group: buyeros-protected-runtime-bundle
   cancel-in-progress: false
@@ -104,7 +106,7 @@ jobs:
         with:
           name: buyeros-private-observations-encrypted
           path: ${{ runner.temp }}/encrypted-stage
-      - name: Verify recorded non-self browser approval then encrypt complete runtime bundle
+      - name: Verify recorded policy-compliant browser approval then encrypt complete runtime bundle
         env:
           GH_TOKEN: ${{ secrets.BUYEROS_PROMOTION_METADATA_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

@@ -11,6 +11,8 @@ permissions:
   actions: read
   attestations: read
   deployments: write
+env:
+  BUYEROS_RELEASE_REVIEW_POLICY: ${{ vars.BUYEROS_RELEASE_REVIEW_POLICY || 'independent-v1' }}
 concurrency:
   group: buyeros-production-promote
   cancel-in-progress: false

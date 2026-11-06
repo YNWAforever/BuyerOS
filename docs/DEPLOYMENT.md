@@ -72,6 +72,28 @@ is a replacement for these gates. The legacy Render setup and broader historical
 release records remain under `docs/buyeros/runbooks/` and `docs/buyeros/RELEASE_READINESS.md`;
 their recorded versions and permissions are not current-source acceptance.
 
+## Release review policy
+
+Independent review remains the default (`BUYEROS_RELEASE_REVIEW_POLICY=independent-v1`).
+For the explicitly approved single-owner BuyerOS setup, set the repository variable
+to `solo-owner-v1`. Both protected workflows pass this policy to the validators.
+The production environment must require only YNWAforever (GitHub user ID 201698560),
+allow that owner to review their own run, and continue to disallow administrator bypass.
+The owner must manually inspect the staged workspace and submit the exact bound
+canary approval comment supplied for that source/deployment. No agent auto-approval
+is part of this policy.
+
+Solo-owner receipts explicitly record `review_policy=solo-owner-v1` and
+`release_owner_id=201698560`; they are never described or accepted as independent
+review. Unknown policies, other reviewers, missing approvals, stale source/deployment
+bindings, and mislabelled receipts are rejected. CI, protected main, staging,
+authenticated access checks, attestation, encryption, and rollback gates still apply.
+
+Changing the GitHub environment checkbox alone is insufficient: both the workflow
+policy and the receipt verifier must agree. To restore independent review, configure
+an independent reviewer with self-review prevention and set the policy back to
+`independent-v1`; solo-owner receipts cannot be reused under that policy.
+
 ## Rollback and incidents
 
 Record the previous deployment ID before promotion; the protected staging workflow
