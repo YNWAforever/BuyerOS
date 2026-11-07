@@ -153,6 +153,10 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
     assert jobs['bundle-signoff']['if']=="github.ref == 'refs/heads/main'"
     assert jobs['stage-probe']['environment']=='buyeros-runtime-readonly'
     assert jobs['bundle-signoff']['environment']['name']=='buyeros-production-promote'
+    secret='BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON'
+    assert all(secret not in step.get('env',{}) for step in jobs['stage-probe']['steps'])
+    signing=next(step for step in jobs['bundle-signoff']['steps'] if 'protected-runtime.py sign' in step.get('run',''))
+    assert signing['env'][secret]=='${{ secrets.'+secret+' }}'
     uploads=[s for j in jobs.values() for s in j['steps'] if s.get('uses','').startswith('actions/upload-artifact@')]
     assert [u['with']['name'] for u in uploads]==['buyeros-private-observations-encrypted','buyeros-attested-runtime']
     assert [u['with']['path'] for u in uploads]==['${{ runner.temp }}/buyeros-stage.encrypted.json','${{ runner.temp }}/runtime-bundle.json']
@@ -317,6 +321,8 @@ def owned_stage(tmp_path, monkeypatch, deployment_policy=False,auth_mode='auth0'
         if argv[:2]==['vercel','build']: return ''
         if argv[:2]==['vercel','deploy']:
             assert '--skip-domain' in argv
+            assert ['--env','BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1']==argv[argv.index('BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1')-1:argv.index('BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1')+1]
+            assert 'BUYEROS_RUNTIME_SOURCE_SHA='+('a'*40) in argv
             return 'https://owned-candidate.vercel.app\n'
         assert argv==['git','rev-parse',('a'*40)+'^{tree}']
         return ('b'*40)+'\n'
@@ -338,25 +344,21 @@ def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,m
 
 
 @pytest.mark.parametrize('auth_mode,expected',[(None,'neon'),('auth0','auth0'),('neon','neon'),('dual','dual')])
-def test_stage_records_effective_auth_mode_and_keeps_neon_receipt(auth_mode,expected,tmp_path,monkeypatch):
+def test_stage_records_effective_auth_mode_without_consuming_neon_receipt(auth_mode,expected,tmp_path,monkeypatch):
     import json
     runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,auth_mode=auth_mode)
-    receipt={'offline_fixture':True}
-    monkeypatch.setenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',json.dumps(receipt))
+    monkeypatch.setenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON','invalid JSON must not be consumed by stage')
     runtime.stage(123,output)
     packet=runtime.decrypt_observation_packet(json.loads(output.read_text()),'1'*64)
     assert packet['files']['manifest.json']['activation']['auth']==expected
-    if expected in ('neon','dual'):
-        assert packet['files']['neon-receipt.json']==receipt
-    else:
-        assert 'neon-receipt.json' not in packet['files']
+    assert 'neon-receipt.json' not in packet['files']
 
 
-def test_stage_omitted_auth_mode_requires_neon_receipt_before_publishing_packet(tmp_path,monkeypatch):
+def test_stage_omitted_auth_mode_can_publish_before_neon_acceptance(tmp_path,monkeypatch):
     runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,auth_mode=None)
     monkeypatch.delenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',raising=False)
-    with pytest.raises(ValueError,match='protected input unavailable'):runtime.stage(123,output)
-    assert not output.exists()
+    runtime.stage(123,output)
+    assert output.exists()
     assert not (tmp_path/'.vercel/.env.production.local').exists()
 
 
@@ -370,3 +372,55 @@ def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypat
     with pytest.raises(ValueError,match='unexpectedly assigned aliases'): runtime.stage(123,output)
     assert not output.exists()
     assert not (tmp_path/'.vercel/.env.production.local').exists()
+
+
+@pytest.mark.parametrize('auth_mode',['neon','dual'])
+@pytest.mark.parametrize('fault',['valid','missing','deployment_id','source_sha','tree_sha',
+                                  'configuration_sha256','db_target_sha256','stale','unaccepted'])
+def test_sign_requires_separate_exact_fresh_neon_acceptance(tmp_path,monkeypatch,auth_mode,fault):
+    """Exercise signing and the real compose/evaluate gates with synthetic evidence."""
+    import json
+    from types import SimpleNamespace
+    from test_runtime_bundle import private_inputs
+    from runtime_bundle import decrypt_workspace_bundle
+    runtime=runtime_module()
+    manifest=private_inputs(tmp_path)
+    manifest['activation']['auth']=auth_mode
+    files={path.name:json.loads(path.read_text()) for path in tmp_path.glob('*.json')}
+    files['manifest.json']=manifest
+    files['rollback-receipt.json']=files.pop('protected-receipts.json')['items']['rollback']
+    receipt={**runtime.common(manifest),'data':{'accepted':True,'neon_only_rollback_verified':True}}
+    # A legacy packet receipt must never substitute for the protected signing input.
+    files['neon-receipt.json']=copy.deepcopy(receipt)
+    packet={'schema':'buyeros.private-runtime-observations.v1','source_sha':manifest['source_sha'],
+            'origin':'https://owned.vercel.app','files':files,'stage_run_id':456}
+    stage_file=tmp_path/'stage.encrypted.json'
+    runtime.write_encrypted(stage_file,runtime.encrypt_observation_packet(packet,'1'*64))
+    env={'GITHUB_SHA':manifest['source_sha'],'GITHUB_REF':'refs/heads/main',
+         'GITHUB_WORKFLOW':'BuyerOS protected runtime bundle','GITHUB_RUN_ID':'456',
+         'BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY':'1'*64,
+         'BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY':'2'*64,'BUYEROS_RELEASE_PROBE_TOKEN':'owned-test-probe'}
+    for key,value in env.items():monkeypatch.setenv(key,value)
+    monkeypatch.delenv('BUYEROS_RELEASE_REVIEW_POLICY',raising=False)
+    monkeypatch.setattr(runtime,'current_controls',lambda *args:controls())
+    monkeypatch.setattr(runtime,'deployment',lambda *args:({},packet['origin']))
+    monkeypatch.setattr(runtime,'load_script',lambda name:SimpleNamespace(collect_configuration=lambda *args:None))
+    comment='workspace-canary-pass:'+manifest['source_sha']+':'+manifest['candidate_deployment_id']+':roles-project-reload-retry'
+    monkeypatch.setattr(runtime,'github',lambda path:approvals(comment) if path.endswith('/approvals')
+        else {'run_attempt':1,'triggering_actor':{'id':101},'id':456})
+    if fault=='deployment_id':receipt[fault]='dpl_other'
+    if fault in ('source_sha','tree_sha'):receipt[fault]='0'*40
+    if fault in ('configuration_sha256','db_target_sha256'):receipt[fault]='0'*64
+    if fault=='stale':receipt['checked_at']='2020-01-01T00:00:00Z'
+    if fault=='unaccepted':receipt['data']['accepted']=False
+    if fault=='missing':monkeypatch.delenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',raising=False)
+    else:monkeypatch.setenv('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON',json.dumps(receipt))
+    output=tmp_path/'signed.encrypted.json'
+    if fault=='valid':
+        runtime.sign(stage_file,output)
+        bundle=decrypt_workspace_bundle(json.loads(output.read_text()),'2'*64)
+        assert bundle['receipts']['items']['neon']==receipt
+    else:
+        with pytest.raises(ValueError,match='protected input unavailable' if fault=='missing' else 'complete live gate'):
+            runtime.sign(stage_file,output)
+        assert not output.exists()

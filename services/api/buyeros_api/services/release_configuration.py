@@ -8,7 +8,7 @@ from ..settings import Settings
 from .release_binding import runtime_identity
 
 CONFIG_FIELDS=('auth_mode','auth0_issuer','auth0_audience','neon_issuer','neon_audience','neon_jwks_url',
-               'neon_expected_issuer','neon_expected_audience','neon_expected_jwks_url',
+               'neon_expected_issuer','neon_expected_audience','neon_expected_jwks_url','neon_staged_origin_enabled',
                'paid_admission_enabled','delivery_admission_enabled','cloudflare_execution_enabled',
                'live_read_enabled','reconciliation_enabled','r2_enabled','private_object_backend','environment')
 

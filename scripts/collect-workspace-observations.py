@@ -7,6 +7,8 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -14,6 +16,7 @@ import uuid
 
 ACCOUNTS = ('owned', 'foreign', 'empty', 'revoked')
 MAX_BODY = 1024 * 1024
+IMMUTABLE_VERCEL_HOST = r'[a-z0-9][a-z0-9-]*-[a-z0-9]{9}-[a-z0-9][a-z0-9-]*\.vercel\.app'
 PACKET_KEYS = {'schema', 'source_sha', 'origin', 'api_prefix', 'authorization_reference_sha256', 'accounts', 'token_sha256'}
 ROLES = {'viewer', 'operator', 'reviewer', 'workspace_admin'}
 
@@ -84,8 +87,79 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+def protected_get_json(url, token):
+    """Use Vercel's authenticated transport without exposing the API credential."""
+    parsed = urllib.parse.urlsplit(url)
+    if not re.fullmatch(IMMUTABLE_VERCEL_HOST, parsed.hostname or ''):
+        raise ValueError('immutable Vercel deployment required')
+    origin = 'https://' + parsed.hostname
+    path = parsed.path + ('?' + parsed.query if parsed.query else '')
+    uuid_pattern = r'[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}'
+    allowed_path = (r'/v1/(?:internal/release-(?:binding|configuration)'
+                    r'|workspaces\?offset=0&limit=100'
+                    r'|workspaces/' + uuid_pattern + r'/projects/' + uuid_pattern + r')')
+    scope = os.environ.get('VERCEL_ORG_ID', '')
+    if (url != origin + path or parsed.scheme != 'https' or parsed.fragment
+            or not re.fullmatch(allowed_path, path)
+            or not re.fullmatch(r'team_[A-Za-z0-9]+', scope)
+            or not isinstance(token, str) or not 0 < len(token) <= 16384
+            or not token.isascii() or any(ord(c) < 33 or ord(c) > 126 for c in token)):
+        raise ValueError('invalid protected runtime read target or credential')
+    # Curl config, not argv: escape both characters with meaning inside quotes.
+    escaped = token.replace('\\', '\\\\').replace('"', '\\"')
+    config = ('header = "Authorization: Bearer ' + escaped + '"\n'
+              'header = "Accept: application/json"\n')
+    command = ['vercel', 'curl', path, '--deployment', origin, '--scope', scope, '--',
+               '--disable', '--config', '-', '--silent', '--request', 'GET',
+               '--proto', '=https', '--proto-redir', '=https', '--no-insecure',
+               '--no-location', '--max-redirs', '0', '--retry', '0',
+               '--connect-timeout', '5', '--max-time', '15', '--noproxy', '*',
+               '--max-filesize', str(MAX_BODY),
+               '--write-out', '\n%{http_code}\n%{content_type}\n%{url_effective}']
+    # Vercel prepends its own options, so --disable alone cannot suppress curlrc.
+    # Curl checks CURL_HOME first; preserve Vercel's existing auth configuration.
+    with tempfile.TemporaryDirectory() as home, tempfile.TemporaryFile() as output:
+        Path(home, '.curlrc').write_text('', encoding='ascii')
+        Path(home, '_curlrc').write_text('', encoding='ascii')
+        env = dict(os.environ, CURL_HOME=home, VERCEL_TELEMETRY_DISABLED='1')
+        # CLI treats ORG_ID alone as incomplete project linkage, even with --scope.
+        # Scope is already explicit; absent PROJECT_ID, retain the on-disk link.
+        if not env.get('VERCEL_PROJECT_ID'):
+            env.pop('VERCEL_ORG_ID', None)
+        try:
+            result = subprocess.run(command, input=config.encode('ascii'), stdout=output,
+                                    stderr=subprocess.DEVNULL, timeout=30, check=False, env=env)
+        except (OSError, subprocess.SubprocessError):
+            raise ValueError('protected runtime read unavailable') from None
+        if result.returncode != 0:
+            raise ValueError('protected runtime read unavailable')
+        output.seek(0)
+        raw = output.read(MAX_BODY + 2049)
+    if len(raw) > MAX_BODY + 2048:
+        raise ValueError('response too large')
+    try:
+        body, status, content_type, effective_url = raw.rsplit(b'\n', 3)
+        if len(body) > MAX_BODY:
+            raise ValueError('response too large')
+        if not re.fullmatch(rb'[1-5][0-9]{2}', status):
+            raise ValueError('invalid HTTP status')
+        status = int(status)
+        if 300 <= status < 400:
+            raise ValueError('runtime redirects are refused')
+        if effective_url.decode('ascii') != url:
+            raise ValueError('runtime origin or path changed')
+        if content_type.split(b';', 1)[0].strip().lower() != b'application/json':
+            raise ValueError('JSON envelope required')
+        return status, json.loads(body.decode('utf-8'), object_pairs_hook=unique_keys)
+    except (ValueError, UnicodeError):
+        raise ValueError('invalid protected runtime response') from None
+
+
 def get_json(url, token):
     """One TLS-verified GET; no redirects, retry, response logging or URL credentials."""
+    hostname = urllib.parse.urlsplit(url).hostname or ''
+    if os.environ.get('VERCEL_TOKEN') and re.fullmatch(IMMUTABLE_VERCEL_HOST, hostname):
+        return protected_get_json(url, token)
     request = urllib.request.Request(url, method='GET', headers={
         'Authorization': 'Bearer ' + token, 'Accept': 'application/json', 'User-Agent': 'BuyerOS-owned-read-canary/1'})
     # Ignore inherited proxy settings: a secret must only go to the approved TLS origin.

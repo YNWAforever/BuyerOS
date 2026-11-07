@@ -175,7 +175,9 @@ def stage(ci_run_id,output):
         current_controls(source,ci_run_id)
         command(['vercel','build','--prod'],timeout=900)
         args=['vercel','deploy','--prebuilt','--prod','--skip-domain','--yes',
-              '--env','BUYEROS_RUNTIME_SOURCE_SHA='+source]
+              '--env','BUYEROS_RUNTIME_SOURCE_SHA='+source,
+              '--env','BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1']
+        values['BUYEROS_NEON_STAGED_ORIGIN_ENABLED']='1'
         meta={'githubCommitSha':source,'githubCommitOrg':'YNWAforever','githubCommitRepo':'BuyerOS',
               'githubCommitRepoId':str(controls['project']['link']['repoId']),'githubCommitRef':'main'}
         for key,value in meta.items(): args.extend(['--meta',key+'='+value])
@@ -208,8 +210,6 @@ def stage(ci_run_id,output):
                'rollback-receipt.json':{**common(manifest),'data':{**rollback_artifacts,'compatible':True,
                     'deployment_id':rollback_id,'api_observation_sha256':digest(rollback_api),
                     'schema_observation_sha256':digest(observed_schema)}}}
-        if manifest['activation']['auth'] in ('dual','neon'):
-            files['neon-receipt.json']=private_json('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON')
         packet={'schema':'buyeros.private-runtime-observations.v1','source_sha':source,
                 'origin':origin,'files':files,'stage_run_id':int(os.environ['GITHUB_RUN_ID'])}
         encrypted=encrypt_observation_packet(packet,os.environ['BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY'])
@@ -247,7 +247,11 @@ def sign(input_file,output):
         'empty_membership_verified':True,'revoked_denied':True,'foreign_tenant_denied':True,'reload_retry_verified':True,
         'api_observation_sha256':digest(api),'schema_observation_sha256':digest(schema)}}
     manual={'workspace_canary':canary,'rollback':files['rollback-receipt.json']}
-    if 'neon-receipt.json' in files: manual['neon']=files['neon-receipt.json']
+    # Acceptance can only be collected after staging the exact candidate. Read
+    # the separately accepted protected input after actual human approval;
+    # composition below still enforces the full candidate tuple and freshness.
+    if manifest['activation']['auth'] in ('dual','neon'):
+        manual['neon']=private_json('BUYEROS_NEON_ACCEPTANCE_RECEIPT_JSON')
     receipts=compose_workspace_receipts(manifest,{'schema':'buyeros.workspace-release-receipts.v1','items':manual},
         schema_observation=schema,api_observation=api,binding_observation=files['binding-observations.json'],
         configuration_observation=files['configuration-observations.json'],

@@ -129,7 +129,7 @@ def test_schema_endpoint_and_binding_use_same_host_normalization():
     module=service()
     assert module.database_endpoint_sha256('postgresql://u:p@EP-OWNED.NEON.TECH/db') == module.database_endpoint_sha256('postgresql://u:p@ep-owned.neon.tech:5432/db')
 
-def test_effective_runtime_configuration_cannot_claim_pulled_disabled_flags():
+def test_effective_runtime_configuration_cannot_claim_pulled_disabled_flags(monkeypatch):
     module=importlib.import_module('buyeros_api.services.release_configuration')
     from buyeros_api.settings import Settings
     pulled=module.pulled_configuration_sha256({'BUYEROS_PAID_ADMISSION_ENABLED':'false','BUYEROS_DELIVERY_ADMISSION_ENABLED':'false'})
@@ -137,19 +137,55 @@ def test_effective_runtime_configuration_cannot_claim_pulled_disabled_flags():
     enabled=Settings(paid_admission_enabled=True,delivery_admission_enabled=False)
     assert module.configuration_sha256(disabled)==pulled
     assert module.configuration_sha256(enabled)!=pulled
+    monkeypatch.delenv('BUYEROS_NEON_STAGED_ORIGIN_ENABLED',raising=False)
+    assert Settings().neon_staged_origin_enabled is False
+    baseline=module.pulled_configuration_sha256({})
+    assert module.pulled_configuration_sha256({'BUYEROS_NEON_STAGED_ORIGIN_ENABLED':'0'})==baseline
+    staged=module.pulled_configuration_sha256({'BUYEROS_NEON_STAGED_ORIGIN_ENABLED':'1'})
+    assert staged!=baseline
+    monkeypatch.setenv('BUYEROS_NEON_STAGED_ORIGIN_ENABLED','1')
+    assert Settings().neon_staged_origin_enabled is True
+    assert module.configuration_sha256(Settings())==staged
+    # Expected export parsing must not inherit the runner's staging flag.
+    assert module.pulled_configuration_sha256({})==baseline
 
 
 def test_protected_configuration_route_checks_credential_and_no_store(configured,monkeypatch):
+    from contextlib import asynccontextmanager
+    from types import SimpleNamespace
+    from buyeros_api.services.release_configuration import read_runtime_configuration,pulled_configuration_sha256
+    from buyeros_api.providers import registry
     routes=importlib.import_module('buyeros_api.api.routes.release_binding')
+    statements=[]
+    class Connection:
+        @asynccontextmanager
+        async def begin(self):yield
+        async def execute(self,statement):
+            statements.append(str(statement))
+            return SimpleNamespace(scalar_one=lambda:False)
+    class Engine:
+        @asynccontextmanager
+        async def connect(self):yield Connection()
+    monkeypatch.setattr(registry,'provider_readiness',lambda *args,**kwargs:{'reason_codes':['PROVIDER_UNSELECTED']})
     async def read():
-        return {'schema':'buyeros.runtime-configuration.v1','source_sha':SOURCE,'deployment_id':DEPLOYMENT,
-                'configuration_sha256':'c'*64,'activation':{'providers':'disabled','worker':'disabled',
-                                                          'delivery':'disabled','contact_enrichment':'unconfigured'}}
+        return await read_runtime_configuration(Engine(),get_settings())
     monkeypatch.setattr(routes,'read_configuration',read,raising=False)
     with TestClient(create_app()) as client:
         denied=client.get('/v1/internal/release-configuration')
         assert denied.status_code==401
-        response=client.get('/v1/internal/release-configuration',headers={'Authorization':'Bearer '+TOKEN})
-    assert response.status_code==200 and response.headers['cache-control']=='no-store'
-    assert response.json()['activation']['contact_enrichment']=='unconfigured'
-    assert TOKEN not in response.text
+        assert statements==[]
+        hashes=[]
+        for flag in ('0','1'):
+            monkeypatch.setenv('BUYEROS_NEON_STAGED_ORIGIN_ENABLED',flag)
+            get_settings.cache_clear()
+            response=client.get('/v1/internal/release-configuration',headers={'Authorization':'Bearer '+TOKEN})
+            assert response.status_code==200 and response.headers['cache-control']=='no-store'
+            value=response.json()
+            assert value['activation']['contact_enrichment']=='unconfigured'
+            assert value['source_sha']==SOURCE and value['deployment_id']==DEPLOYMENT
+            assert value['configuration_sha256']==pulled_configuration_sha256({'BUYEROS_NEON_STAGED_ORIGIN_ENABLED':flag})
+            hashes.append(value['configuration_sha256'])
+            assert TOKEN not in response.text
+        assert hashes[0]!=hashes[1]
+    assert statements==['SET TRANSACTION READ ONLY',"SET LOCAL statement_timeout = '3000ms'",
+                        'SELECT enabled FROM public.worker_runtime_control LIMIT 2']*2

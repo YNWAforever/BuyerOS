@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     neon_expected_issuer: str | None = None
     neon_expected_audience: str | None = None
     neon_expected_jwks_url: str | None = None
+    neon_staged_origin_enabled: bool = False
     auth_migration_expires_at: str | None = None
     jwks_cache_seconds: int = Field(default=300, ge=1)
     jwks_max_stale_seconds: int = Field(default=3600, ge=1)
