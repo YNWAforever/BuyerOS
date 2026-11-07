@@ -291,5 +291,138 @@ class BoundedHttpTests(unittest.TestCase):
         self.assertIsNone(module.NoRedirect().redirect_request(None, None, 302, 'redirect', headers, 'https://foreign.example.test'))
 
 
+class ProtectedVercelHttpTests(unittest.TestCase):
+    origin = 'https://buyeros-a1b2c3d4e-owner-projects.vercel.app'
+    path = '/v1/internal/release-binding'
+
+    def invoke(self, raw=None, *, url=None, code=0, error=None, token='private-bearer'):
+        module = load()
+        url = url or self.origin + self.path
+        if raw is None:
+            raw = b'{"data":{}}\n200\napplication/json\n' + url.encode()
+        def run(command, **kwargs):
+            self.command, self.options = command, kwargs
+            # CLI 50.28 prepends --url and its protection header before our flags.
+            # Thus --disable is not first: the private curlrc must really exist.
+            curl_home = Path(kwargs['env']['CURL_HOME'])
+            self.assertEqual((curl_home / '.curlrc').read_bytes(), b'')
+            self.assertEqual((curl_home / '_curlrc').read_bytes(), b'')
+            for key in ('HOME', 'USERPROFILE', 'APPDATA', 'XDG_CONFIG_HOME'):
+                self.assertEqual(kwargs['env'].get(key), module.os.environ.get(key))
+            if error:
+                raise error
+            kwargs['stdout'].write(raw)
+            return module.subprocess.CompletedProcess(command, code)
+        with patch.dict(module.os.environ, {'VERCEL_TOKEN': 'private-vercel', 'VERCEL_ORG_ID': 'team_test'}), \
+                patch.object(module.subprocess, 'run', side_effect=run) as execute, \
+                patch.object(module.urllib.request, 'build_opener') as native:
+            try:
+                return module.get_json(url, token)
+            finally:
+                self.assertLessEqual(execute.call_count, 1)
+                native.assert_not_called()
+
+    def test_protected_read_keeps_bearer_in_stdin_and_exact_origin_in_argv(self):
+        self.assertEqual(self.invoke(), (200, {'data': {}}))
+        argv = self.command
+        self.assertEqual(argv[:7], ['vercel', 'curl', self.path, '--deployment', self.origin, '--scope', 'team_test'])
+        self.assertNotIn('private-bearer', repr(argv))
+        self.assertNotIn('private-vercel', repr(argv))
+        self.assertIn(b'Authorization: Bearer private-bearer', self.options['input'])
+        self.assertEqual(self.options['timeout'], 30)
+        for flag in ('--no-location', '--no-insecure', '--max-filesize', '--noproxy'):
+            self.assertIn(flag, argv)
+        query_url = self.origin + '/v1/workspaces?offset=0&limit=100'
+        self.assertEqual(self.invoke(url=query_url), (200, {'data': {}}))
+        self.assertEqual(self.command[2], '/v1/workspaces?offset=0&limit=100')
+
+    def test_protected_read_preserves_http_denial_status(self):
+        raw = b'{"code":"NOT_FOUND"}\n404\napplication/json; charset=utf-8\n' + (self.origin + self.path).encode()
+        self.assertEqual(self.invoke(raw), (404, {'code': 'NOT_FOUND'}))
+
+    def test_protected_read_rejects_redirect_and_changed_effective_origin(self):
+        for status, url in [('302', self.origin + self.path), ('200', 'https://evil.test' + self.path),
+                            ('200', self.origin + '/v1/workspaces')]:
+            with self.subTest(status=status, url=url), self.assertRaises(ValueError):
+                self.invoke(('{}\n' + status + '\napplication/json\n' + url).encode())
+
+    def test_protected_read_refuses_scope_expansion_before_subprocess(self):
+        module = load()
+        with patch.object(module.subprocess, 'run') as run:
+            for target in ['/relative', 'https://evil.test/v1/internal/release-binding',
+                           'https://buyeros.vercel.app/v1/internal/release-binding']:
+                with self.subTest(target=target), self.assertRaises(ValueError):
+                    module.protected_get_json(target, 'bearer')
+            run.assert_not_called()
+        for url in [self.origin.replace('https://', 'http://') + self.path,
+                    self.origin.replace('https://', 'https://user@') + self.path,
+                    self.origin + ':443' + self.path, self.origin + self.path + '#fragment',
+                    self.origin + '/v1/../admin', self.origin + '//evil.test',
+                    self.origin + self.path + '?url=https://evil.test']:
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                self.invoke(url=url)
+
+    def test_protected_read_refuses_header_injection_and_escapes_config(self):
+        with self.assertRaises(ValueError):
+            self.invoke(token='secret\nurl = "https://evil.test"')
+        self.invoke(token='secret"\\suffix')
+        self.assertIn(b'secret\\"\\\\suffix', self.options['input'])
+
+    def test_protected_read_bounds_body_with_and_without_valid_metadata(self):
+        body = b'"' + b'a' * (1024 * 1024 - 2) + b'"'
+        self.assertEqual(len(self.invoke(body + b'\n200\napplication/json\n' +
+                                         (self.origin + self.path).encode())[1]), 1024 * 1024 - 2)
+        for raw in [b'x' * (1024 * 1024 + 2049),
+                    b' ' * (1024 * 1024) + b'{}\n200\napplication/json\n' + (self.origin + self.path).encode()]:
+            with self.subTest(size=len(raw)), self.assertRaises(ValueError):
+                self.invoke(raw)
+
+    def test_protected_read_rejects_html_duplicate_keys_and_invalid_status(self):
+        for body, status, mime in [('{}', '200', 'text/html'), ('{"a":1,"a":2}', '200', 'application/json'),
+                                   ('{}', '000', 'application/json'), ('not json', '200', 'application/json')]:
+            with self.subTest(body=body, status=status, mime=mime), self.assertRaises(ValueError):
+                self.invoke((body + '\n' + status + '\n' + mime + '\n' + self.origin + self.path).encode())
+
+    def test_protected_read_sanitizes_cli_failure_and_timeout_without_retry(self):
+        module = load()
+        for code, error in [(1, None), (0, OSError('private-secret')),
+                            (0, module.subprocess.TimeoutExpired(['private-secret'], 30))]:
+            with self.subTest(code=code, error=type(error)), self.assertRaisesRegex(ValueError, '^protected runtime read unavailable$'):
+                self.invoke(code=code, error=error)
+
+    def test_missing_scope_fails_closed(self):
+        module = load()
+        with patch.dict(module.os.environ, {'VERCEL_TOKEN': 'private', 'VERCEL_ORG_ID': ''}), \
+                patch.object(module.subprocess, 'run') as run, self.assertRaises(ValueError):
+            module.get_json(self.origin + self.path, 'bearer')
+        run.assert_not_called()
+
+    def test_cli_linkage_uses_explicit_scope_without_lone_org_environment(self):
+        module = load()
+        with patch.dict(module.os.environ, {'VERCEL_PROJECT_ID': ''}):
+            self.assertEqual(self.invoke(), (200, {'data': {}}))
+        self.assertNotIn('VERCEL_ORG_ID', self.options['env'])
+        self.assertEqual(self.command[self.command.index('--scope') + 1], 'team_test')
+
+    def test_cli_linkage_preserves_complete_workflow_project_environment(self):
+        module = load()
+        with patch.dict(module.os.environ, {'VERCEL_PROJECT_ID': 'prj_test'}):
+            self.assertEqual(self.invoke(), (200, {'data': {}}))
+        self.assertEqual(self.options['env']['VERCEL_ORG_ID'], 'team_test')
+        self.assertEqual(self.options['env']['VERCEL_PROJECT_ID'], 'prj_test')
+
+    def test_normal_hosts_aliases_and_missing_vercel_token_keep_native_transport(self):
+        module = load()
+        cases = [(self.origin + self.path, ''), ('https://buyeros.vercel.app' + self.path, 'private'),
+                 ('https://buyeros-a1b2c3d4e-owner.vercel.app.evil.test' + self.path, 'private')]
+        for url, credential in cases:
+            with self.subTest(url=url), patch.dict(module.os.environ, {'VERCEL_TOKEN': credential}), \
+                    patch.object(module.urllib.request, 'build_opener') as build, \
+                    patch.object(module.subprocess, 'run') as run:
+                build.return_value.open.return_value = BoundedHttpTests.Response(b'{}')
+                self.assertEqual(module.get_json(url, 'bearer'), (200, {}))
+                run.assert_not_called()
+
+
 if __name__ == '__main__':
     unittest.main()

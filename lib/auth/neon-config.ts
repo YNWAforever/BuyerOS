@@ -1,6 +1,6 @@
 /** Server configuration only. Expected values come from the reviewed environment target;
  * they are independent bindings, never inferred from a callback, token or request host. */
-export interface NeonConfig {readonly authUrl:string;readonly publicOrigin:string;readonly cookieSecret:string}
+export interface NeonConfig {readonly authUrl:string;readonly publicOrigin:string;readonly cookieSecret:string;readonly stagedOrigin?:string}
 type Environment=Record<string,string|undefined>;
 function invalid():never {throw new Error('Neon server configuration is unavailable');}
 function required(env:Environment,name:string):string {
@@ -28,5 +28,16 @@ export function loadNeonConfig(env:Environment):NeonConfig {
   if(origin.origin!==publicOrigin||origin.pathname!=='/'||origin.port&&environment!=='local')return invalid();
   if(origin.protocol!=='https:'&&!(environment==='local'&&origin.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(origin.hostname)))return invalid();
   if(cookieSecret.length<32||cookieSecret.length>8192)return invalid();
-  return Object.freeze({authUrl,publicOrigin,cookieSecret});
+  let stagedOrigin:string|undefined;
+  const staging=env.BUYEROS_NEON_STAGED_ORIGIN_ENABLED;
+  if(staging!==undefined&&staging!=='0'){
+    if(staging!=='1'||environment!=='production'||env.NODE_ENV!=='production'||env.VERCEL_ENV!=='production'
+      ||!/^[a-f0-9]{40}$/.test(env.BUYEROS_RUNTIME_SOURCE_SHA??''))return invalid();
+    // Only the platform-injected deployment hostname is trusted. Never derive
+    // this allowlist from Host, forwarded headers, or a request URL.
+    const hostname=required(env,'VERCEL_URL');
+    if(!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.vercel\.app$/.test(hostname))return invalid();
+    stagedOrigin='https://'+hostname;
+  }
+  return Object.freeze({authUrl,publicOrigin,cookieSecret,...(stagedOrigin?{stagedOrigin}:{})});
 }
