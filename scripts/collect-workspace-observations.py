@@ -8,11 +8,15 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from vercel_cli_auth import authenticated_command
 
 ACCOUNTS = ('owned', 'foreign', 'empty', 'revoked')
 MAX_BODY = 1024 * 1024
@@ -117,7 +121,7 @@ def protected_get_json(url, token):
                '--max-filesize', str(MAX_BODY),
                '--write-out', '\n%{http_code}\n%{content_type}\n%{url_effective}']
     # Vercel prepends its own options, so --disable alone cannot suppress curlrc.
-    # Curl checks CURL_HOME first; preserve Vercel's existing auth configuration.
+    # Curl checks CURL_HOME first. CLI credentials use a separate private config.
     with tempfile.TemporaryDirectory() as home, tempfile.TemporaryFile() as output:
         Path(home, '.curlrc').write_text('', encoding='ascii')
         Path(home, '_curlrc').write_text('', encoding='ascii')
@@ -127,8 +131,9 @@ def protected_get_json(url, token):
         if not env.get('VERCEL_PROJECT_ID'):
             env.pop('VERCEL_ORG_ID', None)
         try:
-            result = subprocess.run(command, input=config.encode('ascii'), stdout=output,
-                                    stderr=subprocess.DEVNULL, timeout=30, check=False, env=env)
+            with authenticated_command(command) as authenticated:
+                result = subprocess.run(authenticated, input=config.encode('ascii'), stdout=output,
+                                        stderr=subprocess.DEVNULL, timeout=30, check=False, env=env)
         except (OSError, subprocess.SubprocessError):
             raise ValueError('protected runtime read unavailable') from None
         if result.returncode != 0:
