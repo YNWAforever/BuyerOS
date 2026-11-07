@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from protected_release import ENVIRONMENT,REPOSITORY,release_gate,verify_controls,verify_approval
 from vercel_cli_auth import authenticated_command
+from runtime_failure_diagnostic import bounded_stderr,write_private_failure
 from runtime_bundle import (canonical_json,unique_keys,encrypt_observation_packet,decrypt_observation_packet,
                             build_workspace_bundle,compose_workspace_receipts,encrypt_workspace_bundle)
 
@@ -35,6 +36,7 @@ DIAGNOSTIC_STATUSES=frozenset({'started','passed','failed','command_nonzero','co
                               'http_unauthorized','http_forbidden','http_not_found'})
 GH_METADATA_LABELS=frozenset({'controls_branch','controls_protection','controls_environment','controls_run','controls_jobs'})
 _failure_diagnostic=None
+_private_failure=None
 
 
 def safe_summary(label,status):
@@ -51,7 +53,7 @@ def safe_summary(label,status):
 
 
 def checked(label,operation,*args,**kwargs):
-    global _failure_diagnostic
+    global _failure_diagnostic,_private_failure
     if label not in DIAGNOSTIC_LABELS:raise ValueError('invalid diagnostic label')
     safe_summary(label,'started')
     try:
@@ -73,6 +75,15 @@ def checked(label,operation,*args,**kwargs):
         elif isinstance(error,subprocess.TimeoutExpired):status='command_timeout'
         elif isinstance(error,FileNotFoundError):status='file_unavailable'
         if _failure_diagnostic is None:_failure_diagnostic={'phase':label,'category':status}
+        try:
+            if _private_failure is None and isinstance(error,(subprocess.CalledProcessError,subprocess.TimeoutExpired)):
+                stderr=bounded_stderr(error.stderr)
+                if stderr:
+                    code=error.returncode if isinstance(error,subprocess.CalledProcessError) else None
+                    _private_failure={'phase':label,'category':status,'stderr':stderr,
+                                      'exit_code':code if type(code) is int else None}
+        except Exception:
+            pass
         safe_summary(label,status)
         raise
     safe_summary(label,'passed')
@@ -343,14 +354,16 @@ def sign(input_file,output):
 
 
 def main(argv=None):
-    global _failure_diagnostic
+    global _failure_diagnostic,_private_failure
     _failure_diagnostic=None
+    _private_failure=None
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation',choices=['stage','sign'])
     parser.add_argument('--ci-run-id',type=int)
     parser.add_argument('--input',type=Path)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--diagnostics-output',type=Path)
+    parser.add_argument('--private-diagnostics-output',type=Path)
     args=parser.parse_args(argv)
     try:
         if args.operation=='stage': checked('stage',stage,args.ci_run_id,args.output)
@@ -359,6 +372,15 @@ def main(argv=None):
         return 0
     except Exception:
         write_failure_diagnostic(args.diagnostics_output)
+        try:
+            if args.private_diagnostics_output is not None and _private_failure is not None:
+                write_private_failure(args.private_diagnostics_output,_private_failure,
+                    os.environ.get('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY',''),
+                    os.environ.get('GITHUB_SHA',''),os.environ.get('GITHUB_RUN_ID',''))
+        except Exception:
+            pass
+        finally:
+            _private_failure=None
         print(json.dumps({'error':{'code':'PROTECTED_RUNTIME_'+args.operation.upper()+'_BLOCKED'}}))
         return 2
 

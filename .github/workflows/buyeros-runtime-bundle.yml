@@ -66,14 +66,23 @@ jobs:
           BUYEROS_G0_REVOKED_TOKEN: ${{ secrets.BUYEROS_G0_REVOKED_TOKEN }}
           BUYEROS_RELEASE_PROBE_TOKEN: ${{ secrets.BUYEROS_RELEASE_PROBE_TOKEN }}
           BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY: ${{ secrets.BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY }}
+          BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY: ${{ secrets.BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY }}
           BUYEROS_ROLLBACK_DEPLOYMENT_ID: ${{ vars.BUYEROS_ROLLBACK_DEPLOYMENT_ID }}
         run: |
           status=0
-          services/api/.venv/bin/python scripts/protected-runtime.py stage --ci-run-id "$CI_RUN_ID" --output "$RUNNER_TEMP/buyeros-stage.encrypted.json" --diagnostics-output "$RUNNER_TEMP/buyeros-safe-stage.json" > "$RUNNER_TEMP/buyeros-stage.log" 2>&1 || status=$?
+          services/api/.venv/bin/python scripts/protected-runtime.py stage --ci-run-id "$CI_RUN_ID" --output "$RUNNER_TEMP/buyeros-stage.encrypted.json" --diagnostics-output "$RUNNER_TEMP/buyeros-safe-stage.json" --private-diagnostics-output "$RUNNER_TEMP/buyeros-stage-failure.encrypted.json" > "$RUNNER_TEMP/buyeros-stage.log" 2>&1 || status=$?
           if [ "$status" -ne 0 ]; then
             if [ -f "$RUNNER_TEMP/buyeros-safe-stage.json" ]; then cat "$RUNNER_TEMP/buyeros-safe-stage.json"; fi
             exit "$status"
           fi
+      - name: Preserve encrypted failure details only
+        if: failure() && steps.stage.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: buyeros-private-stage-failure-encrypted
+          path: ${{ runner.temp }}/buyeros-stage-failure.encrypted.json
+          if-no-files-found: ignore
+          retention-days: 1
       - name: Publish encrypted intermediate observations only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
