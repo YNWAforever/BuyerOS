@@ -12,7 +12,7 @@ def authenticated_command(argv):
     if not argv or argv[0]!='vercel' or not token:
         yield argv
         return
-    # CLI 50.28 checks its credential file before loading VERCEL_TOKEN. Use an
+    # The pinned CLI checks saved credentials before loading VERCEL_TOKEN. Use an
     # isolated config instead of relying on a developer's saved login. The
     # private directory/file are removed even when the command fails or times out.
     with tempfile.TemporaryDirectory(prefix='buyeros-vercel-auth-') as directory:

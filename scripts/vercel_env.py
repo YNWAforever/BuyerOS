@@ -1,4 +1,4 @@
-"""Strict reader for Vercel CLI 50.28 env-pull output, without expansion."""
+"""Strict reader for pinned Vercel CLI env-pull output, without expansion."""
 import re
 
 # ECMAScript WhiteSpace + LineTerminator, used by String.prototype.trim.
