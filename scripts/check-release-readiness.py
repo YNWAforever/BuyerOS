@@ -15,7 +15,7 @@ GATES={'workspace':WORKSPACE,'research_export':RESEARCH,'native_send':RESEARCH+(
 # A submitted manifest cannot omit a failing original required job.
 REQUIRED_CI_JOBS=frozenset({'frontend','api','worker','browser-smoke','browser-continuity','browser-zoom',
     'audit-fixes','owned-worker-capacity','cloudflare-controller','cloudflare-staff-acceptance',
-    'c61-evidence-checker','release-readiness'})
+    'c61-evidence-checker','release-readiness','guided-sales-isolated','offer-profile (dev)','offer-profile (vercel-built)'})
 
 
 def _time(value):

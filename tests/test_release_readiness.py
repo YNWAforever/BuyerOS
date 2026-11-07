@@ -25,7 +25,7 @@ def candidate():
         'required_heads':['0050_c61_delivery_authorizations'],'ci_run_id':123,
         'required_ci_jobs':['frontend','api','worker','browser-smoke','browser-continuity','browser-zoom',
             'audit-fixes','owned-worker-capacity','cloudflare-controller','cloudflare-staff-acceptance',
-            'c61-evidence-checker','release-readiness'],
+            'c61-evidence-checker','release-readiness','guided-sales-isolated','offer-profile (dev)','offer-profile (vercel-built)'],
         'candidate_deployment_id':'dpl_candidate','receipt_max_age_seconds':900,
         'rollback_artifacts':{'frontend':'frontend-compatible','api':'api-compatible'},
         'activation':{'auth':'auth0','providers':'disabled','worker':'disabled','delivery':'disabled'}}

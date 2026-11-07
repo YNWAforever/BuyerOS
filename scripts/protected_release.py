@@ -2,11 +2,34 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 REPOSITORY='YNWAforever/BuyerOS'
 ENVIRONMENT='buyeros-production-promote'
+SOLO_OWNER_ID=201698560  # YNWAforever; approved single-owner policy for this repository.
+
+
+def review_policy():
+    value=os.environ.get('BUYEROS_RELEASE_REVIEW_POLICY','independent-v1')
+    if value not in ('independent-v1','solo-owner-v1'):
+        raise ValueError('unknown release review policy')
+    return value
+
+
+def reviewer_allowed(reviewer,initiator):
+    return reviewer==SOLO_OWNER_ID if review_policy()=='solo-owner-v1' else reviewer!=initiator
+
+
+def review_rule_valid(rule):
+    if rule.get('type')!='required_reviewers':return False
+    reviewers=rule.get('reviewers',[])
+    if review_policy()=='solo-owner-v1':
+        return (rule.get('prevent_self_review') is False and len(reviewers)==1
+                and reviewers[0].get('type')=='User'
+                and reviewers[0].get('reviewer',{}).get('id')==SOLO_OWNER_ID)
+    return rule.get('prevent_self_review') is True and bool(reviewers)
 
 
 def release_gate():
@@ -16,6 +39,7 @@ def release_gate():
 
 
 def verify_controls(*,source,ci_run_id,branch,protection,environment,project,project_id,team_id,run,jobs):
+    review_policy()
     required=release_gate().REQUIRED_CI_JOBS
     checks=protection.get('required_status_checks',{})
     contexts=set(checks.get('contexts',[]))|{x.get('context') for x in checks.get('checks',[])}
@@ -26,9 +50,8 @@ def verify_controls(*,source,ci_run_id,branch,protection,environment,project,pro
     policy=environment.get('deployment_branch_policy',{})
     if (policy.get('protected_branches') is not True or policy.get('custom_branch_policies') is not False
             or environment.get('can_admins_bypass') is not False
-            or not any(rule.get('type')=='required_reviewers' and rule.get('prevent_self_review') is True
-                       and rule.get('reviewers') for rule in environment.get('protection_rules',[]))):
-        raise ValueError('non-self protected environment required')
+            or not any(review_rule_valid(rule) for rule in environment.get('protection_rules',[]))):
+        raise ValueError('protected environment matching release review policy required')
     link=project.get('link',{})
     if (project.get('id')!=project_id or project.get('accountId')!=team_id
             or project.get('autoAssignCustomDomains') is not False
@@ -58,12 +81,14 @@ def verify_approval(history,*,initiator_id,run_id,source,deployment_id,require_c
     review=relevant[0];reviewer=review.get('user',{}).get('id')
     comment=review.get('comment','')
     expected='workspace-canary-pass:'+source+':'+deployment_id+':roles-project-reload-retry'
-    if (review.get('state')!='approved' or type(reviewer) is not int or reviewer<=0 or reviewer==initiator_id
+    if (review.get('state')!='approved' or type(reviewer) is not int or reviewer<=0 or not reviewer_allowed(reviewer,initiator_id)
             or type(comment) is not str or (require_canary and comment!=expected)):
-        raise ValueError('verified non-self approval and bound canary comment required')
+        raise ValueError('verified policy-compliant approval and bound canary comment required')
     comment_digest=hashlib.sha256(comment.encode()).hexdigest()
     proof={'reviewer_id':reviewer,'initiator_id':initiator_id,'approval_run_id':run_id,
            'approval_comment_sha256':comment_digest,'human_signoff':True}
+    proof['review_policy']=review_policy()
+    if proof['review_policy']=='solo-owner-v1':proof['release_owner_id']=SOLO_OWNER_ID
     proof['browser_canary_sha256']=hashlib.sha256(json.dumps({**proof,'source_sha':source,
         'deployment_id':deployment_id},sort_keys=True,separators=(',',':')).encode()).hexdigest()
     return proof

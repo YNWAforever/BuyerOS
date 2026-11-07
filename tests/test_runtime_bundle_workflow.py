@@ -1,5 +1,6 @@
 """Owned adapters exercise stage refusals and approval validation without external writes."""
 import copy
+import os
 import importlib.util
 from pathlib import Path
 import sys
@@ -24,7 +25,7 @@ def controls():
         project_id='prj_owned',team_id='team_owned',
         run={'id':123,'head_sha':m['source_sha'],'head_branch':'main','status':'completed','conclusion':'success',
              'path':'.github/workflows/buyeros-ci.yml','repository':{'full_name':'YNWAforever/BuyerOS'}},
-        jobs={'total_count':12,'jobs':[{'name':n,'status':'completed','conclusion':'success'} for n in m['required_ci_jobs']]})
+        jobs={'total_count':len(m['required_ci_jobs']),'jobs':[{'name':n,'status':'completed','conclusion':'success'} for n in m['required_ci_jobs']]})
 
 
 def module():
@@ -76,6 +77,57 @@ def test_runtime_bundle_requires_verified_nonself_approval_and_bound_canary_comm
     result=module().verify_approval(approvals(), initiator_id=101, run_id=456, source='a'*40, deployment_id='dpl_owned')
     assert result['reviewer_id']==202 and result['initiator_id']==101 and result['approval_run_id']==456
     assert result['human_signoff'] is True
+
+
+def test_explicit_solo_owner_policy_requires_real_bound_owner_approval(monkeypatch):
+    monkeypatch.setenv('BUYEROS_RELEASE_REVIEW_POLICY','solo-owner-v1')
+    c=controls()
+    rule=c['environment']['protection_rules'][0]
+    rule.update(prevent_self_review=False,reviewers=[{'type':'User','reviewer':{'id':201698560}}])
+    assert module().verify_controls(**c) is None
+    value=approvals();value[0]['user']['id']=201698560
+    proof=module().verify_approval(value,initiator_id=201698560,run_id=456,source='a'*40,deployment_id='dpl_owned')
+    assert proof['review_policy']=='solo-owner-v1'
+    assert proof['reviewer_id']==proof['initiator_id']==201698560
+    assert proof['release_owner_id']==201698560
+    for fault in ('other-reviewer','wrong-comment','missing','rejected'):
+        bad=copy.deepcopy(value)
+        if fault=='other-reviewer':bad[0]['user']['id']=202
+        if fault=='wrong-comment':bad[0]['comment']='approved'
+        if fault=='missing':bad=[]
+        if fault=='rejected':bad[0]['state']='rejected'
+        with pytest.raises(ValueError):module().verify_approval(bad,initiator_id=201698560,run_id=456,source='a'*40,deployment_id='dpl_owned')
+
+
+@pytest.mark.parametrize('fault',['wrong-owner','extra-reviewer','admin-bypass','missing-reviewer'])
+def test_solo_owner_controls_remain_closed(monkeypatch,fault):
+    monkeypatch.setenv('BUYEROS_RELEASE_REVIEW_POLICY','solo-owner-v1')
+    c=controls();rule=c['environment']['protection_rules'][0]
+    rule.update(prevent_self_review=False,reviewers=[{'type':'User','reviewer':{'id':201698560}}])
+    if fault=='wrong-owner':rule['reviewers'][0]['reviewer']['id']=202
+    if fault=='extra-reviewer':rule['reviewers'].append({'type':'User','reviewer':{'id':202}})
+    if fault=='admin-bypass':c['environment']['can_admins_bypass']=True
+    if fault=='missing-reviewer':rule['reviewers']=[]
+    with pytest.raises(ValueError):module().verify_controls(**c)
+
+
+def test_unknown_review_policy_is_not_an_escape_hatch(monkeypatch):
+    monkeypatch.setenv('BUYEROS_RELEASE_REVIEW_POLICY','skip-review')
+    with pytest.raises(ValueError):module().verify_controls(**controls())
+
+
+def test_solo_owner_receipt_cannot_be_relabelled_as_independent(monkeypatch):
+    from runtime_bundle import _human_canary
+    monkeypatch.setenv('BUYEROS_RELEASE_REVIEW_POLICY','solo-owner-v1')
+    value=approvals();value[0]['user']['id']=201698560
+    proof=module().verify_approval(value,initiator_id=201698560,run_id=456,source='a'*40,deployment_id='dpl_owned')
+    proof.update(api_observation_sha256='1'*64,schema_observation_sha256='2'*64)
+    _human_canary(proof)
+    for key in ('review_policy','release_owner_id'):
+        bad=proof.copy();bad.pop(key)
+        with pytest.raises(ValueError):_human_canary(bad)
+    monkeypatch.delenv('BUYEROS_RELEASE_REVIEW_POLICY')
+    with pytest.raises(ValueError):_human_canary(proof)
 
 
 @pytest.mark.parametrize('fault',['missing','self','comment','environment','rejected','forged-id','multiple'])
@@ -169,6 +221,26 @@ def test_runtime_environment_rejects_libpq_target_overrides_and_paid_activation(
     for key in ('BUYEROS_PAID_ADMISSION_ENABLED','BUYEROS_DELIVERY_ADMISSION_ENABLED','BUYEROS_CLOUDFLARE_EXECUTION_ENABLED'):
         path.write_text(base+key+'="true"\n')
         with pytest.raises(ValueError): runtime.runtime_env(path)
+
+
+def test_unreadable_vercel_secrets_use_protected_bindings(tmp_path,monkeypatch):
+    runtime=runtime_module();path=tmp_path/'production.env'
+    path.write_text('BUYEROS_DATABASE_URL=""\nBUYEROS_RELEASE_PROBE_TOKEN=""\n')
+    monkeypatch.setenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL','postgresql://buyeros_api:fixture@ep-owned.neon.tech/buyer')
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN','owned-probe-token')
+    values=runtime.runtime_env(path)
+    assert values['BUYEROS_DATABASE_URL']==os.environ['BUYEROS_SCHEMA_CHECK_DATABASE_URL']
+    assert values['BUYEROS_RELEASE_PROBE_TOKEN']=='owned-probe-token'
+    monkeypatch.delenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL')
+    with pytest.raises(ValueError):runtime.runtime_env(path)
+
+
+def test_readable_production_binding_cannot_be_overridden(tmp_path,monkeypatch):
+    runtime=runtime_module();path=tmp_path/'production.env'
+    path.write_text('BUYEROS_DATABASE_URL="postgresql://user:fixture@ep-actual.neon.tech/buyer"\nBUYEROS_RELEASE_PROBE_TOKEN="actual-token"\n')
+    monkeypatch.setenv('BUYEROS_SCHEMA_CHECK_DATABASE_URL','postgresql://user:fixture@ep-other.neon.tech/buyer')
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN','wrong-token')
+    with pytest.raises(ValueError):runtime.runtime_env(path)
 
 def test_binding_collector_refuses_changed_effective_configuration():
     from test_release_readiness import candidate

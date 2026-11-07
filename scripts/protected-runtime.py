@@ -99,12 +99,19 @@ def runtime_env(path):
         if not sep or not re.fullmatch(r'[A-Z_][A-Z0-9_]*',key) or key in values:
             raise ValueError('invalid production environment file')
         values[key]=json.loads(raw.replace('\\$', '$')) if raw.startswith('"') else raw
-    dsn=values.get('BUYEROS_DATABASE_URL','')
+    # Vercel Secret values are deliberately blank in CLI exports. Use the
+    # protected runtime-role credential only when the exported binding is absent.
+    # The reviewed endpoint contract and live candidate probe still must agree.
+    dsn=values.get('BUYEROS_DATABASE_URL') or os.environ.get('BUYEROS_SCHEMA_CHECK_DATABASE_URL','')
+    if not dsn:raise ValueError('protected runtime schema credential unavailable')
     database_target_sha256(dsn)
+    values['BUYEROS_DATABASE_URL']=dsn
     for key in ('BUYEROS_PAID_ADMISSION_ENABLED','BUYEROS_DELIVERY_ADMISSION_ENABLED','BUYEROS_CLOUDFLARE_EXECUTION_ENABLED'):
         if values.get(key,'false').lower() not in ('false','0'): raise ValueError('paid or delivery controls are not disabled')
-    if values.get('BUYEROS_RELEASE_PROBE_TOKEN')!=os.environ.get('BUYEROS_RELEASE_PROBE_TOKEN'):
+    probe=os.environ.get('BUYEROS_RELEASE_PROBE_TOKEN','')
+    if not probe or (values.get('BUYEROS_RELEASE_PROBE_TOKEN') and values['BUYEROS_RELEASE_PROBE_TOKEN']!=probe):
         raise ValueError('runtime probe credential not bound to production environment')
+    values['BUYEROS_RELEASE_PROBE_TOKEN']=probe
     return values
 
 
