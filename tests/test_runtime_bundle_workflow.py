@@ -511,6 +511,66 @@ def test_unreadable_vercel_secrets_use_protected_bindings(tmp_path,monkeypatch):
     with pytest.raises(ValueError):runtime.runtime_env(path)
 
 
+def test_pinned_vercel_export_values_match_build_reader_without_json_or_expansion(tmp_path,monkeypatch):
+    from vercel_env import parse_pulled_environment
+    # Exact CLI 50.28 escapeValue and line wrapper; synthetic inputs only.
+    cases={
+        'CORS':('["https://qa.example.test"]','["https://qa.example.test"]'),
+        'QUOTES':('say "hello"','say "hello"'),
+        'DOLLARS':('$HOME ${TOKEN} $(whoami)','$HOME ${TOKEN} $(whoami)'),
+        'ESCAPED_DOLLAR':('\\$TOKEN','\\$TOKEN'),
+        'BACKSLASH':('C:\\temp\\file','C:\\temp\\file'),
+        'SLASH_QUOTE':('a\\"b','a\\"b'),
+        'LF':('a\nb','a\nb'),'CR':('a\rb','a\\rb'),
+        'CRLF':('a\r\nb','a\\r\nb'),
+        'LITERAL_N':('a\\nb','a\nb'),'LITERAL_R':('a\\rb','a\\rb'),
+        'DOUBLE_SLASH_N':('a\\\\nb','a\\\nb'),
+        'TAB':('a\tb','a\tb'),'PADDED':('  padded  ','padded'),
+        'HASH_EQUALS':('a#b=c','a#b=c'),'EMPTY':('',''),
+        'UNICODE':('a香港b','a香港b'),
+        'BOM':('\ufeffpadded\ufeff','padded'),
+        'NEL':('\u0085preserved\u0085','\u0085preserved\u0085'),
+        'CONTROLS':('\u001c\u001d\u001e\u001fpreserved\u001c\u001d\u001e\u001f',
+                    '\u001c\u001d\u001e\u001fpreserved\u001c\u001d\u001e\u001f'),
+        'JS_SPACES':('\u00a0\u1680\u2000\u200a\u202f\u205f\u3000padded\u3000','padded'),
+        'MONGOLIAN':('\u180epreserved\u180e','\u180epreserved\u180e'),
+    }
+    monkeypatch.setenv('TOKEN','MUST_NOT_INTERPOLATE')
+    content='# Created by Vercel CLI\n'+''.join(
+        key+'="'+value.replace('\n','\\n').replace('\r','\\r')+'"\n'
+        for key,(value,expected) in cases.items())
+    path=tmp_path/'pulled.env';path.write_text(content,encoding='utf-8')
+    assert parse_pulled_environment(path)=={key:expected for key,(_,expected) in cases.items()}
+
+
+@pytest.mark.parametrize('content',[
+    'LOWERcase="PRIVATE"\n','A.B="PRIVATE"\n','A-B="PRIVATE"\n','1A="PRIVATE"\n',
+    'A="PRIVATE"\nA="other"\n','A=PRIVATE\n','A="PRIVATE\n',
+    'A=PRIVATE"\n',"A='PRIVATE'\n",'A="PRIVATE" trailing\n',
+    'A="PRIVATE\ncontinued"\n','A="PRIVATE\x00"\n',
+    'A="PRIVATE\u2028continued"\n','A="PRIVATE\u2029continued"\n',
+])
+def test_pulled_environment_rejects_ambiguous_export_with_fixed_error(tmp_path,content):
+    from vercel_env import parse_pulled_environment
+    path=tmp_path/'pulled.env';path.write_text(content,encoding='utf-8')
+    with pytest.raises(ValueError) as caught:parse_pulled_environment(path)
+    assert str(caught.value)=='invalid production environment file'
+
+
+def test_runtime_environment_accepts_raw_nested_cors_quotes_and_preserves_probe_dollar(tmp_path,monkeypatch):
+    import json
+    runtime=runtime_module();path=tmp_path/'pulled.env'
+    probe='owned-\\$TOKEN-"quoted"'
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN',probe)
+    path.write_text('# Created by Vercel CLI\n'
+        'BUYEROS_DATABASE_URL="postgresql://user:pw@ep-owned.neon.tech/buyer"\n'
+        'BUYEROS_CORS_ORIGINS="["https://qa.example.test"]"\n'
+        'BUYEROS_RELEASE_PROBE_TOKEN="'+probe+'"\n',encoding='utf-8')
+    values=runtime.runtime_env(path)
+    assert json.loads(values['BUYEROS_CORS_ORIGINS'])==['https://qa.example.test']
+    assert values['BUYEROS_RELEASE_PROBE_TOKEN']==probe
+
+
 def test_readable_production_binding_cannot_be_overridden(tmp_path,monkeypatch):
     runtime=runtime_module();path=tmp_path/'production.env'
     path.write_text('BUYEROS_DATABASE_URL="postgresql://user:fixture@ep-actual.neon.tech/buyer"\nBUYEROS_RELEASE_PROBE_TOKEN="actual-token"\n')

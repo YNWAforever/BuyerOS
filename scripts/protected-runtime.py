@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from protected_release import ENVIRONMENT,REPOSITORY,release_gate,verify_controls,verify_approval
 from vercel_cli_auth import authenticated_command
+from vercel_env import parse_pulled_environment
 from runtime_failure_diagnostic import bounded_stderr,write_private_failure
 from runtime_bundle import (canonical_json,unique_keys,encrypt_observation_packet,decrypt_observation_packet,
                             build_workspace_bundle,compose_workspace_receipts,encrypt_workspace_bundle)
@@ -180,13 +181,7 @@ def service_artifacts(value):
 
 
 def runtime_env(path):
-    values={}
-    for line in path.read_text(encoding='utf-8').splitlines():
-        if not line or line.startswith('#'): continue
-        key,sep,raw=line.partition('=')
-        if not sep or not re.fullmatch(r'[A-Z_][A-Z0-9_]*',key) or key in values:
-            raise ValueError('invalid production environment file')
-        values[key]=json.loads(raw.replace('\\$', '$')) if raw.startswith('"') else raw
+    values=parse_pulled_environment(path)
     # Vercel Secret values are deliberately blank in CLI exports. Use the
     # protected runtime-role credential only when the exported binding is absent.
     # The reviewed endpoint contract and live candidate probe still must agree.
