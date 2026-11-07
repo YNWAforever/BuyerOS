@@ -16,9 +16,11 @@ Before dispatch, read back the controls rather than relying on this file:
 
 Enter secret values directly into the protected GitHub environments. Do not put secrets in workflow inputs, repository files, comments, logs, or artifacts.
 
-Both protected environments need `BUYEROS_PROMOTION_METADATA_TOKEN` (a repository-scoped credential with only the read permissions needed for branch/environment/workflow metadata) and `VERCEL_TOKEN` scoped to the intended team/project. Set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as environment variables. Do not copy a broadly scoped local GitHub credential into CI.
+Both protected environments need `BUYEROS_PROMOTION_METADATA_TOKEN` (a repository-scoped credential with only the read permissions needed for branch/environment/workflow metadata) and `VERCEL_TOKEN` scoped to the intended team. The pinned CLI also reads team metadata during `pull`; a token restricted to one project can pass project API reads yet fail that step with HTTP 403. Use the intended team's All Projects scope for this CLI workflow; release controls still enforce the exact BuyerOS project and team. Set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as environment variables. Do not copy a broadly scoped local GitHub credential into CI.
 
 The pinned Vercel CLI checks saved credentials before loading `VERCEL_TOKEN` on a fresh runner. Release commands therefore write that token to an isolated temporary CLI auth file, select it with `--global-config`, and remove it after the command, including failures. The token never enters command arguments, and a developer's saved login is not copied or modified.
+
+Production environment exports use the pinned CLI's dotenv format, not JSON string escaping. The release reader preserves embedded quotes (including JSON CORS arrays), matches the pinned build reader's newline handling, and never expands variables or executes values. Invalid names, duplicate keys, and malformed records remain blocking errors. Sensitive exports may be blank; the existing protected database/probe bindings and independent runtime checks remain required.
 
 Both environments also need `BUYEROS_RELEASE_PROBE_TOKEN` so stage, signoff, and promotion can read the exact candidate configuration without activating a provider. The promotion job uses its narrowly scoped workflow token with `deployments: write` to persist intent in the dedicated `buyeros-production-intents` ledger; the metadata credential remains read-only.
 
