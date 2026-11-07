@@ -149,6 +149,14 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
     workflow=yaml.load(path.read_text(),Loader=yaml.BaseLoader)
     jobs=workflow['jobs']
     assert set(jobs)=={'stage-probe','bundle-signoff'}
+    ci=yaml.load((ROOT/'.github/workflows/buyeros-ci.yml').read_text(),Loader=yaml.BaseLoader)
+    promotion=yaml.load((ROOT/'.github/workflows/buyeros-promote.yml').read_text(),Loader=yaml.BaseLoader)
+    release_jobs=[*jobs.values(),*promotion['jobs'].values(),ci['jobs']['release-readiness']]
+    installs=[step['run'] for job in release_jobs for step in job['steps']
+              if 'npm install --global vercel@' in step.get('run','')]
+    assert installs==['npm install --global vercel@54.17.2']*4
+    assert any(step.get('run')=='node scripts/check-vercel-release-cli.mjs "$(npm root --global)/vercel"'
+               for step in ci['jobs']['release-readiness']['steps'])
     assert jobs['stage-probe']['if']=="github.ref == 'refs/heads/main'"
     assert jobs['bundle-signoff']['if']=="github.ref == 'refs/heads/main'"
     assert jobs['stage-probe']['environment']=='buyeros-runtime-readonly'
