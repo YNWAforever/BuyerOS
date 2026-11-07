@@ -29,6 +29,7 @@ The stage environment also needs:
 - Four distinct current test-account credentials in `BUYEROS_G0_OWNED_TOKEN`, `BUYEROS_G0_FOREIGN_TOKEN`, `BUYEROS_G0_EMPTY_TOKEN`, and `BUYEROS_G0_REVOKED_TOKEN`. Negative controls must be real independently scoped accounts, not reused credentials or expired tokens.
 - `BUYEROS_RELEASE_PROBE_TOKEN`, matching the production runtime setting with the same name. It grants access only to the fixed release-binding response.
 - `BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY`, a random 32-byte key encoded as 64 hex characters, shared only with the signoff environment.
+- `BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY`, a separate random 32-byte key encoded as 64 hex characters, held only in the stage environment and the operator's private diagnostic session. It encrypts bounded subprocess failure details; it cannot authorize staging, signing, or promotion.
 - `BUYEROS_ROLLBACK_DEPLOYMENT_ID` as an environment variable identifying the current production deployment with compatible frontend/API artifacts.
 - `BUYEROS_SCHEMA_CHECK_DATABASE_URL`, the restricted runtime-role credential used when the Vercel export omits the database secret. The reviewed endpoint and live candidate binding must still match.
 
@@ -68,5 +69,7 @@ Only after the exact production alias and all release controls are verified may 
 ## Verification Boundaries
 
 If protected staging fails, use its allowlisted diagnostic phase and failure category to locate the failing check. Raw command output, arguments, exception messages, credentials, and private contracts remain in the runner's private log and are not published. A diagnostic does not satisfy any release check. Verify whether a deployment was created before starting another staging run; never retry an uncertain deployment or promotion result.
+
+When the separate diagnostic key is configured, a failed stage also preserves up to 64 KiB of subprocess stderr in `buyeros-private-stage-failure-encrypted`, retained for one day. Only AES-GCM ciphertext is uploaded; source and workflow-run identity are authenticated with it. Decrypt privately, verify the expected source and run, and report only the relevant nonsecret error. This distinct diagnostic format is never accepted as release evidence. Missing diagnostic keys or failed diagnostic writes preserve the original failure and do not permit progress.
 
 Unit, disposable-database, CI, stage, human-browser, and production evidence are distinct. A green CI run, READY deployment, ciphertext artifact, or HTTP 200 cannot replace the missing stage or production acceptance checks. Keep historical failures, source-audit backups, and untracked fixture evidence; do not alter `.gitignore` to hide them.

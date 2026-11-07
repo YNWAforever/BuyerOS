@@ -158,8 +158,11 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
     signing=next(step for step in jobs['bundle-signoff']['steps'] if 'protected-runtime.py sign' in step.get('run',''))
     assert signing['env'][secret]=='${{ secrets.'+secret+' }}'
     uploads=[s for j in jobs.values() for s in j['steps'] if s.get('uses','').startswith('actions/upload-artifact@')]
-    assert [u['with']['name'] for u in uploads]==['buyeros-private-observations-encrypted','buyeros-attested-runtime']
-    assert [u['with']['path'] for u in uploads]==['${{ runner.temp }}/buyeros-stage.encrypted.json','${{ runner.temp }}/runtime-bundle.json']
+    assert [u['with']['name'] for u in uploads]==['buyeros-private-stage-failure-encrypted','buyeros-private-observations-encrypted','buyeros-attested-runtime']
+    assert [u['with']['path'] for u in uploads]==['${{ runner.temp }}/buyeros-stage-failure.encrypted.json','${{ runner.temp }}/buyeros-stage.encrypted.json','${{ runner.temp }}/runtime-bundle.json']
+    assert uploads[0]['if']=="failure() && steps.stage.outcome == 'failure'"
+    assert uploads[0]['with']['retention-days']=='1'
+    assert uploads[0]['with']['if-no-files-found']=='ignore'
     attests=[s for s in jobs['bundle-signoff']['steps'] if s.get('uses','').startswith('actions/attest@')]
     assert attests[0]['with']['subject-path']=='${{ runner.temp }}/runtime-bundle.json'
     commands=[s for j in jobs.values() for s in j['steps'] if 'run' in s and 'scripts/' in s['run']]
@@ -170,6 +173,8 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
         safe='"$RUNNER_TEMP/buyeros-safe-'+operation+'.json"'
         assert lines[0]=='status=0'
         assert '--diagnostics-output '+safe in lines[1]
+        if operation=='stage':
+            assert '--private-diagnostics-output "$RUNNER_TEMP/buyeros-stage-failure.encrypted.json"' in lines[1]
         assert lines[1].endswith('> "$RUNNER_TEMP/buyeros-'+operation+'.log" 2>&1 || status=$?')
         assert lines[2:]==['if [ "$status" -ne 0 ]; then',
                           'if [ -f '+safe+' ]; then cat '+safe+'; fi',
@@ -321,8 +326,115 @@ def test_success_writes_no_failure_report_and_resets_previous_failure(tmp_path,m
     runtime._failure_diagnostic={'phase':'stage_deploy','category':'command_nonzero'}
     monkeypatch.setattr(runtime,'stage',lambda *args:None)
     monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(tmp_path/'summary'))
-    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic)])==0
-    assert not diagnostic.exists() and runtime._failure_diagnostic is None
+    private=tmp_path/'private.json'
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic),
+                         '--private-diagnostics-output',str(private)])==0
+    assert not private.exists() and not diagnostic.exists() and runtime._failure_diagnostic is None
+
+
+def decrypt_failure_fixture(envelope,key='3'*64,source='a'*40,run='456'):
+    import base64
+    import json
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    binding={'schema':'buyeros.runtime-failure.encrypted.v1','source_sha':source,'run_id':run}
+    aad=json.dumps(binding,sort_keys=True,separators=(',',':')).encode('ascii')
+    return json.loads(AESGCM(bytes.fromhex(key)).decrypt(base64.b64decode(envelope['nonce']),
+        base64.b64decode(envelope['ciphertext']),aad))
+
+
+def test_private_pull_failure_is_bounded_encrypted_and_never_deploys(tmp_path,monkeypatch,capsys):
+    import base64
+    import json
+    import subprocess
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    marker='PRIVATE_STDERR_DATABASE_SECRET'
+    stderr=marker+'é'*70000
+    original=runtime.command
+    def command(argv,**kwargs):
+        if argv[:2]==['vercel','pull']:
+            raise subprocess.CalledProcessError(9,['PRIVATE_ARG'],output='PRIVATE_STDOUT',stderr=stderr)
+        return original(argv,**kwargs)
+    monkeypatch.setattr(runtime,'command',command)
+    monkeypatch.setenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY','3'*64)
+    summary=tmp_path/'summary';safe=tmp_path/'safe.json';private=tmp_path/'private.json'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),
+        '--diagnostics-output',str(safe),'--private-diagnostics-output',str(private)])==2
+    envelope=json.loads(private.read_text())
+    assert set(envelope)=={'schema','source_sha','run_id','nonce','ciphertext'}
+    assert envelope['source_sha']=='a'*40 and envelope['run_id']=='456'
+    payload=decrypt_failure_fixture(envelope)
+    assert set(payload)=={'phase','category','exit_code','stderr_base64'}
+    assert payload['phase']=='stage_pull' and payload['category']=='command_nonzero' and payload['exit_code']==9
+    assert base64.b64decode(payload['stderr_base64'])==stderr.encode()[:65536]
+    captured=capsys.readouterr()
+    public=captured.out+captured.err+summary.read_text()+safe.read_text()+private.read_text()
+    for value in (marker,'PRIVATE_ARG','PRIVATE_STDOUT'):assert value not in public
+    assert not output.exists() and not any(call[:2]==['vercel','deploy'] for call in calls)
+    assert not list(tmp_path.glob('.runtime-failure-*'))
+    assert runtime._private_failure is None
+    from runtime_bundle import decrypt_observation_packet,decrypt_workspace_bundle
+    for decrypt in (decrypt_observation_packet,decrypt_workspace_bundle):
+        with pytest.raises(ValueError):decrypt(envelope,'3'*64)
+
+
+@pytest.mark.parametrize('fault',['key','source','run','ciphertext','nonce'])
+def test_private_failure_authentication_rejects_wrong_binding_and_tampering(fault):
+    import base64
+    from cryptography.exceptions import InvalidTag
+    from runtime_failure_diagnostic import encrypt_failure
+    envelope=encrypt_failure({'phase':'stage_pull','category':'command_nonzero','exit_code':1,'stderr':b'PRIVATE'},'3'*64,'a'*40,'456')
+    options={}
+    if fault=='key':options['key']='4'*64
+    if fault=='source':options['source']='b'*40
+    if fault=='run':options['run']='457'
+    if fault in ('ciphertext','nonce'):
+        raw=bytearray(base64.b64decode(envelope[fault]));raw[0]^=1
+        envelope[fault]=base64.b64encode(raw).decode()
+    with pytest.raises(InvalidTag):decrypt_failure_fixture(envelope,**options)
+
+
+@pytest.mark.parametrize('fault',['missing-key','bad-key','bad-source','bad-run','existing-file','missing-directory'])
+def test_private_diagnostic_failure_never_masks_original_exit(tmp_path,monkeypatch,capsys,fault):
+    import subprocess
+    runtime=runtime_module()
+    monkeypatch.setenv('GITHUB_SHA','a'*40);monkeypatch.setenv('GITHUB_RUN_ID','456')
+    monkeypatch.setenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY','3'*64)
+    if fault=='missing-key':monkeypatch.delenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY')
+    if fault=='bad-key':monkeypatch.setenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY','PRIVATE_INVALID_KEY')
+    if fault=='bad-source':monkeypatch.setenv('GITHUB_SHA','PRIVATE_INVALID_SOURCE')
+    if fault=='bad-run':monkeypatch.setenv('GITHUB_RUN_ID','PRIVATE_INVALID_RUN')
+    private=tmp_path/'private.json'
+    if fault=='existing-file':private.write_text('original evidence')
+    if fault=='missing-directory':private=tmp_path/'absent'/'private.json'
+    def fail(*args):raise subprocess.CalledProcessError(7,['PRIVATE_ARG'],stderr=b'PRIVATE_STDERR')
+    monkeypatch.setattr(runtime,'stage',lambda *args:runtime.checked('stage_pull',fail))
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--private-diagnostics-output',str(private)])==2
+    if fault=='existing-file':assert private.read_text()=='original evidence'
+    else:assert not private.exists()
+    assert not list(tmp_path.glob('.runtime-failure-*'))
+    captured=capsys.readouterr();assert 'PRIVATE' not in captured.out+captured.err
+
+
+@pytest.mark.parametrize('kind',['empty','unknown','timeout'])
+def test_only_captured_subprocess_stderr_creates_private_evidence(tmp_path,monkeypatch,kind):
+    import json
+    import subprocess
+    runtime=runtime_module()
+    monkeypatch.setenv('GITHUB_SHA','a'*40);monkeypatch.setenv('GITHUB_RUN_ID','456')
+    monkeypatch.setenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY','3'*64)
+    class PrivateError(Exception):
+        def __str__(self):raise AssertionError('must never stringify')
+    errors={'empty':subprocess.CalledProcessError(1,['PRIVATE'],stderr=None,output='PRIVATE'),
+            'unknown':PrivateError('PRIVATE'),'timeout':subprocess.TimeoutExpired(['PRIVATE'],45,stderr=b'captured timeout')}
+    def fail(*args):raise errors[kind]
+    monkeypatch.setattr(runtime,'stage',lambda *args:runtime.checked('stage_pull',fail))
+    private=tmp_path/'private.json'
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--private-diagnostics-output',str(private)])==2
+    if kind=='timeout':
+        payload=decrypt_failure_fixture(json.loads(private.read_text()))
+        assert payload['exit_code'] is None and payload['phase']=='stage_pull' and payload['category']=='command_timeout'
+    else:assert not private.exists()
 
 
 def test_diagnostic_vocabulary_rejects_untrusted_labels_without_running_operation(tmp_path,monkeypatch):
