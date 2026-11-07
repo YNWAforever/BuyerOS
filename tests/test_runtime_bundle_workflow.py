@@ -164,6 +164,16 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
     assert attests[0]['with']['subject-path']=='${{ runner.temp }}/runtime-bundle.json'
     commands=[s for j in jobs.values() for s in j['steps'] if 'run' in s and 'scripts/' in s['run']]
     assert all('> "$RUNNER_TEMP/' in s['run'] and '2>&1' in s['run'] for s in commands)
+    for operation,job in [('stage','stage-probe'),('sign','bundle-signoff')]:
+        script=next(s['run'] for s in jobs[job]['steps'] if 'protected-runtime.py '+operation in s.get('run',''))
+        lines=[line.strip() for line in script.splitlines()]
+        safe='"$RUNNER_TEMP/buyeros-safe-'+operation+'.json"'
+        assert lines[0]=='status=0'
+        assert '--diagnostics-output '+safe in lines[1]
+        assert lines[1].endswith('> "$RUNNER_TEMP/buyeros-'+operation+'.log" 2>&1 || status=$?')
+        assert lines[2:]==['if [ "$status" -ne 0 ]; then',
+                          'if [ -f '+safe+' ]; then cat '+safe+'; fi',
+                          'exit "$status"','fi']
 
 def runtime_module():
     path=ROOT/'scripts/protected-runtime.py'
@@ -171,6 +181,156 @@ def runtime_module():
     spec=importlib.util.spec_from_file_location('protected_runtime_test',path)
     result=importlib.util.module_from_spec(spec);spec.loader.exec_module(result)
     return result
+
+
+@pytest.mark.parametrize('phase',['controls_branch','controls_protection','controls_environment',
+                                 'controls_project','controls_run','controls_jobs','controls_verify'])
+def test_control_failure_diagnostics_are_fixed_and_stop_stage(tmp_path,monkeypatch,capsys,phase):
+    import json
+    runtime=runtime_module();c=controls();seen=[]
+    secret='PRIVATE_TOKEN_HOST_COMMAND_OUTPUT_NEVER_RENDER'
+    class PrivateFailure(Exception):
+        def __str__(self):raise AssertionError('Exception text must never be inspected')
+    monkeypatch.setenv('VERCEL_PROJECT_ID','prj_owned');monkeypatch.setenv('VERCEL_ORG_ID','team_owned')
+    monkeypatch.setenv('GITHUB_SHA','a'*40);monkeypatch.setenv('GITHUB_REF','refs/heads/main')
+    monkeypatch.setenv('GITHUB_WORKFLOW','BuyerOS protected runtime bundle')
+    monkeypatch.setenv('BUYEROS_ENABLE_PROTECTED_STAGE','true')
+    summary=tmp_path/'summary';diagnostic=tmp_path/'safe.json';output=tmp_path/'encrypted.json'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    names={'branches/main':'branch','branches/main/protection':'protection',
+           'environments/buyeros-production-promote':'environment',
+           'actions/runs/123':'run','actions/runs/123/jobs?per_page=100':'jobs'}
+    def read(name):
+        seen.append(name)
+        if 'controls_'+name==phase:raise PrivateFailure(secret)
+        return c[name]
+    monkeypatch.setattr(runtime,'github',lambda path:read(names[path]))
+    monkeypatch.setattr(runtime,'vercel',lambda path:read('project'))
+    def verify(**kwargs):
+        seen.append('verify')
+        if phase=='controls_verify':raise PrivateFailure(secret)
+        raise AssertionError('Failed metadata must not reach verification')
+    monkeypatch.setattr(runtime,'verify_controls',verify)
+    def forbidden(*args,**kwargs):raise AssertionError('No deploy after failed controls')
+    monkeypatch.setattr(runtime,'command',forbidden)
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),
+                         '--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':phase,'category':'failed'}
+    assert seen[-1]==phase.removeprefix('controls_') and not output.exists()
+    captured=capsys.readouterr()
+    assert secret not in captured.out+captured.err+summary.read_text()+diagnostic.read_text()
+    assert phase+': failed' in summary.read_text()
+    for line in summary.read_text().splitlines():
+        label,status=line.removeprefix('- ').split(': ')
+        assert label in runtime.DIAGNOSTIC_LABELS and status in runtime.DIAGNOSTIC_STATUSES
+
+
+@pytest.mark.parametrize('kind,category',[('exit','command_nonzero'),('timeout','command_timeout'),('unknown','failed')])
+def test_command_diagnostics_never_expose_arguments_or_process_output(tmp_path,monkeypatch,capsys,kind,category):
+    import json
+    import subprocess
+    runtime=runtime_module();secret='SECRET_ARG_STDOUT_STDERR_EXCEPTION'
+    errors={'exit':subprocess.CalledProcessError(42,[secret],output=secret,stderr=secret),
+            'timeout':subprocess.TimeoutExpired([secret],45,output=secret,stderr=secret),
+            'unknown':type(secret,(Exception,),{})(secret)}
+    def fail(*args,**kwargs):raise errors[kind]
+    monkeypatch.setattr(runtime.subprocess,'run',fail)
+    monkeypatch.setattr(runtime,'stage',lambda *args:runtime.checked('stage_deploy',runtime.command,[secret]))
+    summary=tmp_path/'summary';diagnostic=tmp_path/'safe.json'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':'stage_deploy','category':category}
+    captured=capsys.readouterr()
+    assert secret not in captured.out+captured.err+summary.read_text()+diagnostic.read_text()
+
+
+def test_unwritable_diagnostics_preserve_original_failure_and_exit(tmp_path,monkeypatch,capsys):
+    runtime=runtime_module();error=ValueError('PRIVATE_FAILURE')
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(tmp_path))
+    def fail(*args):raise error
+    with pytest.raises(ValueError) as raised:runtime.checked('stage_pull',fail)
+    assert raised.value is error
+    monkeypatch.setattr(runtime,'stage',fail)
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(tmp_path)])==2
+    assert 'PRIVATE_FAILURE' not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize('code,category',[('401','http_unauthorized'),('403','http_forbidden'),('404','http_not_found')])
+def test_metadata_http_categories_publish_only_fixed_labels(tmp_path,monkeypatch,capsys,code,category):
+    import json
+    import subprocess
+    runtime=runtime_module();secret='HOSTILE_SECRET\n::error::DO_NOT_RENDER'
+    summary=tmp_path/'summary';monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    for phase in sorted(runtime.GH_METADATA_LABELS):
+        def fail(*args):
+            raise subprocess.CalledProcessError(1,['gh','api',secret],output=secret,
+                                                stderr=secret+' (HTTP '+code+')\n')
+        monkeypatch.setattr(runtime,'stage',lambda *args:runtime.checked(phase,fail))
+        diagnostic=tmp_path/(phase+'.json')
+        assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic)])==2
+        assert json.loads(diagnostic.read_text())=={'phase':phase,'category':category}
+        assert secret not in diagnostic.read_text()
+    captured=capsys.readouterr()
+    assert secret not in captured.out+captured.err+summary.read_text()
+    assert 'DO_NOT_RENDER' not in summary.read_text()
+
+
+def test_http_classifier_ignores_nonmetadata_commands_and_nonexact_suffixes(tmp_path,monkeypatch):
+    import subprocess
+    runtime=runtime_module();monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(tmp_path/'summary'))
+    cases=[('controls_project',['gh','api'],'PRIVATE (HTTP 403)'),
+           ('controls_project',['vercel','api'],'PRIVATE (403) trailing'),
+           ('controls_project',['vercel','api'],'PRIVATE (HTTP 403)'),
+           ('controls_project',['vercel','deploy'],'PRIVATE (403)'),
+           ('stage_deploy',['vercel','api'],'PRIVATE (403)'),
+           ('stage_deploy',['gh','api'],'PRIVATE (HTTP 403)'),
+           ('controls_branch',['vercel','api'],'PRIVATE (HTTP 403)'),
+           ('controls_branch',['gh','api'],'PRIVATE (HTTP 403) trailing'),
+           ('controls_branch',['gh','api'],'PRIVATE (HTTP 403)\ntrailing'),
+           ('controls_branch',['gh','api'],'PRIVATE (HTTP 500)'),
+           ('controls_branch',['gh','api'],b'PRIVATE (HTTP 403)'),
+           ('controls_branch',['gh','api'],None)]
+    for phase,cmd,stderr in cases:
+        error=subprocess.CalledProcessError(1,cmd,stderr=stderr,output='PRIVATE (HTTP 403)')
+        def fail():raise error
+        runtime._failure_diagnostic=None
+        with pytest.raises(subprocess.CalledProcessError) as raised:runtime.checked(phase,fail)
+        assert raised.value is error
+        assert runtime._failure_diagnostic=={'phase':phase,'category':'command_nonzero'}
+    assert 'PRIVATE' not in (tmp_path/'summary').read_text()
+
+
+def test_vercel_project_forbidden_diagnostic_keeps_private_auth_transport_hidden(tmp_path,monkeypatch,capsys):
+    import json
+    import subprocess
+    runtime=runtime_module();secret='PRIVATE_AUTH_PATH_TOKEN_AND_PROVIDER_TEXT'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(tmp_path/'summary'))
+    def fail(*args):
+        raise subprocess.CalledProcessError(1,['vercel','api','/v9/projects/private','--global-config',secret],
+                                            output=secret,stderr=secret+' (403)\n')
+    monkeypatch.setattr(runtime,'stage',lambda *args:runtime.checked('controls_project',fail))
+    diagnostic=tmp_path/'safe.json'
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':'controls_project','category':'http_forbidden'}
+    captured=capsys.readouterr()
+    assert secret not in captured.out+captured.err+diagnostic.read_text()+(tmp_path/'summary').read_text()
+
+
+def test_success_writes_no_failure_report_and_resets_previous_failure(tmp_path,monkeypatch):
+    runtime=runtime_module();diagnostic=tmp_path/'safe.json'
+    runtime._failure_diagnostic={'phase':'stage_deploy','category':'command_nonzero'}
+    monkeypatch.setattr(runtime,'stage',lambda *args:None)
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(tmp_path/'summary'))
+    assert runtime.main(['stage','--output',str(tmp_path/'out'),'--diagnostics-output',str(diagnostic)])==0
+    assert not diagnostic.exists() and runtime._failure_diagnostic is None
+
+
+def test_diagnostic_vocabulary_rejects_untrusted_labels_without_running_operation(tmp_path,monkeypatch):
+    runtime=runtime_module();summary=tmp_path/'summary'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    runtime.safe_summary('PRIVATE_LABEL','failed');runtime.safe_summary('stage','PRIVATE_STATUS')
+    with pytest.raises(ValueError):runtime.checked('PRIVATE_LABEL',lambda:pytest.fail('must not run'))
+    assert not summary.exists()
 
 
 def test_stage_does_not_deploy_when_remote_controls_fail(tmp_path,monkeypatch):
@@ -341,6 +501,28 @@ def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,m
     assert len([call for call in calls if call[:2]==['vercel','deploy']])==1
     assert not (tmp_path/'.vercel/.env.production.local').exists()
     assert 'postgresql://' not in output.read_text()
+
+
+@pytest.mark.parametrize('phase',['stage_rollback_probe','stage_api_probe'])
+def test_failed_api_observation_never_reports_probe_passed(tmp_path,monkeypatch,phase):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    reads=runtime.load_script('collect-workspace-observations.py');original=reads.collect
+    def collect(packet,tokens,origin):
+        result=original(packet,tokens,origin)
+        if ('owned-rollback' in origin)==(phase=='stage_rollback_probe'):
+            result['all_checks_passed']=False
+        return result
+    monkeypatch.setattr(reads,'collect',collect)
+    summary=tmp_path/'summary';diagnostic=tmp_path/'safe.json'
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY',str(summary))
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),
+                         '--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':phase,'category':'failed'}
+    assert phase+': failed' in summary.read_text()
+    assert phase+': passed' not in summary.read_text()
+    assert not output.exists()
+    assert len([call for call in calls if call[:2]==['vercel','deploy']])==(phase=='stage_api_probe')
 
 
 @pytest.mark.parametrize('auth_mode,expected',[(None,'neon'),('auth0','auth0'),('neon','neon'),('dual','dual')])

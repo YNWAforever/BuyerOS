@@ -13,6 +13,7 @@ import sys
 from urllib.parse import urlsplit
 
 from protected_release import ENVIRONMENT,REPOSITORY,release_gate,verify_controls,verify_approval
+from vercel_cli_auth import authenticated_command
 from runtime_bundle import (canonical_json,unique_keys,encrypt_observation_packet,decrypt_observation_packet,
                             build_workspace_bundle,compose_workspace_receipts,encrypt_workspace_bundle)
 
@@ -23,6 +24,76 @@ from buyeros_api.services.release_configuration import pulled_configuration_sha2
 from buyeros_api.services.schema_readiness import SchemaContract,inspect_schema
 
 
+DIAGNOSTIC_LABELS=frozenset({'stage','sign','controls_target','controls_branch','controls_protection',
+    'controls_environment','controls_project','controls_run','controls_jobs','controls_verify',
+    'stage_controls','stage_api_contract','stage_schema_contract','stage_account_scope','stage_rollback',
+    'stage_rollback_artifacts','stage_pull','stage_environment','stage_schema_probe','stage_rollback_probe',
+    'stage_recheck_controls','stage_build','stage_deploy','stage_candidate_lookup','stage_candidate_verify',
+    'stage_candidate_artifacts','stage_tree','stage_binding_probe','stage_configuration_probe',
+    'stage_api_probe','stage_encrypt','stage_write'})
+DIAGNOSTIC_STATUSES=frozenset({'started','passed','failed','command_nonzero','command_timeout','file_unavailable',
+                              'http_unauthorized','http_forbidden','http_not_found'})
+GH_METADATA_LABELS=frozenset({'controls_branch','controls_protection','controls_environment','controls_run','controls_jobs'})
+_failure_diagnostic=None
+
+
+def safe_summary(label,status):
+    """Best-effort fixed vocabulary only; never render exception or command data."""
+    if label not in DIAGNOSTIC_LABELS or status not in DIAGNOSTIC_STATUSES:return
+    try:
+        path=os.environ.get('GITHUB_STEP_SUMMARY')
+        if path:
+            with open(path,'a',encoding='utf-8') as handle:
+                handle.write('- '+label+': '+status+'\n')
+    except Exception:
+        # Observability must neither authorize work nor replace its failure.
+        pass
+
+
+def checked(label,operation,*args,**kwargs):
+    global _failure_diagnostic
+    if label not in DIAGNOSTIC_LABELS:raise ValueError('invalid diagnostic label')
+    safe_summary(label,'started')
+    try:
+        result=operation(*args,**kwargs)
+    except Exception as error:
+        status='failed'
+        if isinstance(error,subprocess.CalledProcessError):
+            status='command_nonzero'
+            # Inspect only the CLI's exact trailing HTTP marker. No command,
+            # stderr text, captured digits, or exception names are published.
+            if (label in GH_METADATA_LABELS and type(error.cmd) is list
+                    and error.cmd[:2]==['gh','api'] and type(error.stderr) is str):
+                match=re.search(r'\(HTTP (401|403|404)\)(?:\r?\n)?\Z',error.stderr)
+                if match:status={'401':'http_unauthorized','403':'http_forbidden','404':'http_not_found'}[match.group(1)]
+            elif (label=='controls_project' and type(error.cmd) is list
+                    and error.cmd[:2]==['vercel','api'] and type(error.stderr) is str
+                    and re.search(r'\(403\)(?:\r?\n)?\Z',error.stderr)):
+                status='http_forbidden'
+        elif isinstance(error,subprocess.TimeoutExpired):status='command_timeout'
+        elif isinstance(error,FileNotFoundError):status='file_unavailable'
+        if _failure_diagnostic is None:_failure_diagnostic={'phase':label,'category':status}
+        safe_summary(label,status)
+        raise
+    safe_summary(label,'passed')
+    return result
+
+
+def write_failure_diagnostic(path):
+    """Optional public-safe failure report; a failed write cannot alter exit 2."""
+    if path is None:return
+    report=_failure_diagnostic
+    if (type(report) is not dict or set(report)!={'phase','category'}
+            or report['phase'] not in DIAGNOSTIC_LABELS
+            or report['category'] not in DIAGNOSTIC_STATUSES-{'started','passed'}):
+        report={'phase':'stage','category':'failed'}
+    try:
+        with path.open('x',encoding='utf-8') as handle:
+            handle.write(json.dumps(report)+'\n')
+    except Exception:
+        pass
+
+
 def load_script(name):
     spec=importlib.util.spec_from_file_location(name.replace('-','_'),ROOT/'scripts'/name)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -30,7 +101,8 @@ def load_script(name):
 
 
 def command(argv,*,timeout=45):
-    return subprocess.run(argv,check=True,capture_output=True,text=True,timeout=timeout).stdout
+    with authenticated_command(argv) as authenticated:
+        return subprocess.run(authenticated,check=True,capture_output=True,text=True,timeout=timeout).stdout
 
 
 def github(path):
@@ -52,14 +124,19 @@ def private_json(key):
 
 
 def current_controls(source,ci_run_id):
-    project_id=os.environ['VERCEL_PROJECT_ID'];team_id=os.environ['VERCEL_ORG_ID']
-    if not re.fullmatch(r'prj_[A-Za-z0-9]+',project_id) or not re.fullmatch(r'team_[A-Za-z0-9]+',team_id):
-        raise ValueError('exact project and team required')
-    inputs=dict(source=source,ci_run_id=ci_run_id,branch=github('branches/main'),
-        protection=github('branches/main/protection'),environment=github('environments/'+ENVIRONMENT),
-        project=vercel('/v9/projects/'+project_id+'?teamId='+team_id),project_id=project_id,team_id=team_id,
-        run=github('actions/runs/'+str(ci_run_id)),jobs=github('actions/runs/'+str(ci_run_id)+'/jobs?per_page=100'))
-    verify_controls(**inputs)
+    def target():
+        project_id=os.environ['VERCEL_PROJECT_ID'];team_id=os.environ['VERCEL_ORG_ID']
+        if not re.fullmatch(r'prj_[A-Za-z0-9]+',project_id) or not re.fullmatch(r'team_[A-Za-z0-9]+',team_id):
+            raise ValueError('exact project and team required')
+        return project_id,team_id
+    project_id,team_id=checked('controls_target',target)
+    inputs=dict(source=source,ci_run_id=ci_run_id,branch=checked('controls_branch',github,'branches/main'),
+        protection=checked('controls_protection',github,'branches/main/protection'),
+        environment=checked('controls_environment',github,'environments/'+ENVIRONMENT),
+        project=checked('controls_project',vercel,'/v9/projects/'+project_id+'?teamId='+team_id),project_id=project_id,team_id=team_id,
+        run=checked('controls_run',github,'actions/runs/'+str(ci_run_id)),
+        jobs=checked('controls_jobs',github,'actions/runs/'+str(ci_run_id)+'/jobs?per_page=100'))
+    checked('controls_verify',verify_controls,**inputs)
     return inputs
 
 
@@ -133,15 +210,22 @@ def common(manifest):
             'checked_at':datetime.now(timezone.utc).isoformat(),'evidence_mode':'candidate_runtime'}
 
 
+def collect_verified(reads,packet,tokens,origin):
+    result=reads.collect(packet,tokens,origin)
+    if result.get('all_checks_passed') is not True:
+        raise ValueError('API controls failed')
+    return result
+
+
 def stage(ci_run_id,output):
     source=os.environ['GITHUB_SHA']
     if (os.environ.get('GITHUB_REF')!='refs/heads/main'
             or os.environ.get('GITHUB_WORKFLOW')!='BuyerOS protected runtime bundle'
             or os.environ.get('BUYEROS_ENABLE_PROTECTED_STAGE')!='true' or output.exists()):
         raise ValueError('reviewed protected main stage authorization required')
-    controls=current_controls(source,ci_run_id)
+    controls=checked('stage_controls',current_controls,source,ci_run_id)
     # Private templates bind account scope and schema policy before any deployment.
-    api=private_json('BUYEROS_G0_TARGET_JSON');schema=SchemaContract.model_validate(private_json('BUYEROS_SCHEMA_CONTRACT_JSON'))
+    api=checked('stage_api_contract',private_json,'BUYEROS_G0_TARGET_JSON');schema=checked('stage_schema_contract',lambda:SchemaContract.model_validate(private_json('BUYEROS_SCHEMA_CONTRACT_JSON')))
     if (api.get('source_sha')!=source or schema.source_sha!=source or schema.evidence_mode!='candidate_runtime'
             or schema.target_receipt is None or schema.target!=schema.target_receipt
             or digest(api)!=os.environ.get('BUYEROS_G0_CONTRACT_SHA256')
@@ -150,30 +234,29 @@ def stage(ci_run_id,output):
         raise ValueError('source-specific reviewed private templates required')
     reads=load_script('collect-workspace-observations.py')
     tokens={key:os.environ['BUYEROS_G0_'+key.upper()+'_TOKEN'] for key in reads.ACCOUNTS}
-    reads.validate(api,tokens,api['origin'])
+    checked('stage_account_scope',reads.validate,api,tokens,api['origin'])
     rollback_id=os.environ.get('BUYEROS_ROLLBACK_DEPLOYMENT_ID','')
     if re.fullmatch(r'dpl_[A-Za-z0-9_-]+',rollback_id) is None: raise ValueError('reviewed rollback deployment absent')
-    rollback=vercel('/v13/deployments/'+rollback_id+'?teamId='+controls['team_id'])
+    rollback=checked('stage_rollback',vercel,'/v13/deployments/'+rollback_id+'?teamId='+controls['team_id'])
     if (rollback.get('id')!=rollback_id or rollback.get('projectId')!=controls['project_id']
             or rollback.get('ownerId')!=controls['team_id'] or rollback.get('target')!='production'
             or rollback.get('readyState')!='READY'):
         raise ValueError('exact compatible rollback deployment required')
-    rollback_artifacts=service_artifacts(rollback)
+    rollback_artifacts=checked('stage_rollback_artifacts',service_artifacts,rollback)
     pulled=ROOT/'.vercel/.env.production.local'
     try:
-        command(['vercel','pull','--yes','--environment=production'],timeout=120)
-        values=runtime_env(pulled)
+        checked('stage_pull',command,['vercel','pull','--yes','--environment=production'],timeout=120)
+        values=checked('stage_environment',runtime_env,pulled)
         target=database_target_sha256(values['BUYEROS_DATABASE_URL'])
         expected_endpoint=database_endpoint_sha256(values['BUYEROS_DATABASE_URL'])
         if schema.target.endpoint_sha256!=expected_endpoint:
             raise ValueError('schema target endpoint differs from production binding')
-        observed_schema=asyncio.run(schema_observation(values['BUYEROS_DATABASE_URL'],schema))
+        observed_schema=checked('stage_schema_probe',lambda:asyncio.run(schema_observation(values['BUYEROS_DATABASE_URL'],schema)))
         rollback_packet={**api,'origin':'https://'+rollback['url']}
-        rollback_api=reads.collect(rollback_packet,tokens,rollback_packet['origin'])
-        if not rollback_api['all_checks_passed']: raise ValueError('rollback API compatibility failed')
+        rollback_api=checked('stage_rollback_probe',collect_verified,reads,rollback_packet,tokens,rollback_packet['origin'])
         # Review main at the final boundary before the one staging call.
-        current_controls(source,ci_run_id)
-        command(['vercel','build','--prod'],timeout=900)
+        checked('stage_recheck_controls',current_controls,source,ci_run_id)
+        checked('stage_build',command,['vercel','build','--prod'],timeout=900)
         args=['vercel','deploy','--prebuilt','--prod','--skip-domain','--yes',
               '--env','BUYEROS_RUNTIME_SOURCE_SHA='+source,
               '--env','BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1']
@@ -181,27 +264,26 @@ def stage(ci_run_id,output):
         meta={'githubCommitSha':source,'githubCommitOrg':'YNWAforever','githubCommitRepo':'BuyerOS',
               'githubCommitRepoId':str(controls['project']['link']['repoId']),'githubCommitRef':'main'}
         for key,value in meta.items(): args.extend(['--meta',key+'='+value])
-        url=command(args,timeout=900).strip().splitlines()[-1]
+        url=checked('stage_deploy',command,args,timeout=900).strip().splitlines()[-1]
         if re.fullmatch(r'https://[a-z0-9-]+\.vercel\.app',url) is None: raise ValueError('staging outcome unverified; do not retry')
-        created=vercel('/v13/deployments/'+url.removeprefix('https://')+'?teamId='+controls['team_id'])
-        deployed,origin=deployment(source,created['id'],controls)
+        created=checked('stage_candidate_lookup',vercel,'/v13/deployments/'+url.removeprefix('https://')+'?teamId='+controls['team_id'])
+        deployed,origin=checked('stage_candidate_verify',deployment,source,created['id'],controls)
         if (deployed.get('aliasAssigned') is not False
                 or controls['project'].get('autoAssignCustomDomains') is not False
                 or ('autoAssignCustomDomains' in deployed and deployed['autoAssignCustomDomains'] is not False)):
             raise ValueError('staged deployment unexpectedly assigned aliases')
-        artifacts=service_artifacts(deployed)
+        artifacts=checked('stage_candidate_artifacts',service_artifacts,deployed)
         manifest={'schema':'buyeros.release-manifest.v1','source_sha':source,
-            'tree_sha':command(['git','rev-parse',source+'^{tree}']).strip(),
+            'tree_sha':checked('stage_tree',command,['git','rev-parse',source+'^{tree}']).strip(),
             'configuration_sha256':pulled_configuration_sha256(values),'db_target_sha256':target,'schema_contract_sha256':observed_schema['contract_sha256'],
             'frontend_artifact':artifacts['frontend'],'api_artifact':artifacts['api'],'worker_artifact':None,
             'required_heads':observed_schema['observed_heads'],'ci_run_id':ci_run_id,
             'required_ci_jobs':sorted(release_gate().REQUIRED_CI_JOBS),'candidate_deployment_id':deployed['id'],
             'receipt_max_age_seconds':900,'rollback_artifacts':rollback_artifacts,
             'activation':{'auth':values.get('BUYEROS_AUTH_MODE','neon'),'providers':'disabled','worker':'disabled','delivery':'disabled'}}
-        bound=load_script('collect-runtime-binding.py').collect_binding(manifest,origin,values['BUYEROS_DATABASE_URL'],os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
-        observed_configuration=load_script('collect-runtime-binding.py').collect_configuration(manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
-        observed_api=reads.collect({**api,'origin':origin},tokens,origin)
-        if observed_api['all_checks_passed'] is not True: raise ValueError('candidate API controls failed')
+        bound=checked('stage_binding_probe',load_script('collect-runtime-binding.py').collect_binding,manifest,origin,values['BUYEROS_DATABASE_URL'],os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
+        observed_configuration=checked('stage_configuration_probe',load_script('collect-runtime-binding.py').collect_configuration,manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
+        observed_api=checked('stage_api_probe',collect_verified,reads,{**api,'origin':origin},tokens,origin)
         files={'manifest.json':manifest,'schema-observations.json':observed_schema,'api-observations.json':observed_api,
                'binding-observations.json':bound,'configuration-observations.json':observed_configuration,
                'build-evidence.json':{'ci':{'run_id':ci_run_id,'head_sha':source,'status':'completed','conclusion':'success',
@@ -212,8 +294,8 @@ def stage(ci_run_id,output):
                     'schema_observation_sha256':digest(observed_schema)}}}
         packet={'schema':'buyeros.private-runtime-observations.v1','source_sha':source,
                 'origin':origin,'files':files,'stage_run_id':int(os.environ['GITHUB_RUN_ID'])}
-        encrypted=encrypt_observation_packet(packet,os.environ['BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY'])
-        write_encrypted(output,encrypted)
+        encrypted=checked('stage_encrypt',encrypt_observation_packet,packet,os.environ['BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY'])
+        checked('stage_write',write_encrypted,output,encrypted)
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as summary:
             summary.write('candidate_url='+origin+'\ndeployment_id='+deployed['id']+'\nsource_sha='+source+'\n')
     finally:
@@ -261,18 +343,22 @@ def sign(input_file,output):
 
 
 def main(argv=None):
+    global _failure_diagnostic
+    _failure_diagnostic=None
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation',choices=['stage','sign'])
     parser.add_argument('--ci-run-id',type=int)
     parser.add_argument('--input',type=Path)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--diagnostics-output',type=Path)
     args=parser.parse_args(argv)
     try:
-        if args.operation=='stage': stage(args.ci_run_id,args.output)
-        else: sign(args.input,args.output)
+        if args.operation=='stage': checked('stage',stage,args.ci_run_id,args.output)
+        else: checked('sign',sign,args.input,args.output)
         print(json.dumps({'status':'encrypted_runtime_'+args.operation+'_complete'}))
         return 0
     except Exception:
+        write_failure_diagnostic(args.diagnostics_output)
         print(json.dumps({'error':{'code':'PROTECTED_RUNTIME_'+args.operation.upper()+'_BLOCKED'}}))
         return 2
 

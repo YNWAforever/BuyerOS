@@ -18,6 +18,8 @@ Enter secret values directly into the protected GitHub environments. Do not put 
 
 Both protected environments need `BUYEROS_PROMOTION_METADATA_TOKEN` (a repository-scoped credential with only the read permissions needed for branch/environment/workflow metadata) and `VERCEL_TOKEN` scoped to the intended team/project. Set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as environment variables. Do not copy a broadly scoped local GitHub credential into CI.
 
+The pinned Vercel CLI checks saved credentials before loading `VERCEL_TOKEN` on a fresh runner. Release commands therefore write that token to an isolated temporary CLI auth file, select it with `--global-config`, and remove it after the command, including failures. The token never enters command arguments, and a developer's saved login is not copied or modified.
+
 Both environments also need `BUYEROS_RELEASE_PROBE_TOKEN` so stage, signoff, and promotion can read the exact candidate configuration without activating a provider. The promotion job uses its narrowly scoped workflow token with `deployments: write` to persist intent in the dedicated `buyeros-production-intents` ledger; the metadata credential remains read-only.
 
 The stage environment also needs:
@@ -64,5 +66,7 @@ The promoter first creates a project/candidate/bundle-scoped GitHub deployment i
 Only after the exact production alias and all release controls are verified may the separately authorized Golden Resources source checks be saved. Preserve each original note, observed date, grade, rationale, limitations, and official-source links. Use the authenticated BuyerOS append-only API as the company user; read back exactly 24 records and 57 links and compare original notes unchanged. Do not create provider operations, cost reservations, research/enrichment jobs, or delivery attempts.
 
 ## Verification Boundaries
+
+If protected staging fails, use its allowlisted diagnostic phase and failure category to locate the failing check. Raw command output, arguments, exception messages, credentials, and private contracts remain in the runner's private log and are not published. A diagnostic does not satisfy any release check. Verify whether a deployment was created before starting another staging run; never retry an uncertain deployment or promotion result.
 
 Unit, disposable-database, CI, stage, human-browser, and production evidence are distinct. A green CI run, READY deployment, ciphertext artifact, or HTTP 200 cannot replace the missing stage or production acceptance checks. Keep historical failures, source-audit backups, and untracked fixture evidence; do not alter `.gitignore` to hide them.

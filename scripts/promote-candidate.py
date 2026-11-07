@@ -9,6 +9,7 @@ import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from promotion_transport import claim_promotion_intent,single_promote
+from vercel_cli_auth import authenticated_command
 from runtime_bundle import decrypt_workspace_bundle, is_encrypted_workspace_bundle
 from runtime_bundle import build_workspace_bundle
 from runtime_bundle import encrypt_workspace_bundle
@@ -49,7 +50,8 @@ def promote(manifest,receipts,gate,*,attestation_verified,metadata,execute,promo
     return result
 
 def command(argv):
-    return subprocess.run(argv,check=True,capture_output=True,text=True,timeout=45).stdout
+    with authenticated_command(argv) as authenticated:
+        return subprocess.run(authenticated,check=True,capture_output=True,text=True,timeout=45).stdout
 
 def github(path):return json.loads(command(['gh','api',f'repos/{REPOSITORY}/{path}']))
 def vercel(path):return json.loads(command(['vercel','api',path,'-X','GET','--raw']))

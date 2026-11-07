@@ -13,6 +13,7 @@ import sys
 import urllib.parse
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'scripts'))
 TOKENS = {key: 'owned-fixture-token-' + key for key in ('owned', 'foreign', 'empty', 'revoked')}
 W1, W2 = '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002'
 P1, P2 = '00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000004'
@@ -25,6 +26,44 @@ def load():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+class FreshRunnerCliAuthentication(unittest.TestCase):
+    def test_private_auth_file_exists_only_during_command_and_never_in_argv(self):
+        import os
+        import stat
+        from vercel_cli_auth import authenticated_command
+        secret='private-runner-token'
+        for suffix in (['api','/v2/user'],['curl','/v1/internal/release-binding','--','--config','-']):
+            argv=['vercel',*suffix]
+            with patch.dict(os.environ,{'VERCEL_TOKEN':secret}):
+                with authenticated_command(argv) as command:
+                    config=Path(command[command.index('--global-config')+1])
+                    self.assertEqual(json.loads((config/'auth.json').read_text()),{'token':secret})
+                    self.assertNotIn(secret,repr(command))
+                    self.assertEqual(argv,['vercel',*suffix])
+                    if '--' in argv:self.assertLess(command.index('--global-config'),command.index('--'))
+                    if os.name!='nt':self.assertEqual(stat.S_IMODE((config/'auth.json').stat().st_mode),0o600)
+                self.assertFalse(config.exists())
+
+    def test_private_auth_cleanup_on_failed_command(self):
+        import os
+        import subprocess
+        from vercel_cli_auth import authenticated_command
+        for error in (RuntimeError('command failed'),subprocess.TimeoutExpired(['vercel'],45)):
+            with patch.dict(os.environ,{'VERCEL_TOKEN':'private-runner-token'}):
+                with self.assertRaises(type(error)):
+                    with authenticated_command(['vercel','api','/v2/user']) as command:
+                        config=Path(command[-1])
+                        raise error
+                self.assertFalse(config.exists())
+
+    def test_unrelated_commands_and_local_login_without_token_are_unchanged(self):
+        import os
+        from vercel_cli_auth import authenticated_command
+        for token,argv in [('', ['vercel','api','/v2/user']),('private', ['gh','api','user'])]:
+            with patch.dict(os.environ,{'VERCEL_TOKEN':token}):
+                with authenticated_command(argv) as command:self.assertEqual(command,argv)
 
 
 def packet():
