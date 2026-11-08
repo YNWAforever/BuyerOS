@@ -41,6 +41,16 @@ type ThreadState='new'|'loading'|'ready'|'missing'|'unavailable'|'reloading';
 
 const draftsBySession=new WeakMap<SessionScope,Map<string,ConversationDrafts>>();
 const projectNames=new WeakMap<SessionScope,Map<string,Promise<string|null>>>();
+// A user's explicit "Guided setup" choice survives studio remounts and thread-route
+// changes in the same scope. The secondary surface never opens on its own.
+const guidedSetupChoice=new WeakMap<SessionScope,{identity:string;open:boolean}>();
+function guidedOpenFor(session:SessionScope):boolean{
+  const row=guidedSetupChoice.get(session);
+  return row?.identity===session.identity()?row.open:false;
+}
+function rememberGuidedOpen(session:SessionScope,open:boolean):void{
+  guidedSetupChoice.set(session,{identity:session.identity(),open});
+}
 function draftsFor(session:SessionScope,scopeKey:string,scope:{actor:string;workspace:string;project:string}){
   let map=draftsBySession.get(session);
   if(!map){map=new Map();draftsBySession.set(session,map);}
@@ -124,6 +134,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [activeTab,setActiveTab]=useState<PanelTab|null>(null);
   const [mobileView,setMobileView]=useState<'conversation'|'threads'|'panel'>('conversation');
   const [title,setTitle]=useState('');
+  const [guidedOpen,setGuidedOpen]=useState(()=>guidedOpenFor(session));
   // A fallback conversation (turn route absent) cannot carry the company link; the
   // entry point says so on the canonical discussion route.
   const [urlNotice]=useState(()=>{
@@ -396,7 +407,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'):!loaded||loaded.chat.access!=='viewer'} sending={sending}
           projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
           sendFailed={sendFailed} notice={sendNotice||urlNotice} onSend={send}/>}
-      <details className="conversation-secondary"><summary>{t('Guided setup')}</summary>
+      <details className="conversation-secondary" open={guidedOpen}
+        onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
         {loaded
           ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
           :threadId!==null
