@@ -396,7 +396,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       <details className="conversation-secondary"><summary>{t('Guided setup')}</summary>
         {loaded
           ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
-          :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
+          :threadId!==null
+            ?<p className="conversation-secondary-loading" role="status">{t('Loading discussion…')}</p>
+            :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
       </details>
     </div>
     {panelOpen&&<div className="conversation-panel-slot" id="conversation-context-panel">

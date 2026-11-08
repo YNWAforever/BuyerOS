@@ -234,6 +234,7 @@
 .conversation-secondary{margin:0 14px 12px}
 .conversation-secondary>summary{cursor:pointer;font-size:12px;color:var(--buyeros-muted)}
 .conversation-secondary[open]>summary{margin-bottom:10px}
+.conversation-secondary-loading{margin:0;font-size:12px;color:var(--buyeros-muted)}
 .conversation-secondary .live-thread-actions{margin-bottom:8px}
 
 /* Context panel */
