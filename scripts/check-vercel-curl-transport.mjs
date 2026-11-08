@@ -34,9 +34,9 @@ const calls = [];
 const context = vm.createContext({
   process: { argv },
   // esbuild's module adapters, with only the installed arg module loaded below.
-  __commonJS: (map) => { let module; return () => {
-    if (!module) { module = { exports: {} }; Object.values(map)[0](module.exports, module); }
-    return module.exports;
+  __commonJS: (map) => { let loadedModule; return () => {
+    if (!loadedModule) { loadedModule = { exports: {} }; Object.values(map)[0](loadedModule.exports, loadedModule); }
+    return loadedModule.exports;
   }; },
   __toESM: (value) => ({ default: value }),
   output_manager_default: { print() {}, debug() {}, error() { throw Error('unexpected CLI error'); } },
