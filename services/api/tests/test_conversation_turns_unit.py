@@ -332,6 +332,9 @@ def test_linked_buyer_produces_proposal_only_enrichment():
     assert staged_enrichment['source_refs'] == [engine._buyer_source_ref(buyer)]
     assert staged_enrichment['source_refs'][0]['kind'] == 'buyer'
     assert engine._buyer_citation(buyer)['id'] == f"buyer:{buyer['id']}"
+    # Serializer must not downgrade a buyer citation to a document citation.
+    assert engine._citation_item(f"buyer:{buyer['id']}", 'DeltaGrid').kind == 'buyer'
+    assert engine._citation_item('document:' + str(uuid.uuid4()), 'Offer document').kind == 'document'
     assert 'xverum.enrich_company' in engine.PROPOSAL_ONLY
     assert engine._executor('xverum.enrich_company') is not None
 

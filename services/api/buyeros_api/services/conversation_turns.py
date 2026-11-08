@@ -131,7 +131,8 @@ def missing_source_text(language) -> str:
 def _citation_item(source_id: str, label: str) -> CitationItem:
     kind = source_id.split(':', 1)[0]
     return CitationItem(id=source_id, label=label,
-        kind=kind if kind in {'document', 'fact', 'drive', 'run', 'results'} else 'document')
+        kind=kind if kind in {'document', 'fact', 'drive', 'run', 'results', 'buyer'}
+            else 'document')
 
 
 def citations_part(grounding) -> CitationsPart | None:

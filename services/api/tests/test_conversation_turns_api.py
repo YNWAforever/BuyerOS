@@ -467,9 +467,15 @@ def test_buyer_link_grounds_turn_and_proposes_proposal_only_enrichment(turn_api,
     data = result.json()['data']
     thread, turn = data['thread'], data['turn']
     assert thread['buyerId'] == buyer
-    citations = next(part for part in turn['parts'] if part['kind'] == 'citations')
-    assert f'buyer:{buyer}' in {item['id'] for item in citations['items']}
-    assert {item['kind'] for item in citations['items']} == {'buyer'}
+    # Inspect every citations part (the linked buyer must be a buyer citation,
+    # alongside any other legitimately grounded project sources).
+    citation_items = [item for part in turn['parts']
+        if part['kind'] == 'citations' for item in part['items']]
+    assert f'buyer:{buyer}' in {item['id'] for item in citation_items}
+    assert 'buyer' in {item['kind'] for item in citation_items}
+    assert {item['kind'] for item in citation_items} <= {'buyer', 'document'}
+    assert all(item['id'] == DOCUMENT_SOURCE for item in citation_items
+        if item['kind'] == 'document')
     proposal = next(part for part in turn['parts'] if part['kind'] == 'proposal')
     assert proposal['capability'] == 'xverum.enrich_company'
     assert proposal['requires_approval'] is True
