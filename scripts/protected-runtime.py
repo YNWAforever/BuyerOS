@@ -31,6 +31,8 @@ DIAGNOSTIC_LABELS=frozenset({'stage','sign','controls_target','controls_branch',
     'stage_controls','stage_api_contract','stage_schema_contract','stage_account_scope','stage_rollback',
     'stage_rollback_artifacts','stage_pull','stage_environment','stage_schema_probe','stage_rollback_probe',
     'stage_recheck_controls','stage_build','stage_deploy','stage_candidate_lookup','stage_candidate_verify',
+    'stage_candidate_aliases','stage_canonical_before','stage_canonical_after',
+    'stage_aliases_before_publish','sign_aliases_before_publish','sign_canonical_before_publish',
     'stage_candidate_artifacts','stage_tree','stage_binding_probe','stage_configuration_probe',
     'stage_api_probe','stage_encrypt','stage_write'})
 DIAGNOSTIC_STATUSES=frozenset({'started','passed','failed','command_nonzero','command_timeout','file_unavailable',
@@ -167,6 +169,36 @@ def deployment(source,deployment_id,controls):
     return result,origin
 
 
+def verify_staged_aliases(deployed,controls):
+    # aliasAssigned describes completion of alias processing, including an empty list.
+    # Creation-time metadata alone cannot prove the current assignment inventory.
+    if (type(deployed.get('alias')) is not list or deployed['alias']
+            or deployed.get('aliasError') is not None
+            or controls['project'].get('autoAssignCustomDomains') is not False
+            or ('autoAssignCustomDomains' in deployed and deployed['autoAssignCustomDomains'] is not False)):
+        raise ValueError('staged deployment unexpectedly assigned aliases')
+    result=vercel('/v2/deployments/'+deployed['id']+'/aliases?teamId='+controls['team_id'])
+    if not isinstance(result,dict) or type(result.get('aliases')) is not list or result['aliases']:
+        raise ValueError('current deployment aliases are unproven')
+    if 'pagination' in result:
+        pagination=result['pagination']
+        if not isinstance(pagination,dict) or 'next' not in pagination or pagination['next'] is not None:
+            raise ValueError('current deployment aliases are incomplete')
+
+
+def verify_candidate_aliases(source,deployment_id,controls):
+    deployed,_=deployment(source,deployment_id,controls)
+    verify_staged_aliases(deployed,controls)
+
+
+def verify_canonical_rollback(rollback_id,controls):
+    canonical='buyer-os-nu.vercel.app'
+    result=vercel('/v4/aliases/'+canonical+'?teamId='+controls['team_id'])
+    if (not isinstance(result,dict) or result.get('alias')!=canonical
+            or result.get('deploymentId')!=rollback_id or result.get('redirect') is not None):
+        raise ValueError('canonical production alias differs from reviewed rollback')
+
+
 def service_artifacts(value):
     services=value.get('services',[])
     if type(services) is not list or {s.get('name') for s in services}!={'app','api'}:
@@ -249,6 +281,7 @@ def stage(ci_run_id,output):
             or rollback.get('readyState')!='READY'):
         raise ValueError('exact compatible rollback deployment required')
     rollback_artifacts=checked('stage_rollback_artifacts',service_artifacts,rollback)
+    checked('stage_canonical_before',verify_canonical_rollback,rollback_id,controls)
     pulled=ROOT/'.vercel/.env.production.local'
     try:
         checked('stage_pull',command,['vercel','pull','--yes','--environment=production'],timeout=120)
@@ -274,10 +307,7 @@ def stage(ci_run_id,output):
         if re.fullmatch(r'https://[a-z0-9-]+\.vercel\.app',url) is None: raise ValueError('staging outcome unverified; do not retry')
         created=checked('stage_candidate_lookup',vercel,'/v13/deployments/'+url.removeprefix('https://')+'?teamId='+controls['team_id'])
         deployed,origin=checked('stage_candidate_verify',deployment,source,created['id'],controls)
-        if (deployed.get('aliasAssigned') is not False
-                or controls['project'].get('autoAssignCustomDomains') is not False
-                or ('autoAssignCustomDomains' in deployed and deployed['autoAssignCustomDomains'] is not False)):
-            raise ValueError('staged deployment unexpectedly assigned aliases')
+        checked('stage_candidate_aliases',verify_staged_aliases,deployed,controls)
         artifacts=checked('stage_candidate_artifacts',service_artifacts,deployed)
         manifest={'schema':'buyeros.release-manifest.v1','source_sha':source,
             'tree_sha':checked('stage_tree',command,['git','rev-parse',source+'^{tree}']).strip(),
@@ -300,6 +330,8 @@ def stage(ci_run_id,output):
                     'schema_observation_sha256':digest(observed_schema)}}}
         packet={'schema':'buyeros.private-runtime-observations.v1','source_sha':source,
                 'origin':origin,'files':files,'stage_run_id':int(os.environ['GITHUB_RUN_ID'])}
+        checked('stage_aliases_before_publish',verify_candidate_aliases,source,deployed['id'],controls)
+        checked('stage_canonical_after',verify_canonical_rollback,rollback_id,controls)
         encrypted=checked('stage_encrypt',encrypt_observation_packet,packet,os.environ['BUYEROS_RUNTIME_OBSERVATION_ENCRYPTION_KEY'])
         checked('stage_write',write_encrypted,output,encrypted)
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as summary:
@@ -345,6 +377,9 @@ def sign(input_file,output):
         configuration_observation=files['configuration-observations.json'],
         schema_observation_sha256=digest(schema),api_observation_sha256=digest(api),source_sha=source,**files['build-evidence.json'])
     bundle=build_workspace_bundle(manifest,receipts,source_sha=source)
+    checked('sign_aliases_before_publish',verify_candidate_aliases,source,manifest['candidate_deployment_id'],controls)
+    checked('sign_canonical_before_publish',verify_canonical_rollback,
+            files['rollback-receipt.json']['data']['deployment_id'],controls)
     write_encrypted(output,encrypt_workspace_bundle(bundle,os.environ['BUYEROS_RUNTIME_BUNDLE_ENCRYPTION_KEY']))
 
 
