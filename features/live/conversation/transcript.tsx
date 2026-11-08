@@ -1,9 +1,13 @@
 'use client';
-import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {useLayoutEffect,useRef,useState} from 'react';
 import {ArrowDown} from 'lucide-react';
 import type {TranscriptEntry} from './parts';
 import {groupTranscript} from './parts';
 import {MessageParts,type PartActions} from './inline-parts';
+function readerOffset():number{
+  // The studio mounts client-side; the server render (tests/static markup) keeps UTC.
+  return typeof window==='undefined'?0:new Date().getTimezoneOffset();
+}
 
 type Props={
   t:(value:string)=>string;
@@ -29,9 +33,8 @@ function dayLabel(dayStart:number|null,locale:'en'|'zh-HK',t:(value:string)=>str
 export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle}:Props){
   const scroller=useRef<HTMLDivElement>(null),atBottom=useRef(true),primed=useRef(false);
   const [showJump,setShowJump]=useState(false);
-  // Offset starts at UTC for a stable server/client first paint, then adopts the reader's zone.
-  const [offset,setOffset]=useState(0);
-  useEffect(()=>{setOffset(new Date().getTimezoneOffset());},[]);
+  // Offset is read once per mount; day groups then match the reader's zone.
+  const [offset]=useState(readerOffset);
   function scrollToLatest(behavior:ScrollBehavior='smooth'){
     const node=scroller.current;
     if(!node)return;

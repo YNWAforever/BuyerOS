@@ -174,3 +174,22 @@ Deliberate deviations reported to the Lead, not silent interface changes:
   (`CONVERSATION_MODEL_UNAVAILABLE`): the turn persists a deterministic advisory
   summary plus citations and an honest notice. Tests inject a deterministic
   fixture adapter through `reply_from_grounding`; no paid admission is enabled.
+
+## Implementation deviations (recorded 2026-11-08)
+
+Accepted while implementing; they refine, not weaken, the contract:
+
+1. `output_link` nests the canonical reference under `output` so its payload `kind`
+   never collides with the part discriminator (`kind`).
+2. `ServerThread.messages[]` also carries `turn_id` — after reload the client must
+   address a decision without reconstructing the turn from ordering.
+3. `turn.status` additionally allows `cancelled`.
+4. A failed or unknown decision execution is terminal: the proposal records
+   `failed`/`outcome_unknown`, a decision row is persisted, and the same proposal
+   cannot be approved again under a new key.
+5. Native-source reads evaluate policy read-only inside short transactions; the
+   workspace policy/budget advisory locks remain mandatory on admission and
+   mutation paths only.
+6. Enrichment proposals are not wired yet: a thread cannot currently carry a buyer
+   identity, so the reviewed Xverum capability has no authorised subject. This is
+   an open gap, not an approval bypass.

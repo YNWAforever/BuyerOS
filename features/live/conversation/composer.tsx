@@ -56,7 +56,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
     {notice&&<p className="conversation-compose-notice" role="status">{t(notice)}</p>}
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
     {!drafts.available&&<p className="conversation-compose-note">{t('This browser will not keep unsent text after reload.')}</p>}
-    {(text.trim()===''||slashOpen)&&chips.length>0&&<div className="conversation-chips" role="group" aria-label={t('Quick actions')}>
+    {(text.trim()===''||slashOpen)&&chips.length>0&&<div className="conversation-chips" role="group" aria-label={t('Quick actions')} data-skill-ids={chips.some(chip=>chip.skillId)?'ready':'pending'}>
       {filtered.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
     </div>}
     <div className="conversation-compose-box">

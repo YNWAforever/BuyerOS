@@ -132,6 +132,7 @@
 .conversation-menu[open]>form{display:flex;flex-direction:column;gap:6px;margin-top:6px;padding:10px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-small);background:var(--buyeros-surface);position:absolute;right:0;top:100%;width:min(260px,calc(100vw - 40px));z-index:20}
 .conversation-menu[open]>button{display:flex!important;width:100%;margin-top:6px;justify-content:flex-start!important}
 .conversation-load{padding:28px 18px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.conversation-inline-notice{margin:0;padding:8px 14px;font-size:12px;color:var(--buyeros-warning);background:var(--buyeros-warning-soft);border-bottom:1px solid var(--buyeros-warning-border);overflow-wrap:anywhere}
 
 /* Transcript */
 .conversation-transcript-wrap{position:relative;display:flex;flex-direction:column;min-height:0}

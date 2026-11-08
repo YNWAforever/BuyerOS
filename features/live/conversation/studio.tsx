@@ -15,8 +15,7 @@ import {ShareThread,WorkspaceBadge} from '../discussion-sharing';
 import {guidedTemplates} from '../conversation-home';
 import {LiveUnavailable} from '../unavailable';
 import {ConversationDrafts} from './draft';
-import {readChatThread,type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';
-import {buildTranscript,collectPanelData,latestToolActivity,type EphemeralReply} from './parts';
+import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,latestToolActivity,type EphemeralReply} from './parts';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
 import {ConversationTranscript} from './transcript';
@@ -97,7 +96,7 @@ function useDebounced<T>(value:T,delay:number):T{
 export function ConversationStudio({client,session,t,locale,navigate,canViewOffer,threadId,fresh}:ConversationStudioProps){
   const identity=session.identity(),scope=session.current();
   const api=useMemo(()=>scopedThreadApi(client,session,identity),[client,session,identity]);
-  const turnsApi=useMemo(()=>scopedTurns(client,session,true),[client,session,identity]);
+  const turnsApi=useMemo(()=>scopedTurns(client,session,true),[client,session]);
   const drafts=useMemo(()=>draftsFor(session,JSON.stringify([scope.actor,scope.workspace,scope.project]),{
     actor:scope.actor,workspace:scope.workspace??'',project:scope.project??''}),[session,scope.actor,scope.workspace,scope.project]);
   useLayoutEffect(()=>{if(!canViewOffer)api.forgetReply();},[api,canViewOffer]);
@@ -305,6 +304,17 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       if(!(error instanceof LiveCancelled)&&current())setThreadNoticeText(threadNotice(error));
     }finally{if(current())setSourcesBusy(false);}
   }
+  async function removeDriveSources(){
+    if(!loaded||loaded.chat.access==='viewer'||sourcesBusy)return;
+    const sources=loaded.chat.sources.filter(source=>!source.id.startsWith('drive:'));
+    if(sources.length===loaded.chat.sources.length)return;
+    setSourcesBusy(true);
+    try{
+      const updated=await api.sources(loaded.raw,sources);
+      if(current())await loadThread(updated,loaded.chat);
+    }catch(error){if(!(error instanceof LiveCancelled)&&current())setThreadNoticeText(threadNotice(error));}
+    finally{if(current())setSourcesBusy(false);}
+  }
   async function renameThread(){
     if(!loaded||!title.trim()||title.length>80)return;
     try{
@@ -325,7 +335,6 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
   },[mobileView]);
   useEffect(()=>{if(mobileView==='panel')setPanelPreference(true);},[mobileView]);
-  useEffect(()=>{if(mobileView!=='conversation')setMobileView('conversation');},[targetId]);
 
   const contentTabs:PanelTab[]=[];
   if(panel.results.length||loaded?.chat.runs.length)contentTabs.push('results');
@@ -359,6 +368,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           <button type="button" className="conversation-icon-button" onClick={()=>{setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>
         </div>
       </header>
+      {threadNoticeText&&threadState==='ready'&&<p className="conversation-inline-notice" role="status">{t(threadNoticeText)}</p>}
       {threadState==='missing'
         ?<div className="conversation-load"><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/><button type="button" onClick={()=>navigate('/app/discussions/new')}>{t('New discussion')}</button></div>
         :threadState==='unavailable'
@@ -366,7 +376,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           :<ConversationTranscript t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
       <ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts} canWrite={!loaded||loaded.chat.access!=='viewer'} sending={sending}
         projectName={projectName} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-        sendFailed={sendFailed} notice={threadState==='ready'?'':sendNotice} onSend={send}/>
+        sendFailed={sendFailed} notice={sendNotice} onSend={send}/>
       <details className="conversation-secondary"><summary>{t('Guided setup')}</summary>
         {loaded
           ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
@@ -378,6 +388,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         citations={panel.citations} selectedSources={panel.selectedSources} proposals={panel.proposals} entries={entries} access={loaded?.chat.access??'viewer'}
         threadId={loaded?.chat.id??null} threadVersion={loaded?.chat.version??0} canEdit={!!loaded&&loaded.chat.access!=='viewer'} canViewOffer={canViewOffer}
         client={client} session={session} navigate={navigate} onToggleSource={(source,selected)=>void toggleSource(source,selected)} sourcesBusy={sourcesBusy}
+        onRemoveDrive={()=>void removeDriveSources()}
         onDecide={(part,turnId,choice)=>void decide(part,turnId,choice)} deciding={deciding} decisionFor={proposalId=>decisions[proposalId]}
         turnStatusFor={turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined}
         drive={<DriveConnections key={`${identity}:${loaded?.chat.id??'none'}`} client={client} session={session} t={t} selected={loaded?.chat.sources??[]} readOnly={!loaded||loaded.chat.access==='viewer'} onSource={(source,selected)=>void toggleSource(source,selected)}/>}
