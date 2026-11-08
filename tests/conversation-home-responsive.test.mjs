@@ -155,7 +155,7 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
  await page.route('**/v1/**',async route=>{
   const request=route.request(),url=new URL(request.url());
   requests.push({method:request.method(),path:url.pathname,search:url.search});
-  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['if-match']});}
+  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['x-buyeros-if-match']??request.headers()['if-match']});}
   const answer=await handler({req:request,url,state,requests,posts});
   if(answer){if(answer.status===204)return route.fulfill({status:204});return route.fulfill({status:answer.status??200,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(answer.json)});}
   const data=fixture.contextResponse(url);
@@ -164,7 +164,7 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
  const query='fixture?route='+encodeURIComponent(initialRoute)+(flag?'':'&flag=off')+(locale==='zh-HK'?'&locale=zh-HK':'');
  await page.goto(server.resolvedUrls.local[0]+query);
  await page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
- return {page,browser,server,dir,requests,posts,errors,state,
+ return {page,browser,server,dir,requests,posts,errors,state,origin:server.resolvedUrls.local[0],
   close:async()=>{await browser.close();await server.close();rmSync(dir,{recursive:true,force:true});}};
 }
 async function waitForDestination(page,expected){await page.waitForFunction(value=>window.lastDestination===value,expected);}
@@ -172,8 +172,15 @@ async function waitForDestination(page,expected){await page.waitForFunction(valu
 test('conversation-first transcript renders typed inline parts and inline decisions',async()=>{
  const harness=await fixtureHarness();
  try{
-  const {page,errors,posts}=harness;
+  const {page,errors,posts,origin}=harness;
   const transcript=page.locator('.conversation-transcript');
+  // Inline navigation unmounts the studio; return to the canonical thread route
+  // explicitly rather than reloading the destination screen.
+  const threadUrl=origin+'fixture?route='+encodeURIComponent('/app/discussions/s/'+threadId);
+  // A new document loses the harness-injected stylesheet; re-add it with the CSS-only
+  // screenshots and use the canonical thread route after inline navigation.
+  const stylePage=()=>page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
+  const openThread=async()=>{await page.goto(threadUrl);await stylePage();await page.getByText('Here is the brief.',{exact:true}).waitFor();};
   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
   // Inline tool activity keeps its truthful state.
@@ -185,13 +192,11 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   // Citations are real links to the canonical record.
   await transcript.getByRole('button',{name:'Offer document',exact:true}).click();
   await waitForDestination(page,`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
-  // Output links open the saved revision (reload to remount the studio after navigation).
-  await page.reload();
-  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  // Output links open the saved revision (return to the thread route first).
+  await openThread();
   await transcript.getByRole('button',{name:'Open saved output',exact:true}).click();
   await waitForDestination(page,`/app/documents/${outputId}?workspace=${workspace}&project=${project}`);
-  await page.reload();
-  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  await openThread();
   // The proposal is an inline approval card, not a chat instruction.
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),1);
   assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),1);
@@ -205,6 +210,7 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   // Reload rebuilds the same transcript from persisted parts without replaying a turn.
   const turnsBefore=posts.filter(row=>row.path.endsWith('/conversation-turns')).length;
   await page.reload();
+  await stylePage();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,turnsBefore,'reload never replays a turn');
   // zh-HK pass: same surface, translated labels.
@@ -407,7 +413,7 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   const panel=page.locator('.conversation-panel');
   await panel.getByRole('tab',{name:'Sources',exact:true}).click();
   await panel.getByRole('button',{name:'Remove',exact:true}).first().click();
-  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).first().waitFor();
   assert.equal(writes.length,1);assert.deepEqual(writes[0].body.sources.map(source=>source.id),[thread.sources[1].id,citationId]);
   await panel.getByRole('button',{name:'Remove unavailable Google Drive selections',exact:true}).click();
   await panel.getByRole('button',{name:'Remove unavailable Google Drive selections',exact:true}).waitFor({state:'detached'});
@@ -416,7 +422,7 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   // A stale revision keeps the unsent text and says exactly what to do next.
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this after the conflict');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
-  await page.getByText('This discussion changed. Copy any unsaved text, reload and send again.',{exact:true}).waitFor();
+  await page.getByText('This discussion changed. Copy any unsaved text, reload and send again.',{exact:true}).first().waitFor();
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Keep this after the conflict');
   assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),1);
   // A viewer reads the same discussion but cannot decide, send or change sources.
@@ -460,6 +466,7 @@ test('a permission failure keeps the message unsent and surfaces the honest noti
  }});
  try{
   const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Do not lose this message');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
@@ -484,7 +491,7 @@ test('an unavailable workspace thread fails explicitly instead of showing anothe
   const {page}=harness;
   await page.getByText('Not found in this workspace.',{exact:true}).waitFor();
   await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).waitFor();
-  assert.equal(await transcript.count(),0,'no transcript for an unavailable thread');
+  assert.equal(await page.locator('.conversation-transcript').count(),0,'no transcript for an unavailable thread');
   assert.equal(await page.getByRole('button',{name:'New discussion',exact:true}).count()>=1,true);
  }finally{await harness.close();}
 });
