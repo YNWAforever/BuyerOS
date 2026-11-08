@@ -28,7 +28,59 @@ def load():
     return module
 
 
-class FreshRunnerCliAuthentication(unittest.TestCase):
+class PinnedCurlFixture:
+    def setUp(self):
+        import os
+        self.package_temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.package_temp.cleanup)
+        self.package = Path(self.package_temp.name)
+        (self.package / 'dist').mkdir()
+        (self.package / 'dist/vc.js').write_text('// synthetic CLI')
+        (self.package / 'package.json').write_text(json.dumps({
+            'name': 'vercel', 'version': '50.28.0', 'bin': {'vercel': './dist/vc.js'}}))
+        self.env_patch = patch.dict(os.environ, {'BUYEROS_VERCEL_CURL_PACKAGE': str(self.package)})
+        self.env_patch.start()
+        self.addCleanup(self.env_patch.stop)
+
+class PinnedCurlTests(PinnedCurlFixture, unittest.TestCase):
+    def test_curl_maps_only_after_private_auth_insertion(self):
+        import os
+        from vercel_cli_auth import authenticated_command
+        argv = ['vercel', 'curl', '/v1/workspaces', '--scope', 'team_fixture', '--', '--config', '-']
+        with patch.dict(os.environ, {'VERCEL_TOKEN': 'syntheticsecret'}):
+            with authenticated_command(argv) as command:
+                self.assertEqual(command[:3], ['node', str(self.package / 'dist/vc.js'), 'curl'])
+                self.assertLess(command.index('--global-config'), command.index('--'))
+                self.assertEqual(command[command.index('--') + 1:], ['--config', '-'])
+                self.assertNotIn('syntheticsecret', repr(command))
+            for verb in ('api', 'build', 'deploy', 'promote', 'pull'):
+                with authenticated_command(['vercel', verb]) as command:
+                    self.assertEqual(command[:2], ['vercel', verb])
+
+    def test_missing_or_invalid_pin_refuses_before_execution(self):
+        import os
+        from vercel_cli_auth import authenticated_command
+        original = (self.package / 'package.json').read_text()
+        for fault in ('missing', 'relative', 'version', 'name', 'bin', 'entrypoint', 'json'):
+            with self.subTest(fault=fault):
+                (self.package / 'package.json').write_text(original)
+                value = str(self.package)
+                data = json.loads(original)
+                if fault == 'missing': value = ''
+                elif fault == 'relative': value = 'relative/package'
+                elif fault == 'version': data['version'] = '54.17.2'
+                elif fault == 'name': data['name'] = 'other'
+                elif fault == 'bin': data['bin']['vercel'] = '../other.js'
+                elif fault == 'entrypoint': (self.package / 'dist/vc.js').unlink()
+                if fault == 'json': (self.package / 'package.json').write_text('{')
+                else: (self.package / 'package.json').write_text(json.dumps(data))
+                with patch.dict(os.environ, {'BUYEROS_VERCEL_CURL_PACKAGE': value, 'VERCEL_TOKEN': ''}):
+                    with self.assertRaisesRegex(ValueError, '^protected curl CLI pin is invalid$'):
+                        with authenticated_command(['vercel', 'curl', '/']): self.fail('must refuse')
+                (self.package / 'dist/vc.js').write_text('// synthetic CLI')
+
+
+class FreshRunnerCliAuthentication(PinnedCurlFixture, unittest.TestCase):
     def test_private_auth_file_exists_only_during_command_and_never_in_argv(self):
         import os
         import stat
@@ -330,7 +382,7 @@ class BoundedHttpTests(unittest.TestCase):
         self.assertIsNone(module.NoRedirect().redirect_request(None, None, 302, 'redirect', headers, 'https://foreign.example.test'))
 
 
-class ProtectedVercelHttpTests(unittest.TestCase):
+class ProtectedVercelHttpTests(PinnedCurlFixture, unittest.TestCase):
     origin = 'https://buyeros-a1b2c3d4e-owner-projects.vercel.app'
     path = '/v1/internal/release-binding'
 
@@ -364,7 +416,7 @@ class ProtectedVercelHttpTests(unittest.TestCase):
     def test_protected_read_keeps_bearer_in_stdin_and_exact_origin_in_argv(self):
         self.assertEqual(self.invoke(), (200, {'data': {}}))
         argv = self.command
-        self.assertEqual(argv[:7], ['vercel', 'curl', self.path, '--deployment', self.origin, '--scope', 'team_test'])
+        self.assertEqual(argv[:8], ['node', str(self.package / 'dist/vc.js'), 'curl', self.path, '--deployment', self.origin, '--scope', 'team_test'])
         self.assertNotIn('private-bearer', repr(argv))
         self.assertNotIn('private-vercel', repr(argv))
         self.assertIn(b'Authorization: Bearer private-bearer', self.options['input'])
@@ -373,7 +425,7 @@ class ProtectedVercelHttpTests(unittest.TestCase):
             self.assertIn(flag, argv)
         query_url = self.origin + '/v1/workspaces?offset=0&limit=100'
         self.assertEqual(self.invoke(url=query_url), (200, {'data': {}}))
-        self.assertEqual(self.command[2], '/v1/workspaces?offset=0&limit=100')
+        self.assertEqual(self.command[3], '/v1/workspaces?offset=0&limit=100')
 
     def test_protected_read_preserves_http_denial_status(self):
         raw = b'{"code":"NOT_FOUND"}\n404\napplication/json; charset=utf-8\n' + (self.origin + self.path).encode()

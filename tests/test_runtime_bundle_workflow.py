@@ -155,6 +155,15 @@ def test_runtime_bundle_workflow_keeps_private_payload_out_of_logs_and_artifacts
     installs=[step['run'] for job in release_jobs for step in job['steps']
               if 'npm install --global vercel@' in step.get('run','')]
     assert installs==['npm install --global vercel@54.17.2']*4
+    for job in release_jobs:
+        isolated=[step['run'] for step in job['steps'] if step.get('name')=='Install isolated protected curl CLI']
+        assert len(isolated)==1
+        assert 'npm install --prefix "$RUNNER_TEMP/buyeros-curl-cli" --no-audit --no-fund --package-lock=false vercel@50.28.0' in isolated[0]
+        assert 'BUYEROS_VERCEL_CURL_PACKAGE=$RUNNER_TEMP/buyeros-curl-cli/node_modules/vercel' in isolated[0]
+        assert '>> "$GITHUB_ENV"' in isolated[0]
+        assert 'GITHUB_PATH' not in isolated[0]
+    assert any('node scripts/check-vercel-curl-transport.mjs' in step.get('run','')
+               for step in ci['jobs']['release-readiness']['steps'])
     assert any(step.get('run')=='node scripts/check-vercel-release-cli.mjs "$(npm root --global)/vercel"'
                for step in ci['jobs']['release-readiness']['steps'])
     assert jobs['stage-probe']['if']=="github.ref == 'refs/heads/main'"

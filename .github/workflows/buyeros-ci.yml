@@ -14,8 +14,14 @@ jobs:
         with:
           node-version: '24'
       - run: npm install --global vercel@54.17.2
+      - name: Install isolated protected curl CLI
+        run: |
+          npm install --prefix "$RUNNER_TEMP/buyeros-curl-cli" --no-audit --no-fund --package-lock=false vercel@50.28.0
+          echo "BUYEROS_VERCEL_CURL_PACKAGE=$RUNNER_TEMP/buyeros-curl-cli/node_modules/vercel" >> "$GITHUB_ENV"
       - name: Verify pinned release CLI accepts the actual Services configuration
         run: node scripts/check-vercel-release-cli.mjs "$(npm root --global)/vercel"
+      - name: Verify installed protected curl argument transport without network
+        run: node scripts/check-vercel-curl-transport.mjs "$BUYEROS_VERCEL_CURL_PACKAGE" "$(npm root --global)/vercel"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -30,7 +36,7 @@ jobs:
           mkdir -p artifacts/repair
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py --collect-only -q > artifacts/repair/promotion-discovery.txt
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py -q --junitxml=artifacts/repair/promotion.xml
-          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 281 --junit artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 283 --junit artifacts/repair/promotion.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
