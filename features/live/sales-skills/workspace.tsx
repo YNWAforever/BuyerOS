@@ -329,7 +329,7 @@ export function GuidedSales({
     let row =
       thread ?? (api.recovery.get("new-thread") as ServerThread | undefined);
     if (!row) {
-      row = await threads.create(text.slice(0, 80));
+      row = await threads.create(text.slice(0, 80), text);
       if (!current()) return;
       api.recovery.set("new-thread", row);
     }
