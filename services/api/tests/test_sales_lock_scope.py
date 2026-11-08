@@ -302,12 +302,13 @@ def test_route_wiring_reads_opt_out_and_writes_keep_the_lock(monkeypatch):
     assert observed and all("locks" not in kwargs for kwargs in observed), observed
 
 
-def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(monkeypatch):
-    """TASK-4 residual: the enumeration GET must not hold the policy advisory lock.
+def test_native_sources_uses_short_transactions_not_one_long_locked_read(monkeypatch):
+    """TASK-4 residual: no transaction/lock may span the whole enumeration.
 
-    Per-source validation runs inside short ``read_only=True`` tenant sessions and
-    calls the read-only policy evaluator; the serialized mutation path is
-    untouched (covered by the access() tests above).
+    The route must not run inside a read-only transaction (per-source validation
+    uses write-capable retention helpers — CI caught a 25006 regression). It also
+    must not hold the workspace gates across all candidates: candidate collection
+    and each batch of at most 10 sources get their own short normal transaction.
     """
     from buyeros_api.api import deps as api_deps
     from buyeros_api.api.routes import sales_tasks as routes
@@ -315,6 +316,7 @@ def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(m
     from buyeros_api.sales import native_sources
 
     observed = []
+    state = {'current': None, 'sessions': []}
 
     @asynccontextmanager
     async def fake_access(*args, **kwargs):
@@ -323,7 +325,9 @@ def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(m
 
     @asynccontextmanager
     async def fake_tenant_session(engine, workspace_id, *, read_only=False):
-        observed.append({'read_only': read_only})
+        marker = {'read_only': read_only, 'resolved': 0}
+        state['sessions'].append(marker)
+        state['current'] = marker
 
         class _Rows:
             def all(self):
@@ -333,9 +337,14 @@ def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(m
             async def scalars(self, statement):
                 return _Rows()
 
-        yield _Session()
+        try:
+            yield _Session()
+        finally:
+            state['current'] = None
 
     async def fake_resolve(*args, **kwargs):
+        assert state['current'] is not None, 'resolution must happen inside a short transaction'
+        state['current']['resolved'] += 1
         observed.append({'resolve_readonly': kwargs.get('readonly')})
 
     monkeypatch.setattr(routes, 'access', fake_access)
@@ -348,6 +357,12 @@ def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(m
     response = client.get(SALES_ROOT + '/native-sources')
     assert response.status_code == 200, response.text
     assert observed[0] == {'sales': True, 'admission': False, 'locks': False}
-    assert [item for item in observed if 'read_only' in item] == [{'read_only': True}] * 3
-    resolutions = [item for item in observed if 'resolve_readonly' in item]
-    assert resolutions and all(item['resolve_readonly'] is True for item in resolutions)
+    # No read-only transaction anywhere: the path is legitimately write-capable.
+    assert state['sessions'] and all(not marker['read_only'] for marker in state['sessions'])
+    # Candidate collection plus at least one validation batch: more than one session.
+    assert len(state['sessions']) >= 2
+    # No single transaction spans the enumeration.
+    assert all(marker['resolved'] <= 10 for marker in state['sessions'])
+    assert sum(marker['resolved'] for marker in state['sessions']) == 3
+    assert all(item.get('resolve_readonly') in (None, False)
+        for item in observed if 'resolve_readonly' in item)

@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from buyeros_api.api.app import create_app
-from tests.test_buyer_review_db import _h, OPERATOR, VIEWER, REVIEWER, ADMIN, WORKSPACE_A, PROJECT_A
+from tests.test_buyer_review_db import _seed_buyer, _h, OPERATOR, VIEWER, REVIEWER, ADMIN, WORKSPACE_A, PROJECT_A
 from tests.test_conversation_threads_api import create as create_thread, grant, headers, member, ROOT as THREAD_ROOT
 
 ROOT = f'/v1/workspaces/{uuid.uuid4()}/projects/{uuid.uuid4()}/sales-tasks'
@@ -457,3 +457,24 @@ def test_postgres_review_r2_disabled_entry_preserves_current_acl_recovery(sales_
             assert result.status_code == 503 and result.json()['code'] == 'READ_DISABLED'
     finally:
         get_settings.cache_clear()
+
+
+def test_postgres_native_sources_route_returns_200_for_candidate_rows(sales_api):
+    """CI regression: per-source validation must not run in a read-only transaction.
+
+    The route previously used a read-only tenant session around write-capable
+    retention/native-read helpers, producing PostgreSQL 25006 and a 500 on
+    GET /sales-tasks/native-sources. This asserts the real route against the real
+    database with at least one candidate row to validate.
+    """
+    client, dsn = sales_api
+    buyer = _seed_buyer(dsn, name='Native Source Route')
+    first = client.get(SALES_ROOT + '/native-sources', headers=_h())
+    assert first.status_code == 200, first.text
+    assert first.headers['cache-control'] == 'no-store'
+    items = first.json()['data']['items']
+    assert isinstance(items, list)
+    assert any(item['ref']['id'] == str(buyer) for item in items), items
+    # Repeat call: each request uses bounded short transactions only.
+    second = client.get(SALES_ROOT + '/native-sources', headers=_h())
+    assert second.status_code == 200, second.text

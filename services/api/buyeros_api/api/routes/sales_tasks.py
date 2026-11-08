@@ -34,26 +34,33 @@ async def native_sources(workspace_id:uuid.UUID, project_id:uuid.UUID, request:R
     from ...sales.contracts import SourceRef
     from ...sales.native_sources import resolve_native_source
     items=[]
-    # Authorization first, without workspace gates; the enumeration below runs in
-    # short READ ONLY transactions. Per-source policy is evaluated through the
-    # read-only snapshot path, so this GET never holds (or queues on) the
-    # policy/budget advisory locks that admission and mutation still take.
+    # Authorization first, without workspace gates. The candidate collection and
+    # each validation batch then run in their own SHORT normal transactions, so
+    # no single transaction or workspace advisory lock spans the enumeration.
+    # (A read-only transaction is wrong here: per-source validation uses the
+    # existing write-capable retention/native-read helpers.)
     async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False) as (session, actor):
         pass
     scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
-    for kind,model,column in [('buyer',ProjectBuyer,'version'),('profile',IcpVersion,'number'),('run',SearchRun,'version')]:
-        async with tenant_session(get_engine(), workspace_id, read_only=True) as session:
+    candidates=[]
+    async with tenant_session(get_engine(), workspace_id) as session:
+        for kind,model,column in [('buyer',ProjectBuyer,'version'),('profile',IcpVersion,'number'),('run',SearchRun,'version')]:
             rows=(await session.scalars(select(model).where(model.workspace_id==workspace_id,
                 model.project_id==project_id).order_by(model.id).limit(50))).all()
             for row in rows:
                 ref=SourceRef(id=row.id,kind=kind,version=getattr(row,column),locator=f'{kind}:{row.id}',retention_class='durable')
+                candidates.append((ref,f'{kind} {str(row.id)[:8]}'))
+    batch_size=10
+    for start in range(0,len(candidates),batch_size):
+        # Short transaction: current policy/revision/native authority per source,
+        # committed (and locks released) before the next batch starts.
+        async with tenant_session(get_engine(), workspace_id) as session:
+            for ref,label in candidates[start:start+batch_size]:
                 try:
-                    # The same current policy/revision/native authority as task intake,
-                    # read from a read-only snapshot.
-                    await resolve_native_source(session,scope,ref,readonly=True)
+                    await resolve_native_source(session,scope,ref)
                 except (ValueError,ApiError):
                     continue
-                items.append({'label':f'{kind} {str(row.id)[:8]}', 'ref':ref.model_dump(mode='json')})
+                items.append({'label':label,'ref':ref.model_dump(mode='json')})
     from ...sales.contracts import SalesNativeSources
     return envelope(SalesNativeSources(items=items).model_dump(mode='json'),request.state.request_id)
 

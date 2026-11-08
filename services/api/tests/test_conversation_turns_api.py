@@ -52,9 +52,12 @@ def turn_api(enabled, api, seeded):
             (PROFILE, PROJECT_A))
     yield api, seeded
     with psycopg.connect(seeded, autocommit=True) as conn:
-        conn.execute("UPDATE sales_tasks SET state='cancelled' WHERE workspace_id=%s",
-            (WORKSPACE_A,))
-        conn.execute('DELETE FROM conversation_threads WHERE workspace_id=%s', (WORKSPACE_A,))
+        # Discussions must be removed before the shared fixture deletes users;
+        # cover both seeded workspaces in case a test touched project B.
+        conn.execute("UPDATE sales_tasks SET state='cancelled' WHERE workspace_id IN (%s,%s)",
+            (WORKSPACE_A, WORKSPACE_B))
+        conn.execute('DELETE FROM conversation_threads WHERE workspace_id IN (%s,%s)',
+            (WORKSPACE_A, WORKSPACE_B))
 
 
 def key(prefix='turn'):
