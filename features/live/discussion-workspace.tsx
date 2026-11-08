@@ -1,11 +1,10 @@
 'use client';
 import {DriveConnections} from './conversation-connections';
-import {GuidedSales} from './sales-skills/workspace';
 import {useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore} from 'react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
 import {ConversationThreads,type ServerSummary} from '@/services/live/conversation-threads';
-import {ServerConversation,useThreadApi} from './discussion-server';
+import {useThreadApi} from './discussion-server';
 import {SaveWorkspace} from './discussion-sharing';
 import {DiscussionStore} from '@/services/live/discussions';
 import {loadDiscussionContext,type ContextSection} from '@/services/live/discussion-context';
@@ -16,6 +15,7 @@ import type {GroundedReply} from '@/services/live/discussion-citations';
 import {ConversationResearch} from './conversation-research';
 import {LiveDiscussion} from './discussion';
 import {LiveUnavailable} from './unavailable';
+import {ConversationStudio} from './conversation/studio';
 
 // Scope-owned resources survive route remounts. Thread actions never trigger context GETs.
 const stores=new WeakMap<SessionScope,Map<string,DiscussionStore>>();
@@ -38,8 +38,15 @@ export function LiveConversation(props:Props){
   const snapshot=props.session.getSnapshot();
   if(!snapshot.authenticated||!snapshot.scope.workspace||!snapshot.scope.project)return null;
   const route=discussionForPath(props.pathname,true)!;
-  if(route.id.startsWith('s/'))return <ServerConversation key={snapshot.identity+route.id} {...props} id={route.id.slice(2)}/>;
-  if(route.id==='home'||route.id==='new')return <><GuidedSales key={snapshot.identity+route.id} {...props}/><details><summary>{props.t('Device discussions')}</summary><ScopedConversation key={snapshot.identity} {...props}/></details></>;
+  const studio={client:props.client,session:props.session,t:props.t,locale:props.locale,navigate:props.navigate,canViewOffer:props.canViewOffer,canViewResults:props.canViewResults};
+  // Conversation-first routes: one continuous surface for the project home, a new
+  // discussion and a saved workspace thread. Device-only discussions stay reachable
+  // behind their own disclosure so existing local work is never hidden.
+  if(route.id.startsWith('s/'))return <ConversationStudio key={snapshot.identity+route.id} {...studio} threadId={route.id.slice(2)} fresh={false}/>;
+  if(route.id==='home'||route.id==='new')return <>
+    <ConversationStudio key={snapshot.identity+route.id} {...studio} threadId={null} fresh={route.id==='new'}/>
+    <details className="conversation-device-threads"><summary>{props.t('Device discussions')}</summary><ScopedConversation key={snapshot.identity} {...props}/></details>
+  </>;
   return <ScopedConversation key={snapshot.identity} {...props}/>;
 }
 function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOffer,canViewResults}:Props){
