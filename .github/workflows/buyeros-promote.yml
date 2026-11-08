@@ -36,6 +36,10 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/api
       - run: npm install --global vercel@54.17.2
+      - name: Install isolated protected curl CLI
+        run: |
+          npm install --prefix "$RUNNER_TEMP/buyeros-curl-cli" --no-audit --no-fund --package-lock=false vercel@50.28.0
+          echo "BUYEROS_VERCEL_CURL_PACKAGE=$RUNNER_TEMP/buyeros-curl-cli/node_modules/vercel" >> "$GITHUB_ENV"
       - name: Fetch encrypted runtime bundle and verify protected gates before one alias call
         env:
           BUYEROS_RELEASE_LEDGER_TOKEN: ${{ github.token }}
