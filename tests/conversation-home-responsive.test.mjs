@@ -430,6 +430,9 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   await page.reload();
   const viewerComposer=page.getByRole('textbox',{name:'Message BuyerOS'});
   await viewerComposer.waitFor();
+  // The composer is disabled from the moment a saved thread is opened until its
+  // access resolves; poll the disabled state so the product rule is asserted, not timing.
+  await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');return node instanceof HTMLTextAreaElement&&node.disabled;});
   assert.equal(await viewerComposer.isDisabled(),true);
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0);
   await page.locator('.conversation-panel').getByRole('tab',{name:'Sources',exact:true}).click();
@@ -492,6 +495,7 @@ test('an unavailable workspace thread fails explicitly instead of showing anothe
   await page.getByText('Not found in this workspace.',{exact:true}).waitFor();
   await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).waitFor();
   assert.equal(await page.locator('.conversation-transcript').count(),0,'no transcript for an unavailable thread');
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).isDisabled(),true,'a failed thread read never opens a writable composer');
   assert.equal(await page.getByRole('button',{name:'New discussion',exact:true}).count()>=1,true);
  }finally{await harness.close();}
 });

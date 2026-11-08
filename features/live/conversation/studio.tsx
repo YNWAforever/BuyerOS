@@ -390,7 +390,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           :<ConversationTranscript t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
       {awaitingHomeThread
         ?<div className="conversation-compose conversation-compose-pending" role="status" aria-busy="true">{t('Loading discussion…')}</div>
-        :<ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts} canWrite={!loaded||loaded.chat.access!=='viewer'} sending={sending}
+        :<ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts}
+          // A saved thread stays read-only until its access is known: a viewer must never
+          // get an enabled composer while the thread resolves, and a failed load stays inert.
+          canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'):!loaded||loaded.chat.access!=='viewer'} sending={sending}
           projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
           sendFailed={sendFailed} notice={sendNotice||urlNotice} onSend={send}/>}
       <details className="conversation-secondary"><summary>{t('Guided setup')}</summary>
