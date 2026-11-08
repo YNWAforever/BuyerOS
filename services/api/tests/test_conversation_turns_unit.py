@@ -224,6 +224,11 @@ def test_registered_tables_match_the_readiness_contract():
     updates = [item for item in required['required_privileges']
         if item['relation'] == 'public.conversation_turn_proposals' and item['privilege'] == 'UPDATE']
     assert updates and set(updates[0]['columns']) == {'status', 'revision', 'result', 'updated_at'}
+    worker = sales_requirements(worker=True)
+    for name in ('public.conversation_thread_messages', 'public.conversation_turns',
+                 'public.conversation_turn_proposals', 'public.conversation_turn_decisions'):
+        assert name not in worker['required_relations']
+        assert not [item for item in worker['required_privileges'] if item['relation'] == name]
 
 
 def test_turn_routes_register_only_with_conversation_home(monkeypatch):

@@ -186,7 +186,8 @@ def test_inline_approval_is_required_and_then_uses_the_typed_output_path(turn_ap
     with psycopg.connect(dsn) as conn:
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 0
         assert conn.execute('SELECT count(*) FROM sales_outputs').fetchone()[0] == 0
-    approved = decide(client, turn, version=thread['version'])
+    approved = decide(client, turn, version=thread['version'],
+        mutation_key='approve-stale-replay-key')
     assert approved.status_code == 200, approved.text
     data = approved.json()['data']
     continuation, new_thread = data['turn'], data['thread']
@@ -198,9 +199,16 @@ def test_inline_approval_is_required_and_then_uses_the_typed_output_path(turn_ap
     link = next(part for part in continuation['parts'] if part['kind'] == 'output_link')
     assert link['output']['status'] == 'available'
     assert new_thread['version'] == thread['version'] + 2
-    replay = decide(client, turn, version=thread['version'], mutation_key='decision-replay-key')
-    assert replay.status_code == 200
+    # Same key AND same (now stale) expected version: the recorded continuation
+    # must be replayed, not rejected with STALE_REVISION.
+    replay = decide(client, turn, version=thread['version'],
+        mutation_key='approve-stale-replay-key')
+    assert replay.status_code == 200, replay.text
     assert replay.json()['data']['turn']['id'] == continuation['id']
+    # New key, stale version: the durable decision row replays too.
+    new_key = decide(client, turn, version=thread['version'], mutation_key='decision-replay-key')
+    assert new_key.status_code == 200
+    assert new_key.json()['data']['turn']['id'] == continuation['id']
     with psycopg.connect(dsn) as conn:
         # One durable task, one reviewed revision, exactly one decision; no provider work.
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
@@ -350,3 +358,48 @@ def test_fixture_adapter_answer_is_validated_and_persists_only_selected_citation
     assert turn['parts'][0]['text'] == 'Review the cited approved offer source.'
     assert 'CONVERSATION_MODEL_UNAVAILABLE' not in {notice['code'] for notice in turn['notices']}
     assert 'Approved source excerpt' not in result.text
+
+
+def test_executor_failure_after_partial_write_is_terminal_and_not_replayable(turn_api, monkeypatch):
+    """Blocker-2 regression: a failed executor must record the decision.
+
+    The fixture adapter performs one real typed step (a durable sales task) and
+    then raises. The proposal must become terminal, the decision must be
+    recorded, and a second approval under a different key must be rejected —
+    never leave the proposal open with a committed task behind it.
+    """
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+    from buyeros_api.sales.contracts import SourceRef, TaskInput
+
+    async def partial_then_fail(session, scope, thread, turn, proposal):
+        from buyeros_api.services.sales_tasks import create_task
+        await create_task(session, scope, TaskInput(
+            thread_id=proposal.thread_id, skill_id=proposal.skill_id,
+            skill_version=proposal.skill_version, user_message='PARTIAL_FAIL_SENTINEL',
+            source_refs=tuple(SourceRef.model_validate(ref) for ref in proposal.source_refs),
+            arguments=proposal.arguments), 'partial-failure-task-key', thread.version)
+        raise ValueError('synthetic post-admission failure')
+
+    monkeypatch.setitem(engine.EXECUTORS, 'documents.read', partial_then_fail)
+    created = post_turn(client, turn_body()).json()['data']
+    turn, thread = created['turn'], created['thread']
+    failed = decide(client, turn, version=thread['version'],
+        mutation_key='partial-failure-approve')
+    assert failed.status_code == 200, failed.text
+    continuation = failed.json()['data']['turn']
+    assert continuation['status'] == 'failed'
+    activity = next(part for part in continuation['parts'] if part['kind'] == 'tool_activity')
+    assert activity['state'] == 'failed'
+    again = decide(client, turn, version=thread['version'],
+        mutation_key='partial-failure-second-approve')
+    assert again.status_code == 200
+    assert again.json()['data']['turn']['id'] == continuation['id']  # durable replay
+    different = decide(client, turn, decision='reject', version=thread['version'],
+        mutation_key='partial-failure-different-decision')
+    assert different.status_code == 409 and different.json()['code'] == 'ALREADY_DECIDED'
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT status FROM conversation_turn_proposals').fetchone()[0] == 'failed'
+        assert conn.execute('SELECT count(*) FROM conversation_turn_decisions').fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
+

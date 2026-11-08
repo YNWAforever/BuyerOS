@@ -300,3 +300,54 @@ def test_route_wiring_reads_opt_out_and_writes_keep_the_lock(monkeypatch):
     for response in writes:
         assert response.status_code in {200, 201}, response.text
     assert observed and all("locks" not in kwargs for kwargs in observed), observed
+
+
+def test_native_sources_read_uses_read_only_policy_snapshot_not_workspace_gate(monkeypatch):
+    """TASK-4 residual: the enumeration GET must not hold the policy advisory lock.
+
+    Per-source validation runs inside short ``read_only=True`` tenant sessions and
+    calls the read-only policy evaluator; the serialized mutation path is
+    untouched (covered by the access() tests above).
+    """
+    from buyeros_api.api import deps as api_deps
+    from buyeros_api.api.routes import sales_tasks as routes
+    from buyeros_api.db import session as db_session
+    from buyeros_api.sales import native_sources
+
+    observed = []
+
+    @asynccontextmanager
+    async def fake_access(*args, **kwargs):
+        observed.append(dict(kwargs))
+        yield object(), ACTOR
+
+    @asynccontextmanager
+    async def fake_tenant_session(engine, workspace_id, *, read_only=False):
+        observed.append({'read_only': read_only})
+
+        class _Rows:
+            def all(self):
+                return [SimpleNamespace(id=uuid.uuid4(), version=1, number=1)]
+
+        class _Session:
+            async def scalars(self, statement):
+                return _Rows()
+
+        yield _Session()
+
+    async def fake_resolve(*args, **kwargs):
+        observed.append({'resolve_readonly': kwargs.get('readonly')})
+
+    monkeypatch.setattr(routes, 'access', fake_access)
+    monkeypatch.setattr(db_session, 'tenant_session', fake_tenant_session)
+    monkeypatch.setattr(api_deps, 'get_engine', lambda: object())
+    monkeypatch.setattr(native_sources, 'resolve_native_source', fake_resolve)
+    app = create_app()
+    app.dependency_overrides[get_principal] = lambda: object()
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.get(SALES_ROOT + '/native-sources')
+    assert response.status_code == 200, response.text
+    assert observed[0] == {'sales': True, 'admission': False, 'locks': False}
+    assert [item for item in observed if 'read_only' in item] == [{'read_only': True}] * 3
+    resolutions = [item for item in observed if 'resolve_readonly' in item]
+    assert resolutions and all(item['resolve_readonly'] is True for item in resolutions)

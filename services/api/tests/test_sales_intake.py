@@ -98,7 +98,7 @@ def test_disabled_admission_keeps_discovery_followup_readback(monkeypatch):
             headers={'If-Match':'"1"','Idempotency-Key':'synthetic-followup'})]:
         assert response.status_code == 200, response.text
         assert response.headers['cache-control']=='no-store'
-    assert calls == [{'sales':True,'admission':False}]*2
+    assert calls == [{'sales':True,'admission':False,'locks':False}, {'sales':True,'admission':False}]
 
 
 def large_proposal_inputs():

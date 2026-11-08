@@ -97,6 +97,12 @@ Alembic revision `0066_conversation_turns`:
 - `conversation_thread_messages` + `role`, `seq` (unique per thread, backfilled
   from `created_at, id`), `client_message_id` (partial unique per thread),
   `turn_id`, `parts`.
+- App-rollback compatibility: a `BEFORE INSERT` trigger
+  (`conversation_thread_message_seq`) allocates `seq` for the previous
+  application revision, whose inserts carry only the legacy columns. Downgrade
+  refuses when any assistant turn, typed part, client message id or turn id
+  exists; for legacy-only notes it drops the added columns and ordering falls
+  back to `created_at, id` (note text is preserved; typed turn history is not).
 - `conversation_turns` — one row per user turn or continuation; unique
   `(workspace_id, thread_id, client_message_id)` and unique
   `(workspace_id, actor_id, client_message_id)` so a duplicate submission cannot

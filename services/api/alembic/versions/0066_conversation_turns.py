@@ -2,7 +2,15 @@
 
 Additive only: legacy notes migrate to ``role='user'`` with a monotonic ``seq``;
 parts/decision rows live under the discussion's deletion boundary. No worker
-grants and no seeded data. Downgrade refuses populated tables.
+grants and no seeded data.
+
+App-rollback compatibility: the previous application revision inserts messages
+with only ``(…, text)``. A BEFORE INSERT trigger supplies the monotonic ``seq``
+(and the ``role``/``parts`` defaults) for those inserts, so a rollback to the
+previous code keeps writing. Downgrade refuses when any assistant turn, typed
+part, client message id or turn id exists; for legacy-only data the added
+columns are dropped and ordering falls back to ``created_at, id`` (the text and
+note semantics are unchanged).
 """
 from pathlib import Path
 from runpy import run_path
@@ -254,6 +262,24 @@ def upgrade():
       ADD CONSTRAINT fk_conversation_thread_messages_turn
       FOREIGN KEY(workspace_id,project_id,thread_id,turn_id)
       REFERENCES conversation_turns(workspace_id,project_id,thread_id,id) ON DELETE CASCADE;
+
+    -- Previous-app-revision inserts provide no seq/role/parts. Allocate the
+    -- per-thread monotonic sequence inside the database so a code rollback
+    -- remains writable; the current revision always supplies seq explicitly.
+    CREATE FUNCTION public.buyeros_thread_message_seq() RETURNS trigger
+    LANGUAGE plpgsql SET search_path=pg_catalog,public AS $$
+    BEGIN
+      IF NEW.seq IS NULL OR NEW.seq<=0 THEN
+        SELECT COALESCE(MAX(m.seq),0)+1 INTO NEW.seq
+          FROM public.conversation_thread_messages m
+          WHERE m.workspace_id=NEW.workspace_id AND m.thread_id=NEW.thread_id;
+      END IF;
+      RETURN NEW;
+    END $$;
+    REVOKE ALL ON FUNCTION public.buyeros_thread_message_seq() FROM PUBLIC,buyeros_worker;
+    GRANT EXECUTE ON FUNCTION public.buyeros_thread_message_seq() TO buyeros_api;
+    CREATE TRIGGER conversation_thread_message_seq BEFORE INSERT ON conversation_thread_messages
+      FOR EACH ROW EXECUTE FUNCTION public.buyeros_thread_message_seq();
     """)
     for table in TABLES:
         op.execute(f'''ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;
@@ -273,6 +299,13 @@ def downgrade():
     db = op.get_bind()
     if any(db.execute(sa.text(f'SELECT EXISTS(SELECT 1 FROM {table})')).scalar_one() for table in TABLES):
         raise RuntimeError('0066 downgrade blocked: preserve populated conversation turns/decisions')
+    typed = db.execute(sa.text("SELECT EXISTS(SELECT 1 FROM conversation_thread_messages "
+        "WHERE role<>'user' OR parts<>'[]'::jsonb OR client_message_id IS NOT NULL "
+        "OR turn_id IS NOT NULL)")).scalar_one()
+    if typed:
+        raise RuntimeError('0066 downgrade blocked: preserve assistant turns and typed message parts')
+    op.execute('DROP TRIGGER conversation_thread_message_seq ON conversation_thread_messages')
+    op.execute('DROP FUNCTION public.buyeros_thread_message_seq()')
     op.execute('ALTER TABLE conversation_thread_messages DROP CONSTRAINT fk_conversation_thread_messages_turn')
     op.execute('DROP INDEX uq_conversation_thread_messages_client')
     for constraint in MESSAGE_CONSTRAINTS[1:4]:

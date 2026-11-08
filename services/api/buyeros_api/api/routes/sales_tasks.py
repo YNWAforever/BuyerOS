@@ -26,22 +26,31 @@ async def capability(workspace_id:uuid.UUID, project_id:uuid.UUID, request:Reque
 async def native_sources(workspace_id:uuid.UUID, project_id:uuid.UUID, request:Request,
     principal:Principal=Depends(get_principal)):
     from sqlalchemy import select
+    from ...api.deps import get_engine
+    from ...db.session import tenant_session
     from ...db.buyers import ProjectBuyer
     from ...db.icp import IcpVersion
     from ...db.runs import SearchRun
     from ...sales.contracts import SourceRef
     from ...sales.native_sources import resolve_native_source
     items=[]
+    # Authorization first, without workspace gates; the enumeration below runs in
+    # short READ ONLY transactions. Per-source policy is evaluated through the
+    # read-only snapshot path, so this GET never holds (or queues on) the
+    # policy/budget advisory locks that admission and mutation still take.
     async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False) as (session, actor):
-        scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
-        for kind,model,column in [('buyer',ProjectBuyer,'version'),('profile',IcpVersion,'number'),('run',SearchRun,'version')]:
+        pass
+    scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
+    for kind,model,column in [('buyer',ProjectBuyer,'version'),('profile',IcpVersion,'number'),('run',SearchRun,'version')]:
+        async with tenant_session(get_engine(), workspace_id, read_only=True) as session:
             rows=(await session.scalars(select(model).where(model.workspace_id==workspace_id,
                 model.project_id==project_id).order_by(model.id).limit(50))).all()
             for row in rows:
                 ref=SourceRef(id=row.id,kind=kind,version=getattr(row,column),locator=f'{kind}:{row.id}',retention_class='durable')
                 try:
-                    # The same current policy/revision/native authority as task intake.
-                    await resolve_native_source(session,scope,ref)
+                    # The same current policy/revision/native authority as task intake,
+                    # read from a read-only snapshot.
+                    await resolve_native_source(session,scope,ref,readonly=True)
                 except (ValueError,ApiError):
                     continue
                 items.append({'label':f'{kind} {str(row.id)[:8]}', 'ref':ref.model_dump(mode='json')})

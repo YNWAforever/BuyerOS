@@ -167,6 +167,11 @@ def sales_requirements(*, worker=False):
     if worker:
         from ..db.conversation_threads import ConversationThreadShare
         relations['public.conversation_thread_shares']=list(ConversationThreadShare.__table__.columns.keys())
+        # Worker grants deliberately exclude transcript and turn content; those
+        # relations must not appear in the worker readiness contract either.
+        for name in ('public.conversation_thread_messages', 'public.conversation_turns',
+                     'public.conversation_turn_proposals', 'public.conversation_turn_decisions'):
+            relations.pop(name, None)
         selected={name:columns for name,columns in relations.items()
             if name not in {'public.conversation_thread_preferences'}}
         privileges=[{'relation':name,'columns':columns,'privilege':'SELECT'} for name,columns in selected.items()]

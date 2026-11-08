@@ -402,10 +402,12 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
             payload.thread_id, scope.actor_id, edit=True, lock=True)
         if payload.expected_thread_version is None:
             raise ApiError(400, 'INVALID_REQUEST', 'If-Match thread version is required')
-        _check_version(thread.version, payload.expected_thread_version)
     else:
         role = 'owner'
     project = await _project(session, scope)
+    # Durable replay precedes the write precondition: an uncertain retry reuses
+    # the same key and the same expected version, while the first attempt already
+    # advanced thread.version. The stored fingerprint still binds that version.
     existing = await _existing_turn(session, scope, payload.client_message_id)
     if existing is not None:
         return await _replay(session, scope, existing, payload)
@@ -421,6 +423,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
         if row is None:
             raise not_found()
         return await _replay(session, scope, row, payload)
+    if thread is not None:
+        _check_version(thread.version, payload.expected_thread_version)
     saved_fp = request_fingerprint(scope, payload, thread.id if thread is not None else None)
     try:
         async with session.begin_nested():
@@ -583,19 +587,14 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         raise not_found()
     thread, role = await load(session, scope.workspace_id, scope.project_id,
         source_turn.thread_id, scope.actor_id, edit=True, lock=True)
-    _check_version(thread.version, request.expected_thread_version)
-    proposal = (await session.execute(select(ConversationTurnProposal).where(
-        ConversationTurnProposal.workspace_id == scope.workspace_id,
-        ConversationTurnProposal.project_id == scope.project_id,
-        ConversationTurnProposal.thread_id == thread.id,
-        ConversationTurnProposal.turn_id == source_turn.id,
-        ConversationTurnProposal.id == request.proposal_id).with_for_update())).scalar_one_or_none()
-    if proposal is None:
-        raise not_found()
     fingerprint = digest({'operation': 'conversationTurnDecision',
         'proposal_id': str(request.proposal_id), 'decision': request.decision,
         'actor_id': str(scope.actor_id), 'thread_id': str(thread.id),
         'turn_id': str(source_turn.id)})
+    # Durable replay precedes the write precondition. A retry after an uncertain
+    # first response reuses the same key and the same expected version, while the
+    # first commit already advanced thread.version; the fingerprint still binds
+    # both, so a genuinely different request keeps conflicting.
     outcome = await begin_idempotency(session, workspace_id=scope.workspace_id,
         actor_id=scope.actor_id, operation_id='conversationTurnDecision', key=key,
         body=request.model_dump(mode='json'),
@@ -610,13 +609,28 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         return thread, role, _payload(row), False
     existing = (await session.execute(select(ConversationTurnDecision).where(
         ConversationTurnDecision.workspace_id == scope.workspace_id,
+        ConversationTurnDecision.project_id == scope.project_id,
+        ConversationTurnDecision.thread_id == thread.id,
+        ConversationTurnDecision.turn_id == source_turn.id,
         ConversationTurnDecision.proposal_id == request.proposal_id))).scalar_one_or_none()
     if existing is not None:
         if existing.decision != request.decision:
             raise ApiError(409, 'ALREADY_DECIDED', 'this proposal already has a decision')
         row = await _turn_by_id(session, scope, existing.continuation_turn_id)
+        if row is None:
+            raise not_found()
         complete_idempotency(outcome, str(existing.continuation_turn_id))
         return thread, role, _payload(row), True
+    # Genuinely new decision: authoritative current version and open proposal.
+    _check_version(thread.version, request.expected_thread_version)
+    proposal = (await session.execute(select(ConversationTurnProposal).where(
+        ConversationTurnProposal.workspace_id == scope.workspace_id,
+        ConversationTurnProposal.project_id == scope.project_id,
+        ConversationTurnProposal.thread_id == thread.id,
+        ConversationTurnProposal.turn_id == source_turn.id,
+        ConversationTurnProposal.id == request.proposal_id).with_for_update())).scalar_one_or_none()
+    if proposal is None:
+        raise not_found()
     if source_turn.status != 'needs_approval' or proposal.status != 'proposed':
         raise ApiError(409, 'INVALID_STATE', 'this turn has no open proposal')
     try:
@@ -626,12 +640,17 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
     except IntegrityError as exc:
         existing = (await session.execute(select(ConversationTurnDecision).where(
             ConversationTurnDecision.workspace_id == scope.workspace_id,
+            ConversationTurnDecision.project_id == scope.project_id,
+            ConversationTurnDecision.thread_id == thread.id,
+            ConversationTurnDecision.turn_id == source_turn.id,
             ConversationTurnDecision.proposal_id == request.proposal_id))).scalar_one_or_none()
         if existing is None:
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
                 'a concurrent decision for this proposal is in progress') from exc
         complete_idempotency(outcome, str(existing.continuation_turn_id))
         row = await _turn_by_id(session, scope, existing.continuation_turn_id)
+        if row is None:
+            raise not_found()
         return thread, role, _payload(row), True
     complete_idempotency(outcome, str(continuation.id))
     return thread, role, _payload(continuation), decided
@@ -670,19 +689,22 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
     await gates(session, scope.workspace_id)  # current policy + budget serialization
     executor = _executor(proposal.capability)
     if executor is None:
-        return await _blocked_continuation(session, scope, thread, source_turn, proposal,
-            fingerprint, 'CAPABILITY_NOT_AVAILABLE',
+        return await _finish_failure(session, scope, thread, source_turn, proposal,
+            request, fingerprint, 'failed', 'CAPABILITY_NOT_AVAILABLE',
             'No reviewed executor is registered for this capability.'), False
     try:
         result = await executor(session, scope, thread, source_turn, proposal)
     except ApiError as exc:
         if exc.status_code in {403, 404}:
             raise
+        # Any durable effects the executor already committed inside this
+        # savepoint stay recovery-visible, but the decision and proposal become
+        # terminal so the same proposal can never be approved again.
         return await _finish_failure(session, scope, thread, source_turn, proposal,
-            fingerprint, 'failed', exc.code, exc.message), False
-    except ValueError:
+            request, fingerprint, 'failed', exc.code, exc.message), False
+    except Exception:
         return await _finish_failure(session, scope, thread, source_turn, proposal,
-            fingerprint, 'failed', 'EXECUTION_REJECTED',
+            request, fingerprint, 'failed', 'EXECUTION_REJECTED',
             'Current policy, source authority or configuration rejected this execution.'), False
     status = {'output': 'completed', 'notice': 'needs_input',
               'failed': 'failed', 'unknown': 'outcome_unknown'}[result.kind]
@@ -720,12 +742,12 @@ async def _blocked_continuation(session, scope, thread, source_turn, proposal,
     continuation = await _continuation_turn(session, scope, thread, source_turn,
         fingerprint, source_turn.language, parts=parts, notices=notices, status='needs_input')
     # Non-terminal: the proposal stays open so it can be approved after the
-    # workspace is configured. No decision row is recorded.
+    # workspace is configured. No decision row is recorded (recoverable notice).
     return continuation
 
 
-async def _finish_failure(session, scope, thread, source_turn, proposal, fingerprint,
-                          status, code, message):
+async def _finish_failure(session, scope, thread, source_turn, proposal, request,
+                          fingerprint, status, code, message):
     parts = [_decision_part(proposal, 'failed' if status == 'failed' else 'outcome_unknown',
                 summary=message[:500], error_code=code,
                 started_at=proposal.created_at or now(), finished_at=now()),
@@ -733,6 +755,15 @@ async def _finish_failure(session, scope, thread, source_turn, proposal, fingerp
     notices = (TurnNotice(code=code, message=message),)
     continuation = await _continuation_turn(session, scope, thread, source_turn,
         fingerprint, source_turn.language, parts=parts, notices=notices, status=status)
+    # Terminal: persist proposal/decision state even though the executor failed,
+    # so a failed or uncertain step is visible and cannot be re-approved.
+    failure_status = 'failed' if status == 'failed' else 'outcome_unknown'
+    proposal.status = failure_status
+    proposal.revision += 1
+    proposal.result = {'code': code, 'output_id': None, 'output_revision': None,
+        'task_id': None}
+    _record_decision(session, scope, source_turn, proposal, request, fingerprint,
+        continuation, 'failed')
     return continuation
 
 
@@ -755,19 +786,26 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         raise not_found()
     thread, role = await load(session, scope.workspace_id, scope.project_id,
         source_turn.thread_id, scope.actor_id, edit=True, lock=True)
-    _check_version(thread.version, expected_version)
     fingerprint = digest({'operation': 'cancelConversationTurn',
         'turn_id': str(source_turn.id), 'actor_id': str(scope.actor_id)})
+    # Durable replay precedes the write precondition (see decide()).
     outcome = await begin_idempotency(session, workspace_id=scope.workspace_id,
         actor_id=scope.actor_id, operation_id='cancelConversationTurn', key=key,
         body={}, target={'project_id': str(scope.project_id),
             'turn_id': str(source_turn.id)}, precondition=f'"{expected_version}"')
     if outcome.replay:
         row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id))
+        if row is None:
+            raise not_found()
         return thread, role, _payload(row)
+    recorded = await _recorded_cancellation(session, scope, thread.id, source_turn.id)
+    if recorded is not None:
+        complete_idempotency(outcome, str(recorded.id))
+        return thread, role, _payload(recorded)
     if source_turn.status in {'completed', 'failed', 'outcome_unknown', 'cancelled'}:
         complete_idempotency(outcome, str(source_turn.id))
         return thread, role, _payload(source_turn)
+    _check_version(thread.version, expected_version)
     continuation = None
     try:
         async with session.begin_nested():
@@ -794,7 +832,21 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
                 proposal.status = 'cancelled'
                 proposal.revision += 1
     except IntegrityError as exc:
-        raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
-            'a concurrent cancellation is in progress') from exc
+        recorded = await _recorded_cancellation(session, scope, thread.id, source_turn.id)
+        if recorded is None:
+            raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
+                'a concurrent cancellation is in progress') from exc
+        complete_idempotency(outcome, str(recorded.id))
+        return thread, role, _payload(recorded)
     complete_idempotency(outcome, str(continuation.id))
     return thread, role, _payload(continuation)
+
+
+async def _recorded_cancellation(session, scope: Scope, thread_id, source_turn_id):
+    return (await session.execute(select(ConversationTurn).where(
+        ConversationTurn.workspace_id == scope.workspace_id,
+        ConversationTurn.project_id == scope.project_id,
+        ConversationTurn.thread_id == thread_id,
+        ConversationTurn.parent_turn_id == source_turn_id,
+        ConversationTurn.status == 'cancelled').order_by(
+            ConversationTurn.created_at.desc()).limit(1))).scalar_one_or_none()
