@@ -215,6 +215,49 @@ def test_notices_reject_unknown_fields_and_oversized_lists():
         turn_contracts.validate_notices([{'code': 'CODE', 'message': 'm'}] * 9)
 
 
+def test_integrity_errors_are_only_mapped_to_idempotency_when_expected():
+    """Finding 2 regression: unrelated constraint failures are never masked as 409.
+
+    The turn/decision handlers used to map every IntegrityError to
+    IDEMPOTENCY_CONFLICT, hiding the real constraint (this masked the 0067
+    validator failure as a bogus concurrent request).
+    """
+    from types import SimpleNamespace
+    from buyeros_api.api.errors import ApiError
+    from buyeros_api.services import conversation_turns as engine
+
+    class FakeIntegrity(Exception):
+        def __init__(self, constraint):
+            self.orig = SimpleNamespace(diag=SimpleNamespace(constraint_name=constraint))
+
+    def failure(constraint):
+        return FakeIntegrity(constraint)
+
+    assert engine.is_expected_conflict(
+        failure('uq_conversation_turns_actor_client'), engine.TURN_CONFLICT_CONSTRAINTS)
+    assert engine.is_expected_conflict(
+        failure('uq_conversation_turn_decisions_workspace_id_proposal_id'),
+        engine.DECISION_CONFLICT_CONSTRAINTS)
+    unrelated = failure('fk_conversation_threads_buyer')
+    assert not engine.is_expected_conflict(unrelated, engine.TURN_CONFLICT_CONSTRAINTS)
+    with pytest.raises(ApiError) as caught:
+        engine.raise_unexpected_integrity(unrelated, 'unit-test')
+    assert caught.value.status_code == 500
+    assert caught.value.code == 'INTERNAL_ERROR'
+    assert caught.value.code != 'IDEMPOTENCY_CONFLICT'
+
+
+def test_migration_0067_validator_is_plain_sql_and_accepts_reviewed_cost_metadata():
+    """The copied validator must not keep f-string brace escapes or reject cost.known."""
+    from pathlib import Path
+
+    source = (Path(__file__).resolve().parents[1] / 'alembic' / 'versions'
+        / '0067_conversation_buyer.py').read_text(encoding='utf-8')
+    assert '{{' not in source and '}}' not in source
+    assert "ARRAY['kind','amount','unit','may_incur_provider_charges','known']" in source
+    assert "'buyer'" in source
+
+
 def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
@@ -348,3 +391,19 @@ def test_proposal_only_executors_are_terminal_and_never_dispatch(monkeypatch):
     finally:
         monkeypatch.delenv('BUYEROS_PAID_ADMISSION_ENABLED', raising=False)
         get_settings.cache_clear()
+
+
+def test_plan_ceiling_caps_proposals_so_step_count_stays_bounded():
+    """A turn may never exceed MAX_TURN_STEPS persisted steps (DB CHECK 0..3)."""
+    drive_id = 'drive:' + str(uuid.uuid4()) + ':' + 'a' * 32
+    thread_row = thread('understand-documents')
+    payload = request(text='Enrich the linked company and read the Drive evidence')
+    plan, staged = engine.build_plan(thread_row, payload,
+        engine.skill_for(thread_row, payload), project(), grounding(),
+        buyer=buyer_projection(), drive_ids=(drive_id,), sales_ok=True,
+        language_ok=True)
+    assert len(plan.steps) == turn_contracts.MAX_TURN_STEPS
+    assert len(plan.proposals) == turn_contracts.MAX_TURN_STEPS - 1
+    assert len(staged) == len(plan.proposals)
+    assert {proposal.capability for proposal in plan.proposals} == {
+        'documents.read', 'xverum.enrich_company'}

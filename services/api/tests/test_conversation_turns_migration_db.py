@@ -1,4 +1,4 @@
-"""Migration 0066 invariants: head, RLS/grants, app-rollback shape, downgrade.
+"""Migrations 0066/0067 invariants: head, RLS/grants, rollback shape, downgrade.
 
 Runs only on PostgreSQL; skipped when no disposable database is available.
 """
@@ -55,6 +55,8 @@ def test_new_relations_are_tenant_scoped_and_closed_to_the_worker(isolated_migra
             "'status','UPDATE')").fetchone()[0] is True
         assert db.execute("SELECT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname="
             "'conversation_thread_message_seq' AND NOT tgisinternal)").fetchone()[0] is True
+        assert db.execute("SELECT EXISTS(SELECT 1 FROM information_schema.columns WHERE "
+            "table_name='conversation_threads' AND column_name='buyer_id')").fetchone()[0] is True
         for service in ('search', 'model', 'contact'):
             assert db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] is True
         assert db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0] is True
@@ -80,10 +82,11 @@ def test_previous_app_insert_shape_stays_writable_and_gets_a_monotonic_seq(isola
         assert rows == [('legacy one', 1), ('legacy two', 2)]
 
 
-def test_upgrade_backfills_seq_in_creation_order_from_the_previous_head(isolated_migrated):
+def test_upgrade_backfills_seq_in_creation_order_from_the_previous_head(isolated_seeded):
     cfg = config()
     command.downgrade(cfg, PREVIOUS)
-    with psycopg.connect(isolated_migrated) as db:
+    with psycopg.connect(isolated_seeded) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == PREVIOUS
         user = _user(db)
         thread = _thread(db, user)
         base = datetime.now(timezone.utc)
@@ -94,7 +97,7 @@ def test_upgrade_backfills_seq_in_creation_order_from_the_previous_head(isolated
                 (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, user, user, text,
                  base + timedelta(microseconds=index)))
     command.upgrade(cfg, 'head')
-    with psycopg.connect(isolated_migrated) as db:
+    with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
         rows = db.execute('SELECT text,seq,role,parts FROM conversation_thread_messages '
             'WHERE thread_id=%s ORDER BY seq', (thread,)).fetchall()
@@ -102,10 +105,10 @@ def test_upgrade_backfills_seq_in_creation_order_from_the_previous_head(isolated
                         ('third', 3, 'user', [])]
 
 
-def test_downgrade_is_honest_for_legacy_data_and_refuses_typed_turns(isolated_migrated):
+def test_downgrade_is_honest_for_legacy_data_and_refuses_typed_turns(isolated_seeded):
     cfg = config()
     command.downgrade(cfg, PREVIOUS)
-    with psycopg.connect(isolated_migrated) as db:
+    with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == PREVIOUS
         assert db.execute("SELECT to_regclass('public.conversation_turns')").fetchone()[0] is None
         assert db.execute("SELECT attname FROM pg_attribute WHERE attrelid="
@@ -118,7 +121,7 @@ def test_downgrade_is_honest_for_legacy_data_and_refuses_typed_turns(isolated_mi
             "thread_id,owner_user_id,author_user_id,text) VALUES(%s,%s,%s,%s,%s,%s,'kept')",
             (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, user, user))
     command.upgrade(cfg, 'head')
-    with psycopg.connect(isolated_migrated) as db:
+    with psycopg.connect(isolated_seeded) as db:
         user = _user(db, 'thread-typed-fixture')
         thread = _thread(db, user)
         db.execute("INSERT INTO conversation_turns(id,workspace_id,project_id,thread_id,"
@@ -127,7 +130,7 @@ def test_downgrade_is_honest_for_legacy_data_and_refuses_typed_turns(isolated_mi
             (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, user, user, 'a' * 64))
     with pytest.raises(RuntimeError, match='preserve populated conversation turns'):
         command.downgrade(cfg, PREVIOUS)
-    with psycopg.connect(isolated_migrated) as db:
+    with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
         assert db.execute('SELECT count(*) FROM conversation_turns').fetchone()[0] == 1
 
@@ -154,12 +157,15 @@ def test_company_link_and_proposal_only_capabilities(isolated_seeded):
             "source_refs,arguments_preview) VALUES(%s,%s,%s,%s,%s,%s,'xverum.enrich_company',"
             "'sales-contacts','1','Enrich','Reviewed enrichment for the linked buyer',"
             "'{}','[]','{}')", (proposal, WORKSPACE_A, PROJECT_A, thread, turn, user))
+        # A rejected capability must fail inside a savepoint so the outer
+        # transaction (and therefore the downgrade precondition) stays valid.
         with pytest.raises(psycopg.errors.CheckViolation):
-            db.execute("INSERT INTO conversation_turn_proposals(id,workspace_id,project_id,"
-                "thread_id,turn_id,actor_id,capability,skill_id,skill_version,title,rationale,"
-                "arguments,source_refs,arguments_preview) VALUES(%s,%s,%s,%s,%s,%s,'unknown.read',"
-                "'sales-contacts','1','x','x','{}','[]','{}')",
-                (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, turn, user))
+            with db.transaction():
+                db.execute("INSERT INTO conversation_turn_proposals(id,workspace_id,project_id,"
+                    "thread_id,turn_id,actor_id,capability,skill_id,skill_version,title,rationale,"
+                    "arguments,source_refs,arguments_preview) VALUES(%s,%s,%s,%s,%s,%s,"
+                    "'unknown.read','sales-contacts','1','x','x','{}','[]','{}')",
+                    (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, turn, user))
     with pytest.raises(RuntimeError, match='preserve thread company links'):
         command.downgrade(cfg, '0066_conversation_turns')
     with psycopg.connect(isolated_seeded) as db:

@@ -79,7 +79,7 @@ def upgrade():
         ELSIF kind='tool_activity' THEN
           IF (item->>'call_id') !~ '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'
             OR item->>'state' NOT IN ('proposed','approved','running','completed','failed','skipped','outcome_unknown')
-            OR item->>'capability' !~ '^[a-z][a-z0-9_.]{{2,63}}$'
+            OR item->>'capability' !~ '^[a-z][a-z0-9_.]{2,63}$'
             OR jsonb_typeof(item->'title')<>'string' OR length(item->>'title') NOT BETWEEN 1 AND 240
             OR jsonb_typeof(item->'started_at')<>'string' THEN RETURN false; END IF;
           IF jsonb_typeof(item->'finished_at') NOT IN ('string','null') THEN RETURN false; END IF;
@@ -89,7 +89,7 @@ def upgrade():
             AND (jsonb_typeof(item->'error_code')<>'string' OR length(item->>'error_code')>64) THEN RETURN false; END IF;
         ELSIF kind='proposal' THEN
           IF (item->>'proposal_id') !~ '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$' OR item->>'requires_approval' <> 'true'
-            OR item->>'capability' !~ '^[a-z][a-z0-9_.]{{2,63}}$'
+            OR item->>'capability' !~ '^[a-z][a-z0-9_.]{2,63}$'
             OR jsonb_typeof(item->'title')<>'string' OR length(item->>'title') NOT BETWEEN 1 AND 240
             OR jsonb_typeof(item->'rationale')<>'string' OR length(item->>'rationale') NOT BETWEEN 1 AND 1000
             OR jsonb_typeof(item->'arguments_preview')<>'object'
@@ -98,7 +98,8 @@ def upgrade():
             sub := item->'cost';
             IF jsonb_typeof(sub)<>'object'
               OR NOT sub ?& ARRAY['kind','amount','unit','may_incur_provider_charges']
-              OR sub - ARRAY['kind','amount','unit','may_incur_provider_charges'] <> '{}'::jsonb
+              OR (sub - ARRAY['kind','amount','unit','may_incur_provider_charges','known'] <> '{}'::jsonb
+                  AND sub - ARRAY['kind','amount','unit','may_incur_provider_charges'] <> '{}'::jsonb)
               OR sub->>'kind' NOT IN ('nonbillable','provider_credits')
               OR sub->>'unit' NOT IN ('USD','credits')
               OR jsonb_typeof(sub->'may_incur_provider_charges')<>'boolean'
@@ -118,7 +119,7 @@ def upgrade():
           IF jsonb_typeof(item->'title')<>'string' OR length(item->>'title') NOT BETWEEN 1 AND 240
             OR jsonb_typeof(item->'href') NOT IN ('string','null') THEN RETURN false; END IF;
         ELSE
-          IF (item->>'code') !~ '^[A-Z][A-Z0-9_]{{2,63}}$'
+          IF (item->>'code') !~ '^[A-Z][A-Z0-9_]{2,63}$'
             OR jsonb_typeof(item->'message')<>'string'
             OR length(item->>'message') NOT BETWEEN 1 AND 500 THEN RETURN false; END IF;
           IF item ? 'recovery' AND item->'recovery' <> 'null'::jsonb THEN
@@ -153,8 +154,8 @@ def downgrade():
     db = op.get_bind()
     if db.execute(sa.text("SELECT EXISTS(SELECT 1 FROM conversation_threads WHERE buyer_id IS NOT NULL)")).scalar_one():
         raise RuntimeError('0067 downgrade blocked: preserve thread company links')
-    if db.execute(sa.text("SELECT EXISTS(SELECT 1 FROM conversation_turn_proposals WHERE capability = ANY(:caps))"),
-            {'caps': list(NEW_CAPABILITIES)}).scalar_one():
+    if db.execute(sa.text("SELECT EXISTS(SELECT 1 FROM conversation_turn_proposals "
+            "WHERE capability IN ('xverum.enrich_company','drive.read'))")).scalar_one():
         raise RuntimeError('0067 downgrade blocked: preserve proposal-only MCP capability decisions')
     op.execute('ALTER TABLE conversation_turn_proposals DROP CONSTRAINT ck_conversation_turn_proposals_capability')
     op.execute("ALTER TABLE conversation_turn_proposals ADD CONSTRAINT conversation_turn_proposals_capability_check "

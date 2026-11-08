@@ -2,6 +2,14 @@
 
 Fixture-only: approved offer facts and documents are seeded synthetically. No
 model call, no provider call and no paid admission is enabled anywhere here.
+
+Contract notes encoded below (Amendment A1/A2 and the turn contract):
+* a thread-first turn creates the discussion with NO selected source, so it is
+  honestly ``needs_input`` with a ``SOURCES_REQUIRED`` notice — not
+  ``needs_approval``; citations/proposals require an explicit source selection;
+* a replayed ``client_message_id`` returns the recorded turn (200) before the
+  thread-version precondition, which is the intended idempotent-retry contract;
+* inline proposals always require a separate authenticated decision.
 """
 import uuid
 
@@ -79,21 +87,39 @@ def post_turn(client, body=None, *, subject=OPERATOR, version=None, mutation_key
     return client.post(TURN_ROOT, headers=headers, json=body or turn_body())
 
 
+def grounded_thread(client):
+    """Existing discussion with one reviewer-approved document selected.
+
+    Turn-first discussions intentionally start without a source selection, so
+    citations and inline proposals need this explicit step (Amendment A1 keeps
+    ``POST /conversation-threads`` valid for that purpose).
+    """
+    return create_thread(client, sources=[{'id': DOCUMENT_SOURCE, 'label': 'Offer document'}])
+
+
+def turn_on_thread(client, thread, *, subject=OPERATOR, version=None, mutation_key=None,
+                   **changes):
+    body = {**turn_body(**changes), 'thread_id': thread['id']}
+    return post_turn(client, body, subject=subject,
+        version=thread['version'] if version is None else version,
+        mutation_key=mutation_key)
+
+
 def proposal_of(turn):
     return next(part for part in turn['parts'] if part['kind'] == 'proposal')
 
 
-def decide(client, turn, decision='approve', *, subject=OPERATOR, version=None,
+def decide(client, turn, decision='approve', *, subject=OPERATOR, version,
            mutation_key=None, proposal_id=None):
     proposal = proposal_of(turn)
     return client.post(f"{TURN_ROOT}/{turn['id']}/decisions",
         headers={**_h(subject, mutation_key or key('decision')),
-                  'If-Match': f'"{version or 2}"'},
+                  'If-Match': f'"{version}"'},
         json={'proposal_id': proposal_id or proposal['proposal_id'],
-              'decision': decision, 'expected_thread_version': version or 2})
+              'decision': decision, 'expected_thread_version': version})
 
 
-def cancel(client, turn, *, subject=OPERATOR, version=2, mutation_key=None):
+def cancel(client, turn, *, subject=OPERATOR, version, mutation_key=None):
     return client.post(f"{TURN_ROOT}/{turn['id']}/cancel",
         headers={**_h(subject, mutation_key or key('cancel')),
                   'If-Match': f'"{version}"'})
@@ -104,23 +130,29 @@ def fact_role(conn):
 
 
 def test_thread_first_turn_creates_thread_and_user_message_atomically(turn_api):
+    """Amendment A1: thread + first user message are created in one transaction.
+
+    A new discussion has no selected source yet, so the honest status is
+    ``needs_input`` with a SOURCES_REQUIRED notice (no citations/proposal).
+    """
     client, dsn = turn_api
     body = turn_body()
     result = post_turn(client, body)
     assert result.status_code == 200, result.text
     data = result.json()['data']
     thread, turn = data['thread'], data['turn']
-    assert thread['access'] == 'owner'
+    assert thread['access'] == 'owner' and thread['buyerId'] is None
     assert thread['title'] == 'Summarise the selected documents'
-    assert turn['status'] == 'needs_approval'
-    kinds = [part['kind'] for part in turn['parts']]
-    assert kinds[:2] == ['text', 'citations'] and 'proposal' in kinds
-    assert [item['id'] for item in turn['parts'][1]['items']] == [DOCUMENT_SOURCE]
+    assert turn['status'] == 'needs_input'
+    assert [part['kind'] for part in turn['parts']] == ['text']
+    assert 'SOURCES_REQUIRED' in {notice['code'] for notice in turn['notices']}
+    citations = [part for part in turn['parts'] if part['kind'] == 'citations']
+    assert citations == []
     assert [message['role'] for message in thread['messages']] == ['user', 'assistant']
     assert thread['messages'][0]['client_message_id'] == body['client_message_id']
     assert thread['messages'][0]['seq'] == 1 and thread['messages'][1]['seq'] == 2
     assert 'parts' not in thread['messages'][0]
-    assert [part['kind'] for part in thread['messages'][1]['parts']] == kinds
+    assert [part['kind'] for part in thread['messages'][1]['parts']] == ['text']
     with psycopg.connect(dsn) as conn:
         assert fact_role(conn) == 1
         assert conn.execute('SELECT count(*) FROM conversation_turns').fetchone()[0] == 1
@@ -159,9 +191,10 @@ def test_duplicate_client_message_id_replays_without_second_thread_or_execution(
 
 def test_existing_thread_requires_current_version_and_edit_access(turn_api):
     client, dsn = turn_api
-    thread = create_thread(client, sources=[{'id': DOCUMENT_SOURCE, 'label': 'Offer document'}])
+    thread = grounded_thread(client)
     assert thread['version'] == 1
-    missing = post_turn(client, turn_body())
+    # Existing discussion without If-Match: the strong native precondition is required.
+    missing = post_turn(client, {**turn_body(), 'thread_id': thread['id']})
     assert missing.status_code == 400 and missing.json()['code'] == 'INVALID_REQUEST'
     stale = post_turn(client, {**turn_body(), 'thread_id': thread['id']}, version=2)
     assert stale.status_code == 409 and stale.json()['code'] == 'STALE_REVISION'
@@ -183,14 +216,16 @@ def test_existing_thread_requires_current_version_and_edit_access(turn_api):
 
 def test_inline_approval_is_required_and_then_uses_the_typed_output_path(turn_api):
     client, dsn = turn_api
-    body = turn_body()
-    created = post_turn(client, body).json()['data']
-    turn, thread = created['turn'], created['thread']
+    thread = grounded_thread(client)
+    base = thread['version']
+    created = turn_on_thread(client, thread).json()['data']
+    turn, current_thread = created['turn'], created['thread']
+    current = current_thread['version']
+    assert current == base + 1
     with psycopg.connect(dsn) as conn:
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 0
         assert conn.execute('SELECT count(*) FROM sales_outputs').fetchone()[0] == 0
-    approved = decide(client, turn, version=thread['version'],
-        mutation_key='approve-stale-replay-key')
+    approved = decide(client, turn, version=current, mutation_key='approve-stale-replay-key')
     assert approved.status_code == 200, approved.text
     data = approved.json()['data']
     continuation, new_thread = data['turn'], data['thread']
@@ -201,15 +236,15 @@ def test_inline_approval_is_required_and_then_uses_the_typed_output_path(turn_ap
     assert activity['state'] == 'completed'
     link = next(part for part in continuation['parts'] if part['kind'] == 'output_link')
     assert link['output']['status'] == 'available'
-    assert new_thread['version'] == thread['version'] + 2
-    # Same key AND same (now stale) expected version: the recorded continuation
-    # must be replayed, not rejected with STALE_REVISION.
-    replay = decide(client, turn, version=thread['version'],
-        mutation_key='approve-stale-replay-key')
+    assert new_thread['version'] == current + 2
+    # Same key AND the same expected version sent originally: the recorded
+    # continuation must be replayed, not rejected with STALE_REVISION even
+    # though the first commit advanced thread.version (BLOCKER-1 contract).
+    replay = decide(client, turn, version=current, mutation_key='approve-stale-replay-key')
     assert replay.status_code == 200, replay.text
     assert replay.json()['data']['turn']['id'] == continuation['id']
     # New key, stale version: the durable decision row replays too.
-    new_key = decide(client, turn, version=thread['version'], mutation_key='decision-replay-key')
+    new_key = decide(client, turn, version=base, mutation_key='decision-replay-key')
     assert new_key.status_code == 200
     assert new_key.json()['data']['turn']['id'] == continuation['id']
     with psycopg.connect(dsn) as conn:
@@ -225,22 +260,25 @@ def test_inline_approval_is_required_and_then_uses_the_typed_output_path(turn_ap
     reloaded = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
     assistant = [message for message in reloaded['messages'] if message['role'] == 'assistant']
     assert [part['kind'] for part in assistant[-1]['parts']] == kinds
-    rejected = decide(client, turn, decision='reject', version=thread['version'])
+    rejected = decide(client, turn, decision='reject', version=base)
     assert rejected.status_code == 409 and rejected.json()['code'] == 'ALREADY_DECIDED'
 
 
 def test_rejection_executes_nothing_and_is_safe_to_replay(turn_api):
     client, dsn = turn_api
-    created = post_turn(client, turn_body()).json()['data']
-    rejected = decide(client, created['turn'], decision='reject', version=created['thread']['version'])
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    current = created['thread']['version']
+    rejected = decide(client, created['turn'], decision='reject', version=current)
     assert rejected.status_code == 200, rejected.text
     turn = rejected.json()['data']['turn']
     assert turn['status'] == 'completed'
     assert 'PROPOSAL_REJECTED' in {notice['code'] for notice in turn['notices']}
     activity = next(part for part in turn['parts'] if part['kind'] == 'tool_activity')
     assert activity['state'] == 'skipped'
-    replay = decide(client, created['turn'], decision='reject',
-        version=created['thread']['version'], mutation_key='reject-replay-key')
+    # Replay with a stale version and a new key: the durable decision row wins.
+    replay = decide(client, created['turn'], decision='reject', version=current,
+        mutation_key='reject-replay-key')
     assert replay.status_code == 200
     assert replay.json()['data']['turn']['id'] == turn['id']
     with psycopg.connect(dsn) as conn:
@@ -251,10 +289,11 @@ def test_rejection_executes_nothing_and_is_safe_to_replay(turn_api):
 
 def test_disabled_admission_returns_notice_and_executes_nothing_then_can_resume(turn_api, monkeypatch):
     client, dsn = turn_api
-    created = post_turn(client, turn_body()).json()['data']
-    turn, thread = created['turn'], created['thread']
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    current = created['thread']['version']
     monkeypatch.setenv('BUYEROS_SALES_SKILLS_ENABLED', 'false')
-    blocked = decide(client, turn, version=thread['version'])
+    blocked = decide(client, created['turn'], version=current)
     assert blocked.status_code == 200, blocked.text
     data = blocked.json()['data']
     assert data['turn']['status'] == 'needs_input'
@@ -264,7 +303,7 @@ def test_disabled_admission_returns_notice_and_executes_nothing_then_can_resume(
         assert conn.execute('SELECT count(*) FROM conversation_turn_decisions').fetchone()[0] == 0
         assert conn.execute('SELECT status FROM conversation_turn_proposals').fetchone()[0] == 'proposed'
     monkeypatch.setenv('BUYEROS_SALES_SKILLS_ENABLED', 'true')
-    resumed = decide(client, turn, version=data['thread']['version'])
+    resumed = decide(client, created['turn'], version=data['thread']['version'])
     assert resumed.status_code == 200, resumed.text
     assert resumed.json()['data']['turn']['status'] == 'completed'
     with psycopg.connect(dsn) as conn:
@@ -281,18 +320,20 @@ def test_unknown_outcome_is_persisted_retained_and_never_retried(turn_api, monke
             message='The execution outcome is unknown; reconciliation is required.')
 
     monkeypatch.setitem(engine.EXECUTORS, 'documents.read', uncertain)
-    created = post_turn(client, turn_body()).json()['data']
-    result = decide(client, created['turn'], version=created['thread']['version'])
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    current = created['thread']['version']
+    result = decide(client, created['turn'], version=current)
     assert result.status_code == 200, result.text
     turn = result.json()['data']['turn']
     assert turn['status'] == 'outcome_unknown'
     activity = next(part for part in turn['parts'] if part['kind'] == 'tool_activity')
     assert activity['state'] == 'outcome_unknown'
-    replay = decide(client, created['turn'], version=created['thread']['version'],
+    replay = decide(client, created['turn'], version=current,
         mutation_key='unknown-replay-key')
     assert replay.status_code == 200
     assert replay.json()['data']['turn']['id'] == turn['id']
-    reloaded = client.get(f"{THREAD_ROOT}/{created['thread']['id']}", headers=_h()).json()['data']
+    reloaded = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
     last = [message for message in reloaded['messages'] if message['role'] == 'assistant'][-1]
     assert last['parts'][0]['state'] == 'outcome_unknown'
     with psycopg.connect(dsn) as conn:
@@ -302,36 +343,41 @@ def test_unknown_outcome_is_persisted_retained_and_never_retried(turn_api, monke
 
 def test_share_revocation_and_non_member_decisions_are_denied(turn_api):
     client, dsn = turn_api
-    thread = grant(client, dsn, create_thread(client,
-        sources=[{'id': DOCUMENT_SOURCE, 'label': 'Offer document'}]), REVIEWER, 'editor')
-    created = post_turn(client, {**turn_body(), 'thread_id': thread['id']},
-        subject=REVIEWER, version=thread['version']).json()['data']
-    assert created['thread']['version'] == thread['version'] + 1
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    # Share after the turn, then revoke: current ACL is re-read for every call.
+    shared = grant(client, dsn, created['thread'], REVIEWER, 'editor')
     revoked = client.delete(f"{THREAD_ROOT}/{thread['id']}/shares/{member(dsn, REVIEWER)}",
-        headers=thread_headers(version=created['thread']['version']))
+        headers=thread_headers(version=shared['version']))
     assert revoked.status_code == 200, revoked.text
     current = revoked.json()['data']['version']
     denied = decide(client, created['turn'], subject=REVIEWER, version=current)
-    assert denied.status_code == 404
+    assert denied.status_code == 404, denied.text
     assert post_turn(client, {**turn_body(), 'thread_id': thread['id']},
         subject=REVIEWER, version=current).status_code == 404
+    # Non-member workspace/project stays a 404 with no existence leak.
+    foreign = client.post(
+        TURN_ROOT.replace(WORKSPACE_A, WORKSPACE_B).replace(PROJECT_A, PROJECT_B),
+        headers=dict(_h(OPERATOR, key())), json=turn_body())
+    assert foreign.status_code == 404
     with psycopg.connect(dsn) as conn:
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 0
 
 
 def test_cancel_stops_undispatched_step_and_replays_idempotently(turn_api):
     client, dsn = turn_api
-    created = post_turn(client, turn_body()).json()['data']
-    cancelled = cancel(client, created['turn'], version=created['thread']['version'],
-        mutation_key='cancel-key')
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    current = created['thread']['version']
+    cancelled = cancel(client, created['turn'], version=current, mutation_key='cancel-key')
     assert cancelled.status_code == 200, cancelled.text
     turn = cancelled.json()['data']['turn']
     assert turn['status'] == 'cancelled'
     assert 'TURN_CANCELLED' in {notice['code'] for notice in turn['notices']}
     activity = next(part for part in turn['parts'] if part['kind'] == 'tool_activity')
     assert activity['state'] == 'skipped'
-    replay = cancel(client, created['turn'], version=created['thread']['version'],
-        mutation_key='cancel-key')
+    # Same key and stale expected version replay the recorded cancellation.
+    replay = cancel(client, created['turn'], version=current, mutation_key='cancel-key')
     assert replay.status_code == 200
     assert replay.json()['data']['turn']['id'] == turn['id']
     with psycopg.connect(dsn) as conn:
@@ -354,7 +400,8 @@ def test_fixture_adapter_answer_is_validated_and_persists_only_selected_citation
             'fixture': True, 'citations': list(grounding.citations)})
 
     monkeypatch.setattr(engine, 'model_answer', fixture_adapter)
-    result = post_turn(client, turn_body())
+    thread = grounded_thread(client)
+    result = turn_on_thread(client, thread)
     assert result.status_code == 200, result.text
     turn = result.json()['data']['turn']
     assert captured['refs'] == [DOCUMENT_SOURCE]
@@ -368,8 +415,8 @@ def test_executor_failure_after_partial_write_is_terminal_and_not_replayable(tur
 
     The fixture adapter performs one real typed step (a durable sales task) and
     then raises. The proposal must become terminal, the decision must be
-    recorded, and a second approval under a different key must be rejected —
-    never leave the proposal open with a committed task behind it.
+    recorded, and the failed turn must be durably replayed — never leave the
+    proposal open with a committed task behind it.
     """
     client, dsn = turn_api
     from buyeros_api.services import conversation_turns as engine
@@ -385,20 +432,21 @@ def test_executor_failure_after_partial_write_is_terminal_and_not_replayable(tur
         raise ValueError('synthetic post-admission failure')
 
     monkeypatch.setitem(engine.EXECUTORS, 'documents.read', partial_then_fail)
-    created = post_turn(client, turn_body()).json()['data']
-    turn, thread = created['turn'], created['thread']
-    failed = decide(client, turn, version=thread['version'],
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    current = created['thread']['version']
+    failed = decide(client, created['turn'], version=current,
         mutation_key='partial-failure-approve')
     assert failed.status_code == 200, failed.text
     continuation = failed.json()['data']['turn']
     assert continuation['status'] == 'failed'
     activity = next(part for part in continuation['parts'] if part['kind'] == 'tool_activity')
     assert activity['state'] == 'failed'
-    again = decide(client, turn, version=thread['version'],
+    again = decide(client, created['turn'], version=current,
         mutation_key='partial-failure-second-approve')
     assert again.status_code == 200
     assert again.json()['data']['turn']['id'] == continuation['id']  # durable replay
-    different = decide(client, turn, decision='reject', version=thread['version'],
+    different = decide(client, created['turn'], decision='reject', version=current,
         mutation_key='partial-failure-different-decision')
     assert different.status_code == 409 and different.json()['code'] == 'ALREADY_DECIDED'
     with psycopg.connect(dsn) as conn:
@@ -407,13 +455,13 @@ def test_executor_failure_after_partial_write_is_terminal_and_not_replayable(tur
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
 
 
-
 # --- task-6: durable buyer link + proposal-only approved MCP capabilities ---
 
 def test_buyer_link_grounds_turn_and_proposes_proposal_only_enrichment(turn_api, monkeypatch):
     client, dsn = turn_api
     buyer = _seed_buyer(dsn, name='DeltaGrid')
-    body = turn_body(buyer_id=buyer, text='Enrich the linked company')
+    body = turn_body(buyer_id=buyer, text='Enrich the linked company',
+                     skill_id='sales-contacts')
     result = post_turn(client, body)
     assert result.status_code == 200, result.text
     data = result.json()['data']
@@ -480,7 +528,7 @@ def test_buyer_link_rejects_unknown_and_foreign_ids(turn_api):
 def test_existing_thread_company_link_cannot_be_repointed(turn_api):
     client, dsn = turn_api
     buyer = _seed_buyer(dsn, name='LinkGuard')
-    thread = create_thread(client, sources=[{'id': DOCUMENT_SOURCE, 'label': 'Offer document'}])
+    thread = grounded_thread(client)
     mismatch = post_turn(client, {**turn_body(buyer_id=buyer), 'thread_id': thread['id']},
         version=thread['version'])
     assert mismatch.status_code == 409

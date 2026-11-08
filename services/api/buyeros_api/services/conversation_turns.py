@@ -13,6 +13,7 @@ import json
 import uuid
 from dataclasses import replace
 from datetime import datetime, timezone
+import logging
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -26,9 +27,9 @@ from ..db.icp import Project
 from ..sales.contracts import Scope, SourceRef, TaskInput
 from ..sales.registry import TEMPLATE_SKILLS, load_skill
 from ..sales.turn_contracts import (CitationsPart, CitationItem, ExecutionOutcome,
-    Language, NoticePart, OutputLinkPart, OutputRef, ProposalCost, ProposalPart,
-    Recovery, TextPart, ToolActivityPart, TurnDecisionRequest, TurnNotice, TurnPayload,
-    TurnPlan, TurnRequest, validate_notices, validate_part_list)
+    Language, MAX_TURN_STEPS, NoticePart, OutputLinkPart, OutputRef, ProposalCost,
+    ProposalPart, Recovery, TextPart, ToolActivityPart, TurnDecisionRequest, TurnNotice,
+    TurnPayload, TurnPlan, TurnRequest, validate_notices, validate_part_list)
 from .conversation_access import load, not_found, sales_enabled
 from .conversation_reply import Grounding, reply_from_grounding, resolve_sources
 
@@ -45,6 +46,48 @@ CAPABILITY_BY_SKILL = {
 # honest terminal notice; no executor in this increment dispatches anywhere.
 PROPOSAL_ONLY = frozenset({'xverum.enrich_company', 'drive.read'})
 EXECUTORS = {}
+# Only these unique constraints prove an exact-once replay/race. Any other
+# integrity violation is a real defect and must never be reported as a bogus
+# idempotency conflict (that masked the original turn-test failures).
+TURN_CONFLICT_CONSTRAINTS = frozenset({
+    'uq_conversation_turns_workspace_id_thread_id_client_message_id',
+    'uq_conversation_turns_actor_client',
+    'uq_conversation_thread_messages_client',
+})
+DECISION_CONFLICT_CONSTRAINTS = frozenset({
+    'uq_conversation_turn_decisions_workspace_id_proposal_id',
+})
+CANCEL_CONFLICT_CONSTRAINTS = frozenset({
+    'conversation_turns_pkey',
+    'uq_conversation_turns_workspace_id_id',
+})
+LOGGER = logging.getLogger(__name__)
+
+
+def constraint_name(exc) -> str | None:
+    """Safe diagnostic name only (no SQL, binds or payloads are logged)."""
+    original = getattr(exc, 'orig', None)
+    diag = getattr(original, 'diag', None)
+    name = getattr(diag, 'constraint_name', None)
+    if isinstance(name, str) and name:
+        return name
+    text_value = str(original if original is not None else exc)
+    for candidate in (TURN_CONFLICT_CONSTRAINTS | DECISION_CONFLICT_CONSTRAINTS
+                      | CANCEL_CONFLICT_CONSTRAINTS):
+        if candidate in text_value:
+            return candidate
+    return None
+
+
+def is_expected_conflict(exc, constraints) -> bool:
+    return constraint_name(exc) in constraints
+
+
+def raise_unexpected_integrity(exc, operation: str):
+    """Non-masking error for an integrity failure we do not recognise."""
+    LOGGER.error('conversation_turn_integrity operation=%s constraint=%s',
+        operation, constraint_name(exc))
+    raise ApiError(500, 'INTERNAL_ERROR', 'request failed') from exc
 
 
 def digest(value) -> str:
@@ -252,6 +295,10 @@ def build_plan(thread, payload: TurnRequest, skill, project, grounding, *,
     steps = ['answer']
 
     def add(proposal, staged_payload):
+        # Bounded plan ceiling: at most MAX_TURN_STEPS-1 reviewed proposals
+        # (the first step is always the advisory/grounded answer).
+        if len(proposals) >= MAX_TURN_STEPS - 1:
+            return
         proposals.append(proposal)
         staged.append(staged_payload)
         steps.append('propose')
@@ -619,6 +666,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                 action='conversation_turn.created', entity_type='conversation_turn',
                 entity_id=turn.id)
     except IntegrityError as exc:
+        if not is_expected_conflict(exc, TURN_CONFLICT_CONSTRAINTS):
+            raise_unexpected_integrity(exc, 'conversation_turn.create')
         existing = await _existing_turn(session, scope, payload.client_message_id)
         if existing is None:
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
@@ -709,8 +758,12 @@ async def _execute_xverum_proposal_only(session, scope: Scope, thread, turn,
     if not get_settings().paid_admission_enabled:
         return _terminal('PAID_ADMISSION_DISABLED',
             'Paid provider admission is disabled; no Xverum request was dispatched.')
-    control = (await session.execute(select(WorkerRuntimeControl.backend,
-        WorkerRuntimeControl.enabled))).one()
+    try:
+        control = (await session.execute(select(WorkerRuntimeControl.backend,
+            WorkerRuntimeControl.enabled))).one()
+    except Exception:
+        return _terminal('EXECUTION_RUNTIME_REQUIRED',
+            'The reviewed native execution runtime is not enabled; no Xverum request was dispatched.')
     if (control.backend != 'cloudflare' or not control.enabled
             or not get_settings().cloudflare_execution_enabled):
         return _terminal('EXECUTION_RUNTIME_REQUIRED',
@@ -857,6 +910,8 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
             continuation, decided = await _apply_decision(session, scope, thread,
                 source_turn, proposal, request, fingerprint)
     except IntegrityError as exc:
+        if not is_expected_conflict(exc, DECISION_CONFLICT_CONSTRAINTS):
+            raise_unexpected_integrity(exc, 'conversation_turn.decide')
         existing = (await session.execute(select(ConversationTurnDecision).where(
             ConversationTurnDecision.workspace_id == scope.workspace_id,
             ConversationTurnDecision.project_id == scope.project_id,
@@ -1056,6 +1111,8 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
                 proposal.status = 'cancelled'
                 proposal.revision += 1
     except IntegrityError as exc:
+        if not is_expected_conflict(exc, CANCEL_CONFLICT_CONSTRAINTS):
+            raise_unexpected_integrity(exc, 'conversation_turn.cancel')
         recorded = await _recorded_cancellation(session, scope, thread.id, source_turn.id)
         if recorded is None:
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',

@@ -63,6 +63,13 @@ unknown/foreign ids with `404` (no existence leak). The link is immutable for
 the discussion: a later turn that supplies a different `buyer_id` fails with
 `409 BUYER_LINK_MISMATCH`. `ServerThread` gains `"buyerId": "uuid | null"`.
 
+A turn-first request has no selected source yet (Amendment A1 creates the
+thread shell); the created turn is therefore honestly `needs_input` with a
+`SOURCES_REQUIRED` notice. Citations and inline proposals require an explicit
+source selection on an existing thread (or an enrichment proposal, which only
+needs the linked buyer). At most two proposals are emitted per turn so the
+persisted step counter stays within the reviewed ceiling.
+
 Grounding includes the linked buyer as a citation item
 `{"id": "buyer:<uuid>", "label": "<display name>", "kind": "buyer"}`; only the
 minimal projection (id, company id, canonical display name, domain, review
