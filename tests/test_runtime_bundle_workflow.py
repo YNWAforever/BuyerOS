@@ -648,13 +648,16 @@ def owned_stage(tmp_path, monkeypatch, deployment_policy=False,auth_mode='auth0'
         **{'BUYEROS_G0_'+key.upper()+'_TOKEN':token for key,token in TOKENS.items()}}
     for key,value in values.items(): monkeypatch.setenv(key,value)
     candidate_deployment={'id':'dpl_candidate','projectId':'prj_owned','ownerId':'team_owned','target':'production',
-        'readyState':'READY','url':'owned-candidate.vercel.app','aliasAssigned':False,
+        'readyState':'READY','url':'owned-candidate.vercel.app','aliasAssigned':True,'alias':[],
         'meta':{'githubCommitSha':'a'*40,'githubCommitOrg':'YNWAforever','githubCommitRepo':'BuyerOS','githubCommitRepoId':'1234'},
         'services':[{'name':'app'},{'name':'api'}],
         'lambdas':[{'readyState':'READY','output':[{'functionName':'app'},{'functionName':'api'}]}]}
     if deployment_policy!='absent': candidate_deployment['autoAssignCustomDomains']=deployment_policy
     rollback={**copy.deepcopy(candidate_deployment),'id':'dpl_rollback','url':'owned-rollback.vercel.app'}
     def read_vercel(path):
+        if path=='/v4/aliases/buyer-os-nu.vercel.app?teamId=team_owned':
+            return {'alias':'buyer-os-nu.vercel.app','deploymentId':'dpl_rollback'}
+        if path=='/v2/deployments/dpl_candidate/aliases?teamId=team_owned': return {'aliases':[]}
         if '/dpl_rollback?' in path: return copy.deepcopy(rollback)
         assert '/dpl_candidate?' in path or '/owned-candidate.vercel.app?' in path
         return copy.deepcopy(candidate_deployment)
@@ -679,10 +682,12 @@ def owned_stage(tmp_path, monkeypatch, deployment_policy=False,auth_mode='auth0'
     return runtime,candidate_deployment,calls,tmp_path/'stage.encrypted.json'
 
 
+@pytest.mark.parametrize('alias_assigned',[False,True])
 @pytest.mark.parametrize('deployment_policy',['absent',False],ids=['optional-field-absent','explicitly-disabled'])
-def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,monkeypatch,deployment_policy):
+def test_stage_accepts_native_deployment_with_reviewed_project_policy(tmp_path,monkeypatch,deployment_policy,alias_assigned):
     import json
     runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch,deployment_policy)
+    deployed['aliasAssigned']=alias_assigned
     runtime.stage(123,output)
     packet=runtime.decrypt_observation_packet(json.loads(output.read_text()),'1'*64)
     assert packet['files']['manifest.json']['candidate_deployment_id']=='dpl_candidate'
@@ -733,11 +738,13 @@ def test_stage_omitted_auth_mode_can_publish_before_neon_acceptance(tmp_path,mon
     assert not (tmp_path/'.vercel/.env.production.local').exists()
 
 
-@pytest.mark.parametrize('fault',['assigned','assignment-unproven','auto-assigned','malformed-auto-assignment'])
+@pytest.mark.parametrize('fault',['assigned','assignment-unproven','malformed-alias','alias-error','auto-assigned','malformed-auto-assignment'])
 def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypatch,fault):
     runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
-    if fault=='assigned': deployed['aliasAssigned']=True
-    if fault=='assignment-unproven': deployed.pop('aliasAssigned')
+    if fault=='assigned': deployed['alias']=['unexpected.example.com']
+    if fault=='assignment-unproven': deployed.pop('alias')
+    if fault=='malformed-alias': deployed['alias']=None
+    if fault=='alias-error': deployed['aliasError']={'code':'failed'}
     if fault=='auto-assigned': deployed['autoAssignCustomDomains']=True
     if fault=='malformed-auto-assignment': deployed['autoAssignCustomDomains']=None
     with pytest.raises(ValueError,match='unexpectedly assigned aliases'): runtime.stage(123,output)
@@ -747,7 +754,8 @@ def test_stage_refuses_assigned_or_unproven_candidate_aliases(tmp_path,monkeypat
 
 @pytest.mark.parametrize('auth_mode',['neon','dual'])
 @pytest.mark.parametrize('fault',['valid','missing','deployment_id','source_sha','tree_sha',
-                                  'configuration_sha256','db_target_sha256','stale','unaccepted'])
+                                  'configuration_sha256','db_target_sha256','stale','unaccepted',
+                                  'approval-missing','late-alias','late-canonical'])
 def test_sign_requires_separate_exact_fresh_neon_acceptance(tmp_path,monkeypatch,auth_mode,fault):
     """Exercise signing and the real compose/evaluate gates with synthetic evidence."""
     import json
@@ -760,6 +768,7 @@ def test_sign_requires_separate_exact_fresh_neon_acceptance(tmp_path,monkeypatch
     files={path.name:json.loads(path.read_text()) for path in tmp_path.glob('*.json')}
     files['manifest.json']=manifest
     files['rollback-receipt.json']=files.pop('protected-receipts.json')['items']['rollback']
+    files['rollback-receipt.json']['data']['deployment_id']='dpl_rollback'
     receipt={**runtime.common(manifest),'data':{'accepted':True,'neon_only_rollback_verified':True}}
     # A legacy packet receipt must never substitute for the protected signing input.
     files['neon-receipt.json']=copy.deepcopy(receipt)
@@ -774,10 +783,26 @@ def test_sign_requires_separate_exact_fresh_neon_acceptance(tmp_path,monkeypatch
     for key,value in env.items():monkeypatch.setenv(key,value)
     monkeypatch.delenv('BUYEROS_RELEASE_REVIEW_POLICY',raising=False)
     monkeypatch.setattr(runtime,'current_controls',lambda *args:controls())
-    monkeypatch.setattr(runtime,'deployment',lambda *args:({},packet['origin']))
+    events=[]
+    candidate={'id':manifest['candidate_deployment_id'],'alias':[],'aliasAssigned':True}
+    monkeypatch.setattr(runtime,'deployment',lambda *args:(copy.deepcopy(candidate),packet['origin']))
+    def vercel(path):
+        assert 'approved' in events
+        events.append(path)
+        if '/v2/deployments/' in path:
+            return {'aliases':['unexpected.example.com'] if fault=='late-alias' else []}
+        assert path=='/v4/aliases/buyer-os-nu.vercel.app?teamId=team_owned'
+        return {'alias':'buyer-os-nu.vercel.app','deploymentId':'dpl_other' if fault=='late-canonical' else 'dpl_rollback'}
+    monkeypatch.setattr(runtime,'vercel',vercel)
+    verify=runtime.verify_approval
+    def approve(*args,**kwargs):
+        result=verify(*args,**kwargs)
+        events.append('approved')
+        return result
+    monkeypatch.setattr(runtime,'verify_approval',approve)
     monkeypatch.setattr(runtime,'load_script',lambda name:SimpleNamespace(collect_configuration=lambda *args:None))
     comment='workspace-canary-pass:'+manifest['source_sha']+':'+manifest['candidate_deployment_id']+':roles-project-reload-retry'
-    monkeypatch.setattr(runtime,'github',lambda path:approvals(comment) if path.endswith('/approvals')
+    monkeypatch.setattr(runtime,'github',lambda path:([] if fault=='approval-missing' else approvals(comment)) if path.endswith('/approvals')
         else {'run_attempt':1,'triggering_actor':{'id':101},'id':456})
     if fault=='deployment_id':receipt[fault]='dpl_other'
     if fault in ('source_sha','tree_sha'):receipt[fault]='0'*40
@@ -791,7 +816,101 @@ def test_sign_requires_separate_exact_fresh_neon_acceptance(tmp_path,monkeypatch
         runtime.sign(stage_file,output)
         bundle=decrypt_workspace_bundle(json.loads(output.read_text()),'2'*64)
         assert bundle['receipts']['items']['neon']==receipt
+        assert len(events)==3 and events[0]=='approved'
+    elif fault in ('approval-missing','late-alias','late-canonical'):
+        diagnostic=tmp_path/'safe.json'
+        assert runtime.main(['sign','--input',str(stage_file),'--output',str(output),'--diagnostics-output',str(diagnostic)])==2
+        expected={'approval-missing':'sign','late-alias':'sign_aliases_before_publish',
+                  'late-canonical':'sign_canonical_before_publish'}[fault]
+        assert json.loads(diagnostic.read_text())=={'phase':expected,'category':'failed'}
+        assert not output.exists()
+        if fault=='approval-missing':assert events==[]
     else:
         with pytest.raises(ValueError,match='protected input unavailable' if fault=='missing' else 'complete live gate'):
             runtime.sign(stage_file,output)
         assert not output.exists()
+
+
+@pytest.mark.parametrize('body',[None, [], {}, {'aliases':None}, {'aliases':{}}, {'aliases':['unexpected.example.com']},
+    {'aliases':[], 'pagination':None}, {'aliases':[], 'pagination':{}},
+    {'aliases':[], 'pagination':{'next':123}}, {'aliases':[], 'pagination':{'next':''}}])
+def test_stage_refuses_unproven_authoritative_alias_inventory(tmp_path,monkeypatch,body):
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.vercel
+    monkeypatch.setattr(runtime,'vercel',lambda path:body if '/aliases?' in path else original(path))
+    with pytest.raises(ValueError,match='alias'):runtime.stage(123,output)
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
+
+
+def test_stage_accepts_exhausted_authoritative_alias_inventory(tmp_path,monkeypatch):
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.vercel
+    monkeypatch.setattr(runtime,'vercel',lambda path:{'aliases':[],'pagination':{'next':None}} if '/aliases?' in path else original(path))
+    runtime.stage(123,output)
+    assert output.exists()
+
+
+@pytest.mark.parametrize('boundary',['before','after'])
+@pytest.mark.parametrize('fault',['changed','missing','wrong-host','redirect','unavailable'])
+def test_stage_canonical_readback_is_exact_and_failure_has_fixed_phase(tmp_path,monkeypatch,boundary,fault):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.vercel;read_count=0
+    def read(path):
+        nonlocal read_count
+        result=original(path)
+        if '/v4/aliases/' in path:
+            read_count+=1
+            if read_count==(1 if boundary=='before' else 2):
+                if fault=='changed':result['deploymentId']='dpl_other'
+                if fault=='missing':result.pop('deploymentId')
+                if fault=='wrong-host':result['alias']='other.vercel.app'
+                if fault=='redirect':result['redirect']='other.example.com'
+                if fault=='unavailable':raise ValueError('private remote failure')
+        return result
+    monkeypatch.setattr(runtime,'vercel',read)
+    diagnostic=tmp_path/'safe.json'
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),'--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':'stage_canonical_'+boundary,'category':'failed'}
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
+    assert len([c for c in calls if c[:2]==['vercel','deploy']])==(boundary=='after')
+
+
+def test_stage_alias_read_failure_reports_fixed_phase_and_publishes_nothing(tmp_path,monkeypatch):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.vercel
+    def read(path):
+        if '/aliases?' in path:raise ValueError('private diagnostic')
+        return original(path)
+    monkeypatch.setattr(runtime,'vercel',read)
+    diagnostic=tmp_path/'safe.json'
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),'--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':'stage_candidate_aliases','category':'failed'}
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
+
+
+@pytest.mark.parametrize('fault',['inventory','metadata'])
+def test_stage_rechecks_aliases_after_probes_before_publication(tmp_path,monkeypatch,fault):
+    import json
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.vercel;inventory_reads=0;metadata_reads=0
+    def read(path):
+        nonlocal inventory_reads,metadata_reads
+        result=original(path)
+        if '/v2/deployments/' in path:
+            inventory_reads+=1
+            if inventory_reads==2 and fault=='inventory':result={'aliases':['late.example.com']}
+        if '/v13/deployments/dpl_candidate?' in path:
+            metadata_reads+=1
+            if metadata_reads==2 and fault=='metadata':result['alias']=['late.example.com']
+        return result
+    monkeypatch.setattr(runtime,'vercel',read)
+    diagnostic=tmp_path/'safe.json'
+    assert runtime.main(['stage','--ci-run-id','123','--output',str(output),'--diagnostics-output',str(diagnostic)])==2
+    assert json.loads(diagnostic.read_text())=={'phase':'stage_aliases_before_publish','category':'failed'}
+    assert not output.exists()
+    assert not (tmp_path/'.vercel/.env.production.local').exists()
