@@ -56,7 +56,7 @@ const aiCitation={id:`fact:profile:${aiProfile}:${aiFact}`,label:'Approved offer
 sampleThread.sources=[{id:aiCitation.id,label:aiCitation.label}];
 sampleThread.messages.push({id:'m2',kind:'ai',status:'needs_review',fixture:true,text:'A cited fixture reply '+('字'.repeat(100)),citations:[aiCitation]});
 const sampleContext=[{title:'Documents & outputs',items:[{id:'document:d1',label:'Offer document',title:'source'.repeat(40)+'.pdf',status:'parsing',path:'/app/discover/edit?document=d1'}]},{title:'Offer facts',items:[{id:'fact:f1',label:'Candidate offer fact',title:'product',detail:'內容'.repeat(250),status:'candidate',path:'/app/discover/edit'}]}];
-for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in ${locale}`,async()=>{
+for(const locale of ['en','zh-HK'])test(`thread and context fit 320??440px in ${locale}`,async()=>{
  const {liveZh}=await import('../features/live/locale.ts');const t=value=>locale==='zh-HK'?(liveZh[value]||value):value;
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
  try{
@@ -80,7 +80,8 @@ for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in 
 // scoped to fixtures. Screenshots are written for review artifacts.
 // ---------------------------------------------------------------------------
 const fixture=await import('./conversation-browser-fixture.mjs');
-const {workspace,project,threadId,turnId,proposalId,outputId,newThreadId,documentId}=fixture;
+const {workspace,project,threadId,turnId,proposalId,outputId,newThreadId,documentId,citationId,
+ buyerId,buyerThreadId,buyerProposalId}=fixture;
 const shots='test-results/conversation-studio';
 mkdirSync(shots,{recursive:true});
 const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
@@ -154,7 +155,7 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
  await page.route('**/v1/**',async route=>{
   const request=route.request(),url=new URL(request.url());
   requests.push({method:request.method(),path:url.pathname,search:url.search});
-  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key']});}
+  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['if-match']});}
   const answer=await handler({req:request,url,state,requests,posts});
   if(answer){if(answer.status===204)return route.fulfill({status:204});return route.fulfill({status:answer.status??200,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(answer.json)});}
   const data=fixture.contextResponse(url);
@@ -177,16 +178,23 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
   // Inline tool activity keeps its truthful state.
   assert.equal(await page.getByText('Completed',{exact:true}).count(),1);
+  // Both inline entry points exist before either navigation can unmount the studio.
+  assert.equal(await transcript.getByRole('button',{name:'Open saved output',exact:true}).count(),1);
+  assert.equal(await transcript.getByRole('button',{name:'Offer document',exact:true}).count(),1);
+  await page.screenshot({path:shots+'/transcript-inline-parts-desktop.png',fullPage:true});
   // Citations are real links to the canonical record.
   await transcript.getByRole('button',{name:'Offer document',exact:true}).click();
   await waitForDestination(page,`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
-  // Output links open the saved revision.
+  // Output links open the saved revision (reload to remount the studio after navigation).
+  await page.reload();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
   await transcript.getByRole('button',{name:'Open saved output',exact:true}).click();
   await waitForDestination(page,`/app/documents/${outputId}?workspace=${workspace}&project=${project}`);
+  await page.reload();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
   // The proposal is an inline approval card, not a chat instruction.
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),1);
   assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),1);
-  await page.screenshot({path:shots+'/transcript-inline-parts-desktop.png',fullPage:true});
   await transcript.getByRole('button',{name:'Approve',exact:true}).click();
   await page.getByText('Approved. This discussion continues with the result.',{exact:true}).waitFor();
   const decisions=posts.filter(row=>/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(row.path));
@@ -251,7 +259,7 @@ test('a new discussion sends exactly one turn for its first message and retries 
   const followUp=page.getByRole('textbox',{name:'Message BuyerOS'});
   await followUp.fill('Add a contact');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
-  await page.getByText('The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',{exact:true}).waitFor();
+  await page.getByText('The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',{exact:true}).first().waitFor();
   const failed=posts.filter(row=>row.path.endsWith('/conversation-turns')).at(-1);
   assert.match(failed.body.client_message_id,uuidPattern);
   await page.getByRole('button',{name:'Retry send',exact:true}).click();
@@ -274,7 +282,7 @@ test('fallback without the turn endpoint saves a truthful note and never fabrica
   await page.getByText('Continuous replies are unavailable here. Your messages are saved as notes.',{exact:true}).waitFor();
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this note');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
-  await page.getByText('Saved as a note. Select sources to ask BuyerOS.',{exact:true}).waitFor();
+  await page.getByText('Saved as a note. Select sources to ask BuyerOS.',{exact:true}).first().waitFor();
   const appends=posts.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/messages$/.test(row.path));
   assert.equal(appends.length,1,'the note path appends once');
   assert.equal(appends[0].body.text,'Keep this note');
@@ -307,7 +315,7 @@ test('unsent composer text survives navigation, reload and remains scoped to the
  }finally{await harness.close();}
 });
 
-test('the studio keeps three views separate on mobile and never overflows 320–1440px',async()=>{
+test('the studio keeps three views separate on mobile and never overflows 320??440px',async()=>{
  const harness=await fixtureHarness();
  try{
   const {page}=harness;
@@ -417,7 +425,7 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   const viewerComposer=page.getByRole('textbox',{name:'Message BuyerOS'});
   await viewerComposer.waitFor();
   assert.equal(await viewerComposer.isDisabled(),true);
-  assert.equal(await page.locator('.conversation-transcript').getByRole('button',{name:'Approve',exact:true}).count(),0);
+  assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0);
   await page.locator('.conversation-panel').getByRole('tab',{name:'Sources',exact:true}).click();
   assert.equal(await page.locator('.conversation-panel').getByRole('button',{name:'Remove',exact:true}).count(),0);
  }finally{await harness.close();}
@@ -455,10 +463,10 @@ test('a permission failure keeps the message unsent and surfaces the honest noti
   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Do not lose this message');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
-  await page.getByText('You do not have permission to act in this discussion.',{exact:true}).waitFor();
+  await page.getByText('You do not have permission to act in this discussion.',{exact:true}).first().waitFor();
   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1);
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Do not lose this message','the unsent message stays in the composer');
-  assert.equal(await page.locator('.conversation-transcript').getByText('Do not lose this message',{exact:true}).count(),0,'a denied send is never appended');
+  assert.equal(await transcript.getByText('Do not lose this message',{exact:true}).count(),0,'a denied send is never appended');
  }finally{await harness.close();}
 });
 
@@ -476,8 +484,72 @@ test('an unavailable workspace thread fails explicitly instead of showing anothe
   const {page}=harness;
   await page.getByText('Not found in this workspace.',{exact:true}).waitFor();
   await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).waitFor();
-  assert.equal(await page.locator('.conversation-transcript').count(),0,'no transcript for an unavailable thread');
+  assert.equal(await transcript.count(),0,'no transcript for an unavailable thread');
   assert.equal(await page.getByRole('button',{name:'New discussion',exact:true}).count()>=1,true);
+ }finally{await harness.close();}
+});
+
+test('Discuss this company starts one linked turn and a terminal enrichment card becomes inert',async()=>{
+ const handler=async({req,url,state})=>{
+  const method=req.method();
+  if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')return {status:204};
+  if(url.pathname===prefix)return {json:fixture.envelope({id:project,name:'Fixture project'})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[{id:'sales-contacts'}]})};
+  if(url.pathname.endsWith('/conversation-threads')&&method==='GET')return {json:fixture.envelope({items:[],total:0,offset:0,limit:50})};
+  const threadGet=url.pathname.match(/\/conversation-threads\/([0-9a-f-]+)$/);
+  if(threadGet&&method==='GET'){
+   if(threadGet[1]===buyerThreadId){
+    const conversation=state.terminal?fixture.terminalBuyerConversation():fixture.buyerConversation();
+    state.buyerThread=conversation.thread;return {json:fixture.envelope(conversation.thread)};
+   }
+   return {json:fixture.envelope(fixture.studioThread)};
+  }
+  if(url.pathname.endsWith('/conversation-turns')&&method==='POST'){
+   const conversation=fixture.buyerConversation();state.buyerThread=conversation.thread;return {json:fixture.envelope(conversation)};
+  }
+  if(/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(url.pathname)&&method==='POST'){
+   state.terminal=true;return {json:fixture.envelope(fixture.terminalBuyerConversation())};
+  }
+  return null;
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await page.getByRole('button',{name:'Discuss this company',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Discuss this company',exact:true}).click();
+  await transcript.getByText('Here is what we can verify about DeltaGrid.',{exact:true}).waitFor();
+  // Exactly one thread-first turn; no thread_id, no If-Match, buyer link carried.
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,1,'one thread-first turn for the company entry');
+  assert.equal('thread_id' in turns[0].body,false);
+  assert.equal('expected_thread_version' in turns[0].body,false);
+  assert.equal(turns[0].match,undefined,'a thread-first turn never sends If-Match');
+  assert.equal(turns[0].body.buyer_id,buyerId);
+  assert.equal(turns[0].body.template_id,'check-company');
+  assert.equal(turns[0].body.skill_id,'sales-contacts');
+  assert.match(turns[0].body.client_message_id,uuidPattern);
+  assert.equal(turns[0].body.language,'en');
+  assert.match(turns[0].body.text,/Discuss this company/);
+  assert.match(await page.locator('#fixture-path').textContent(),new RegExp('/app/discussions/s/'+buyerThreadId));
+  // Company identity comes from thread.buyerId + the persisted buyer citation; no extra fetch.
+  const compose=page.locator('.conversation-compose');
+  await compose.getByLabel('Linked company').waitFor();
+  assert.match(await compose.getByLabel('Linked company').innerText(),/DeltaGrid/);
+  // Always-approval plus an honest cost review with no invented number.
+  assert.equal(await transcript.getByText('Approval required',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('Cost review required before any paid request.',{exact:true}).count(),1);
+  assert.equal(await page.locator('.conversation-proposal-cost').innerText(),'Cost review required before any paid request.');
+  // Approval returns a terminal configuration outcome; the card must become inert.
+  await transcript.getByRole('button',{name:'Approve',exact:true}).click();
+  await transcript.getByText('Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.').first().waitFor();
+  assert.equal(await transcript.getByText('Failed',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('This step cannot run in the current configuration.',{exact:true}).count(),1);
+  assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0,'terminal configuration leaves no actionable decision');
+  assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),0);
+  const decision=posts.find(row=>row.path.endsWith('/decisions'));
+  assert.deepEqual(decision.body,{proposal_id:buyerProposalId,decision:'approve',expected_thread_version:1});
+  assert.equal(decision.match,'"1"');
  }finally{await harness.close();}
 });
 
@@ -735,3 +807,6 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
   assert.deepEqual(imports[1].body.messages,[{text:'Keep this local note'}]);assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+
+

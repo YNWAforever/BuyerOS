@@ -6,7 +6,7 @@ import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
 const {readChatThread,readMessagePart,readTurn,internalHref,isUuid}=await import('../features/live/conversation/types.ts');
-const {buildTranscript,groupTranscript,collectPanelData,latestToolActivity,panelHasContent}=await import('../features/live/conversation/parts.ts');
+const {buildTranscript,groupTranscript,collectPanelData,latestToolActivity,panelHasContent,terminalProposals,companyFromEntries}=await import('../features/live/conversation/parts.ts');
 
 const threadId='11111111-1111-4111-8111-111111111111';
 const turnId='22222222-2222-4222-8222-222222222222';
@@ -31,6 +31,9 @@ test('amendment A thread rows normalise role, seq, parts and timestamps; legacy 
   assert.equal(parsed.messages[2].role,'user');assert.deepEqual(parsed.messages[2].parts,[]);assert.equal(parsed.messages[2].seq,null);
   const roundTrip=readChatThread(JSON.parse(JSON.stringify(parsed)));
   assert.ok(roundTrip);
+  // Amendment buyer link: the thread envelope carries camelCase buyerId; absent reads null.
+  assert.equal(parsed.buyerId,null);
+  assert.equal(readChatThread({...thread([userRow]),buyerId:'ae000000-0000-4000-8000-000000000001'}).buyerId,'ae000000-0000-4000-8000-000000000001');
 });
 
 test('unknown roles and part kinds degrade safely; malformed parts never throw',()=>{
@@ -80,8 +83,33 @@ test('panel data dedupes citations, results and proposals and includes selected 
   const parsed=readChatThread(thread([userRow,assistantRow]));
   const panel=collectPanelData(parsed,buildTranscript(parsed));
   assert.equal(panel.results.length,1);assert.equal(panel.citations.length,1);
+  // Buyer identity derives only from a persisted buyer citation, never invented.
+  const buyerEntryParts=[{kind:'citations',items:[{id:'buyer:ae000000-0000-4000-8000-000000000001',label:'DeltaGrid',kind:'buyer'}]}];
+  const buyerThread=readChatThread({...thread([{id:'be000000-0000-4000-8000-000000000001',seq:1,role:'assistant',text:'DeltaGrid',turn_id:null,parts:buyerEntryParts}]),buyerId:'ae000000-0000-4000-8000-000000000001'});
+  assert.deepEqual(companyFromEntries(buildTranscript(buyerThread)),{id:'buyer:ae000000-0000-4000-8000-000000000001',label:'DeltaGrid'});
+  assert.equal(companyFromEntries(buildTranscript(parsed)),null);
+  // Provider-credit cost with known:false keeps its honest shape (no invented amount).
+  const input=readMessagePart({kind:'proposal',proposal_id:'p',capability:'xverum.enrich_company',title:'Enrich',
+    rationale:'Needs verified evidence',requires_approval:true,
+    cost:{kind:'provider_credits',amount:'0',unit:'credits',may_incur_provider_charges:true,known:false}});
+  assert.equal(input.kind,'proposal');assert.equal(input.cost.kind,'provider_credits');
+  assert.equal(input.cost.known,false);assert.equal(input.cost.amount,'0');assert.equal(input.cost.unit,'credits');
+  // A terminal configuration notice in a later turn makes the earlier proposal inert.
+  const terminalThread=readChatThread(thread([userRow,assistantRow,
+    {id:'c1000000-0000-4000-8000-000000000001',seq:3,role:'assistant',text:'Cannot run',turn_id:'c2000000-0000-4000-8000-000000000001',
+      parts:[{kind:'notice',code:'XVERUM_DISPATCH_NOT_ENABLED',message:'Dispatch is disabled.'},
+        {kind:'tool_activity',call_id:'c2000000-0000-4000-8000-000000000001',capability:'sales-research',title:'Research',state:'failed',started_at:'2026-11-08T01:02:00.000Z',error_code:'XVERUM_DISPATCH_NOT_ENABLED'}]}]));
+  const terminalEntries=buildTranscript(terminalThread);
+  const terminal=terminalProposals(terminalEntries);
+  assert.equal(terminal.get('77777777-7777-4777-8777-777777777777').terminal,true);
+  assert.equal(terminalProposals(buildTranscript(parsed)).size,0);
   const alt=readMessagePart({part:'output_link',kind:'research_brief',output_id:'66666666-6666-4666-8666-666666666666',title:'Research brief',revision:1,status:'saved',href:'https://evil.invalid/x'});
   assert.equal(alt.kind,'output_link');assert.equal(alt.kind==='output_link'?alt.outputKind:null,'research_brief');assert.equal(alt.href,undefined);
+  // The shipped wire nests the output ref under `output` because `kind` is the discriminator.
+  const nested=readMessagePart({kind:'output_link',title:'Research brief',href:'/app/documents/66666666-6666-4666-8666-666666666666',
+    output:{output_id:'66666666-6666-4666-8666-666666666666',kind:'research_brief',revision:1,status:'saved'}});
+  assert.equal(nested.kind,'output_link');assert.equal(nested.href,'/app/documents/66666666-6666-4666-8666-666666666666');
+  assert.equal(nested.kind==='output_link'?nested.outputKind:null,'research_brief');
   assert.equal(panel.proposals.length,1);assert.equal(panel.proposals[0].turnId,turnId);
   assert.equal(panel.selectedSources.length,1);
   assert.equal(panelHasContent(panel),true);

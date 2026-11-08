@@ -5,6 +5,7 @@
  */
 import type {ChatThread,CitationItem,ConversationTurn,MessagePart,MessageRole,NoticePart,
   OutputLinkPart,ProposalPart,SelectedSource,ToolActivityPart} from './types';
+import {isTerminalNoticeCode} from './approval';
 
 export type EphemeralReply={id:string;text:string;citations:CitationItem[]};
 export type TranscriptEntry={
@@ -119,4 +120,40 @@ export function latestToolActivity(entries:ReadonlyArray<TranscriptEntry>,capabi
 }
 export function panelHasContent(panel:PanelData):boolean{
   return panel.results.length>0||panel.citations.length>0||panel.selectedSources.length>0||panel.proposals.length>0;
+}
+export type TerminalProposal={terminal:boolean;noticeMessage?:string};
+/**
+ * A proposal whose continuation already ended in a terminal configuration notice (or
+ * a failed/skipped tool step for the same capability) must never be actionable again,
+ * including after reload when the local decision record is gone.
+ */
+export function terminalProposals(entries:ReadonlyArray<TranscriptEntry>):Map<string,TerminalProposal>{
+  const result=new Map<string,TerminalProposal>();
+  entries.forEach((entry,index)=>{
+    const proposals=entry.parts.filter((part):part is ProposalPart=>part.kind==='proposal');
+    if(!proposals.length)return;
+    const later=entries.slice(index+1);
+    for(const proposal of proposals){
+      for(const row of later){
+        for(const part of row.parts){
+          if(part.kind==='notice'&&isTerminalNoticeCode(part.code)){
+            result.set(proposal.proposal_id,{terminal:true,noticeMessage:part.message});
+          }else if(part.kind==='tool_activity'&&part.capability===proposal.capability&&
+            (part.state==='failed'||part.state==='outcome_unknown'||part.state==='skipped')){
+            if(!result.has(proposal.proposal_id))result.set(proposal.proposal_id,{terminal:true});
+          }
+        }
+      }
+    }
+  });
+  return result;
+}
+/** Company identity linked to the thread, taken only from persisted/response citations. */
+export function companyFromEntries(entries:ReadonlyArray<TranscriptEntry>):{id:string;label:string}|null{
+  for(const entry of entries)for(const part of entry.parts){
+    if(part.kind!=='citations')continue;
+    const buyer=part.items.find(item=>item.kind==='buyer');
+    if(buyer)return {id:buyer.id,label:buyer.label};
+  }
+  return null;
 }

@@ -30,7 +30,7 @@ export const turnNotices={
 
 export type TurnSubmitInput={
   threadId:string|null;clientMessageId:string;expectedVersion:number|null;
-  text:string;skillId?:string|null;language:'en'|'zh-HK';signal?:AbortSignal;
+  text:string;skillId?:string|null;templateId?:string;buyerId?:string;language:'en'|'zh-HK';signal?:AbortSignal;
 };
 export type TurnDecisionInput={
   threadId:string;turnId:string;proposalId:string;decision:TurnDecision;
@@ -40,6 +40,8 @@ export type TurnCancelInput={threadId:string;turnId:string;expectedVersion:numbe
 
 const MAX_TEXT=4_000;
 const skillPattern=/^[a-z0-9][a-z0-9-]{0,80}$/;
+export const turnTemplates=['first-project','understand-documents','research-market','review-buyers',
+  'check-company','prepare-follow-up','custom'] as const;
 function validText(value:unknown):value is string{
   return typeof value==='string'&&value.trim().length>0&&value.length<=MAX_TEXT;
 }
@@ -128,14 +130,18 @@ export class ConversationTurns{
     if(input.language!=='en'&&input.language!=='zh-HK')throw new Error(turnNotices.rejected);
     if(input.expectedVersion!==null&&!Number.isSafeInteger(input.expectedVersion))throw new Error(turnNotices.rejected);
     if(input.threadId===null&&input.expectedVersion!==null)throw new Error(turnNotices.rejected);
+    if(input.templateId!==undefined&&!(turnTemplates as readonly string[]).includes(input.templateId))throw new Error(turnNotices.rejected);
+    if(input.buyerId!==undefined&&!isUuid(input.buyerId))throw new Error(turnNotices.rejected);
     const skillId=input.skillId??null;
     // Amendment A1: a first turn omits thread_id and expected_thread_version; the
     // server creates the thread, title and first user message in one transaction.
+    // `buyer_id`/`template_id` are honoured only on that thread-first call.
     const body:Record<string,unknown>=input.threadId===null
-      ?{client_message_id:input.clientMessageId,language:input.language,text:input.text,skill_id:skillId}
+      ?{client_message_id:input.clientMessageId,language:input.language,text:input.text,skill_id:skillId,
+        ...(input.templateId?{template_id:input.templateId}:{}),...(input.buyerId?{buyer_id:input.buyerId}:{})}
       :{thread_id:input.threadId,client_message_id:input.clientMessageId,expected_thread_version:input.expectedVersion,
         language:input.language,text:input.text,skill_id:skillId};
-    const key=JSON.stringify(['turn',this.identity,input.threadId,input.clientMessageId,input.expectedVersion,input.text,skillId,input.language]);
+    const key=JSON.stringify(['turn',this.identity,input.threadId,input.clientMessageId,input.expectedVersion,input.text,skillId,input.language,input.templateId??null,input.buyerId??null]);
     const raw=await this.intentFor(key).run(key,idempotencyKey=>this.send<unknown>('',body,input.expectedVersion,idempotencyKey,input.signal));
     const result=readTurnResult(raw);
     if(!result)throw new Error(turnNotices.invalid);

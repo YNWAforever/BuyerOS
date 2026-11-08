@@ -18,7 +18,8 @@ export type TextPart={kind:'text';text:string;language?:string};
 export type CitationsPart={kind:'citations';items:CitationItem[]};
 export type ToolActivityPart={kind:'tool_activity';call_id:string;capability:string;title:string;state:ToolState;
   started_at?:string;finished_at?:string;summary?:string;error_code?:string};
-export type ProposalCost={currency?:string;amount?:number;basis?:string};
+export type ProposalCost={kind?:'nonbillable'|'provider_credits';amount?:number|string;unit?:string;
+  may_incur_provider_charges?:boolean;known?:boolean;basis?:string};
 export type ProposalPart={kind:'proposal';proposal_id:string;capability:string;title:string;rationale?:string;
   arguments_preview?:unknown;cost?:ProposalCost;requires_approval:boolean};
 export type OutputLinkPart={kind:'output_link';output_id:string;outputKind:string;title:string;revision:number;status:string;href?:string};
@@ -33,7 +34,7 @@ export type ChatRunReference={id:string;label:string;status:string};
 export type ChatMessage={id:string;text:string;role:MessageRole;seq:number|null;clientMessageId:string|null;
   createdAt:number|null;parts:MessagePart[];turnId:string|null};
 export type ChatThread={id:string;version:number;templateId:string;title:string;createdAt:number;updatedAt:number;
-  access:ThreadAccess;shareCount:number;messages:ChatMessage[];sources:SelectedSource[];runs:ChatRunReference[]};
+  access:ThreadAccess;shareCount:number;buyerId:string|null;messages:ChatMessage[];sources:SelectedSource[];runs:ChatRunReference[]};
 export type TurnResult={thread:ChatThread;turn:ConversationTurn};
 export type TurnCapability='checking'|'available'|'absent'|'unavailable';
 export type TurnDecision='approve'|'reject';
@@ -76,8 +77,12 @@ export function readRecovery(value:unknown):Recovery|undefined{
 function readCost(value:unknown):ProposalCost|undefined{
   if(!record(value))return undefined;
   const cost:ProposalCost={};
-  if(str(value.currency,8))cost.currency=value.currency;
+  if(value.kind==='nonbillable'||value.kind==='provider_credits')cost.kind=value.kind;
   if(typeof value.amount==='number'&&Number.isFinite(value.amount))cost.amount=value.amount;
+  else if(typeof value.amount==='string'&&/^\d{1,18}(?:\.\d{1,4})?$/.test(value.amount))cost.amount=value.amount;
+  if(value.unit==='USD'||value.unit==='credits')cost.unit=value.unit;
+  if(typeof value.may_incur_provider_charges==='boolean')cost.may_incur_provider_charges=value.may_incur_provider_charges;
+  if(typeof value.known==='boolean')cost.known=value.known;
   if(str(value.basis,120))cost.basis=value.basis;
   return Object.keys(cost).length?cost:undefined;
 }
@@ -209,8 +214,10 @@ export function readChatThread(value:unknown):ChatThread|null{
   if(Array.isArray(value.runs))for(const run of value.runs.slice(0,MAX_SOURCES)){
     if(record(run)&&nonBlank(run.id,200)&&nonBlank(run.label,80)&&nonBlank(run.status,80))runs.push({id:run.id,label:run.label,status:run.status});
   }
+  const buyerIdRaw=value.buyerId??value.buyer_id;
+  const buyerId=typeof buyerIdRaw==='string'&&buyerIdRaw.length>0&&buyerIdRaw.length<=200?buyerIdRaw:null;
   return {id:value.id,version:value.version,templateId:value.templateId,title:value.title,createdAt:value.createdAt,
-    updatedAt:value.updatedAt,access,shareCount:int(value.shareCount)?value.shareCount as number:0,messages,sources,runs};
+    updatedAt:value.updatedAt,access,shareCount:int(value.shareCount)?value.shareCount as number:0,buyerId,messages,sources,runs};
 }
 export function readTurnResult(value:unknown):TurnResult|null{
   if(!record(value))return null;

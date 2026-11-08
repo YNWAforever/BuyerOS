@@ -51,6 +51,16 @@ test('a first turn omits thread id and If-Match, a later turn sends both and one
   assert.equal(turnNotice(new LiveError('changed','STALE_REVISION',412,'',false)),turnNotices.stale);
   assert.equal(turnNotice(new LiveError('over budget','BUDGET_LIMIT',409,'',false)),turnNotices.budget);
   assert.equal(turnNotice(new Error(turnNotices.invalid)),turnNotices.invalid);
+  // A buyer-linked thread-first turn carries template_id/buyer_id and never If-Match.
+  const companyRequests=[];
+  const companyApi=new ConversationTurns({async request(input){companyRequests.push(input);return result();}},session(),true);
+  await companyApi.submit({threadId:null,clientMessageId:'ae000000-0000-4000-8000-000000000009',expectedVersion:null,
+    text:'Discuss this company',language:'en',templateId:'check-company',skillId:'sales-contacts',buyerId:'ae000000-0000-4000-8000-000000000001'});
+  const companyBody=companyRequests[0].body;
+  assert.equal('thread_id' in companyBody,false);assert.equal('expected_thread_version' in companyBody,false);
+  assert.equal(companyBody.template_id,'check-company');assert.equal(companyBody.skill_id,'sales-contacts');
+  assert.equal(companyBody.buyer_id,'ae000000-0000-4000-8000-000000000001');
+  assert.equal(companyRequests[0].ifMatch,undefined);
 });
 
 test('decisions post to the owning turn with the chosen proposal and version',async()=>{

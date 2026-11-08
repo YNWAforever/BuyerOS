@@ -7,16 +7,27 @@ import type {ProposalPart,ThreadAccess,ToolActivityPart,ToolState,TurnStatus} fr
 export type DecisionChoice='approve'|'reject';
 export type DecisionState='submitting'|'accepted'|'failed';
 export type LocalDecision={choice:DecisionChoice;state:DecisionState;notice?:string};
-export type ProposalUiState='awaiting'|'submitting'|'approved'|'rejected'|'failed'|'unknown_outcome'|'unavailable'|'not_required';
+export type ProposalUiState='awaiting'|'submitting'|'approved'|'rejected'|'failed'|'unknown_outcome'|'unavailable'|'not_required'|'inert';
 export type DecisionGate={canDecide:boolean;canReject:boolean;noticeKey:string};
+/** Approval of a proposal-only capability returns one of these terminal configuration notices. */
+export const TERMINAL_NOTICE_CODES:readonly string[]=['SALES_ADMISSION_DISABLED','PAID_ADMISSION_DISABLED',
+  'EXECUTION_RUNTIME_REQUIRED','XVERUM_NOT_CONFIGURED','XVERUM_DISPATCH_NOT_ENABLED','DRIVE_NOT_CONFIGURED',
+  'DRIVE_SOURCE_UNAVAILABLE','DRIVE_READ_NOT_ENABLED'];
+export function isTerminalNoticeCode(code:string):boolean{return TERMINAL_NOTICE_CODES.includes(code);}
 
-export function proposalUiState(part:ProposalPart,turnStatus:TurnStatus|undefined,decision:LocalDecision|undefined,access:ThreadAccess):ProposalUiState{
+export function proposalUiState(part:ProposalPart,turnStatus:TurnStatus|undefined,decision:LocalDecision|undefined,access:ThreadAccess,terminal=false):ProposalUiState{
   if(!part.requires_approval)return 'not_required';
   if(decision){
     if(decision.state==='submitting')return 'submitting';
-    if(decision.state==='accepted')return decision.choice==='approve'?'approved':'rejected';
+    if(decision.state==='accepted'){
+      // An approved step that ended in a terminal configuration notice is inert,
+      // not "approved and continuing"; the notice beside it stays authoritative.
+      if(terminal&&decision.choice==='approve')return 'inert';
+      return decision.choice==='approve'?'approved':'rejected';
+    }
     return 'failed';
   }
+  if(terminal)return 'inert';
   if(access==='viewer')return 'unavailable';
   if(turnStatus==='outcome_unknown')return 'unknown_outcome';
   if(turnStatus==='cancelled'||turnStatus==='failed')return 'unavailable';
@@ -34,6 +45,7 @@ export function approvalNoticeKey(state:ProposalUiState):string{
     case 'failed':return 'The decision was not confirmed. Check the discussion, then retry the same choice.';
     case 'unknown_outcome':return 'The outcome is unknown. Check the discussion before deciding again.';
     case 'unavailable':return 'This proposal cannot be decided here. Ask a current editor to review it.';
+    case 'inert':return 'This step cannot run in the current configuration.';
     case 'not_required':return 'No approval is needed for this step.';
     default:return '';
   }

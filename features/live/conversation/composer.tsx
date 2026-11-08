@@ -1,6 +1,6 @@
 'use client';
 import {useLayoutEffect,useRef,useState,type KeyboardEvent} from 'react';
-import {ArrowUp,Sparkles} from 'lucide-react';
+import {ArrowUp,Building2,Sparkles} from 'lucide-react';
 import type {ConversationDrafts} from './draft';
 import type {TurnCapability} from './types';
 
@@ -12,6 +12,7 @@ type Props={
   canWrite:boolean;
   sending:boolean;
   projectName:string|null;
+  companyName:string|null;
   chips:ComposerChip[];
   capability:TurnCapability;
   capabilityNotice:string;
@@ -21,7 +22,7 @@ type Props={
   onSend:(text:string,clientMessageId:string,skillId:string|null)=>Promise<boolean>;
 };
 /** Composer owns its unsent text and the exact-once id for an uncertain retry. */
-export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projectName,chips,capability,capabilityNotice,onRetryCapability,sendFailed,notice,onSend}:Props){
+export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projectName,companyName,chips,capability,capabilityNotice,onRetryCapability,sendFailed,notice,onSend}:Props){
   const [text,setText]=useState(()=>drafts.read(threadKey)?.text??'');
   const [pending,setPending]=useState(false);
   const [currentSkill,setCurrentSkill]=useState<string|null>(null);
@@ -60,7 +61,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
       {filtered.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
     </div>}
     <div className="conversation-compose-box">
-      <div className="conversation-compose-context"><span className="conversation-project">{projectName??t('This project')}</span>{capability==='absent'&&<span className="pill gray">{t('Notes only')}</span>}</div>
+      <div className="conversation-compose-context"><span className="conversation-project">{projectName??t('This project')}</span>{companyName&&<span className="conversation-company" aria-label={t('Linked company')}><Building2 size={12} aria-hidden="true"/>{companyName}</span>}{capability==='absent'&&<span className="pill gray">{t('Notes only')}</span>}</div>
       <label className="conversation-sr" htmlFor="conversation-message">{t('Message BuyerOS')}</label>
       <textarea id="conversation-message" ref={area} rows={2} maxLength={4000} value={text} disabled={!canWrite}
         aria-describedby="conversation-compose-help" placeholder={t('Ask about this project, or choose a quick action')}

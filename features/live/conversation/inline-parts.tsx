@@ -1,9 +1,9 @@
 'use client';
 import type {ReactNode} from 'react';
 import {Check,CircleAlert,CircleDashed,CircleSlash,Clock,FileText,Link2,Loader} from 'lucide-react';
-import type {CitationItem,MessagePart,NoticePart,OutputLinkPart,ProposalPart,ThreadAccess,ToolActivityPart,ToolState,TurnStatus} from './types';
+import type {CitationItem,MessagePart,NoticePart,OutputLinkPart,ProposalCost,ProposalPart,ThreadAccess,ToolActivityPart,ToolState,TurnStatus} from './types';
 import {approvalNoticeKey,decisionGate,followUpNoticeKey,proposalUiState,toolStateAfterDecision,type DecisionChoice,type LocalDecision} from './approval';
-import type {TranscriptEntry} from './parts';
+import {type TerminalProposal,type TranscriptEntry} from './parts';
 
 export type PartActions={
   t:(value:string)=>string;
@@ -11,6 +11,7 @@ export type PartActions={
   access:ThreadAccess;
   turnStatusFor:(turnId:string|null)=>TurnStatus|undefined;
   decisionFor:(proposalId:string)=>LocalDecision|undefined;
+  terminalFor:(proposalId:string)=>TerminalProposal|undefined;
   toolFor:(capability:string)=>ToolActivityPart|null;
   decide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;
   deciding:boolean;
@@ -77,16 +78,24 @@ function ToolActivity({part,actions}:{part:ToolActivityPart;actions:PartActions}
     </div>
   </article>;
 }
+function ProposalCostLine({cost,t}:{cost:ProposalCost;t:(value:string)=>string}){
+  if(cost.kind==='provider_credits'&&cost.known===false)
+    return <p className="conversation-proposal-cost">{t('Cost review required before any paid request.')}</p>;
+  if(cost.known===false)return null;
+  if(cost.amount===undefined)return null;
+  return <p className="conversation-proposal-cost">{t('Cost')}: {String(cost.amount)}{cost.unit?` ${cost.unit}`:''}</p>;
+}
 function Proposal({part,entry,actions}:{part:ProposalPart;entry:TranscriptEntry;actions:PartActions}){
   const t=actions.t,turnStatus=actions.turnStatusFor(entry.turnId);
-  const state=proposalUiState(part,turnStatus,actions.decisionFor(part.proposal_id),actions.access);
+  const terminal=actions.terminalFor(part.proposal_id);
+  const state=proposalUiState(part,turnStatus,actions.decisionFor(part.proposal_id),actions.access,terminal?.terminal??false);
   const gate=decisionGate(state),tool=actions.toolFor(part.capability),after=toolStateAfterDecision(tool);
   const notice=approvalNoticeKey(state);
   return <section className={`conversation-proposal is-${state}`} aria-label={t('Approval required')} aria-busy={state==='submitting'}>
     <div className="conversation-proposal-head"><b>{part.title}</b><span className="pill amber">{t('Approval required')}</span></div>
     {part.rationale&&<p>{part.rationale}</p>}
     {part.arguments_preview!==undefined&&part.arguments_preview!==null&&<details className="conversation-proposal-preview"><summary>{t('Proposed details')}</summary><Preview value={part.arguments_preview} t={t}/></details>}
-    {part.cost&&(part.cost.amount!==undefined||part.cost.currency)&&<p className="conversation-proposal-cost">{t('Cost')}: {part.cost.currency??''} {part.cost.amount??''}</p>}
+    {part.cost&&<ProposalCostLine cost={part.cost} t={t}/>}
     {gate.canDecide
       ?<div className="conversation-proposal-actions"><button type="button" className="live-primary" disabled={actions.deciding} onClick={()=>actions.decide(part,entry.turnId,'approve')}>{t('Approve')}</button><button type="button" disabled={actions.deciding} onClick={()=>actions.decide(part,entry.turnId,'reject')}>{t('Reject')}</button></div>
       :notice?<p className="conversation-proposal-state" role="status">{t(notice)}</p>:null}

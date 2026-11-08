@@ -12,6 +12,11 @@ export const outputId='aa000000-0000-4000-8000-000000000001';
 export const newThreadId='ab000000-0000-4000-8000-000000000001';
 export const newTurnId='ac000000-0000-4000-8000-000000000001';
 export const clientMessageId='ad000000-0000-4000-8000-000000000001';
+export const buyerId='ae000000-0000-4000-8000-000000000001';
+export const buyerThreadId='af000000-0000-4000-8000-000000000001';
+export const buyerTurnId='ba000000-0000-4000-8000-000000000001';
+export const buyerDecisionTurnId='bb000000-0000-4000-8000-000000000001';
+export const buyerProposalId='bc000000-0000-4000-8000-000000000001';
 export const citationId=`document:${documentId}`;
 const at='2026-10-01T00:00:00.000Z';
 export function contextResponse(url){
@@ -50,8 +55,41 @@ export const studioSummary={id:threadId,version:3,templateId:'custom',title:'Res
  createdAt:Date.parse(at),updatedAt:Date.parse(at)+60_000,access:'owner',shareCount:0,pinned:false,archived:false};
 export function decisionTurn(){return {id:turnId,status:'completed',
  parts:[{kind:'notice',code:'DECISION_ACCEPTED',message:'Approved. The step is queued.'}],notices:[]};}
-export function newConversation(firstText='Research this buyer'){
- const user={id:'b4000000-0000-4000-8000-000000000001',seq:1,role:'user',text:firstText,
+export const buyerCitationId=`buyer:${buyerId}`;
+function buyerAssistantParts(){
+ return [{kind:'text',text:'Here is what we can verify about DeltaGrid.'},
+  {kind:'citations',items:[{id:buyerCitationId,label:'DeltaGrid',kind:'buyer'}]},
+  {kind:'proposal',proposal_id:buyerProposalId,capability:'xverum.enrich_company',title:'Enrich company',
+   rationale:'Verified contact and channel evidence is needed before outreach.',requires_approval:true,
+   arguments_preview:{company_id:buyerId,buyer_id:buyerId},
+   cost:{kind:'provider_credits',amount:'0',unit:'credits',may_incur_provider_charges:true,known:false}}];
+}
+/** Thread-first "Discuss this company" response: buyer link, buyer citation, always-approved enrichment proposal. */
+export function buyerConversation(){
+ const user={id:'bd000000-0000-4000-8000-000000000001',seq:1,role:'user',text:'Discuss this company and what to verify before outreach.',
+  client_message_id:'be000000-0000-4000-8000-000000000001',turn_id:buyerTurnId,created_at:at,parts:[]};
+ const parts=buyerAssistantParts();
+ const assistant={id:'bf000000-0000-4000-8000-000000000001',seq:2,role:'assistant',text:'Here is what we can verify about DeltaGrid.',
+  client_message_id:null,turn_id:buyerTurnId,created_at:at,parts};
+ return {thread:{id:buyerThreadId,version:1,templateId:'check-company',title:'DeltaGrid company discussion',
+   createdAt:Date.parse(at),updatedAt:Date.parse(at),access:'owner',shareCount:0,buyerId,
+   messages:[user,assistant],sources:[],runs:[]},
+  turn:{id:buyerTurnId,status:'needs_approval',parts,notices:[]}};
+}
+/** Terminal configuration outcome after approving the proposal-only capability. */
+export function terminalBuyerConversation(){
+ const base=buyerConversation();
+ const notice={kind:'notice',code:'XVERUM_DISPATCH_NOT_ENABLED',
+  message:'Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.'};
+ const tool={kind:'tool_activity',call_id:buyerDecisionTurnId,capability:'xverum.enrich_company',title:'Enrich company',
+  state:'failed',started_at:at,finished_at:at,error_code:'XVERUM_DISPATCH_NOT_ENABLED'};
+ const continuation={id:'c0000000-0000-4000-8000-000000000001',seq:3,role:'assistant',
+  text:'Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.',
+  client_message_id:null,turn_id:buyerDecisionTurnId,created_at:at,parts:[notice,tool]};
+ return {thread:{...base.thread,version:2,messages:[...base.thread.messages,continuation]},
+  turn:{id:buyerDecisionTurnId,status:'failed',parts:[notice,tool],notices:[notice]}};
+}
+export function newConversation(firstText='Research this buyer'){ const user={id:'b4000000-0000-4000-8000-000000000001',seq:1,role:'user',text:firstText,
   client_message_id:clientMessageId,turn_id:newTurnId,created_at:at,parts:[]};
  const assistant={id:'b5000000-0000-4000-8000-000000000001',seq:2,role:'assistant',text:'Here is the grounded brief.',
   client_message_id:null,turn_id:newTurnId,created_at:at,parts:[{kind:'text',text:'Here is the grounded brief.'},
@@ -66,6 +104,7 @@ import {createRoot} from 'react-dom/client';
 import {SessionScope} from '/services/live/session.ts';
 import {createLiveClient} from '/services/live/client.ts';
 import {LiveConversation} from '/features/live/discussion-workspace.tsx';
+import {DiscussCompanyButton} from '/features/live/conversation/company-discussion.tsx';
 import {LiveNavigation} from '/features/live/navigation.tsx';
 import {liveZh} from '/features/live/locale.ts';
 const session=new SessionScope({mode:'live',actor:'actor-a',workspace:'${workspace}',project:'${project}'});session.setToken('browser-fixture-token');
@@ -85,6 +124,7 @@ function App(){
  <button onClick={()=>{session.next({workspace:'workspace-b',project:'project-b'});}}>Second workspace</button>
  <button onClick={()=>setLocale(locale==='en'?'zh-HK':'en')}>Change language</button>
  <button onClick={()=>navigate('/app')}>Home</button><button onClick={()=>setOfferAccess(false)}>Revoke offer access</button><output id="fixture-path">{path}</output>
+ <DiscussCompanyButton client={client} session={session} t={t} locale={locale} buyerId="${buyerId}" buyerName="DeltaGrid" navigate={navigate}/>
  <LiveNavigation t={t} navigate={navigate} pathname={path} authorized={true} projectKnown={true} canEdit={true} projectActive={true} canCreate={true} conversationHome={enabled}/>
  <LiveConversation enabled={enabled} session={session} client={client} pathname={path} locale={locale} t={t} navigate={navigate} canViewOffer={offerAccess} canViewResults={true}/></>;
 }

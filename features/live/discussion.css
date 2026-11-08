@@ -215,6 +215,12 @@
 .conversation-compose-box:focus-within{border-color:var(--buyeros-accent);box-shadow:0 0 0 3px var(--buyeros-accent-soft)}
 .conversation-compose-context{display:flex;align-items:center;gap:8px;min-width:0}
 .conversation-project{font-size:11px;font-weight:600;color:var(--buyeros-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conversation-company{display:inline-flex;align-items:center;gap:4px;max-width:100%;font-size:11px;font-weight:650;color:var(--buyeros-accent-hover);background:var(--buyeros-accent-soft);border:1px solid var(--buyeros-accent-border);border-radius:999px;padding:1px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conversation-company svg{flex-shrink:0}
+.conversation-compose-pending{color:var(--buyeros-muted);font-size:12px;min-height:96px;justify-content:center}
+.conversation-company-start{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin:10px 0}
+.conversation-company-start button{min-height:38px!important}
+.conversation-company-start p{margin:0;font-size:12px;color:var(--buyeros-copy)}
 .conversation-compose-context .pill{font-size:10px;padding:1px 6px}
 .live-workspace .conversation-compose textarea{border:0!important;background:transparent!important;padding:2px 0!important;margin:0;width:100%;min-height:44px;max-height:192px;resize:none;font:inherit;font-size:15px;line-height:1.5;color:var(--buyeros-ink);outline:none}
 .conversation-compose textarea:focus-visible{outline:none!important}

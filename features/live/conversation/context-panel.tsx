@@ -8,7 +8,7 @@ import type {ChatRunReference,CitationItem,ProposalPart,SelectedSource,ThreadAcc
 import {approvalNoticeKey,decisionGate,followUpNoticeKey,proposalUiState,type DecisionChoice,type LocalDecision} from './approval';
 import type {OutputLinkPart} from './types';
 import type {PanelProposal} from './parts';
-import {latestToolActivity} from './parts';
+import {latestToolActivity,type TerminalProposal} from './parts';
 import type {TranscriptEntry} from './parts';
 
 export type PanelTab='results'|'sources'|'decisions';
@@ -38,6 +38,7 @@ type Props={
   onDecide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;
   deciding:boolean;
   decisionFor:(proposalId:string)=>LocalDecision|undefined;
+  terminalFor:(proposalId:string)=>TerminalProposal|undefined;
   turnStatusFor:(turnId:string|null)=>TurnStatus|undefined;
   drive:ReactNode;
   onClose?:()=>void;
@@ -107,19 +108,21 @@ function SourcesTab({t,citations,selectedSources,canEdit,onToggleSource,sourcesB
     <details className="conversation-panel-details"><summary>{t('Google Drive')}</summary>{drive}</details>
   </div>;
 }
-function DecisionsTab({t,proposals,entries,access,onDecide,deciding,decisionFor,turnStatusFor}:{
+function DecisionsTab({t,proposals,entries,access,onDecide,deciding,decisionFor,terminalFor,turnStatusFor}:{
   t:(value:string)=>string;proposals:PanelProposal[];entries:TranscriptEntry[];access:ThreadAccess;
   onDecide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;deciding:boolean;
-  decisionFor:(proposalId:string)=>LocalDecision|undefined;turnStatusFor:(turnId:string|null)=>TurnStatus|undefined;
+  decisionFor:(proposalId:string)=>LocalDecision|undefined;terminalFor:(proposalId:string)=>TerminalProposal|undefined;
+  turnStatusFor:(turnId:string|null)=>TurnStatus|undefined;
 }){
   if(!proposals.length)return <p className="conversation-panel-empty">{t('No decisions in this discussion yet.')}</p>;
   return <ul className="conversation-decisions">{proposals.map(item=>{
-    const state=proposalUiState(item.part,turnStatusFor(item.turnId),decisionFor(item.part.proposal_id),access);
+    const terminal=terminalFor(item.part.proposal_id);
+    const state=proposalUiState(item.part,turnStatusFor(item.turnId),decisionFor(item.part.proposal_id),access,terminal?.terminal??false);
     const gate=decisionGate(state),notice=approvalNoticeKey(state);
     const tool=latestToolActivity(entries,item.part.capability);
     return <li key={item.part.proposal_id}>
       <b>{item.part.title}</b>
-      <p><span className={`pill ${state==='approved'?'green':state==='rejected'||state==='failed'?'red':state==='unknown_outcome'?'amber':'gray'}`}>{t(state==='awaiting'?'Awaiting approval':state==='submitting'?'Sending…':state==='approved'?'Approved':state==='rejected'?'Rejected':state==='failed'?'Not confirmed':state==='unknown_outcome'?'Outcome unknown':'Unavailable')}</span></p>
+      <p><span className={`pill ${state==='approved'?'green':state==='rejected'||state==='failed'||state==='inert'?'red':state==='unknown_outcome'?'amber':'gray'}`}>{t(state==='awaiting'?'Awaiting approval':state==='submitting'?'Sending…':state==='approved'?'Approved':state==='rejected'?'Rejected':state==='failed'?'Not confirmed':state==='unknown_outcome'?'Outcome unknown':state==='inert'?'Cannot run':'Unavailable')}</span></p>
       {gate.canDecide?<div className="conversation-proposal-actions"><button type="button" className="live-primary" disabled={deciding} onClick={()=>onDecide(item.part,item.turnId,'approve')}>{t('Approve')}</button><button type="button" disabled={deciding} onClick={()=>onDecide(item.part,item.turnId,'reject')}>{t('Reject')}</button></div>:notice&&<p className="conversation-panel-note" role="status">{t(notice)}</p>}
       {tool&&<p className="conversation-panel-note">{t(followUpNoticeKey(tool.state))}</p>}
     </li>;
@@ -138,7 +141,7 @@ export function ConversationPanel(props:Props){
     <div className="conversation-panel-body" role="tabpanel" id={`conversation-panel-${tab}`} aria-labelledby={`conversation-tab-${tab}`}>
       {tab==='results'&&<ResultsTab t={t} results={results} runs={runs} navigate={props.navigate}/>}
       {tab==='sources'&&<SourcesTab t={t} citations={citations} selectedSources={selectedSources} canEdit={canEdit} onToggleSource={props.onToggleSource} sourcesBusy={props.sourcesBusy} onRemoveDrive={props.onRemoveDrive} drive={drive} threadId={threadId} canViewOffer={props.canViewOffer} client={props.client} session={props.session} navigate={props.navigate}/>}
-      {tab==='decisions'&&<DecisionsTab t={t} proposals={proposals} entries={entries} access={access} onDecide={onDecide} deciding={deciding} decisionFor={decisionFor} turnStatusFor={turnStatusFor}/>}
+      {tab==='decisions'&&<DecisionsTab t={t} proposals={proposals} entries={entries} access={access} onDecide={onDecide} deciding={deciding} decisionFor={decisionFor} terminalFor={props.terminalFor} turnStatusFor={turnStatusFor}/>}
     </div>
   </aside>;
 }

@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
-const {proposalUiState,decisionGate,approvalNoticeKey,decisionIntentKey,followUpNoticeKey,toolStateAfterDecision}=await import('../features/live/conversation/approval.ts');
+const {proposalUiState,decisionGate,approvalNoticeKey,decisionIntentKey,followUpNoticeKey,toolStateAfterDecision,isTerminalNoticeCode}=await import('../features/live/conversation/approval.ts');
 const proposal={kind:'proposal',proposal_id:'p-1',capability:'sales-contacts',title:'Enrich buyer',requires_approval:true};
 const optional={...proposal,proposal_id:'p-2',requires_approval:false};
 
@@ -28,6 +28,14 @@ test('submitting, approved, rejected and failed decisions are distinct stable st
   assert.match(approvalNoticeKey('approved'),/Approved/);
   assert.match(approvalNoticeKey('rejected'),/Rejected/);
   assert.match(approvalNoticeKey('unknown_outcome'),/unknown/);
+  // A terminal configuration notice makes the card inert, including after a local accept.
+  assert.equal(proposalUiState(proposal,'needs_approval',undefined,'owner',true),'inert');
+  assert.equal(proposalUiState(proposal,'needs_approval',{choice:'approve',state:'accepted'},'owner',true),'inert');
+  assert.equal(proposalUiState(proposal,'needs_approval',{choice:'reject',state:'accepted'},'owner',true),'rejected');
+  assert.equal(decisionGate('inert').canDecide,false);assert.equal(decisionGate('inert').canReject,false);
+  assert.match(approvalNoticeKey('inert'),/cannot run/);
+  assert.equal(isTerminalNoticeCode('XVERUM_DISPATCH_NOT_ENABLED'),true);
+  assert.equal(isTerminalNoticeCode('DECISION_ACCEPTED'),false);
 });
 
 test('finished or uncertain turns suspend approval; a rejection never executes',()=>{

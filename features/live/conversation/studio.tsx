@@ -15,7 +15,7 @@ import {ShareThread,WorkspaceBadge} from '../discussion-sharing';
 import {guidedTemplates} from '../conversation-home';
 import {LiveUnavailable} from '../unavailable';
 import {ConversationDrafts} from './draft';
-import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,latestToolActivity,type EphemeralReply} from './parts';
+import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,terminalProposals,type EphemeralReply} from './parts';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
 import {ConversationTranscript} from './transcript';
@@ -124,6 +124,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [activeTab,setActiveTab]=useState<PanelTab|null>(null);
   const [mobileView,setMobileView]=useState<'conversation'|'threads'|'panel'>('conversation');
   const [title,setTitle]=useState('');
+  // A fallback conversation (turn route absent) cannot carry the company link; the
+  // entry point says so on the canonical discussion route.
+  const [urlNotice]=useState(()=>{
+    try{return new URLSearchParams(window.location.search).get('company')==='unlinked'?'The company could not be attached to this conversation.':'';}
+    catch{return '';}
+  });
 
   const targetId=threadId??(fresh?null:autoId);
   const current=()=>session.isCurrent(identity)&&!!session.token();
@@ -202,6 +208,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
 
   const entries=useMemo(()=>buildTranscript(loaded?.chat??null,turns,ephemeral),[loaded,turns,ephemeral]);
   const panel=useMemo(()=>collectPanelData(loaded?.chat??null,entries),[loaded,entries]);
+  const terminal=useMemo(()=>terminalProposals(entries),[entries]);
+  const company=useMemo(()=>companyFromEntries(entries),[entries]);
+  const companyLabel=loaded?.chat.buyerId?(company?.label??t('Linked company')):null;
   const chips=useMemo<ComposerChip[]>(()=>guidedTemplates.map(template=>{
     const candidate=chipSkills[template.id];
     return {key:template.id,label:t(template.title),prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null};
@@ -210,11 +219,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     t,navigate,access:loaded?.chat.access??'viewer',
     turnStatusFor:turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined,
     decisionFor:proposalId=>decisions[proposalId],
+    terminalFor:proposalId=>terminal.get(proposalId),
     toolFor:capabilityName=>latestToolActivity(entries,capabilityName),
     decide:(part,turnId,choice)=>{void decide(part,turnId,choice);},
     deciding,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }),[t,navigate,loaded?.chat.access,turns,decisions,entries,deciding]);
+  }),[t,navigate,loaded?.chat.access,turns,decisions,terminal,entries,deciding]);
 
   async function loadThread(updated:ServerThread,fallback:ChatThread|null){
     const chat=chatThread(updated)??(fallback?{...fallback,version:updated.version,title:updated.title,updatedAt:updated.updatedAt}:null);
@@ -343,6 +353,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const panelTabs=contentTabs.length?contentTabs:(canViewOffer&&loaded?['sources' as PanelTab]:['results' as PanelTab]);
   const tab:PanelTab=activeTab&&panelTabs.includes(activeTab)?activeTab:panelTabs[0];
   const panelOpen=panelPreference??contentTabs.length>0;
+  // On the project home the newest thread is resolved after the list read. Keep the
+  // composer unmounted until it resolves so a reload can never present an empty
+  // composer in place of the restored draft.
+  const awaitingHomeThread=!fresh&&threadId===null&&(list.loading||(autoId!==null&&threadState!=='ready'));
   const threadTitle=loaded?.chat.title??t('New discussion');
   const statusLine=sending?t('Preparing a reply…'):sendNotice?t(sendNotice):threadNoticeText&&threadState==='ready'?t(threadNoticeText):'';
   return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')}>
@@ -374,9 +388,11 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         :threadState==='unavailable'
           ?<div className="conversation-load"><p role="alert">{t(threadNoticeText||threadNotices.unavailable)}</p><button type="button" onClick={()=>setReload(value=>value+1)}>{t('Retry')}</button></div>
           :<ConversationTranscript t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
-      <ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts} canWrite={!loaded||loaded.chat.access!=='viewer'} sending={sending}
-        projectName={projectName} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-        sendFailed={sendFailed} notice={sendNotice} onSend={send}/>
+      {awaitingHomeThread
+        ?<div className="conversation-compose conversation-compose-pending" role="status" aria-busy="true">{t('Loading discussion…')}</div>
+        :<ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts} canWrite={!loaded||loaded.chat.access!=='viewer'} sending={sending}
+          projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
+          sendFailed={sendFailed} notice={sendNotice||urlNotice} onSend={send}/>}
       <details className="conversation-secondary"><summary>{t('Guided setup')}</summary>
         {loaded
           ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
@@ -389,7 +405,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         threadId={loaded?.chat.id??null} threadVersion={loaded?.chat.version??0} canEdit={!!loaded&&loaded.chat.access!=='viewer'} canViewOffer={canViewOffer}
         client={client} session={session} navigate={navigate} onToggleSource={(source,selected)=>void toggleSource(source,selected)} sourcesBusy={sourcesBusy}
         onRemoveDrive={()=>void removeDriveSources()}
-        onDecide={(part,turnId,choice)=>void decide(part,turnId,choice)} deciding={deciding} decisionFor={proposalId=>decisions[proposalId]}
+        onDecide={(part,turnId,choice)=>void decide(part,turnId,choice)} deciding={deciding} decisionFor={proposalId=>decisions[proposalId]} terminalFor={proposalId=>terminal.get(proposalId)}
         turnStatusFor={turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined}
         drive={<DriveConnections key={`${identity}:${loaded?.chat.id??'none'}`} client={client} session={session} t={t} selected={loaded?.chat.sources??[]} readOnly={!loaded||loaded.chat.access==='viewer'} onSource={(source,selected)=>void toggleSource(source,selected)}/>}
         onClose={mobileView==='panel'?()=>setMobileView('conversation'):undefined}/>

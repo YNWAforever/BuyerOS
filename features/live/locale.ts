@@ -923,4 +923,12 @@ export const liveZh: Record<string,string> = {
   'published':'已發佈',
   'exported':'已匯出',
   'Remove unavailable Google Drive selections':'移除不可用的 Google Drive 選擇',
+  'Linked company':'已連結公司',
+  'Loading discussion…':'正在載入討論…',
+  'Cost review required before any paid request.':'任何付費請求前必須先審批費用。',
+  'This step cannot run in the current configuration.':'此步驟無法在目前設定下執行。',
+  'Cannot run':'無法執行',
+  'Discuss this company':'討論這間公司',
+  'Starting discussion…':'正在開始討論…',
+  'The company could not be attached to this conversation.':'此對話未能連結公司。',
 };
