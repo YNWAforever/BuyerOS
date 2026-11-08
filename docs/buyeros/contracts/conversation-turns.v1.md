@@ -30,7 +30,8 @@ and are `no-store`.
   "language": "en | zh-HK",
   "text": "Research this buyer and prepare a follow-up",
   "skill_id": "sales-research | null",
-  "template_id": "one of the seven thread templates | null"
+  "template_id": "one of the seven thread templates | null",
+  "buyer_id": "uuid | null (only honoured when this request creates the thread)"
 }
 ```
 
@@ -52,6 +53,20 @@ the recorded turn; a different payload under the same key is
   }
 }
 ```
+
+### Thread company link
+
+`POST /conversation-turns` accepts `buyer_id` **only on the thread-first path**.
+The server validates that the canonical buyer exists in this workspace and
+project, that the actor has the native buyer-read permission, and rejects
+unknown/foreign ids with `404` (no existence leak). The link is immutable for
+the discussion: a later turn that supplies a different `buyer_id` fails with
+`409 BUYER_LINK_MISMATCH`. `ServerThread` gains `"buyerId": "uuid | null"`.
+
+Grounding includes the linked buyer as a citation item
+`{"id": "buyer:<uuid>", "label": "<display name>", "kind": "buyer"}`; only the
+minimal projection (id, company id, canonical display name, domain, review
+state) is used — never contact data.
 
 ### Thread messages
 
@@ -83,16 +98,24 @@ execution time. Execution reuses the existing typed services
 sales-output owners); no new permission surface, no provider dispatch in this
 increment.
 
-Only nonbillable capabilities are proposed in this increment
-(`documents.read` on `understand-documents`, `research.read` on
-`sales-research`/`sales-quick`). A workspace without sales admission receives a
+Capabilities proposed in this increment: `documents.read`
+(`understand-documents`), `research.read` (`sales-research`/`sales-quick`),
+`xverum.enrich_company` (when the thread has a linked buyer and the intent is
+company enrichment) and `drive.read` (when the thread selects an authorised
+Drive source). The last two are **proposal-only**: approving one records the
+decision and a terminal `failed` turn with an honest notice
+(`SALES_ADMISSION_DISABLED`, `PAID_ADMISSION_DISABLED`,
+`EXECUTION_RUNTIME_REQUIRED`, `XVERUM_NOT_CONFIGURED`,
+`XVERUM_DISPATCH_NOT_ENABLED`, `DRIVE_NOT_CONFIGURED`,
+`DRIVE_SOURCE_UNAVAILABLE`, `DRIVE_READ_NOT_ENABLED`); no provider transport is
+constructed and no spend is reserved. A workspace without sales admission receives a
 `SALES_ADMISSION_DISABLED` notice instead of a proposal or execution. Paid Xverum
 dispatch and `opencode-go` model admission remain behind their existing,
 separately-reviewed gates.
 
 ## Persistence
 
-Alembic revision `0066_conversation_turns`:
+Alembic revisions `0066_conversation_turns` and `0067_conversation_buyer`:
 
 - `conversation_thread_messages` + `role`, `seq` (unique per thread, backfilled
   from `created_at, id`), `client_message_id` (partial unique per thread),
@@ -103,6 +126,12 @@ Alembic revision `0066_conversation_turns`:
   refuses when any assistant turn, typed part, client message id or turn id
   exists; for legacy-only notes it drops the added columns and ordering falls
   back to `created_at, id` (note text is preserved; typed turn history is not).
+- `0067_conversation_buyer`: `conversation_threads.buyer_id` (nullable
+  workspace+project composite FK to `project_buyers`, `ON DELETE SET NULL
+  (buyer_id)`); the proposal capability CHECK accepts
+  `xverum.enrich_company`/`drive.read`; the parts validator is a backward-safe
+  superset (buyer citation kind, credit-cost `known` flag). Downgrade refuses
+  while any company link or proposal-only capability decision exists.
 - `conversation_turns` — one row per user turn or continuation; unique
   `(workspace_id, thread_id, client_message_id)` and unique
   `(workspace_id, actor_id, client_message_id)` so a duplicate submission cannot

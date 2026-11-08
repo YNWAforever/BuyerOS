@@ -53,18 +53,20 @@ def test_turn_first_plan_is_deterministic_and_registry_derived():
     payload = request()
     thread_row = thread('understand-documents')
     first, staged = engine.build_plan(thread_row, payload,
-        engine.skill_for(thread_row, payload), project(), grounding(), True, True)
+        engine.skill_for(thread_row, payload), project(), grounding(), buyer=None,
+        drive_ids=(), sales_ok=True, language_ok=True)
     second, staged_again = engine.build_plan(thread_row, payload,
-        engine.skill_for(thread_row, payload), project(), grounding(), True, True)
+        engine.skill_for(thread_row, payload), project(), grounding(), buyer=None,
+        drive_ids=(), sales_ok=True, language_ok=True)
     assert first.steps == ('answer', 'propose') == second.steps
-    assert first.proposal == second.proposal
-    assert first.proposal.capability == 'documents.read'
+    assert first.proposals == second.proposals
+    assert first.proposals[0].capability == 'documents.read'
     skill = load_skill('understand-documents', '1')
-    assert first.proposal.capability in skill.allowed_actions
-    assert first.proposal.requires_approval is True
-    assert staged['capability'] == 'documents.read'
-    assert staged['arguments']['document_ids'] == [DOCUMENT]
-    assert first.proposal not in second.notices
+    assert first.proposals[0].capability in skill.allowed_actions
+    assert first.proposals[0].requires_approval is True
+    assert staged[0]['capability'] == 'documents.read'
+    assert staged[0]['arguments']['document_ids'] == [DOCUMENT]
+    assert first.proposals[0] not in second.notices
 
 
 def test_request_skill_override_is_validated_against_the_registry():
@@ -78,10 +80,12 @@ def test_plan_ceiling_is_bounded_and_capabilities_are_registered():
     payload = request()
     thread_row = thread('understand-documents')
     plan, staged = engine.build_plan(thread_row, payload,
-        engine.skill_for(thread_row, payload), project(), grounding(), True, True)
+        engine.skill_for(thread_row, payload), project(), grounding(), buyer=None,
+        drive_ids=(), sales_ok=True, language_ok=True)
     assert len(plan.steps) == len(set(plan.steps)) <= turn_contracts.MAX_TURN_STEPS
-    assert set(engine.EXECUTORS) == {'documents.read', 'research.read'}
-    assert plan.proposal.capability in engine.EXECUTORS
+    assert set(engine.EXECUTORS) == {'documents.read', 'research.read',
+        'xverum.enrich_company', 'drive.read'}
+    assert plan.proposals[0].capability in engine.EXECUTORS
     assert engine.skill_for(thread_row, request(skill_id=None)).id == 'understand-documents'
     assert engine.skill_for(thread('custom'), request()).id == 'sales-prospect'
 
@@ -95,8 +99,8 @@ def test_admission_and_language_never_propose_an_action(sales_ok, language_ok, c
     thread_row = thread('understand-documents')
     plan, staged = engine.build_plan(thread_row, payload,
         engine.skill_for(thread_row, payload), project(('en',) if language_ok else ('zh-HK',)),
-        grounding(), sales_ok, language_ok)
-    assert plan.proposal is None and staged is None
+        grounding(), buyer=None, drive_ids=(), sales_ok=sales_ok, language_ok=language_ok)
+    assert plan.proposals == () and staged == []
     assert code in {notice.code for notice in plan.notices}
 
 
@@ -105,8 +109,8 @@ def test_missing_selected_document_does_not_propose_document_work():
     thread_row = thread('understand-documents')
     plan, staged = engine.build_plan(thread_row, payload,
         engine.skill_for(thread_row, payload), project(), grounding(with_document=False),
-        True, True)
-    assert plan.proposal is None and staged is None
+        buyer=None, drive_ids=(), sales_ok=True, language_ok=True)
+    assert plan.proposals == () and staged == []
     assert 'NEEDS_SELECTED_DOCUMENT' in {notice.code for notice in plan.notices}
 
 
@@ -114,8 +118,9 @@ def test_unavailable_capability_for_skill_is_surfaced_not_invented():
     payload = request()
     thread_row = thread('custom')  # sales-prospect has no nonbillable executor here
     plan, staged = engine.build_plan(thread_row, payload,
-        engine.skill_for(thread_row, payload), project(), grounding(), True, True)
-    assert plan.proposal is None and staged is None
+        engine.skill_for(thread_row, payload), project(), grounding(), buyer=None,
+        drive_ids=(), sales_ok=True, language_ok=True)
+    assert plan.proposals == () and staged == []
     assert 'CAPABILITY_NOT_AVAILABLE' in {notice.code for notice in plan.notices}
 
 
@@ -214,7 +219,7 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0066_conversation_turns']
+    assert required['compatible_heads'] == ['0067_conversation_buyer']
     for name in ('conversation_turns', 'conversation_turn_proposals',
                  'conversation_turn_decisions', 'conversation_thread_messages'):
         columns = required['required_relations'][f'public.{name}']
@@ -241,3 +246,105 @@ def test_turn_routes_register_only_with_conversation_home(monkeypatch):
     disabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]
     assert disabled_paths == []
+
+
+# --- task-6: linked buyer + proposal-only approved MCP capabilities ----------
+
+def buyer_projection():
+    return {'id': uuid.uuid4(), 'version': 2, 'company_id': uuid.uuid4(),
+            'name': 'DeltaGrid', 'domain': 'deltagrid.example',
+            'review_state': 'accepted'}
+
+
+def test_linked_buyer_produces_proposal_only_enrichment():
+    thread_row = thread('custom')
+    payload = request(text='Enrich the linked company')
+    buyer = buyer_projection()
+    plan, staged = engine.build_plan(thread_row, payload,
+        engine.skill_for(thread_row, payload), project(), grounding(),
+        buyer=buyer, drive_ids=(), sales_ok=True, language_ok=True)
+    proposals = {proposal.capability: proposal for proposal in plan.proposals}
+    assert 'xverum.enrich_company' in proposals
+    enrichment = proposals['xverum.enrich_company']
+    assert enrichment.requires_approval is True
+    assert enrichment.cost.kind == 'provider_credits'
+    assert enrichment.cost.unit == 'credits'
+    assert enrichment.cost.may_incur_provider_charges is True
+    assert enrichment.cost.known is False  # reviewed tariff not available yet
+    staged_enrichment = next(item for item in staged
+        if item['capability'] == 'xverum.enrich_company')
+    assert staged_enrichment['arguments']['buyer_id'] == str(buyer['id'])
+    assert staged_enrichment['arguments']['company_id'] == str(buyer['company_id'])
+    assert staged_enrichment['source_refs'] == [engine._buyer_source_ref(buyer)]
+    assert staged_enrichment['source_refs'][0]['kind'] == 'buyer'
+    assert engine._buyer_citation(buyer)['id'] == f"buyer:{buyer['id']}"
+    assert 'xverum.enrich_company' in engine.PROPOSAL_ONLY
+    assert engine._executor('xverum.enrich_company') is not None
+
+
+def test_drive_source_produces_proposal_only_read():
+    drive_id = 'drive:' + str(uuid.uuid4()) + ':' + 'a' * 32
+    payload = request(text='Read the selected Drive evidence')
+    plan, staged = engine.build_plan(thread('custom'), payload,
+        load_skill('sales-prospect', '1'), project(), grounding(),
+        buyer=None, drive_ids=(drive_id,), sales_ok=True, language_ok=True)
+    assert [proposal.capability for proposal in plan.proposals] == ['drive.read']
+    proposal = plan.proposals[0]
+    assert proposal.cost.kind == 'nonbillable'
+    assert proposal.cost.may_incur_provider_charges is False
+    assert proposal.requires_approval is True
+    assert staged[0]['arguments']['source_ids'] == [drive_id]
+    assert 'drive.read' in engine.PROPOSAL_ONLY
+
+
+def test_enrichment_intent_is_deterministic_and_text_only():
+    assert engine._enrichment_intent('Please verify this company')
+    assert engine._enrichment_intent('補充公司資料')
+    assert not engine._enrichment_intent('Summarise the selected documents')
+    # The buyer link, not free text, grants tool permission: no buyer -> no proposal.
+    plan, staged = engine.build_plan(thread('custom'),
+        request(text='Please verify this company'), load_skill('sales-prospect', '1'),
+        project(), grounding(), buyer=None, drive_ids=(), sales_ok=True,
+        language_ok=True)
+    assert 'xverum.enrich_company' not in {p.capability for p in plan.proposals}
+
+
+def test_proposal_only_executors_are_terminal_and_never_dispatch(monkeypatch):
+    import asyncio
+    from types import SimpleNamespace
+    from buyeros_api.settings import get_settings
+    from buyeros_api.providers import xverum_mcp
+    from buyeros_api.services import conversation_connections
+
+    monkeypatch.setattr(xverum_mcp, 'XverumTransport',
+        lambda *args, **kwargs: pytest.fail('provider transport must not be constructed'))
+    monkeypatch.setenv('BUYEROS_SALES_SKILLS_ENABLED', 'false')
+
+    class _NoAccessSession:
+        async def execute(self, *args, **kwargs):
+            pytest.fail('no database work is required when admission is disabled')
+
+    scope = SimpleNamespace(workspace_id=uuid.uuid4(), project_id=uuid.uuid4(), actor_id=uuid.uuid4())
+    outcome = asyncio.run(engine._execute_xverum_proposal_only(
+        _NoAccessSession(), scope, None, None, SimpleNamespace(arguments={})))
+    assert (outcome.kind, outcome.code) == ('failed', 'SALES_ADMISSION_DISABLED')
+
+    async def not_connected(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(conversation_connections, 'load', not_connected)
+    drive = asyncio.run(engine._execute_drive_proposal_only(
+        object(), scope, None, None, SimpleNamespace(arguments={'source_ids': []})))
+    assert (drive.kind, drive.code) == ('failed', 'DRIVE_NOT_CONFIGURED')
+
+    monkeypatch.setenv('BUYEROS_SALES_SKILLS_ENABLED', 'true')
+    monkeypatch.setenv('BUYEROS_SALES_WORKSPACE_IDS', str(scope.workspace_id))
+    monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED', 'false')
+    get_settings.cache_clear()
+    try:
+        paid = asyncio.run(engine._execute_xverum_proposal_only(
+            _NoAccessSession(), scope, None, None, SimpleNamespace(arguments={})))
+        assert (paid.kind, paid.code) == ('failed', 'PAID_ADMISSION_DISABLED')
+    finally:
+        monkeypatch.delenv('BUYEROS_PAID_ADMISSION_ENABLED', raising=False)
+        get_settings.cache_clear()

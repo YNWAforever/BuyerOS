@@ -48,7 +48,7 @@ class TextPart(Contract):
 class CitationItem(Contract):
     id: Annotated[str, StringConstraints(min_length=1, max_length=200)]
     label: Annotated[str, StringConstraints(min_length=1, max_length=120)]
-    kind: Literal["document", "fact", "drive", "run", "results"]
+    kind: Literal["document", "fact", "drive", "run", "results", "buyer"]
     href: Annotated[str, StringConstraints(pattern=r"^/[A-Za-z0-9/_.?:=&%-]{1,240}$")] | None = None
 
 
@@ -74,6 +74,8 @@ class ProposalCost(Contract):
     amount: Annotated[Decimal, Field(ge=0, max_digits=18, decimal_places=4)]
     unit: Literal["USD", "credits"]
     may_incur_provider_charges: StrictBool = False
+    # False means the reviewed tariff is not available yet; never invent USD.
+    known: StrictBool = True
 
 
 class ProposalPart(Contract):
@@ -136,6 +138,8 @@ class TurnRequest(Contract):
     text: Text
     skill_id: ShortText | None = None
     template_id: TemplateId | None = None
+    # Only honoured when this request creates the thread (Amendment A1 path).
+    buyer_id: UUID | None = None
 
     @field_validator("text")
     @classmethod
@@ -160,7 +164,7 @@ class TurnPayload(Contract):
 
 class TurnPlan(Contract):
     steps: Annotated[tuple[str, ...], Field(max_length=MAX_TURN_STEPS)]
-    proposal: ProposalPart | None = None
+    proposals: Annotated[tuple[ProposalPart, ...], Field(max_length=2)] = ()
     notices: Annotated[tuple[TurnNotice, ...], Field(max_length=8)] = ()
 
 

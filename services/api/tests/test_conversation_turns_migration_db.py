@@ -13,7 +13,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT, runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0066_conversation_turns'
+HEAD = '0067_conversation_buyer'
 PREVIOUS = '0065_sales_lifecycle'
 NEW_TABLES = ('conversation_turns', 'conversation_turn_proposals',
               'conversation_turn_decisions')
@@ -130,3 +130,41 @@ def test_downgrade_is_honest_for_legacy_data_and_refuses_typed_turns(isolated_mi
     with psycopg.connect(isolated_migrated) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
         assert db.execute('SELECT count(*) FROM conversation_turns').fetchone()[0] == 1
+
+
+def test_company_link_and_proposal_only_capabilities(isolated_seeded):
+    cfg = config()
+    with psycopg.connect(isolated_seeded) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
+        user = _user(db, 'thread-buyer-fixture')
+        thread = _thread(db, user)
+        company, buyer = uuid.uuid4(), uuid.uuid4()
+        db.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) "
+            "VALUES(%s,%s,'Linked Co','Linked Co')", (company, WORKSPACE_A))
+        db.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) "
+            "VALUES(%s,%s,%s,%s)", (buyer, WORKSPACE_A, PROJECT_A, company))
+        db.execute('UPDATE conversation_threads SET buyer_id=%s WHERE id=%s', (buyer, thread))
+        turn, proposal = uuid.uuid4(), uuid.uuid4()
+        db.execute("INSERT INTO conversation_turns(id,workspace_id,project_id,thread_id,"
+            "owner_user_id,actor_id,request_fingerprint,language,status,step_count,parts,notices) "
+            "VALUES(%s,%s,%s,%s,%s,%s,%s,'en','needs_approval',2,'[]','[]')",
+            (turn, WORKSPACE_A, PROJECT_A, thread, user, user, 'b' * 64))
+        db.execute("INSERT INTO conversation_turn_proposals(id,workspace_id,project_id,thread_id,"
+            "turn_id,actor_id,capability,skill_id,skill_version,title,rationale,arguments,"
+            "source_refs,arguments_preview) VALUES(%s,%s,%s,%s,%s,%s,'xverum.enrich_company',"
+            "'sales-contacts','1','Enrich','Reviewed enrichment for the linked buyer',"
+            "'{}','[]','{}')", (proposal, WORKSPACE_A, PROJECT_A, thread, turn, user))
+        with pytest.raises(psycopg.errors.CheckViolation):
+            db.execute("INSERT INTO conversation_turn_proposals(id,workspace_id,project_id,"
+                "thread_id,turn_id,actor_id,capability,skill_id,skill_version,title,rationale,"
+                "arguments,source_refs,arguments_preview) VALUES(%s,%s,%s,%s,%s,%s,'unknown.read',"
+                "'sales-contacts','1','x','x','{}','[]','{}')",
+                (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, turn, user))
+    with pytest.raises(RuntimeError, match='preserve thread company links'):
+        command.downgrade(cfg, '0066_conversation_turns')
+    with psycopg.connect(isolated_seeded) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
+        assert db.execute('SELECT buyer_id FROM conversation_threads WHERE id=%s',
+            (thread,)).fetchone()[0] == buyer
+        assert db.execute('SELECT capability FROM conversation_turn_proposals').fetchone()[0] \
+            == 'xverum.enrich_company'

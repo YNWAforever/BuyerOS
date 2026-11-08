@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0066_conversation_turns"
+HEAD = "0067_conversation_buyer"
 
 
 def _config():

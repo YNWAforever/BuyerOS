@@ -129,7 +129,7 @@ def sales_requirements(*, worker=False):
         'public.sales_task_events':common+['project_id','thread_id','task_id','sequence','kind','payload'],
         'public.sales_task_dependencies':common+['project_id','thread_id','task_id','source_id','source_version','kind','retention_class'],
         'public.conversation_thread_preferences':common+['project_id','thread_id','owner_user_id','actor_id','pinned','archived'],
-        'public.conversation_threads':common+['project_id','owner_user_id','template_id','title','version','sources','runs'],
+        'public.conversation_threads':common+['project_id','owner_user_id','buyer_id','template_id','title','version','sources','runs'],
         'public.conversation_thread_messages':common+['project_id','thread_id','owner_user_id','author_user_id',
             'text','seq','role','client_message_id','turn_id','parts'],
         'public.conversation_turns':common+['project_id','thread_id','owner_user_id','actor_id','client_message_id',
@@ -223,7 +223,7 @@ def sales_requirements(*, worker=False):
     privileges.append({'relation':'public.sales_content_tombstones','columns':['completed_at'],'privilege':'UPDATE'})
     if not worker:
         privileges.append({'relation':'public.sales_executions','columns':['accounting_revision','accounted_bound','settled_usd'],'privilege':'UPDATE'})
-    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns'], 'compatible_heads':['0066_conversation_turns'],
+    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer'], 'compatible_heads':['0067_conversation_buyer'],
         'required_relations':relations, 'required_rls':list(relations),
         'required_privileges':privileges,
         'required_functions':[f'public.buyeros_{service}_receipts_writable()' for service in ('search','model','contact')],

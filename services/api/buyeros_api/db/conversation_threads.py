@@ -13,9 +13,14 @@ class ConversationThread(TenantMixin, Base):
         UniqueConstraint('workspace_id', 'id'),
         UniqueConstraint('workspace_id', 'project_id', 'id', 'owner_user_id'),
         ForeignKeyConstraint(['workspace_id', 'project_id'], ['projects.workspace_id', 'projects.id']),
+        ForeignKeyConstraint(['workspace_id', 'project_id', 'buyer_id'],
+            ['project_buyers.workspace_id', 'project_buyers.project_id', 'project_buyers.id'],
+            ondelete='SET NULL', use_alter=True),
     )
     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     owner_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
+    # Nullable canonical company-specific thread link; never inferred from text.
+    buyer_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     template_id: Mapped[str] = mapped_column(String(40), nullable=False)
     title: Mapped[str] = mapped_column(String(80), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

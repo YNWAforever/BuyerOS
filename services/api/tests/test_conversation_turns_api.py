@@ -12,7 +12,7 @@ from psycopg.types.json import Jsonb
 from buyeros_api.db.icp import canonical_hash
 from buyeros_api.services.conversation_reply import reply_from_grounding
 from tests.icp_fixtures import FACT_ID, valid_icp_payload
-from tests.test_buyer_review_db import (api, _h, OPERATOR, REVIEWER, VIEWER, ADMIN,
+from tests.test_buyer_review_db import (_seed_buyer, api, _h, OPERATOR, REVIEWER, VIEWER, ADMIN,
     WORKSPACE_A, WORKSPACE_B, PROJECT_A, PROJECT_B)
 from tests.test_conversation_threads_api import BODY as THREAD_BODY, ROOT as THREAD_ROOT, \
     create as create_thread, grant, member, headers as thread_headers
@@ -403,3 +403,86 @@ def test_executor_failure_after_partial_write_is_terminal_and_not_replayable(tur
         assert conn.execute('SELECT count(*) FROM conversation_turn_decisions').fetchone()[0] == 1
         assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
 
+
+
+# --- task-6: durable buyer link + proposal-only approved MCP capabilities ---
+
+def test_buyer_link_grounds_turn_and_proposes_proposal_only_enrichment(turn_api, monkeypatch):
+    client, dsn = turn_api
+    buyer = _seed_buyer(dsn, name='DeltaGrid')
+    body = turn_body(buyer_id=buyer, text='Enrich the linked company')
+    result = post_turn(client, body)
+    assert result.status_code == 200, result.text
+    data = result.json()['data']
+    thread, turn = data['thread'], data['turn']
+    assert thread['buyerId'] == buyer
+    citations = next(part for part in turn['parts'] if part['kind'] == 'citations')
+    assert f'buyer:{buyer}' in {item['id'] for item in citations['items']}
+    assert {item['kind'] for item in citations['items']} == {'buyer'}
+    proposal = next(part for part in turn['parts'] if part['kind'] == 'proposal')
+    assert proposal['capability'] == 'xverum.enrich_company'
+    assert proposal['requires_approval'] is True
+    assert proposal['cost']['kind'] == 'provider_credits'
+    assert proposal['cost']['unit'] == 'credits'
+    assert proposal['cost']['may_incur_provider_charges'] is True
+    assert proposal['cost']['known'] is False
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT buyer_id FROM conversation_threads WHERE id=%s',
+            (thread['id'],)).fetchone()[0] == uuid.UUID(buyer)
+        assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 0
+    from buyeros_api.providers import xverum_mcp
+    monkeypatch.setattr(xverum_mcp, 'XverumTransport',
+        lambda *args, **kwargs: pytest.fail('provider transport must never be constructed'))
+    approved = decide(client, turn, version=thread['version'],
+        mutation_key='enrichment-approve-key')
+    assert approved.status_code == 200, approved.text
+    continuation = approved.json()['data']['turn']
+    assert continuation['status'] == 'failed'
+    codes = {notice['code'] for notice in continuation['notices']}
+    assert codes & {'PAID_ADMISSION_DISABLED', 'EXECUTION_RUNTIME_REQUIRED',
+                    'XVERUM_NOT_CONFIGURED', 'XVERUM_DISPATCH_NOT_ENABLED',
+                    'SALES_ADMISSION_DISABLED'}
+    activity = next(part for part in continuation['parts'] if part['kind'] == 'tool_activity')
+    assert activity['state'] == 'failed'
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT status FROM conversation_turn_proposals').fetchone()[0] == 'failed'
+        assert conn.execute('SELECT count(*) FROM conversation_turn_decisions').fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM xverum_stages').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM xverum_tool_receipts').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',
+            (WORKSPACE_A,)).fetchone()[0] == 0
+    replay = decide(client, turn, version=thread['version'],
+        mutation_key='enrichment-approve-replay')
+    assert replay.status_code == 200
+    assert replay.json()['data']['turn']['id'] == continuation['id']
+
+
+def test_buyer_link_rejects_unknown_and_foreign_ids(turn_api):
+    client, dsn = turn_api
+    unknown = post_turn(client, turn_body(buyer_id=str(uuid.uuid4())))
+    assert unknown.status_code == 404 and unknown.json()['code'] == 'NOT_FOUND'
+    # A canonical buyer from another workspace/project is not linkable.
+    company, foreign_buyer = uuid.uuid4(), uuid.uuid4()
+    with psycopg.connect(dsn) as conn:
+        conn.execute("INSERT INTO companies(id,workspace_id,legal_name,display_name) "
+            "VALUES(%s,%s,'B Co','B Co')", (company, WORKSPACE_B))
+        conn.execute("INSERT INTO project_buyers(id,workspace_id,project_id,company_id) "
+            "VALUES(%s,%s,%s,%s)", (foreign_buyer, WORKSPACE_B, PROJECT_B, company))
+    foreign = post_turn(client, turn_body(buyer_id=str(foreign_buyer)))
+    assert foreign.status_code == 404
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM conversation_threads').fetchone()[0] == 0
+
+
+def test_existing_thread_company_link_cannot_be_repointed(turn_api):
+    client, dsn = turn_api
+    buyer = _seed_buyer(dsn, name='LinkGuard')
+    thread = create_thread(client, sources=[{'id': DOCUMENT_SOURCE, 'label': 'Offer document'}])
+    mismatch = post_turn(client, {**turn_body(buyer_id=buyer), 'thread_id': thread['id']},
+        version=thread['version'])
+    assert mismatch.status_code == 409
+    assert mismatch.json()['code'] == 'BUYER_LINK_MISMATCH'
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT buyer_id FROM conversation_threads WHERE id=%s',
+            (thread['id'],)).fetchone()[0] is None
+        assert conn.execute('SELECT count(*) FROM conversation_thread_messages').fetchone()[0] == 1

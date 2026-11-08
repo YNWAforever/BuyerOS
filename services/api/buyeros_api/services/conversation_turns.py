@@ -11,6 +11,7 @@ budget, and paid admission is never enabled by this module.
 import hashlib
 import json
 import uuid
+from dataclasses import replace
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select
@@ -40,6 +41,9 @@ CAPABILITY_BY_SKILL = {
     'sales-research': 'research.read',
     'sales-quick': 'research.read',
 }
+# Reviewed proposal-only capabilities: an approval records a decision and an
+# honest terminal notice; no executor in this increment dispatches anywhere.
+PROPOSAL_ONLY = frozenset({'xverum.enrich_company', 'drive.read'})
 EXECUTORS = {}
 
 
@@ -71,8 +75,8 @@ def advisory_text(grounding, language) -> str:
     if language == 'zh-HK':
         return (f'已選取 {count} 個已核准來源。對話模型尚未設定，'
                 '以下只顯示來源引用摘要，並非模型生成的答案。')
-    return (f'Selected {count} approved source(s). The live conversation model is not '
-            'configured, so this is a source summary with citations, not a generated answer.')
+    return (f'Selected {count} citation(s). The live conversation model is not '
+            'configured, so this is a source/buyer summary with citations, not a generated answer.')
 
 
 def missing_source_text(language) -> str:
@@ -169,13 +173,91 @@ def _document_ids(grounding) -> list[uuid.UUID]:
     return list(dict.fromkeys(values))
 
 
-def build_plan(thread, payload: TurnRequest, skill, project, grounding,
-               sales_ok: bool, language_ok: bool):
-    """Return ``(TurnPlan, staged_proposal_payload | None)`` deterministically."""
+def _label(value, limit=120) -> str:
+    return ' '.join(str(value or '').split())[:limit] or 'Linked company'
+
+
+async def _buyer_projection(session, scope: Scope, buyer_id):
+    """Minimal safe canonical buyer/company projection (no contact data)."""
+    from ..db.buyers import Company, HumanReview, ProjectBuyer
+    from ..sales.contracts import NativeRef
+    from .sales_native import read_native
+    row = (await session.execute(select(ProjectBuyer).where(
+        ProjectBuyer.workspace_id == scope.workspace_id,
+        ProjectBuyer.project_id == scope.project_id,
+        ProjectBuyer.id == buyer_id))).scalar_one_or_none()
+    if row is None:
+        raise not_found()
+    # Exactly the permission the native buyer read requires; never leak existence.
+    await read_native(session, scope, NativeRef(surface='buyer', id=row.id,
+        revision=row.version))
+    company = (await session.execute(select(Company).where(
+        Company.workspace_id == scope.workspace_id,
+        Company.id == row.company_id))).scalar_one_or_none()
+    review = (await session.execute(select(HumanReview.state).where(
+        HumanReview.workspace_id == scope.workspace_id,
+        HumanReview.project_buyer_id == row.id).order_by(
+            HumanReview.created_at.desc()).limit(1))).scalar_one_or_none()
+    return {'id': row.id, 'version': row.version, 'company_id': row.company_id,
+        'name': _label(company.display_name if company is not None else ''),
+        'domain': _label(company.domain, 255) if company is not None and company.domain else None,
+        'review_state': review or 'unreviewed'}
+
+
+def _buyer_citation(buyer):
+    return {'id': f"buyer:{buyer['id']}", 'label': buyer['name'],
+        'locator': {'surface': 'buyer', 'id': str(buyer['id'])}}
+
+
+def _buyer_source_ref(buyer):
+    return {'id': str(buyer['id']), 'version': buyer['version'], 'kind': 'buyer',
+        'locator': f"buyer:{buyer['id']}", 'retention_class': 'durable'}
+
+
+async def _drive_sources(session, scope: Scope, thread):
+    """DB-only scope check of the existing Drive connection; no gateway call."""
+    ids = [source.get('id') for source in (thread.sources or [])
+        if isinstance(source, dict) and isinstance(source.get('id'), str)
+        and source['id'].startswith('drive:')]
+    if not ids:
+        return []
+    from .conversation_connections import SOURCE, load as load_connection
+    row = await load_connection(session, scope.workspace_id, scope.project_id)
+    if row is None or not row.connected or not row.folders:
+        return []
+    values = []
+    for value in ids:
+        match = SOURCE.fullmatch(value)
+        if match is not None and match[1] == str(row.generation):
+            values.append(value)
+    return list(dict.fromkeys(values))[:10]
+
+
+ENRICHMENT_WORDS = ('enrich', 'verify', 'check the company', 'look up the company',
+    'company data', 'company research', 'find contacts', 'find people',
+    '驗證', '查證', '補充', '查詢公司', '公司資料', '聯絡人')
+
+
+def _enrichment_intent(text: str) -> bool:
+    value = text.casefold()
+    return any(word in value for word in ENRICHMENT_WORDS)
+
+
+def build_plan(thread, payload: TurnRequest, skill, project, grounding, *,
+               buyer=None, drive_ids=(), sales_ok: bool, language_ok: bool):
+    """Deterministic, bounded plan from the code-owned registry."""
     notices = []
-    proposal = None
-    staged = None
+    proposals = []
+    staged = []
     steps = ['answer']
+
+    def add(proposal, staged_payload):
+        proposals.append(proposal)
+        staged.append(staged_payload)
+        steps.append('propose')
+
+    evidence_citations = [citation for citation in grounding.citations
+        if not citation['id'].startswith('buyer:')]
     capability = CAPABILITY_BY_SKILL.get(skill.id)
     if not sales_ok:
         notices.append(TurnNotice(code='SALES_ADMISSION_DISABLED',
@@ -187,7 +269,7 @@ def build_plan(thread, payload: TurnRequest, skill, project, grounding,
     elif capability is None or capability not in skill.allowed_actions:
         notices.append(TurnNotice(code='CAPABILITY_NOT_AVAILABLE',
             message='No reviewed inline capability is available for this skill.'))
-    elif not grounding.citations:
+    elif not evidence_citations:
         notices.append(TurnNotice(code='NEEDS_SELECTED_SOURCE',
             message='Select an approved source before proposing a reviewed action.'))
     elif capability == 'documents.read':
@@ -196,7 +278,7 @@ def build_plan(thread, payload: TurnRequest, skill, project, grounding,
             notices.append(TurnNotice(code='NEEDS_SELECTED_DOCUMENT',
                 message='Select at least one approved offer document.'))
         else:
-            proposal, staged = _proposal(thread, payload, skill, capability, grounding,
+            proposal, staged_payload = _proposal(thread, payload, skill, capability, grounding,
                 arguments={'document_ids': [str(value) for value in document_ids],
                     'question': payload.text, 'language': payload.language},
                 preview={'document_ids': [str(value) for value in document_ids],
@@ -206,37 +288,75 @@ def build_plan(thread, payload: TurnRequest, skill, project, grounding,
                 rationale='Reads only the currently approved offer sources already selected '
                     'in this discussion; no new discovery or provider call.' if payload.language == 'en'
                     else '只讀取本討論已選取且已核准的報價來源；不新增探索或供應商呼叫。')
-            steps.append('propose')
+            add(proposal, staged_payload)
     elif capability == 'research.read':
-        proposal, staged = _proposal(thread, payload, skill, capability, grounding,
+        proposal, staged_payload = _proposal(thread, payload, skill, capability, grounding,
             arguments={'research_question': payload.text, 'language': payload.language},
             preview={'research_question': payload.text[:160], 'language': payload.language},
             title='Prepare bounded research' if payload.language == 'en' else '準備有界研究',
             rationale='Prepares a research result from selected approved evidence; requires '
                 'an existing current native research run.' if payload.language == 'en'
                 else '以已選取核准證據準備研究結果；需要現有且最新的原生研究執行。')
-        steps.append('propose')
-    return TurnPlan(steps=tuple(steps), proposal=proposal, notices=tuple(notices)), staged
+        add(proposal, staged_payload)
+
+    if sales_ok and language_ok and buyer is not None and (
+            skill.id == 'sales-contacts' or _enrichment_intent(payload.text)):
+        proposal, staged_payload = _inline_proposal(thread, payload, skill,
+            'xverum.enrich_company',
+            arguments={'buyer_id': str(buyer['id']), 'company_id': str(buyer['company_id']),
+                'purpose': payload.text[:200], 'language': payload.language},
+            preview={'buyer_id': str(buyer['id']), 'company_id': str(buyer['company_id']),
+                'purpose': payload.text[:120]},
+            title='Enrich the linked company' if payload.language == 'en'
+                else '補充連結公司資料',
+            rationale='Reviewed Xverum company enrichment for the linked canonical buyer. '
+                'Requires a separate cost review and provider admission before any paid call.'
+                if payload.language == 'en' else
+                '為連結的正式買家公司進行經審閱的 Xverum 補充。任何付費呼叫前須另經成本審閱及供應商准入。',
+            cost=ProposalCost(kind='provider_credits', amount=0, unit='credits',
+                may_incur_provider_charges=True, known=False),
+            source_refs=[_buyer_source_ref(buyer)])
+        add(proposal, staged_payload)
+
+    if sales_ok and language_ok and drive_ids:
+        proposal, staged_payload = _inline_proposal(thread, payload, skill, 'drive.read',
+            arguments={'source_ids': list(drive_ids), 'purpose': payload.text[:200],
+                'language': payload.language},
+            preview={'source_ids': list(drive_ids), 'purpose': payload.text[:120]},
+            title='Read selected Drive evidence' if payload.language == 'en'
+                else '讀取已選 Drive 證據',
+            rationale='Reads an already authorised Google Drive source as a citation. '
+                'Drive content is never retained in durable receipts.' if payload.language == 'en'
+                else '將已授權的 Google Drive 來源讀取為引用。Drive 內容不會保留於持久收據。',
+            cost=ProposalCost(kind='nonbillable', amount=0, unit='USD',
+                may_incur_provider_charges=False),
+            source_refs=[])
+        add(proposal, staged_payload)
+    return TurnPlan(steps=tuple(steps), proposals=tuple(proposals),
+        notices=_dedupe_notices(notices)), staged
+
+
+def _inline_proposal(thread, payload, skill, capability, *, arguments, preview,
+                     title, rationale, cost, source_refs):
+    proposal_id = uuid.uuid5(uuid.UUID(str(thread.id)),
+        f'conversation-proposal:{payload.client_message_id}:{capability}')
+    staged = {'proposal_id': proposal_id, 'capability': capability,
+        'skill_id': skill.id, 'skill_version': skill.version, 'arguments': arguments,
+        'source_refs': source_refs, 'title': title, 'rationale': rationale,
+        'arguments_preview': preview}
+    part = ProposalPart(proposal_id=proposal_id, capability=capability, title=title,
+        rationale=rationale, arguments_preview=preview, cost=cost)
+    return part, staged
 
 
 def _proposal(thread, payload, skill, capability, grounding, *, arguments, preview,
               title, rationale):
-    proposal_id = uuid.uuid5(uuid.UUID(str(thread.id)),
-        f'conversation-proposal:{payload.client_message_id}:{capability}')
-    staged = {'capability': capability, 'skill_id': skill.id,
-        'skill_version': skill.version, 'arguments': arguments,
-        'source_refs': _execution_refs(grounding), 'title': title,
-        'rationale': rationale, 'arguments_preview': preview}
-    part = ProposalPart(proposal_id=proposal_id, capability=capability, title=title,
-        rationale=rationale, arguments_preview=preview,
+    return _inline_proposal(thread, payload, skill, capability, arguments=arguments,
+        preview=preview, title=title, rationale=rationale,
         cost=ProposalCost(kind='nonbillable', amount=0, unit='USD',
-            may_incur_provider_charges=False))
-    return part, staged
+            may_incur_provider_charges=False),
+        source_refs=_execution_refs(grounding))
 
-
-# ---------------------------------------------------------------------------
-# Turn creation
-# ---------------------------------------------------------------------------
 
 def thread_title(text: str) -> str:
     value = ' '.join(text.replace('\x00', ' ').split())
@@ -279,11 +399,13 @@ async def _existing_turn(session, scope: Scope, client_message_id):
         ConversationTurn.client_message_id == client_message_id))).scalar_one_or_none()
 
 
-async def _turn_by_id(session, scope: Scope, turn_id):
-    return (await session.execute(select(ConversationTurn).where(
-        ConversationTurn.workspace_id == scope.workspace_id,
+async def _turn_by_id(session, scope: Scope, turn_id, thread_id=None):
+    filters = [ConversationTurn.workspace_id == scope.workspace_id,
         ConversationTurn.project_id == scope.project_id,
-        ConversationTurn.id == turn_id))).scalar_one_or_none()
+        ConversationTurn.id == turn_id]
+    if thread_id is not None:
+        filters.append(ConversationTurn.thread_id == thread_id)
+    return (await session.execute(select(ConversationTurn).where(*filters))).scalar_one_or_none()
 
 
 async def _replay(session, scope: Scope, row: ConversationTurn, payload: TurnRequest):
@@ -307,21 +429,31 @@ async def _message_count(session, thread) -> int:
             ConversationThreadMessage.thread_id == thread.id))).scalar_one()
 
 
-async def _grounding(session, scope: Scope, thread):
-    thread = thread
+async def _grounding(session, scope: Scope, thread, buyer=None):
     raw = [source.get('id') for source in (thread.sources or [])
         if isinstance(source, dict) and isinstance(source.get('id'), str)]
     resolvable = [value for value in raw if value.split(':', 1)[0] in
         {'document', 'fact', 'drive'}][:MAX_GROUNDING_SOURCES]
-    if not resolvable:
-        return Grounding([], []), []
-    try:
-        return await resolve_sources(session, workspace_id=scope.workspace_id,
-            project_id=scope.project_id, source_ids=resolvable, readonly=True), []
-    except (ApiError, ValueError):
-        return Grounding([], []), [TurnNotice(code='SOURCE_UNAVAILABLE',
-            message='The selected sources need current review before use.',
-            recovery=Recovery(label='Review selected sources'))]
+    notices = []
+    grounding = Grounding([], [])
+    if resolvable:
+        try:
+            grounding = await resolve_sources(session, workspace_id=scope.workspace_id,
+                project_id=scope.project_id, source_ids=resolvable, readonly=True)
+        except (ApiError, ValueError):
+            notices.append(TurnNotice(code='SOURCE_UNAVAILABLE',
+                message='The selected sources need current review before use.',
+                recovery=Recovery(label='Review selected sources')))
+    if buyer is not None:
+        # Authorised canonical identity is contextual evidence, not a paid source.
+        # Only the minimal safe projection reaches request memory (no contact data).
+        summary = (f"Linked buyer: {buyer['name']}; "
+            f"domain: {buyer['domain'] or 'unknown'}; "
+            f"review state: {buyer['review_state']}.")
+        grounding = replace(grounding,
+            citations=[*grounding.citations, _buyer_citation(buyer)],
+            excerpts=[*grounding.excerpts, summary])
+    return grounding, notices
 
 
 def _dedupe_notices(notices):
@@ -379,16 +511,22 @@ async def _stage_turn(session, scope: Scope, thread, payload: TurnRequest, *,
         text=_assistant_text(parts, notices), seq=seq, role='assistant',
         client_message_id=None, turn_id=turn.id,
         parts=[part.model_dump(mode='json') for part in parts]))
-    if staged is not None:
-        part = next(part for part in parts if isinstance(part, ProposalPart))
-        session.add(ConversationTurnProposal(id=part.proposal_id,
-            workspace_id=scope.workspace_id, project_id=scope.project_id,
-            thread_id=thread.id, turn_id=turn.id, actor_id=scope.actor_id,
-            capability=staged['capability'], skill_id=staged['skill_id'],
-            skill_version=staged['skill_version'], title=staged['title'],
-            rationale=staged['rationale'], arguments=staged['arguments'],
-            source_refs=staged['source_refs'], arguments_preview=staged['arguments_preview'],
-            cost=part.cost.model_dump(mode='json') if part.cost else None))
+    if staged:
+        parts_by_id = {part.proposal_id: part for part in parts
+            if isinstance(part, ProposalPart)}
+        for staged_payload in staged:
+            part = parts_by_id[staged_payload['proposal_id']]
+            session.add(ConversationTurnProposal(id=part.proposal_id,
+                workspace_id=scope.workspace_id, project_id=scope.project_id,
+                thread_id=thread.id, turn_id=turn.id, actor_id=scope.actor_id,
+                capability=staged_payload['capability'],
+                skill_id=staged_payload['skill_id'],
+                skill_version=staged_payload['skill_version'],
+                title=staged_payload['title'], rationale=staged_payload['rationale'],
+                arguments=staged_payload['arguments'],
+                source_refs=staged_payload['source_refs'],
+                arguments_preview=staged_payload['arguments_preview'],
+                cost=part.cost.model_dump(mode='json') if part.cost else None))
     thread.version += 1
     thread.updated_at = now()
     await session.flush()
@@ -397,17 +535,22 @@ async def _stage_turn(session, scope: Scope, thread, payload: TurnRequest, *,
 
 async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
     thread = None
+    buyer = None
     if payload.thread_id is not None:
         thread, role = await load(session, scope.workspace_id, scope.project_id,
             payload.thread_id, scope.actor_id, edit=True, lock=True)
         if payload.expected_thread_version is None:
             raise ApiError(400, 'INVALID_REQUEST', 'If-Match thread version is required')
+        if payload.buyer_id is not None:
+            if thread.buyer_id is None or thread.buyer_id != payload.buyer_id:
+                raise ApiError(409, 'BUYER_LINK_MISMATCH',
+                    'a discussion company link can only be set when the discussion is created')
     else:
         role = 'owner'
     project = await _project(session, scope)
-    # Durable replay precedes the write precondition: an uncertain retry reuses
-    # the same key and the same expected version, while the first attempt already
-    # advanced thread.version. The stored fingerprint still binds that version.
+    if payload.buyer_id is not None:
+        # New thread link: the buyer must be current, same-project and readable now.
+        buyer = await _buyer_projection(session, scope, payload.buyer_id)
     existing = await _existing_turn(session, scope, payload.client_message_id)
     if existing is not None:
         return await _replay(session, scope, existing, payload)
@@ -431,6 +574,7 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
             if thread is None:
                 thread = ConversationThread(workspace_id=scope.workspace_id,
                     project_id=scope.project_id, owner_user_id=scope.actor_id,
+                    buyer_id=payload.buyer_id,
                     template_id=payload.template_id or 'custom',
                     title=thread_title(payload.text), sources=[], runs=[], version=1)
                 session.add(thread)
@@ -439,16 +583,28 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
             if await _message_count(session, thread) + 2 > MAX_THREAD_MESSAGES:
                 raise ApiError(409, 'MESSAGE_LIMIT',
                     'discussion note limit reached; start another discussion and keep unsent text')
-            grounding, source_notices = await _grounding(session, scope, thread)
+            source_notices = []
+            if thread.buyer_id is not None and buyer is None:
+                try:
+                    buyer = await _buyer_projection(session, scope, thread.buyer_id)
+                except ApiError:
+                    if payload.thread_id is None:
+                        raise
+                    source_notices.append(TurnNotice(code='BUYER_LINK_UNAVAILABLE',
+                        message='The linked buyer is no longer readable; ask a project editor '
+                            'to relink it.'))
+            grounding, grounding_notices = await _grounding(session, scope, thread, buyer)
             skill = skill_for(thread, payload)
+            drive_ids = await _drive_sources(session, scope, thread)
             plan, staged = build_plan(thread, payload, skill, project, grounding,
-                sales_enabled(scope.workspace_id),
-                payload.language in (project.language_preferences or []))
+                buyer=buyer, drive_ids=tuple(drive_ids),
+                sales_ok=sales_enabled(scope.workspace_id),
+                language_ok=payload.language in (project.language_preferences or []))
             parts, answer_notices = answer_parts(grounding, payload.language)
-            if plan.proposal is not None:
-                parts.append(plan.proposal)
-            notices = _dedupe_notices([*source_notices, *answer_notices, *plan.notices])
-            if plan.proposal is not None:
+            parts.extend(plan.proposals)
+            notices = _dedupe_notices([*source_notices, *grounding_notices,
+                *answer_notices, *plan.notices])
+            if plan.proposals:
                 status = 'needs_approval'
             elif not grounding.citations:
                 status = 'needs_input'
@@ -459,6 +615,10 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                 request_fp=saved_fp, steps_count=len(plan.steps),
                 skill_id=skill.id, skill_version=skill.version,
                 parts=tuple(parts), notices=notices, status=status, staged=staged)
+            from .audit_service import append_audit
+            append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+                action='conversation_turn.created', entity_type='conversation_turn',
+                entity_id=turn.id)
     except IntegrityError as exc:
         existing = await _existing_turn(session, scope, payload.client_message_id)
         if existing is None:
@@ -534,7 +694,64 @@ async def _execute_research(session, scope: Scope, thread, turn: ConversationTur
             kind=saved.kind, revision=saved.revision, status='available'), task_id=row.id)
 
 
-EXECUTORS.update({'documents.read': _execute_documents, 'research.read': _execute_research})
+
+def _terminal(code, message):
+    return ExecutionOutcome(kind='failed', code=code, message=message)
+
+
+async def _execute_xverum_proposal_only(session, scope: Scope, thread, turn,
+                                        proposal) -> ExecutionOutcome:
+    """Honest terminal outcome; this phase never calls the provider transport."""
+    from ..settings import get_settings
+    from ..db.worker_execution import WorkerRuntimeControl
+    if not sales_enabled(scope.workspace_id):
+        return _terminal('SALES_ADMISSION_DISABLED',
+            'Guided sales execution is disabled for this workspace; no provider call was made.')
+    if not get_settings().paid_admission_enabled:
+        return _terminal('PAID_ADMISSION_DISABLED',
+            'Paid provider admission is disabled; no Xverum request was dispatched.')
+    control = (await session.execute(select(WorkerRuntimeControl.backend,
+        WorkerRuntimeControl.enabled))).one()
+    if (control.backend != 'cloudflare' or not control.enabled
+            or not get_settings().cloudflare_execution_enabled):
+        return _terminal('EXECUTION_RUNTIME_REQUIRED',
+            'The reviewed native execution runtime is not enabled; no Xverum request was dispatched.')
+    try:
+        from .xverum_connections import list_connections
+        connections = await list_connections(session, scope)
+    except (ApiError, ValueError):
+        connections = []
+    if not connections:
+        return _terminal('XVERUM_NOT_CONFIGURED',
+            'No project-assigned Xverum connection is configured; no provider call was made.')
+    return _terminal('XVERUM_DISPATCH_NOT_ENABLED',
+        'Reviewed Xverum dispatch is not enabled in this increment; no provider call was made.')
+
+
+async def _execute_drive_proposal_only(session, scope: Scope, thread, turn,
+                                       proposal) -> ExecutionOutcome:
+    """Scope revalidation only; no gateway call and no content retention."""
+    from .conversation_connections import SOURCE, load as load_connection
+    source_ids = list(proposal.arguments.get('source_ids') or [])
+    try:
+        row = await load_connection(session, scope.workspace_id, scope.project_id)
+    except (ApiError, ValueError):
+        row = None
+    if row is None or not row.connected or not row.folders:
+        return _terminal('DRIVE_NOT_CONFIGURED',
+            'No connected Google Drive source is available; no content was read.')
+    for value in source_ids:
+        match = SOURCE.fullmatch(value) if isinstance(value, str) else None
+        if match is None or match[1] != str(row.generation):
+            return _terminal('DRIVE_SOURCE_UNAVAILABLE',
+                'The selected Drive source is no longer authorised; no content was read.')
+    return _terminal('DRIVE_READ_NOT_ENABLED',
+        'Reading Drive content from a conversation turn is not enabled in this increment; '
+        'no content was read or retained.')
+
+
+EXECUTORS.update({'documents.read': _execute_documents, 'research.read': _execute_research,
+    'xverum.enrich_company': _execute_xverum_proposal_only, 'drive.read': _execute_drive_proposal_only})
 
 
 async def _user_text(session, scope, turn_id) -> str:
@@ -548,9 +765,12 @@ async def _user_text(session, scope, turn_id) -> str:
 async def _continuation_turn(session, scope: Scope, thread, source_turn, request_fp,
                              payload_language, *, parts, notices, status):
     turn_id = uuid.uuid5(uuid.UUID(str(source_turn.id)), f'continuation:{request_fp}')
-    existing = await _turn_by_id(session, scope, turn_id)
+    existing = await _turn_by_id(session, scope, turn_id, thread.id)
     if existing is not None:
         return existing
+    if await _message_count(session, thread) + 1 > MAX_THREAD_MESSAGES:
+        raise ApiError(409, 'MESSAGE_LIMIT',
+            'discussion note limit reached; start another discussion')
     seq = await _next_seq(session, thread.id)
     turn = ConversationTurn(id=turn_id, workspace_id=scope.workspace_id,
         project_id=scope.project_id, thread_id=thread.id, owner_user_id=thread.owner_user_id,
@@ -601,7 +821,7 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         target={'project_id': str(scope.project_id), 'turn_id': str(source_turn.id)},
         precondition=f'"{request.expected_thread_version}"')
     if outcome.replay:
-        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id))
+        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id), thread.id)
         if row is None:
             raise not_found()
         await load(session, scope.workspace_id, scope.project_id, row.thread_id,
@@ -616,7 +836,7 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
     if existing is not None:
         if existing.decision != request.decision:
             raise ApiError(409, 'ALREADY_DECIDED', 'this proposal already has a decision')
-        row = await _turn_by_id(session, scope, existing.continuation_turn_id)
+        row = await _turn_by_id(session, scope, existing.continuation_turn_id, thread.id)
         if row is None:
             raise not_found()
         complete_idempotency(outcome, str(existing.continuation_turn_id))
@@ -648,11 +868,15 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
                 'a concurrent decision for this proposal is in progress') from exc
         complete_idempotency(outcome, str(existing.continuation_turn_id))
-        row = await _turn_by_id(session, scope, existing.continuation_turn_id)
+        row = await _turn_by_id(session, scope, existing.continuation_turn_id, thread.id)
         if row is None:
             raise not_found()
         return thread, role, _payload(row), True
     complete_idempotency(outcome, str(continuation.id))
+    from .audit_service import append_audit
+    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+        action='conversation_turn.decided', entity_type='conversation_turn',
+        entity_id=continuation.id)
     return thread, role, _payload(continuation), decided
 
 
@@ -677,7 +901,8 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
     # Approval: revalidate current membership, role, project, language, sales
     # admission and policy/budget gate state *now*, then execute once.
     project = await _project(session, scope)
-    if not sales_enabled(scope.workspace_id):
+    proposal_only = proposal.capability in PROPOSAL_ONLY
+    if not proposal_only and not sales_enabled(scope.workspace_id):
         return await _blocked_continuation(session, scope, thread, source_turn, proposal,
             fingerprint, 'SALES_ADMISSION_DISABLED',
             'Guided sales execution is disabled for this workspace.'), False
@@ -794,7 +1019,7 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         body={}, target={'project_id': str(scope.project_id),
             'turn_id': str(source_turn.id)}, precondition=f'"{expected_version}"')
     if outcome.replay:
-        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id))
+        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id), thread.id)
         if row is None:
             raise not_found()
         return thread, role, _payload(row)
@@ -839,6 +1064,10 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         complete_idempotency(outcome, str(recorded.id))
         return thread, role, _payload(recorded)
     complete_idempotency(outcome, str(continuation.id))
+    from .audit_service import append_audit
+    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+        action='conversation_turn.cancelled', entity_type='conversation_turn',
+        entity_id=continuation.id)
     return thread, role, _payload(continuation)
 
 

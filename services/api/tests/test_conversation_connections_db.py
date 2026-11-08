@@ -10,7 +10,7 @@ from tests.test_conversation_threads_db import config
 from tests.test_buyer_review_db import WORKSPACE_A,WORKSPACE_B,PROJECT_A,PROJECT_B
 
 TABLE='conversation_drive_connections'
-HEAD='0066_conversation_turns'
+HEAD='0067_conversation_buyer'
 
 
 @pytest.fixture
