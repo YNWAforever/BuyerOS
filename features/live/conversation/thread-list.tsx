@@ -39,7 +39,7 @@ export function ConversationThreadList({t,locale,items,total,currentId,fresh,not
     {notice&&<p className="conversation-threads-notice" role="status">{t(notice)}</p>}
     {loading&&!ordered.length?<p className="conversation-threads-status" role="status">{t('Loading discussions…')}</p>:
       ordered.length?<ul className="conversation-thread-items">{ordered.map(thread=>
-        <li key={thread.id}><button type="button" onClick={()=>onOpen(thread.id)} aria-current={thread.id===currentId?'page':undefined} data-active={thread.id===currentId||undefined}>
+        <li key={thread.id}><button type="button" onClick={()=>onOpen(thread.id)} aria-label={thread.title} aria-current={thread.id===currentId?'page':undefined} data-active={thread.id===currentId||undefined}>
           <span className="conversation-thread-row"><span className="conversation-thread-name">{thread.title}</span>{thread.pinned&&<Pin size={13} aria-hidden="true"/>}</span>
           <span className="conversation-thread-row"><span>{dateLabel(thread.updatedAt,locale)}</span>{thread.access!=='owner'?<span className="pill gray">{t(thread.access==='viewer'?'Viewer':'Editor')}</span>:thread.shareCount>0?<span className="pill gray">{t('Shared')}</span>:null}{thread.archived&&<span className="pill gray">{t('Archived')}</span>}</span>
         </button></li>)}

@@ -465,16 +465,51 @@ def test_postgres_native_sources_route_returns_200_for_candidate_rows(sales_api)
     The route previously used a read-only tenant session around write-capable
     retention/native-read helpers, producing PostgreSQL 25006 and a 500 on
     GET /sales-tasks/native-sources. This asserts the real route against the real
-    database with at least one candidate row to validate.
+    database, twice, and checks both sides of the documented filtering:
+
+    * a candidate whose current authority/evidence validates (an approved profile
+      with a reviewer-approved offer document excerpt) IS returned;
+    * a bare canonical buyer with no current evidence is legitimately dropped by
+      ``resolve_native_source`` (the route filtering is correct behaviour, not a
+      bug to paper over).
     """
+    import psycopg
+    from psycopg.types.json import Jsonb
+    from buyeros_api.db.icp import canonical_hash
+    from tests.icp_fixtures import FACT_ID, valid_icp_payload
+
     client, dsn = sales_api
+    profile = uuid.UUID('c5000000-0000-4000-8000-000000000001')
+    document = uuid.UUID('c3000000-0000-4000-8000-000000000001')
+    content = valid_icp_payload()
+    content['offer_document_ids'] = [str(document)]
+    fact = content['offer_facts'][0]
+    fact.update(provenance='document_excerpt', source_document_id=str(document),
+                excerpt='Approved source excerpt')
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,"
+            "media_type,status,sha256,retention_until,fact_candidates) VALUES(%s,%s,%s,"
+            "'upload','route.txt','text/plain','ready',%s,now()+interval '1 day',%s)",
+            (document, WORKSPACE_A, PROJECT_A, 'a' * 64, Jsonb([fact])))
+        conn.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,"
+            "basis_offer_revision,content,content_hash,approved_by,approved_at) "
+            "VALUES(%s,%s,%s,1,1,%s,%s,%s,now())",
+            (profile, WORKSPACE_A, PROJECT_A, Jsonb(content), canonical_hash(content),
+             uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)))
+        conn.execute('UPDATE projects SET active_icp_version_id=%s WHERE id=%s',
+            (profile, PROJECT_A))
     buyer = _seed_buyer(dsn, name='Native Source Route')
+
     first = client.get(SALES_ROOT + '/native-sources', headers=_h())
     assert first.status_code == 200, first.text
     assert first.headers['cache-control'] == 'no-store'
     items = first.json()['data']['items']
     assert isinstance(items, list)
-    assert any(item['ref']['id'] == str(buyer) for item in items), items
+    # A fully authorised candidate is returned (proof the validation path ran).
+    assert any(item['ref']['kind'] == 'profile' and item['ref']['id'] == str(profile)
+        for item in items), items
+    # Evidence-less buyers are excluded by resolve_native_source, by design.
+    assert not any(item['ref']['id'] == str(buyer) for item in items), items
     # Repeat call: each request uses bounded short transactions only.
     second = client.get(SALES_ROOT + '/native-sources', headers=_h())
     assert second.status_code == 200, second.text
