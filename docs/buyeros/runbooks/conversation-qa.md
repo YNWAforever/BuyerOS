@@ -1,4 +1,4 @@
-# Authenticated conversation QA (real account, dedicated workspace)
+﻿# Authenticated conversation QA (real account, dedicated workspace)
 
 This is the only path that proves the conversation studio end to end with a real
 account. Ordinary CI is fixture-based and cannot reach a real Neon account.
@@ -6,7 +6,7 @@ account. Ordinary CI is fixture-based and cannot reach a real Neon account.
 ## One-time setup (owner)
 
 1. Create the protected environment `buyeros-conversation-qa` in
-   **Settings → Environments**. Add yourself as a required reviewer (recommended)
+   **Settings ??Environments**. Add yourself as a required reviewer (recommended)
    so no run starts without an explicit approval.
 2. Add these **environment** secrets (not repository secrets):
 
@@ -62,3 +62,21 @@ Screenshots and JUnit are uploaded as the `buyeros-conversation-qa` artifact.
 - Real provider dispatch (model/Xverum) remains a separate authorised acceptance
   with paid admission enabled; this journey explicitly does not approve it.
 - Worker/queue execution, delivery and exports keep their own release gates.
+
+## Pre-merge run (label-gated)
+
+`workflow_dispatch` is only available once this file is on the default branch, so
+a pull request can run it earlier by adding the `qa:real` label. Fork PRs are
+refused explicitly, and the protected environment still requires its reviewers.
+
+One-time setup for the label path ??repository **variables** (not secrets):
+
+| Variable | Value |
+| --- | --- |
+| `BUYEROS_QA_ORIGIN` | The Vercel deployment origin under test |
+| `BUYEROS_QA_WORKSPACE_ID` | Dedicated QA workspace UUID |
+| `BUYEROS_QA_PROJECT_ID` | Dedicated QA project UUID |
+
+Then add the `qa:real` label to the PR. The workflow uses the PR head SHA as the
+expected source and the environment secrets for the account, and uploads
+`buyeros-conversation-qa` (screenshots + JUnit).

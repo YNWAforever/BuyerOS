@@ -1,9 +1,12 @@
-﻿name: BuyerOS authenticated conversation QA
+name: BuyerOS authenticated conversation QA
 
 # Manual, protected, real-account acceptance for the conversation studio.
-# It signs in to a deployed candidate with a real Neon account and exercises the
-# conversation surface in the dedicated QA workspace. It is never triggered by a
-# push or a pull request, so ordinary CI cannot reach a real account.
+# Two ways to run it, both gated by the protected environment (and therefore by
+# its required reviewers and secrets):
+#   1. workflow_dispatch from any ref that carries this file (after merge: main).
+#   2. adding the `qa:real` label to a pull request FROM THIS REPOSITORY. PRs from
+#      forks never receive secrets, and the job refuses them explicitly.
+# It is never triggered by a push, so ordinary CI cannot reach a real account.
 on:
   workflow_dispatch:
     inputs:
@@ -23,19 +26,32 @@ on:
         description: Full commit SHA the deployment must be built from
         required: true
         type: string
+  pull_request:
+    types: [labeled]
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: buyeros-conversation-qa
+  group: buyeros-conversation-qa-${{ github.event.pull_request.number || inputs.workspace_id || 'manual' }}
   cancel-in-progress: false
+
+env:
+  QA_ORIGIN: ${{ inputs.origin || vars.BUYEROS_QA_ORIGIN }}
+  QA_WORKSPACE: ${{ inputs.workspace_id || vars.BUYEROS_QA_WORKSPACE_ID }}
+  QA_PROJECT: ${{ inputs.project_id || vars.BUYEROS_QA_PROJECT_ID }}
+  QA_SHA: ${{ inputs.expected_source_sha || github.event.pull_request.head.sha }}
 
 jobs:
   conversation-qa:
+    # A labeled PR may only run this when it comes from this repository.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'qa:real' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     # Secrets for the real QA account live only on this protected environment.
-    # Configure required reviewers there before the first run.
+    # Configure required reviewers there so no run starts without an approval.
     environment: buyeros-conversation-qa
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -53,19 +69,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Verify the target is the reviewed deployment
-        env:
-          ORIGIN: ${{ inputs.origin }}
-          WORKSPACE_ID: ${{ inputs.workspace_id }}
-          PROJECT_ID: ${{ inputs.project_id }}
-          EXPECTED_SHA: ${{ inputs.expected_source_sha }}
         run: |
           set -euo pipefail
           node - <<'NODE'
           const {origin, workspace, project, sha} = {
-            origin: process.env.ORIGIN, workspace: process.env.WORKSPACE_ID,
-            project: process.env.PROJECT_ID, sha: process.env.EXPECTED_SHA,
+            origin: process.env.QA_ORIGIN, workspace: process.env.QA_WORKSPACE,
+            project: process.env.QA_PROJECT, sha: process.env.QA_SHA,
           };
           const fail = (message) => { console.error('BLOCKED: ' + message); process.exit(1) };
+          if (!origin) fail('BUYEROS_QA_ORIGIN is not configured (input or repository variable)');
           let url;
           try { url = new URL(origin) } catch { fail('origin is not a URL') }
           if (url.protocol !== 'https:') fail('origin must be https');
@@ -75,29 +87,19 @@ jobs:
           if (!url.hostname.endsWith('.vercel.app') && url.hostname !== 'vercel.app')
             fail('origin must be a Vercel deployment host');
           const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
-          if (!uuid.test(workspace)) fail('workspace_id is not a UUID');
-          if (!uuid.test(project)) fail('project_id is not a UUID');
-          if (!/^[0-9a-f]{40}$/.test(sha)) fail('expected_source_sha must be a full 40-character SHA');
+          if (!workspace) fail('QA workspace id is not configured');
+          if (!uuid.test(workspace)) fail('workspace id is not a UUID');
+          if (!project) fail('QA project id is not configured');
+          if (!uuid.test(project)) fail('project id is not a UUID');
+          if (!/^[0-9a-f]{40}$/.test(sha || '')) fail('expected source SHA must be a full 40-character SHA');
           console.log('target accepted: ' + url.origin);
           NODE
-      - name: Confirm the deployment reports the reviewed source
-        env:
-          ORIGIN: ${{ inputs.origin }}
-          EXPECTED_SHA: ${{ inputs.expected_source_sha }}
-        run: |
-          set -euo pipefail
-          body="$(curl --fail --silent --show-error --max-time 30 --retry 3 --retry-delay 5 "$ORIGIN/healthz" || true)"
-          if [ -z "$body" ]; then
-            echo "no /healthz endpoint on this deployment; source binding is asserted by the QA spec instead"
-          else
-            echo "$body" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const v=JSON.parse(s);if(v&&v.source_sha&&v.source_sha!==process.env.EXPECTED_SHA){console.error('BLOCKED: deployment source mismatch');process.exit(1)}})"
-          fi
       - name: Run the authenticated conversation QA journey
         env:
-          BUYEROS_QA_ORIGIN: ${{ inputs.origin }}
-          BUYEROS_QA_WORKSPACE_ID: ${{ inputs.workspace_id }}
-          BUYEROS_QA_PROJECT_ID: ${{ inputs.project_id }}
-          BUYEROS_QA_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+          BUYEROS_QA_ORIGIN: ${{ env.QA_ORIGIN }}
+          BUYEROS_QA_WORKSPACE_ID: ${{ env.QA_WORKSPACE }}
+          BUYEROS_QA_PROJECT_ID: ${{ env.QA_PROJECT }}
+          BUYEROS_QA_EXPECTED_SOURCE_SHA: ${{ env.QA_SHA }}
           BUYEROS_NEON_REAL_EMAIL: ${{ secrets.BUYEROS_NEON_REAL_EMAIL }}
           BUYEROS_NEON_REAL_PASSWORD: ${{ secrets.BUYEROS_NEON_REAL_PASSWORD }}
         run: |
