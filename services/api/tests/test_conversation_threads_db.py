@@ -67,7 +67,7 @@ def test_children_reject_cross_project_or_tenant(thread_rows,table):
     with psycopg.connect(dsn) as db:
         for workspace,project in [(WORKSPACE_B,PROJECT_B),(WORKSPACE_A,PROJECT_B)]:
             extra='author_user_id,text,seq,role' if table.endswith('messages') else 'grantee_user_id,granted_by,role'
-            values="%s,'synthetic',1,'user'" if table.endswith('messages') else "%s,%s,'viewer'"
+            values="%s,'synthetic',999,'user'" if table.endswith('messages') else "%s,%s,'viewer'"
             other=uuid.uuid4()
             db.execute("INSERT INTO users(id,issuer,subject) VALUES(%s,'thread-db-fixture',%s)",(other,str(other)))
             args=(uuid.uuid4(),workspace,project,first,user,user) if table.endswith('messages') else (uuid.uuid4(),workspace,project,first,user,other,user)
@@ -97,7 +97,7 @@ def test_note_bounds(thread_rows,text):
     dsn,user,first,_=thread_rows
     with psycopg.connect(dsn) as db:
         with pytest.raises(psycopg.errors.CheckViolation):
-            db.execute("INSERT INTO conversation_thread_messages(id,workspace_id,project_id,thread_id,owner_user_id,author_user_id,text,seq,role) VALUES(%s,%s,%s,%s,%s,%s,%s,1,'user')",(uuid.uuid4(),WORKSPACE_A,PROJECT_A,first,user,user,text))
+            db.execute("INSERT INTO conversation_thread_messages(id,workspace_id,project_id,thread_id,owner_user_id,author_user_id,text,seq,role) VALUES(%s,%s,%s,%s,%s,%s,%s,999,'user')",(uuid.uuid4(),WORKSPACE_A,PROJECT_A,first,user,user,text))
 
 
 def test_owner_cannot_be_grantee(thread_rows):

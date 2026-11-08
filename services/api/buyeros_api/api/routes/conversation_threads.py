@@ -17,6 +17,7 @@ from ...db.models import Membership, User
 from ...services.audit_service import append_audit
 from ...services.membership_directory import directory_search, member_display_name
 from ...services.conversation_access import access, load, not_found, shared, thread_scope
+from ...services.conversation_messages import next_message_seq
 from ...services.sales_tasks import ensure_thread_deletable
 from ...services.conversation_connections import approved_sources, SOURCE as DRIVE_SOURCE
 
@@ -241,8 +242,8 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
             count = (await session.execute(select(func.count()).select_from(Message).where(Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one()
             if count >= 100:
                 raise ApiError(409, 'MESSAGE_LIMIT', '100-note limit reached; start another discussion and keep your unsaved note')
-            seq = (await session.execute(select(func.coalesce(func.max(Message.seq), 0)).where(
-                Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one() + 1
+            # Flushes any pending row first; the discussion row lock serializes appends.
+            seq = await next_message_seq(session, workspace_id, row.id)
             session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id,
                 owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text,
                 seq=seq, role='user', parts=[]))

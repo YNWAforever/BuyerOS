@@ -152,7 +152,7 @@ def test_bounded_server_caps(thread_api,case):
     with psycopg.connect(dsn) as db:
         owner=uuid.uuid5(uuid.NAMESPACE_URL,OPERATOR)
         if case=='message':
-            db.execute("INSERT INTO conversation_thread_messages(id,workspace_id,project_id,thread_id,owner_user_id,author_user_id,text,seq,role) SELECT gen_random_uuid(),%s,%s,%s,%s,%s,'bounded',seq_no,'user' FROM generate_series(1,99) AS seq_no",(WORKSPACE_A,PROJECT_A,row['id'],owner,owner))
+            db.execute("INSERT INTO conversation_thread_messages(id,workspace_id,project_id,thread_id,owner_user_id,author_user_id,text,seq,role) SELECT gen_random_uuid(),%s,%s,%s,%s,%s,'bounded',seq_no,'user' FROM generate_series(2,100) AS seq_no",(WORKSPACE_A,PROJECT_A,row['id'],owner,owner))
         elif case=='run':db.execute('UPDATE conversation_threads SET runs=%s WHERE id=%s',(Jsonb([{'id':str(uuid.uuid4()),'label':'Research run','status':'queued'} for _ in range(100)]),row['id']))
         elif case=='thread':db.execute("INSERT INTO conversation_threads(id,workspace_id,project_id,owner_user_id,template_id,title) SELECT gen_random_uuid(),%s,%s,%s,'custom','bounded' FROM generate_series(1,199)",(WORKSPACE_A,PROJECT_A,owner))
         elif case=='share':

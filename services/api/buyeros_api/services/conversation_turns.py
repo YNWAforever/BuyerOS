@@ -417,10 +417,9 @@ async def _replay(session, scope: Scope, row: ConversationTurn, payload: TurnReq
     return thread, role, _payload(row)
 
 
-async def _next_seq(session, thread_id) -> int:
-    current = (await session.execute(select(func.coalesce(func.max(ConversationThreadMessage.seq), 0))
-        .where(ConversationThreadMessage.thread_id == thread_id))).scalar_one()
-    return current + 1
+async def _next_seq(session, thread) -> int:
+    from .conversation_messages import next_message_seq
+    return await next_message_seq(session, thread.workspace_id, thread.id)
 
 
 async def _message_count(session, thread) -> int:
@@ -497,7 +496,7 @@ async def _stage_turn(session, scope: Scope, thread, payload: TurnRequest, *,
         notices=[notice.model_dump(mode='json') for notice in notices])
     session.add(turn)
     await session.flush()
-    seq = await _next_seq(session, thread.id)
+    seq = await _next_seq(session, thread)
     if client_message_id:
         session.add(ConversationThreadMessage(workspace_id=scope.workspace_id,
             project_id=scope.project_id, thread_id=thread.id,
@@ -771,7 +770,7 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     if await _message_count(session, thread) + 1 > MAX_THREAD_MESSAGES:
         raise ApiError(409, 'MESSAGE_LIMIT',
             'discussion note limit reached; start another discussion')
-    seq = await _next_seq(session, thread.id)
+    seq = await _next_seq(session, thread)
     turn = ConversationTurn(id=turn_id, workspace_id=scope.workspace_id,
         project_id=scope.project_id, thread_id=thread.id, owner_user_id=thread.owner_user_id,
         actor_id=scope.actor_id, client_message_id=None, request_fingerprint=request_fp,
