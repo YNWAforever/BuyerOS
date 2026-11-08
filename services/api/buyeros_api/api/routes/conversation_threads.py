@@ -115,6 +115,7 @@ class Preference(StrictModel):
 async def data(session, row, role, *, full=True):
     result = {'id': str(row.id), 'version': row.version, 'templateId': row.template_id, 'title': row.title,
         'createdAt': int(row.created_at.timestamp()*1000), 'updatedAt': int(row.updated_at.timestamp()*1000), 'access': role,
+        'buyerId': str(row.buyer_id) if row.buyer_id else None,
         'shareCount': (await session.execute(select(func.count()).select_from(Share).where(Share.workspace_id == row.workspace_id, Share.thread_id == row.id))).scalar_one() if role == 'owner' else 0}
     if full:
         messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.seq))).scalars().all()

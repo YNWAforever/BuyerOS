@@ -845,6 +845,22 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     return turn
 
 
+def decision_fingerprint(scope: Scope, thread_id, source_turn_id,
+                         request: TurnDecisionRequest) -> str:
+    """Continuation identity: includes the decision precondition version.
+
+    A non-terminal blocked decision leaves the proposal open; a later decision
+    after the workspace is configured must create a NEW continuation, so the
+    expected version is part of the fingerprint (without it a resume reused the
+    earlier ``needs_input`` continuation).
+    """
+    return digest({'operation': 'conversationTurnDecision',
+        'proposal_id': str(request.proposal_id), 'decision': request.decision,
+        'actor_id': str(scope.actor_id), 'thread_id': str(thread_id),
+        'turn_id': str(source_turn_id),
+        'expected_thread_version': request.expected_thread_version})
+
+
 def _decision_part(proposal, state, *, summary=None, error_code=None, started_at=None,
                    finished_at=None) -> ToolActivityPart:
     return ToolActivityPart(call_id=proposal.id, capability=proposal.capability,
@@ -859,10 +875,7 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         raise not_found()
     thread, role = await load(session, scope.workspace_id, scope.project_id,
         source_turn.thread_id, scope.actor_id, edit=True, lock=True)
-    fingerprint = digest({'operation': 'conversationTurnDecision',
-        'proposal_id': str(request.proposal_id), 'decision': request.decision,
-        'actor_id': str(scope.actor_id), 'thread_id': str(thread.id),
-        'turn_id': str(source_turn.id)})
+    fingerprint = decision_fingerprint(scope, thread.id, source_turn.id, request)
     # Durable replay precedes the write precondition. A retry after an uncertain
     # first response reuses the same key and the same expected version, while the
     # first commit already advanced thread.version; the fingerprint still binds

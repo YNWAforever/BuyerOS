@@ -191,6 +191,17 @@ def test_replay_fingerprint_binds_scope_client_message_and_thread():
     other_scope = SimpleNamespace(workspace_id=scope.workspace_id,
         project_id=scope.project_id, actor_id=uuid.uuid4())
     assert baseline != engine.request_fingerprint(other_scope, payload, thread_id)
+    # Decision continuation identity includes the expected version: a decision
+    # resumed after a blocked (needs_input) decision must create a new result.
+    proposal_id, turn_id = uuid.uuid4(), uuid.uuid4()
+
+    def decision(version):
+        return turn_contracts.TurnDecisionRequest(proposal_id=proposal_id,
+            decision='approve', expected_thread_version=version)
+
+    blocked = engine.decision_fingerprint(scope, thread_id, turn_id, decision(2))
+    assert blocked != engine.decision_fingerprint(scope, thread_id, turn_id, decision(3))
+    assert blocked == engine.decision_fingerprint(scope, thread_id, turn_id, decision(2))
 
 
 def test_title_rules_are_bounded_and_client_safe():
@@ -407,3 +418,4 @@ def test_plan_ceiling_caps_proposals_so_step_count_stays_bounded():
     assert len(staged) == len(plan.proposals)
     assert {proposal.capability for proposal in plan.proposals} == {
         'documents.read', 'xverum.enrich_company'}
+
