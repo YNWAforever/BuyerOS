@@ -39,7 +39,18 @@ test.beforeEach(async({page})=>{page.on('dialog',d=>void d.accept());});
 // Playwright otherwise reports disposed-context errors from those route callbacks.
 test.afterEach(async({page})=>{await page.unrouteAll({behavior:'ignoreErrors'});});
 const catalogue=JSON.parse(readFileSync('services/api/buyeros_api/sales/catalogue.json','utf8')).skills;
-for(const skill of catalogue)test(`registered invocation ${skill.id}`,async({page})=>{const {requests}=await fixture(page);await page.goto(`/fixture?route=/app/discussions/s/${threadId}`);await page.locator(`[data-skill="${skill.id}"]`).click();await page.getByRole('textbox',{name:'Describe your task'}).fill('Synthetic requested work');await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByLabel('Saved messages')).toBeVisible();expect(requests.find(r=>r.path.endsWith('/sales-tasks')&&r.method==='POST')?.body).toMatchObject({skill_id:skill.id,skill_version:'1',user_message:'Synthetic requested work',source_refs:[]});});
+for(const skill of catalogue)test(`registered invocation ${skill.id}`,async({page})=>{
+ const {requests}=await fixture(page),fresh=skill.id==='first-project';
+ const message=fresh?'Synthetic first project: '+ 'Keep the complete initial task. '.repeat(5):'Synthetic requested work';
+ await page.goto(fresh?'/fixture?route=/app/discussions/new':`/fixture?route=/app/discussions/s/${threadId}`);
+ await page.locator(`[data-skill="${skill.id}"]`).click();await page.getByRole('textbox',{name:'Describe your task'}).fill(message);
+ await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByLabel('Saved messages')).toBeVisible();
+ expect(requests.find(r=>r.path.endsWith('/sales-tasks')&&r.method==='POST')?.body).toMatchObject({skill_id:skill.id,skill_version:'1',user_message:message,source_refs:[]});
+ if(fresh){
+  const creations=requests.filter(r=>r.path.endsWith('/conversation-threads')&&r.method==='POST');expect(creations).toHaveLength(1);
+  expect(creations[0].body).toEqual({confirmed:true,template_id:'custom',title:message.slice(0,80),messages:[{text:message}],sources:[],runs:[]});
+ }
+});
 test('catalogue offers every registered skill and typed request review',async({page})=>{
  page.on('pageerror',e=>console.log('PAGE ERROR',e.message));
  await page.route('**/v1/**',route=>{const path=new URL(route.request().url()).pathname;const data=path.endsWith('/sales/skills')?{skills:catalogue.map((s:object)=>({...s,inputs_schema:{properties:{}}}))}:path.endsWith('/conversation-threads')?{items:[],total:0,offset:0,limit:50}:{};return route.fulfill({json:{data,data_mode:'live',request_id:'synthetic'}});});
@@ -65,6 +76,27 @@ test('viewer cannot start, follow up, approve or prepare',async({page})=>{const 
 test('exact output route reload and entry-off recovery use reads only',async({page})=>{const {requests}=await fixture(page,{initial:true});await page.goto(`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('button',{name:'Prepare and save output'}).click();await page.getByRole('button',{name:'Open saved output'}).click();await expect(page.getByRole('heading',{name:'Documents',exact:true})).toBeVisible();await expect(page.getByText('Synthetic saved setup',{exact:true})).toBeVisible();const url=new URL(page.url());url.searchParams.set('flag','off');const before=requests.filter(r=>r.method==='POST').length;await page.goto(url.href);await expect(page.getByText('Synthetic saved setup',{exact:true})).toBeVisible();expect(requests.filter(r=>r.method==='POST')).toHaveLength(before);await expect(page.getByRole('button',{name:'New discussion',exact:true})).toHaveCount(0);});
 test('denied output announces policy error without rendering cached content',async({page})=>{await fixture(page,{denied:true});await page.goto('/fixture?route=/app/documents/d3000000-0000-4000-8000-000000000001/versions/1');await expect(page.getByRole('alert')).toHaveText('Policy does not allow this source or export.');await expect(page.getByText('Synthetic saved setup')).toHaveCount(0);});
 test('native export link requires an explicit currently-authorized download',async({page})=>{await fixture(page);let downloads=0;await page.route('**/v1/**/exports/export-fixture**',route=>{if(route.request().url().endsWith('/content')){downloads++;return route.fulfill({contentType:'application/pdf',body:Buffer.from('%PDF-1.4\nsynthetic fixture\n')});}return route.fulfill({json:{data:{id:'export-fixture',status:'completed'},data_mode:'live',request_id:'synthetic'}});});await page.goto('/fixture?route=/app/documents&export=export-fixture&flag=off');await expect(page.getByRole('button',{name:'Open authorised export'})).toBeVisible();expect(downloads).toBe(0);const saved=page.waitForEvent('download');await page.getByRole('button',{name:'Open authorised export'}).click();expect((await saved).suggestedFilename()).toBe('report.pdf');expect(downloads).toBe(1);});
+test('fresh discussion thread rejection never posts a sales task',async({page})=>{
+ const {requests}=await fixture(page),threadPosts:unknown[]=[];
+ await page.route('**/conversation-threads',async route=>{
+  if(route.request().method()!=='POST')return route.fallback();
+  threadPosts.push(route.request().postDataJSON());
+  await route.fulfill({status:422,json:{code:'INVALID_REQUEST',message:'Synthetic thread rejection',retryable:false,request_id:'synthetic'}});
+ });
+ await page.goto('/fixture?route=/app/discussions/new');
+ await page.locator('[data-skill="first-project"]').click();
+ const message='Synthetic first project rejected before task creation';
+ await page.getByRole('textbox',{name:'Describe your task'}).fill(message);
+ const save=page.getByRole('button',{name:'Save task',exact:true});await save.click();
+ await expect(page.getByRole('region',{name:'Guided sales',exact:true}).getByRole('alert')).toContainText('Outcome unknown');
+ await expect(save).toBeEnabled(); // The request has settled and the action lock is released.
+ expect(threadPosts).toEqual([{confirmed:true,template_id:'custom',title:message,messages:[{text:message}],sources:[],runs:[]}]);
+ expect(requests.filter(r=>r.path.endsWith('/sales-tasks')&&r.method==='POST')).toHaveLength(0);
+ await expect(page.getByLabel('Saved messages')).toHaveCount(0);
+ await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue(message);
+ await expect(page).toHaveURL(/route=\/app\/discussions\/new/);
+});
+
 test('uncertain task send retries the same mutation key',async({page})=>{await fixture(page);const keys:string[]=[];await page.route('**/sales-tasks',async route=>{if(route.request().method()!=='POST')return route.fallback();keys.push(route.request().headers()['idempotency-key']);if(keys.length===1)return route.abort('failed');return route.fallback();});await page.goto(`/fixture?route=/app/discussions/s/${threadId}`);await page.locator('[data-skill="first-project"]').click();await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Outcome unknown'})).toBeVisible();await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByLabel('Saved messages')).toBeVisible();expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);});
 test('dirty navigation can be cancelled and accepted without losing the scoped draft',async({page})=>{await fixture(page);page.removeAllListeners('dialog');await page.goto(`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('textbox',{name:'Describe your task'}).fill('Keep this draft');page.once('dialog',d=>void d.dismiss());await page.getByRole('button',{name:'Home',exact:true}).click();await expect(page.locator('#fixture-path')).toHaveText(`/app/discussions/s/${threadId}`);page.once('dialog',d=>void d.accept());await page.getByRole('button',{name:'Home',exact:true}).click();await page.getByRole('button',{name:'Synthetic discussion',exact:true}).click();await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('Keep this draft');});
 test('project change discards a delayed old-scope task response',async({page})=>{await fixture(page);let release!:()=>void,received!:()=>void;const held=new Promise<void>(r=>release=r),seen=new Promise<void>(r=>received=r);await page.route('**/sales-tasks',async route=>{if(route.request().method()!=='POST')return route.fallback();received();await held;await route.fulfill({json:{data:{id:'old-task',state:'completed'},data_mode:'live',request_id:'synthetic'}}).catch(()=>{});});await page.goto(`/fixture?route=/app/discussions/s/${threadId}`);await page.locator('[data-skill="first-project"]').click();await page.getByRole('button',{name:'Save task',exact:true}).click();await seen;await page.getByLabel('Fixture project').selectOption('project-b');release();await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');await expect(page.getByLabel('Saved messages')).toHaveCount(0);});
