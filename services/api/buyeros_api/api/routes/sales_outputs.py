@@ -17,7 +17,7 @@ async def permissions(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid
     request:Request,principal:Principal=Depends(get_principal)):
     from ...db.sales_outputs import SalesOutput
     from ...services.conversation_access import load
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         output=await service.get_output(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),output_id)
         row=await session.get(SalesOutput,output_id)
         editable=False
@@ -105,7 +105,7 @@ async def listing(workspace_id:uuid.UUID,project_id:uuid.UUID,request:Request,
     limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(get_principal)):
     try: query=OutputListQuery(native_surface=native_surface,native_id=native_id,offset=offset,limit=limit)
     except ValueError as exc: raise ApiError(422,'INVALID_REQUEST','paired valid native filters required') from exc
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         result=await service.list_outputs(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),query)
     return envelope(result.model_dump(mode='json'),request.state.request_id)
 
@@ -113,7 +113,7 @@ async def listing(workspace_id:uuid.UUID,project_id:uuid.UUID,request:Request,
 @router.get('/{output_id}',operation_id='getSalesOutput')
 async def get(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid.UUID,request:Request,response:Response,
     revision:int|None=Query(None,ge=1),principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         result=await service.get_output(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),output_id,revision)
     response.headers['ETag']=f'"{result.revision}"'
     return envelope(result.model_dump(mode='json'),request.state.request_id)
@@ -122,7 +122,7 @@ async def get(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid.UUID,re
 @router.get('/{output_id}/versions',operation_id='listSalesOutputVersions')
 async def history(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid.UUID,request:Request,
     before_revision:int|None=Query(None,ge=1),limit:int=Query(100,ge=1,le=100),principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         result=await service.versions(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),output_id,before_revision,limit)
     result['outputs']=[r.model_dump(mode='json') for r in result['outputs']]
     return envelope(result,request.state.request_id)
@@ -139,7 +139,7 @@ async def exact(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid.UUID,
 async def preview(workspace_id:uuid.UUID,project_id:uuid.UUID,output_id:uuid.UUID,
     revision:int|None=Query(None,ge=1),principal:Principal=Depends(get_principal)):
     from fastapi.responses import HTMLResponse
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         output=await service.get_output(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),output_id,revision)
     return HTMLResponse(service.render_output(output),headers={'Content-Security-Policy':"default-src 'none'; sandbox",
         'Referrer-Policy':'no-referrer','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})

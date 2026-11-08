@@ -579,7 +579,7 @@ def test_populated_dispatch_downgrade_preserves_proof(dispatch_case):
     with pytest.raises(RuntimeError,match='preserve dispatch'):
         command.downgrade(config(),'0062_xverum_credits')
     with psycopg.connect(c.dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0065_sales_lifecycle'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0066_conversation_turns'
         assert db.execute('SELECT count(*) FROM xverum_tool_receipts').fetchone()[0]==1
         for name in ('xverum_stages','xverum_tool_receipts','xverum_reconciliations'):
             assert db.execute('SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(name,)).fetchone()[0]

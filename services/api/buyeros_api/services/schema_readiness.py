@@ -130,6 +130,16 @@ def sales_requirements(*, worker=False):
         'public.sales_task_dependencies':common+['project_id','thread_id','task_id','source_id','source_version','kind','retention_class'],
         'public.conversation_thread_preferences':common+['project_id','thread_id','owner_user_id','actor_id','pinned','archived'],
         'public.conversation_threads':common+['project_id','owner_user_id','template_id','title','version','sources','runs'],
+        'public.conversation_thread_messages':common+['project_id','thread_id','owner_user_id','author_user_id',
+            'text','seq','role','client_message_id','turn_id','parts'],
+        'public.conversation_turns':common+['project_id','thread_id','owner_user_id','actor_id','client_message_id',
+            'request_fingerprint','parent_turn_id','language','skill_id','skill_version','status','step_count',
+            'expected_thread_version','parts','notices'],
+        'public.conversation_turn_proposals':common+['project_id','thread_id','turn_id','actor_id','capability',
+            'skill_id','skill_version','title','rationale','arguments','source_refs','arguments_preview','cost',
+            'requires_approval','status','revision','result'],
+        'public.conversation_turn_decisions':common+['project_id','thread_id','turn_id','proposal_id','actor_id',
+            'decision','request_fingerprint','continuation_turn_id','status'],
     }
     from ..db.sales_execution import SalesReview, SalesExecution, SalesStep
     from ..db.sales_outputs import SalesOutput, SalesOutputVersion, SalesOutputSection, SalesOutputDependency, SalesOutputNativeLink
@@ -152,6 +162,8 @@ def sales_requirements(*, worker=False):
         privileges.append({'relation':name,'columns':columns,'privilege':'UPDATE'})
     privileges.append({'relation':'public.conversation_threads','columns':['id'],'privilege':'DELETE'})
     privileges.append({'relation':'public.sales_outputs','columns':['revision','updated_at'],'privilege':'UPDATE'})
+    privileges.append({'relation':'public.conversation_turn_proposals',
+        'columns':['status','revision','result','updated_at'],'privilege':'UPDATE'})
     if worker:
         from ..db.conversation_threads import ConversationThreadShare
         relations['public.conversation_thread_shares']=list(ConversationThreadShare.__table__.columns.keys())
@@ -206,7 +218,7 @@ def sales_requirements(*, worker=False):
     privileges.append({'relation':'public.sales_content_tombstones','columns':['completed_at'],'privilege':'UPDATE'})
     if not worker:
         privileges.append({'relation':'public.sales_executions','columns':['accounting_revision','accounted_bound','settled_usd'],'privilege':'UPDATE'})
-    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle'], 'compatible_heads':['0065_sales_lifecycle'],
+    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns'], 'compatible_heads':['0066_conversation_turns'],
         'required_relations':relations, 'required_rls':list(relations),
         'required_privileges':privileges,
         'required_functions':[f'public.buyeros_{service}_receipts_writable()' for service in ('search','model','contact')],

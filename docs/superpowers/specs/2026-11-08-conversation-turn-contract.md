@@ -148,3 +148,29 @@ Idempotency: a replayed turn request with the same `Idempotency-Key` and
 
 These two amendments are the shared interface for the current implementation.
 Anything beyond them needs a report back to the Lead rather than a silent change.
+
+## Implementation notes (2026-11-08, backend increment)
+
+Revision `0066_conversation_turns` (Alembic, after `0065_sales_lifecycle`).
+Persisted schema: `conversation_turns` (status, step_count, language, skill,
+`parts` JSONB, `notices` JSONB, `client_message_id`, `request_fingerprint`,
+`parent_turn_id`); `conversation_turn_proposals` (capability, trusted
+`arguments`/`source_refs`, bounded `arguments_preview`, status, revision,
+result); `conversation_turn_decisions` (one effective decision per proposal,
+`continuation_turn_id`); `conversation_thread_messages` gains
+`role`, monotonic `seq`, nullable `client_message_id`, `turn_id` and `parts`.
+All four are tenant-scoped with forced RLS; there are no worker grants.
+
+Deliberate deviations reported to the Lead, not silent interface changes:
+
+- `output_link` nests the canonical reference under `output` because the part
+  discriminator already uses `kind`; payload is
+  `{output_id, kind, revision, status}`.
+- `messages[]` also carries `turn_id`, so a reloaded transcript can address the
+  decisions/cancel endpoints without a second turn lookup.
+- `turn.status` adds `cancelled`; the original status table omitted it while
+  requiring a cancel endpoint.
+- The live model registration remains absent
+  (`CONVERSATION_MODEL_UNAVAILABLE`): the turn persists a deterministic advisory
+  summary plus citations and an honest notice. Tests inject a deterministic
+  fixture adapter through `reply_from_grounding`; no paid admission is enabled.

@@ -116,9 +116,20 @@ async def data(session, row, role, *, full=True):
         'createdAt': int(row.created_at.timestamp()*1000), 'updatedAt': int(row.updated_at.timestamp()*1000), 'access': role,
         'shareCount': (await session.execute(select(func.count()).select_from(Share).where(Share.workspace_id == row.workspace_id, Share.thread_id == row.id))).scalar_one() if role == 'owner' else 0}
     if full:
-        messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.created_at, Message.id))).scalars().all()
-        result.update(messages=[{'id': str(m.id), 'text': m.text} for m in messages], sources=row.sources, runs=row.runs)
+        messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.seq))).scalars().all()
+        result.update(messages=[message_data(m) for m in messages], sources=row.sources, runs=row.runs)
     return result
+
+
+def message_data(message):
+    """Thread message read model; legacy rows read as user notes with no parts."""
+    value = {'id': str(message.id), 'seq': message.seq, 'role': message.role,
+        'text': message.text,
+        'client_message_id': str(message.client_message_id) if message.client_message_id else None,
+        'turn_id': str(message.turn_id) if message.turn_id else None}
+    if message.parts:
+        value['parts'] = message.parts
+    return value
 
 
 def audit(session, row, actor, action, entity_id=None):
@@ -190,7 +201,9 @@ async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload:
             now = datetime.now(timezone.utc)
             for index, note in enumerate(payload.messages):
                 session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id,
-                    owner_user_id=actor, author_user_id=actor, text=note.text, created_at=now+timedelta(microseconds=index)))
+                    owner_user_id=actor, author_user_id=actor, text=note.text,
+                    seq=index+1, role='user', parts=[],
+                    created_at=now+timedelta(microseconds=index)))
             audit(session, row, actor, 'imported')
             complete_idempotency(outcome, str(row.id))  # No note/title copies in idempotency responses.
             await session.flush()
@@ -228,7 +241,11 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
             count = (await session.execute(select(func.count()).select_from(Message).where(Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one()
             if count >= 100:
                 raise ApiError(409, 'MESSAGE_LIMIT', '100-note limit reached; start another discussion and keep your unsaved note')
-            session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id, owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text))
+            seq = (await session.execute(select(func.coalesce(func.max(Message.seq), 0)).where(
+                Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one() + 1
+            session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id,
+                owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text,
+                seq=seq, role='user', parts=[]))
             complete_idempotency(outcome, str(row.id))
             await session.flush()
         result = await data(session, row, role)

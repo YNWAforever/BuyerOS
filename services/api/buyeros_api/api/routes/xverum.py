@@ -37,7 +37,7 @@ async def create_enrichment(workspace_id:uuid.UUID,project_id:uuid.UUID,payload:
 @router.get('/enrichment-proposals/{proposal_id}',operation_id='getEnrichmentProposal')
 async def get_enrichment(workspace_id:uuid.UUID,project_id:uuid.UUID,proposal_id:uuid.UUID,
     request:Request,principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         value=await enrichment.read_proposal(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),proposal_id)
     return envelope(value.model_dump(mode='json'),request.state.request_id)
 
@@ -62,7 +62,7 @@ def result(value,request,response):
 
 @router.get('/connections',operation_id='listXverumConnections')
 async def listing(workspace_id:uuid.UUID,project_id:uuid.UUID,request:Request,principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         values = await service.list_connections(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor))
     return envelope({'connections':[v.model_dump(mode='json') for v in values]},request.state.request_id)
 
@@ -133,7 +133,7 @@ async def create_quote(workspace_id:uuid.UUID,project_id:uuid.UUID,payload:Quote
 @router.get('/quotes/{quote_id}',operation_id='getXverumQuote')
 async def get_quote(workspace_id:uuid.UUID,project_id:uuid.UUID,quote_id:uuid.UUID,
     request:Request,principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         value=await quotes.read_quote(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),quote_id)
     return envelope(value.model_dump(mode='json'),request.state.request_id)
 
@@ -143,7 +143,7 @@ async def candidates(workspace_id:uuid.UUID,project_id:uuid.UUID,receipt_id:uuid
     request:Request,principal:Principal=Depends(get_principal)):
     from ...services.xverum_dispatch import source_search_evidence
     from ...sales.contracts import XverumCompanySearch, XverumPeopleSearch
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         evidence=await source_search_evidence(session,Scope(workspace_id=workspace_id,
             project_id=project_id,actor_id=actor),receipt_id)
         schema=XverumCompanySearch if evidence['tool']=='search_company_xverum' else XverumPeopleSearch
@@ -157,7 +157,7 @@ async def task_stages(workspace_id:uuid.UUID,project_id:uuid.UUID,task_id:uuid.U
     from sqlalchemy import select
     from ...db.xverum import XverumStage, XverumReceiptRow, XverumCreditReservation, XverumQuoteRow
     from ...services.sales_tasks import task_row
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
         await task_row(session,scope,task_id)
         rows=(await session.execute(select(XverumReceiptRow,XverumQuoteRow)
@@ -206,7 +206,7 @@ async def approve_quote(workspace_id:uuid.UUID,project_id:uuid.UUID,quote_id:uui
 @router.get('/receipts/{receipt_id}',operation_id='getXverumReceipt')
 async def get_receipt(workspace_id:uuid.UUID,project_id:uuid.UUID,receipt_id:uuid.UUID,
     request:Request,response:Response,principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         value=await quotes.read_receipt(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),receipt_id)
     return result(value,request,response)
 
@@ -217,7 +217,7 @@ from ...services import xverum_dispatch as dispatch
 @router.get('/receipts/{receipt_id}/liability',operation_id='getXverumLiability')
 async def liability(workspace_id:uuid.UUID,project_id:uuid.UUID,receipt_id:uuid.UUID,
     request:Request,response:Response,principal:Principal=Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         value=await dispatch.read_liability(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),receipt_id)
     response.headers['ETag']=f'"{value.receipt.version}"'
     return envelope(value.model_dump(mode='json'),request.state.request_id)
