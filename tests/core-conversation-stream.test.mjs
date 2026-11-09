@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
 import {readFileSync} from 'node:fs';
@@ -143,16 +143,16 @@ test('SSE parser bounds a single frame and the unparsed buffer',()=>{
 test('stream client aborts an oversized SSE body instead of buffering it',async()=>{
   const original=globalThis.fetch;
   const chunk=`event: part\ndata: ${'z'.repeat(MAX_SSE_BUFFER_BYTES+10)}`;
+  const errors=[];
   try{
-    console.error('CKPT: installing fetch mock');
-    globalThis.fetch=async()=>{console.error('CKPT: fetch called');return new Response(new ReadableStream({start(controller){
-      console.error('CKPT: enqueue chunk '+chunk.length);controller.enqueue(new TextEncoder().encode(chunk));console.error('CKPT: enqueued, closing');controller.close();
-    }}),{status:200,headers:{'content-type':'text/event-stream'}});};
+    globalThis.fetch=async()=>new Response(new ReadableStream({start(controller){
+      controller.enqueue(new TextEncoder().encode(chunk));controller.close();
+    }}),{status:200,headers:{'content-type':'text/event-stream'}});
     const api=new ConversationTurns({async request(){return undefined;}},session(),true);
-    console.error('CKPT: before stream');
-    const outcome=await api.stream('11111111-1111-4111-8111-111111111111',{signal:new AbortController().signal,onEvent(){},onReconnect:(a,d)=>console.error('CKPT reconnect '+a+' '+d),onStreamError:(e)=>console.error('CKPT stream error '+(e&&e.message||e))});
-    console.error('CKPT: after stream outcome='+outcome);
+    const outcome=await api.stream('11111111-1111-4111-8111-111111111111',{signal:new AbortController().signal,
+      onEvent(){},onStreamError:error=>errors.push(error)});
     assert.equal(outcome,'overflow');
+    assert.deepEqual(errors,[],'an overflow is a bounded outcome, not a transport error');
   }finally{globalThis.fetch=original;}
   const parser=new SseParser();
   parser.push(`event: part\ndata: ${'q'.repeat(MAX_SSE_FRAME_BYTES+1)}\n\n`);

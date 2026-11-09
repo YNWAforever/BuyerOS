@@ -46,6 +46,21 @@ const projectNames=new WeakMap<SessionScope,Map<string,Promise<string|null>>>();
 // A user's explicit "Guided setup" choice survives studio remounts and thread-route
 // changes in the same scope. The secondary surface never opens on its own.
 const guidedSetupChoice=new WeakMap<SessionScope,{identity:string;open:boolean}>();
+// A thread-first response redirects immediately; the canonical studio resumes the
+// live stream for that turn once the persisted thread has loaded.
+const pendingStreams=new WeakMap<SessionScope,Map<string,string>>();
+function stashPendingStream(session:SessionScope,threadId:string,turnId:string):void{
+  let map=pendingStreams.get(session);
+  if(!map){map=new Map();pendingStreams.set(session,map);}
+  map.set(threadId,turnId);
+}
+function takePendingStream(session:SessionScope,threadId:string):string|null{
+  const map=pendingStreams.get(session);
+  if(!map)return null;
+  const turnId=map.get(threadId)??null;
+  map.delete(threadId);
+  return turnId;
+}
 function guidedOpenFor(session:SessionScope):boolean{
   const row=guidedSetupChoice.get(session);
   return row?.identity===session.identity()?row.open:false;
@@ -135,6 +150,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [reconnecting,setReconnecting]=useState(false);
   const [cancelling,setCancelling]=useState(false);
   const [reconciling,setReconciling]=useState(false);
+  const [recoveredTurns,setRecoveredTurns]=useState<ReadonlySet<string>>(()=>new Set());
   const streamAbort=useRef<AbortController|null>(null);
   const [deciding,setDeciding]=useState(false),decidingRef=useRef(false);
   const [sourcesBusy,setSourcesBusy]=useState(false);
@@ -189,7 +205,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     // A route change or refetch owns the thread: stop any previous stream and drop
     // provisional entries so persisted data is the only source for the new view.
     streamAbort.current?.abort();streamAbort.current=null;
-    setStream(null);setReconnecting(false);
+    setStream(null);setReconnecting(false);setRecoveredTurns(new Set());
     if(!targetId){setLoaded(null);setThreadState('new');setThreadNoticeText('');setTurns([]);setEphemeral([]);setDecisions({});return;}
     let active=true;
     setThreadState(previous=>previous==='ready'?'reloading':'loading');
@@ -199,12 +215,15 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       if(!chat){setThreadState('unavailable');setThreadNoticeText(turnNotices.invalid);return;}
       setLoaded({raw:row,chat});setThreadState('ready');setThreadNoticeText('');
       setTurns([]);setEphemeral([]);setDecisions({});
+      const pendingTurn=takePendingStream(session,row.id);
+      if(pendingTurn)void beginStream({id:pendingTurn,status:'needs_input',parts:[],notices:[]},row.id);
     }).catch(error=>{
       if(!active||error instanceof LiveCancelled)return;
       const message=threadNotice(error);
       setThreadNoticeText(message);setThreadState(message===threadNotices.missing?'missing':'unavailable');
     });
     return()=>{active=false;};
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- beginStream resumes a one-shot stashed stream for the loaded thread.
   },[api,targetId,identity,session,reload]);
   useEffect(()=>{setTitle(loaded?.chat.title??'');},[loaded?.chat.id,loaded?.chat.title]);
   // Abort a live stream when the studio unmounts (route/scope change).
@@ -247,8 +266,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     }
     return null;
   },[entries]);
-  const recoverTurnId=latestTurn?.status==='outcome_unknown'?latestTurn.id:persistedOutcomeTurnId;
-  const outcomeTurn=!running&&recoverTurnId?{id:recoverTurnId}:null;
+  const recoverTurnId=(latestTurn?.status==='outcome_unknown'?latestTurn.id:persistedOutcomeTurnId)??null;
+  const recoverableTurnId=recoverTurnId&&!recoveredTurns.has(recoverTurnId)?recoverTurnId:null;
+  const outcomeTurn=!running&&recoverableTurnId?{id:recoverableTurnId}:null;
   const failedTurn=!running&&latestTurn?.status==='failed'?latestTurn:null;
   const panel=useMemo(()=>collectPanelData(loaded?.chat??null,entries),[loaded,entries]);
   const terminal=useMemo(()=>terminalProposals(entries),[entries]);
@@ -294,13 +314,17 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       expectedVersion:loaded?.chat.version??null,text,skillId,language:locale});
     if(!current())return false;
     const previousThreadId=loaded?.chat.id??null;
+    if(response.thread.id!==previousThreadId){
+      // Thread-first: canonicalise the route immediately so the persisted user row
+      // is rendered from the saved thread; the canonical studio resumes the stream
+      // for this turn after its thread read (see the thread-load effect).
+      stashPendingStream(session,response.thread.id,response.turn.id);
+      navigate(`/app/discussions/s/${response.thread.id}`);
+      return true;
+    }
     setLoaded({raw:rawOf(response.thread),chat:response.thread});
     setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
-    const streaming=beginStream(response.turn,response.thread.id);
-    if(response.thread.id!==previousThreadId){
-      // Keep the live turn on screen until it settles, then canonicalise the URL.
-      void streaming.then(()=>{if(current())navigate(`/app/discussions/s/${response.thread.id}`);});
-    }
+    void beginStream(response.turn,response.thread.id);
     return true;
   }
   /**
@@ -357,6 +381,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       if(!current())return;
       setLoaded({raw:rawOf(response.thread),chat:response.thread});
       setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
+      setRecoveredTurns(state=>{const next=new Set(state);next.add(outcomeTurn.id);next.add(response.turn.id);return next;});
       setStream(null);setReconnecting(false);
       setSendNotice('The saved result was checked.');
     }catch(error){
