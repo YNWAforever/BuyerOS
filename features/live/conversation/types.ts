@@ -20,8 +20,13 @@ export type ToolActivityPart={kind:'tool_activity';call_id:string;capability:str
   started_at?:string;finished_at?:string;summary?:string;error_code?:string};
 export type ProposalCost={kind?:'nonbillable'|'provider_credits';amount?:number|string;unit?:string;
   may_incur_provider_charges?:boolean;known?:boolean;basis?:string};
+/**
+ * Read-time decision decoration on a persisted proposal part. Privacy-bounded by
+ * the server to exactly these labels; malformed/unknown shapes are dropped.
+ */
+export type ProposalDecision={choice:'approve'|'reject';decided_at:string;decided_by:'you'|'a workspace member'};
 export type ProposalPart={kind:'proposal';proposal_id:string;capability:string;title:string;rationale?:string;
-  arguments_preview?:unknown;cost?:ProposalCost;requires_approval:boolean};
+  arguments_preview?:unknown;cost?:ProposalCost;requires_approval:boolean;decision?:ProposalDecision};
 export type OutputLinkPart={kind:'output_link';output_id:string;outputKind:string;title:string;revision:number;status:string;href?:string};
 export type NoticePart={kind:'notice';code:string;message:string;recovery?:Recovery};
 /** A part kind this client version does not understand. Rendered as a quiet notice. */
@@ -86,6 +91,14 @@ function readCost(value:unknown):ProposalCost|undefined{
   if(str(value.basis,120))cost.basis=value.basis;
   return Object.keys(cost).length?cost:undefined;
 }
+function readProposalDecision(value:unknown):ProposalDecision|undefined{
+  if(!record(value))return undefined;
+  const {choice,decided_at,decided_by}=value;
+  if(choice!=='approve'&&choice!=='reject')return undefined;
+  if(!dateString(decided_at))return undefined;
+  if(decided_by!=='you'&&decided_by!=='a workspace member')return undefined;
+  return {choice,decided_at,decided_by};
+}
 const partKinds=['text','citations','tool_activity','proposal','output_link','notice'] as const;
 function partDiscriminator(value:Record<string,unknown>):{kind:string;payloadKind:string|undefined}{
   for(const field of ['part_kind','part','type','kind'] as const){
@@ -128,11 +141,12 @@ export function readMessagePart(value:unknown):MessagePart{
     }
     case 'proposal':{
       if(!nonBlank(value.proposal_id,200)||!nonBlank(value.capability,120)||!nonBlank(value.title,200))return {kind:'unsupported',source_kind:'proposal'};
-      const cost=readCost(value.cost);
+      const cost=readCost(value.cost),decision=readProposalDecision(value.decision);
       return {kind:'proposal',proposal_id:value.proposal_id,capability:value.capability,title:value.title,
         ...(str(value.rationale,2_000)?{rationale:value.rationale}:{}),
         arguments_preview:value.arguments_preview,
-        ...(cost?{cost}:{}),requires_approval:value.requires_approval!==false};
+        ...(cost?{cost}:{}),requires_approval:value.requires_approval!==false,
+        ...(decision?{decision}:{})};
     }
     case 'output_link':{
       // The wire nests the output kind under `output` because `kind` is the part

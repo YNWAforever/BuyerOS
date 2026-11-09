@@ -6,6 +6,7 @@ import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
 const {proposalExplain,persistedDecision}=await import('../features/live/conversation/explainer.ts');
+const {readMessagePart}=await import('../features/live/conversation/types.ts');
 
 const proposal={kind:'proposal',proposal_id:'11111111-1111-4111-8111-111111111111',
   capability:'xverum.enrich_company',title:'Enrich company',rationale:'Verified contact evidence is needed.',
@@ -67,17 +68,41 @@ test('argument previews are bounded and structured values are not rendered blind
   assert.equal(view.arguments.some(item=>item.label==='nested'),false,'nested objects are not guessed into text');
 });
 
-test('a persisted decision is surfaced only when it actually exists',()=>{
+test('a persisted decision is surfaced only when it actually exists and is well formed',()=>{
   assert.equal(persistedDecision(null),null);
   assert.equal(persistedDecision({}),null);
-  assert.deepEqual(persistedDecision({decision:'approve',actor:'Reviewer A',decided_at:'2026-11-09T10:00:00Z'}),
-    {choice:null,actor:'Reviewer A',decidedAt:'2026-11-09T10:00:00Z'});
-  assert.deepEqual(persistedDecision({decision:{choice:'reject',actor:'Reviewer B'}}),
-    {choice:'reject',actor:'Reviewer B',decidedAt:null});
-  const withDecision=proposalExplain({proposal,turnParts:[],
-    decision:persistedDecision({decision:{choice:'approve',actor:'Reviewer C',decided_at:'2026-11-09T10:00:00Z'}})});
+  for(const malformed of [
+    {choice:'maybe',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'reviewer@example.com'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'11111111-1111-4111-8111-111111111111'},
+    {choice:'approve',decided_at:'not-a-date',decided_by:'a workspace member'},
+    {choice:'approve',decided_at:'',decided_by:'you'},
+    {choice:'approve',decided_by:'you'},
+    {decision:{choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'}},
+  ])assert.equal(persistedDecision(malformed),null,'malformed decisions degrade to absent');
+  const mine=persistedDecision({choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'});
+  assert.deepEqual(mine,{choice:'approve',actor:'you',decidedAt:'2026-11-09T10:00:00Z'});
+  assert.deepEqual(persistedDecision({choice:'reject',decided_at:'2026-11-09T10:00:00+00:00',decided_by:'a workspace member'}),
+    {choice:'reject',actor:'a workspace member',decidedAt:'2026-11-09T10:00:00+00:00'});
+  const withDecision=proposalExplain({proposal,turnParts:[],decision:mine});
   assert.equal(withDecision.decisionKnown,true);
   assert.equal(withDecision.decision.choice,'approve');
-  assert.equal(withDecision.decision.actor,'Reviewer C');
+  assert.equal(withDecision.decision.actor,'you');
+  assert.equal(JSON.stringify(withDecision).includes('11111111-1111-4111-8111-111111111111'),false);
   assert.equal(proposalExplain({proposal,turnParts:[]}).decisionKnown,false);
+  // The part reader is the strict gate: it keeps a well-formed decoration and drops malformed shapes.
+  const base={kind:'proposal',proposal_id:'11111111-1111-4111-8111-111111111111',capability:'xverum.enrich_company',
+    title:'Enrich company',requires_approval:true};
+  const valid=readMessagePart({...base,decision:{choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'}});
+  assert.equal(valid.kind,'proposal');
+  assert.deepEqual(valid.decision,{choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'});
+  const rejected=readMessagePart({...base,decision:{choice:'reject',decided_at:'2026-11-09T10:00:00Z',decided_by:'a workspace member'}});
+  assert.equal(rejected.decision.choice,'reject');
+  for(const malformed of [null,{},'approve',{choice:'approve'},{choice:'approve',decided_at:'2026-11-09T10:00:00Z'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'someone'},
+    {choice:'approve',decided_at:'yesterday',decided_by:'you'}]){
+    const part=readMessagePart({...base,decision:malformed});
+    assert.equal(part.kind,'proposal');
+    assert.equal('decision' in part,false,'the reader drops a malformed decision');
+  }
 });

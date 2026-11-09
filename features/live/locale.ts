@@ -954,4 +954,5 @@ export const liveZh: Record<string,string> = {
   'Decided by':'決定者',
   'Decided at':'決定時間',
   'No provider charge':'沒有供應商費用',
+  'A workspace member':'工作區成員',
 };

@@ -728,7 +728,8 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
  const terminalProposal={kind:'proposal',proposal_id:'d4000000-0000-4000-8000-000000000001',
    capability:'drive.read',title:'Read Drive source',rationale:'Terminal fixture rationale.',
    arguments_preview:{folder:'Synthetic folder'},
-   cost:{kind:'nonbillable',may_incur_provider_charges:false,known:true},requires_approval:true};
+   cost:{kind:'nonbillable',may_incur_provider_charges:false,known:true},requires_approval:true,
+   decision:{choice:'reject',decided_at:'2026-11-09T10:30:00.000Z',decided_by:'a workspace member'}};
  const thread=fixture.threadWith({version:3,messages:[
    fixture.userRow({id:'d8000000-0000-4000-8000-000000000001',seq:1,text:'Explain these proposals',turnId:explainerTurnId}),
    fixture.assistantRow({id:'d5000000-0000-4000-8000-000000000001',seq:2,text:'Proposal summary',turnId:explainerTurnId,parts:[
@@ -758,6 +759,7 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
    assert.equal(await why.getByRole('button',{name:'Offer document',exact:true}).count(),1,'evidence citations stay linked');
    assert.equal(await why.getByText('Cost review required before any paid request.',{exact:true}).count(),1,'known:false keeps the shipped wording');
    assert.equal(await why.getByText('Awaiting approval',{exact:true}).count(),1,'approval state is visible');
+   assert.equal(await why.getByText('Unknown',{exact:true}).count(),3,'an undecided proposal keeps explicit unknown decision rows');
    assert.equal(await why.getByText('DeltaGrid',{exact:true}).count(),1,'bounded arguments render');
    assert.equal(await awaiting.getByText('internal-secret',{exact:true}).count(),0,'internal argument values stay hidden');
    assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1,'existing approval action unchanged');
@@ -770,13 +772,20 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
    assert.equal(await terminal.getByRole('button',{name:'Reject',exact:true}).count(),0);
    await terminal.getByText('Why this proposal',{exact:true}).click();
    const terminalWhy=terminal.locator('.conversation-proposal-why');
-   assert.equal(await terminalWhy.getByText('Unknown',{exact:true}).count(),3,'decision, actor and time render explicit unknown rows');
+   assert.equal(await terminalWhy.getByText('Unknown',{exact:true}).count(),0,'a decided proposal renders persisted values, not Unknown rows');
+   assert.equal(await terminalWhy.getByText('Reject',{exact:true}).count(),1,'the Decision row shows the persisted choice');
+   assert.equal(await terminalWhy.getByText('A workspace member',{exact:true}).count(),1,'Decided by uses the privacy-bounded label');
+   const terminalValues=await terminalWhy.locator('dd').allInnerTexts();
+   assert.equal(terminalValues.length,8);
+   assert.equal(terminalValues.includes('Unknown'),false,'no decision field falls back to Unknown when persisted');
+   assert.match(terminalValues[7],/2026/,'Decided at renders the persisted timestamp');
    // EN + zh-HK labels for the new disclosure.
    await page.getByRole('button',{name:'Change language',exact:true}).click();
    await page.getByText('為何有此建議',{exact:true}).first().waitFor();
    const zhCard=page.locator('.conversation-proposal').first();
    await zhCard.getByText('為何有此建議',{exact:true}).click();
    assert.equal(await zhCard.getByText('理由',{exact:true}).count(),1);
+   assert.equal(await page.getByText('工作區成員',{exact:true}).count(),1,'zh-HK label for the decision actor');
  }finally{await harness.close();}
 });
 

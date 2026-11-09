@@ -148,4 +148,6 @@ Object.assign(zh,{
   'No provider charge':'沒有供應商費用',
   'Decision':'決定',
   'Unknown':'未知',
+  'You':'你',
+  'A workspace member':'工作區成員',
 });

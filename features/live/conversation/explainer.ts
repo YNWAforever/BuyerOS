@@ -14,7 +14,7 @@ export type ExplainerCost=
   |{kind:'nonbillable';mayIncurProviderCharges:boolean}
   |{kind:'unknown'};
 export type ExplainerPolicyNotice={code:string;message:string};
-export type ExplainerDecision={choice:'approve'|'reject'|null;actor:string|null;decidedAt:string|null};
+export type ExplainerDecision={choice:'approve'|'reject';actor:'you'|'a workspace member';decidedAt:string};
 export type ProposalExplainer={
   rationale:string|null;
   argumentsKnown:boolean;
@@ -94,15 +94,19 @@ function readPolicyNotices(parts:ReadonlyArray<MessagePart>):ExplainerPolicyNoti
   }
   return notices;
 }
-/** Optional future read-model field; absence is projected as unknown, never inferred. */
+/**
+ * Strictly validates the read-time decision decoration. Anything malformed or
+ * privacy-widening (unknown actor labels, non-ISO time, extra/invalid choice)
+ * degrades to absent so the explainer shows explicit Unknown rows instead.
+ */
 export function persistedDecision(value:unknown):ExplainerDecision|null{
   if(!record(value))return null;
-  const source=record(value.decision)?value.decision:value;
-  const choice=source.choice==='approve'||source.choice==='reject'?source.choice:null;
-  const actor=typeof source.actor==='string'&&source.actor.trim()?source.actor.trim().slice(0,120):null;
-  const decidedAt=typeof source.decided_at==='string'&&source.decided_at.trim()?source.decided_at.trim().slice(0,64):null;
-  if(!choice&&!actor&&!decidedAt)return null;
-  return {choice,actor,decidedAt};
+  const {choice,decided_at,decided_by}=value;
+  if(choice!=='approve'&&choice!=='reject')return null;
+  if(decided_by!=='you'&&decided_by!=='a workspace member')return null;
+  if(typeof decided_at!=='string'||decided_at.length>64)return null;
+  if(!/^\d{4}-\d\d-\d\dT/.test(decided_at)||!Number.isFinite(Date.parse(decided_at)))return null;
+  return {choice,actor:decided_by,decidedAt:decided_at};
 }
 export function proposalExplain({proposal,turnParts,decision=null}:{
   proposal:ProposalPart;turnParts:ReadonlyArray<MessagePart>;decision?:ExplainerDecision|null;

@@ -45,9 +45,12 @@ function decidedAtLabel(value:string|null,locale:'en'|'zh-HK'):string|null{
  */
 export function ProposalExplainer({t,locale,navigate,proposal,turnParts,approvalState}:Props){
   const view=useMemo(()=>proposalExplain({proposal,turnParts,
-    decision:persistedDecision((proposal as ProposalPart&{decision?:unknown}).decision)}),[proposal,turnParts]);
+    decision:persistedDecision(proposal.decision)}),[proposal,turnParts]);
   const unknown=t('Unknown');
   const decidedAt=view.decisionKnown?decidedAtLabel(view.decision?.decidedAt??null,locale):null;
+  const decisionLabel=view.decisionKnown&&view.decision?t(view.decision.choice==='approve'?'Approve':'Reject'):unknown;
+  const actorLabel=view.decisionKnown&&view.decision
+    ?(view.decision.actor==='you'?t('You'):t('A workspace member')):unknown;
   return <details className="conversation-proposal-why">
     <summary>{t('Why this proposal')}</summary>
     <dl className="conversation-why">
@@ -63,8 +66,8 @@ export function ProposalExplainer({t,locale,navigate,proposal,turnParts,approval
       <div><dt>{t('Cost basis')}</dt><dd className="conversation-why-cost">{costText(t,view)}</dd></div>
       <div><dt>{t('Policy and approval')}</dt><dd>{approvalStateLabel(t,approvalState)}
         {view.policyNotices.length>0&&<ul>{view.policyNotices.map(notice=><li key={`${notice.code}:${notice.message}`}>{notice.message}</li>)}</ul>}</dd></div>
-      <div><dt>{t('Decision')}</dt><dd>{view.decisionKnown?(view.decision?.choice?t(view.decision.choice==='approve'?'Approved':'Rejected'):unknown):unknown}</dd></div>
-      <div><dt>{t('Decided by')}</dt><dd>{view.decisionKnown&&view.decision?.actor?view.decision.actor:unknown}</dd></div>
+      <div><dt>{t('Decision')}</dt><dd>{decisionLabel}</dd></div>
+      <div><dt>{t('Decided by')}</dt><dd>{actorLabel}</dd></div>
       <div><dt>{t('Decided at')}</dt><dd>{decidedAt??unknown}</dd></div>
     </dl>
   </details>;
