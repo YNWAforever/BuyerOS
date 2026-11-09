@@ -49,7 +49,11 @@ async function shot(page:Page,name:string):Promise<void>{
 }
 /** Same sign-in contract as tests/e2e/neon-real-acceptance.spec.ts. */
 async function signIn(page:Page,qa:QaEnv):Promise<void>{
-  await page.goto(scoped('/app',qa));
+  const navigation=await page.goto(scoped('/app',qa));
+  // A protected Vercel deployment answers 401 before the app shell exists; fail
+  // with the actionable cause instead of a 15-second locator timeout.
+  if(navigation&&navigation.status()===401)
+    throw new Error('BLOCKED: the QA candidate is protected by Vercel Authentication; set BUYEROS_QA_PROTECTION_BYPASS (Project Settings → Deployment Protection → Protection Bypass for Automation) or target an unprotected alias');
   await page.getByRole('button',{name:/^(Sign in|登入)$/}).click();
   const email=page.getByRole('textbox',{name:'Email',exact:true}),password=page.getByLabel('Password',{exact:true});
   await expect(email).toBeVisible();

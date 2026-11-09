@@ -69,6 +69,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Verify the target is the reviewed deployment
+        env:
+          QA_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -92,7 +94,10 @@ jobs:
           if (!project) fail('QA project id is not configured');
           if (!uuid.test(project)) fail('project id is not a UUID');
           if (!/^[0-9a-f]{40}$/.test(sha || '')) fail('expected source SHA must be a full 40-character SHA');
-          console.log('target accepted: ' + url.origin);
+          const bypass = process.env.QA_BYPASS;
+          if (bypass && (!/^\S+$/.test(bypass) || bypass.length < 20))
+            fail('BUYEROS_QA_PROTECTION_BYPASS looks invalid (expected a single token of at least 20 characters)');
+          console.log('target accepted: ' + url.origin + (bypass ? ' (with deployment-protection bypass)' : ''));
           NODE
       - name: Run the authenticated conversation QA journey
         env:
@@ -102,6 +107,8 @@ jobs:
           BUYEROS_QA_EXPECTED_SOURCE_SHA: ${{ env.QA_SHA }}
           BUYEROS_NEON_REAL_EMAIL: ${{ secrets.BUYEROS_NEON_REAL_EMAIL }}
           BUYEROS_NEON_REAL_PASSWORD: ${{ secrets.BUYEROS_NEON_REAL_PASSWORD }}
+          # Optional: only needed when the candidate is a protected preview.
+          BUYEROS_QA_PROTECTION_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
         run: |
           set -euo pipefail
           mkdir -p artifacts/conversation-qa
