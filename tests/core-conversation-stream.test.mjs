@@ -150,7 +150,7 @@ test('stream client aborts an oversized SSE body instead of buffering it',async(
     }}),{status:200,headers:{'content-type':'text/event-stream'}});};
     const api=new ConversationTurns({async request(){return undefined;}},session(),true);
     console.error('CKPT: before stream');
-    const outcome=await api.stream('11111111-1111-4111-8111-111111111111',{signal:new AbortController().signal,onEvent(){}});
+    const outcome=await api.stream('11111111-1111-4111-8111-111111111111',{signal:new AbortController().signal,onEvent(){},onReconnect:(a,d)=>console.error('CKPT reconnect '+a+' '+d),onStreamError:(e)=>console.error('CKPT stream error '+(e&&e.message||e))});
     console.error('CKPT: after stream outcome='+outcome);
     assert.equal(outcome,'overflow');
   }finally{globalThis.fetch=original;}

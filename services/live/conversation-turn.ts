@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Typed client for the conversation turn contract (draft v0 + Amendment A).
  *
  * Every mutation keeps one request key per exact payload, so an uncertain response
@@ -40,11 +40,12 @@ export type TurnDecisionInput={
 };
 export type TurnCancelInput={threadId:string;turnId:string;expectedVersion:number;signal?:AbortSignal};
 export type TurnReconcileInput={threadId:string;turnId:string;expectedVersion:number;signal?:AbortSignal};
-export type TurnStreamOutcome='closed'|'absent'|'unavailable'|'aborted';
+export type TurnStreamOutcome='closed'|'absent'|'unavailable'|'overflow'|'aborted';
 export type TurnStreamHandlers={
   signal:AbortSignal;baseUrl?:string;after?:number;
   onEvent:(event:TurnStreamEvent)=>void;
   onReconnect?:(attempt:number,delayMs:number)=>void;
+  onStreamError?:(error:unknown)=>void;
 };
 function pause(ms:number,signal:AbortSignal):Promise<boolean>{
   if(signal.aborted)return Promise.resolve(false);
@@ -198,7 +199,6 @@ export class ConversationTurns{
         if(!await pause(reconnectDelay(attempt),parent))return 'aborted';
         continue;
       }
-      attempt=0;
       if(!response.body)return 'unavailable';
       const parser=new SseParser(),reader=response.body.getReader(),decoder=new TextDecoder();
       let final=false;
@@ -215,10 +215,15 @@ export class ConversationTurns{
           const {done,value}=await reader.read();
           if(parent.aborted){void reader.cancel().catch(()=>{});return 'aborted';}
           if(done)break;
+          const cursorBefore=cursor;
           apply(parser.push(decoder.decode(value,{stream:true})));
+          if(cursor>cursorBefore)attempt=0;
+          if(parser.overflowed)return 'overflow';
         }
         if(!final)apply(parser.flush());
-      }catch{
+        if(parser.overflowed)return 'overflow';
+      }catch(error){
+        handlers.onStreamError?.(error);
         if(parent.aborted)return 'aborted';
       }finally{
         if(final)void reader.cancel().catch(()=>{});
