@@ -64,3 +64,15 @@ def test_migrations_do_not_contain_invalid_row_security_ddl():
             if match:
                 offenders[path.name] = match.group(0)
     assert not offenders, f'invalid row-level-security DDL in migrations: {offenders}'
+
+def test_owned_readback_fixture_pins_the_current_head():
+    """The E2E readback fixture asserts the deployed schema head; keep it in sync."""
+    fixture = SERVICE_ROOT.parents[1] / 'tests' / 'e2e' / 'fixtures' / 'c61-owned-readback.py'
+    if not fixture.exists():
+        return  # fixture only exists in the repository root, not in a packaged service
+    text = fixture.read_text(encoding='utf-8')
+    head = list(scripts().get_revisions('heads'))[0].revision
+    pinned = _re.search(r"assert schema=='([^']+)'", text)
+    assert pinned is not None, 'readback fixture no longer pins a schema head'
+    assert pinned.group(1) == head, (
+        f'readback fixture pins {pinned.group(1)} but the alembic head is {head}')
