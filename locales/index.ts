@@ -137,4 +137,5 @@ Object.assign(zh,{
   'The saved result was checked.':'已檢查儲存的結果。',
   'The live update was interrupted. Showing what was received.':'即時更新已中斷，顯示已收到的內容。',
   'This turn is no longer awaiting a result check.':'這次處理已不再等待結果檢查。',
+  'The live update was too large and was stopped. The saved result is still shown.':'即時更新內容過大，已停止接收；已儲存的結果仍會顯示。',
 });

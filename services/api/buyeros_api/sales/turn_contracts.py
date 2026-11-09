@@ -215,11 +215,12 @@ class TurnEventRecord(Contract):
 
 
 class ReconcileResult(Contract):
-    """Bounded outcome of a read-only reconciliation probe."""
+    """Bounded outcome of a read-only reconciliation probe for one evidence state."""
 
     outcome: Literal["completed", "failed", "unknown"]
     code: Code
     message: Annotated[str, StringConstraints(min_length=1, max_length=500)]
+    evidence_digest: Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{64}$")]
 
 
 class ExecutionOutcome(Contract):

@@ -586,28 +586,28 @@ function streamingApi(overrides={}){
  };
 }
 
-test('streamed turn renders progressively and reconnects from the last cursor without duplicating',async()=>{
+test('streamed turn shows live progress, reconnects from the last cursor and never duplicates persisted parts',async()=>{
  const streamId=fixture.streamTurnId;
- let eventRequests=[],releaseSecond,secondResolve,persisted=false;
+ let eventRequests=[],releaseSecond,secondResolve;
  const secondArrived=new Promise(resolve=>{secondResolve=resolve;});
+ // Production shape: the POST response already contains the persisted assistant message.
  const user2=fixture.userRow({id:'c5000000-0000-4000-8000-000000000001',seq:3,text:'Streamed follow-up',turnId:streamId});
- const pending=fixture.threadWith({messages:[...fixture.studioThread.messages,user2],version:4});
  const answer=fixture.assistantRow({id:'c6000000-0000-4000-8000-000000000001',seq:4,text:'Persisted streamed answer',turnId:streamId,
    parts:[{kind:'text',text:'Persisted streamed answer'}]});
- const persistedThread=fixture.threadWith({messages:[...pending.messages,answer],version:5});
+ const persistedThread=fixture.threadWith({messages:[...fixture.studioThread.messages,user2,answer],version:5});
  const harness=await fixtureHarness({handler:streamingApi({
-   thread:()=>persisted?persistedThread:fixture.studioThread,
-   turn:()=>({json:fixture.envelope({thread:pending,turn:{id:streamId,status:'needs_input',parts:[],notices:[]}})}),
+   thread:()=>persistedThread,
+   turn:()=>({json:fixture.envelope({thread:persistedThread,turn:{id:streamId,status:'completed',
+     parts:[{kind:'text',text:'Persisted streamed answer'}],notices:[]}})}),
    events:async({after})=>{
      eventRequests.push(after);
      if(eventRequests.length===1)return {raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
-       body:fixture.sse([[1,'turn.started',{status:'running'}],[2,'part',{index:0,part:{kind:'text',text:'Streaming partial answer'}}]])}};
+       body:fixture.sse([[1,'turn.started',{status:'running'}],[2,'part',{index:0,part:{kind:'text',text:'Persisted streamed answer'}}]])}};
      secondResolve();
      await new Promise(resolve=>{releaseSecond=resolve;});
-     persisted=true;
      return {raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
        body:fixture.sse([[3,'tool',{call_id:'c7000000-0000-4000-8000-000000000001',capability:'xverum.enrich_company',state:'completed'}],
-         [4,'part',{index:1,part:{kind:'text',text:'Streamed final fragment'}}],[5,'turn.final',{status:'completed'}]])}};
+         [4,'turn.final',{status:'completed'}]])}};
    },
  })});
  try{
@@ -616,27 +616,32 @@ test('streamed turn renders progressively and reconnects from the last cursor wi
    await composer.waitFor();
    await composer.fill('Streamed follow-up');
    await page.getByRole('button',{name:'Send message',exact:true}).click();
-   await page.getByText('Streaming partial answer',{exact:true}).waitFor();
+   // Persisted response wins immediately: exactly one persisted assistant row, no provisional copy.
+   await page.getByText('Persisted streamed answer',{exact:true}).waitFor();
+   assert.equal(await page.getByText('Persisted streamed answer',{exact:true}).count(),1,'exactly one persisted assistant row');
+   assert.equal(await page.getByText('Shown in this tab only',{exact:true}).count(),0,'no provisional pseudo-row when persisted parts exist');
+   // The stream tail is deterministic: the second SSE response is held until released.
    await page.locator('.conversation-stream').waitFor();
-   assert.equal(await composer.isDisabled(),true,'composer stays disabled while the turn is running');
-   assert.equal(await page.getByRole('button',{name:'Cancel turn',exact:true}).count(),1,'a running turn offers cancel');
+   assert.equal(await composer.isDisabled(),true,'composer stays disabled while the stream is running');
    await page.screenshot({path:shots+'/stream-progress-desktop.png',fullPage:true});
    await secondArrived;
    assert.deepEqual(eventRequests,[0,2],'a reconnect resumes after the last seen seq');
    releaseSecond();
-   await page.getByText('Persisted streamed answer',{exact:true}).waitFor();
-   await page.waitForFunction(()=>document.body.innerText.indexOf('Streaming partial answer')===-1);
    await page.locator('.conversation-stream').waitFor({state:'detached'});
    await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');
      return node instanceof HTMLTextAreaElement&&!node.disabled;});
-   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'reconnect never re-submits the turn');
+   assert.equal(await page.getByText('Persisted streamed answer',{exact:true}).count(),1,'final refetch never duplicates the persisted row');
    assert.equal(await page.getByText('Streamed follow-up',{exact:true}).count(),1,'no duplicate user row after reconnect');
+   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'reconnect never re-submits the turn');
    assert.equal(posts.some(row=>/\/decisions$|\/xverum\/|\/quotes?$|\/approve$|\/send$/.test(row.path)),false,'streaming never dispatches paid work');
    assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });
 
 test('a running turn can be cancelled from the keyboard without a new turn',async()=>{
+ // The synchronous POST contract returns a final turn today; this fixture models the
+ // early-response/async branch the cancel endpoint exists for, then verifies the
+ // cancel contract itself (no body, strong precondition) and that no turn repeats.
  const streamId=fixture.streamTurnId;
  const user2=fixture.userRow({id:'c8000000-0000-4000-8000-000000000001',seq:3,text:'Cancellable follow-up',turnId:streamId});
  const pending=fixture.threadWith({messages:[...fixture.studioThread.messages,user2],version:4});

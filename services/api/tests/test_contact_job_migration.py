@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0068_conversation_turn_events"
+HEAD = "0069_conversation_turn_reconciliations"
 
 
 def _config():

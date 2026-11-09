@@ -6,7 +6,7 @@ import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
 const {SseParser,readTurnStreamEvent,parseTurnStreamChunks,emptyTurnStream,reduceTurnEvent,reduceTurnEvents,
-  streamParts,streamStep,reconnectDelay,MAX_STREAM_RECONNECTS}=await import('../features/live/conversation/stream-events.ts');
+  streamParts,streamStep,reconnectDelay,MAX_STREAM_RECONNECTS,MAX_SSE_FRAME_BYTES,MAX_SSE_BUFFER_BYTES}=await import('../features/live/conversation/stream-events.ts');
 const {mergeStreamedEntry,buildTranscript}=await import('../features/live/conversation/parts.ts');
 const {readChatThread}=await import('../features/live/conversation/types.ts');
 const {ConversationTurns,streamCapabilityFromStatus}=await import('../services/live/conversation-turn.ts');
@@ -41,6 +41,13 @@ test('stream event validation allowlists kinds, states, seq and terminal status'
   assert.equal(readTurnStreamEvent({id:'6',event:'',data:'{"kind":"turn.final","status":"cancelled","seq":6}'}).status,'cancelled');
   assert.equal(readTurnStreamEvent({id:'7',event:'part',data:'{broken'}),null);
   assert.equal(readTurnStreamEvent(frame(8,'part',{index:0,part:{kind:'text',text:'safe'}})).part.text,'safe');
+  // API envelope shape: {seq, turn_id, kind, payload}.
+  const nested=readTurnStreamEvent({id:'',event:'part',
+    data:JSON.stringify({seq:9,turn_id:'22222222-2222-4222-8222-222222222222',kind:'part',
+      payload:{index:0,part:{kind:'text',text:'nested'}}})});
+  assert.equal(nested.seq,9);assert.equal(nested.part.text,'nested');
+  assert.equal(readTurnStreamEvent({id:'',event:'turn.final',
+    data:JSON.stringify({seq:10,kind:'turn.final',payload:{status:'completed'}})}).status,'completed');
 });
 
 test('reducer keeps cursor monotonic, ignores replayed events and stops after turn.final',()=>{
@@ -118,6 +125,35 @@ test('provisional entries never duplicate a persisted turn and are appended at m
   assert.equal(entries[1].ephemeral,true);
   assert.equal(entries[1].parts[0].text,'streamed');
   assert.equal(mergeStreamedEntry(buildTranscript(emptyThread),null).length,1);
+});
+
+test('SSE parser bounds a single frame and the unparsed buffer',()=>{
+  const oversized=`event: part\ndata: ${'x'.repeat(MAX_SSE_FRAME_BYTES+10)}\n\n`;
+  const parser=new SseParser();
+  const before=parser.push(`event: turn.started\ndata: ${JSON.stringify({seq:1,kind:'turn.started',payload:{status:'running'}})}\n\n`+oversized);
+  assert.equal(before.length,1,'frames before the oversized frame are still delivered');
+  assert.equal(parser.overflowed,true);
+  assert.deepEqual(parser.push('event: turn.final\ndata: {}\n\n'),[],'no more frames after overflow');
+  const stuck=new SseParser();
+  stuck.push('event: part\ndata: '+'y'.repeat(MAX_SSE_BUFFER_BYTES));
+  assert.equal(stuck.overflowed,true,'a frame that never terminates cannot grow the buffer');
+  assert.deepEqual(stuck.flush(),[]);
+});
+
+test('stream client aborts an oversized SSE body instead of buffering it',async()=>{
+  const original=globalThis.fetch;
+  const chunk=`event: part\ndata: ${'z'.repeat(MAX_SSE_BUFFER_BYTES+10)}`;
+  try{
+    globalThis.fetch=async()=>new Response(new ReadableStream({start(controller){
+      controller.enqueue(new TextEncoder().encode(chunk));controller.close();
+    }}),{status:200,headers:{'content-type':'text/event-stream'}});
+    const api=new ConversationTurns({async request(){return undefined;}},session(),true);
+    const outcome=await api.stream('11111111-1111-4111-8111-111111111111',{signal:new AbortController().signal,onEvent(){}});
+    assert.equal(outcome,'overflow');
+  }finally{globalThis.fetch=original;}
+  const parser=new SseParser();
+  parser.push(`event: part\ndata: ${'q'.repeat(MAX_SSE_FRAME_BYTES+1)}\n\n`);
+  assert.equal(parser.overflowed,true);
 });
 
 test('stream capability probe classifies missing route, existing route and denied access',async()=>{

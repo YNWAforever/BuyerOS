@@ -74,12 +74,23 @@ seen seq never duplicates and never re-executes work. A foreign turn is `404`;
 a non-integer/negative cursor is `422`.
 
 `POST ?/conversation-turns/{turn_id}/reconcile` (Idempotency-Key required) is
-valid only for an `outcome_unknown` turn (else `409 INVALID_STATE`). It performs
-a strictly read-only probe of already-persisted evidence (canonical sales task
-and output state; no provider receipts are created), then persists a
-continuation turn with the resolved `completed`/`failed`/`outcome_unknown`
-outcome, its events and an audit row. It never dispatches, reserves or retries
-a provider call; replays return the recorded continuation.
+valid for an `outcome_unknown` turn (else `409 INVALID_STATE`). It performs a
+strictly read-only probe of already-persisted evidence (canonical sales task and
+output state; no provider receipts are created) and records an **effective
+resolution** in `conversation_turn_reconciliations`, keyed by a digest of the
+observed evidence:
+- an equivalent attempt (same evidence, any key or editor) returns the recorded
+  continuation with no new probe result and no extra audit row;
+- a later attempt with new authoritative evidence records the next
+  `evidence_seq` and may transition the source turn out of `outcome_unknown`
+  exactly once (to `completed` or `failed`); after that transition, changed
+  evidence yields `409 INVALID_STATE`;
+- audit adds exactly one `conversation_turn.reconciled` row per effective
+  resolution, never per attempt.
+It never dispatches, reserves or retries a provider call. Migrations:
+`0068_conversation_turn_events`, `0069_conversation_turn_reconciliations`
+(API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
+`conversation_turns` for the single source transition; no worker grants).
 
 ### Thread company link
 

@@ -72,6 +72,13 @@ export function streamParts(state:TurnStreamState):MessagePart[]{
   return [...parts,...state.notices.map(notice=>({kind:'notice',code:notice.code,message:notice.message} as const))];
 }
 export type StreamStep='working'|'step'|'approval';
+/** Hard bounds so a broken or hostile stream cannot grow browser memory. */
+export const MAX_SSE_FRAME_BYTES=64*1024;
+export const MAX_SSE_BUFFER_BYTES=128*1024;
+const encoder=new TextEncoder();
+function byteLength(value:string):number{
+  return encoder.encode(value).length;
+}
 /** Coarse, honest progress label; capability ids stay out of ordinary copy. */
 export function streamStep(state:TurnStreamState):StreamStep{
   const running=state.tools.find(tool=>tool.state==='running'||tool.state==='approved'||tool.state==='proposed');
@@ -92,13 +99,22 @@ export type SseFrame={id:string;event:string;data:string};
 /** Incremental `text/event-stream` frame parser; chunk boundaries never lose a field. */
 export class SseParser{
   private buffer='';
+  private overflow=false;
+  /** True when a frame or the unparsed buffer exceeded its bound; the stream caller aborts. */
+  get overflowed():boolean{return this.overflow;}
   push(chunk:string):SseFrame[]{
+    if(this.overflow)return [];
     this.buffer+=chunk;
+    if(byteLength(this.buffer)>MAX_SSE_BUFFER_BYTES){this.fail();return [];}
     return this.drain(false);
   }
   flush():SseFrame[]{
-    const frames=this.drain(true);
-    return frames;
+    if(this.overflow)return [];
+    return this.drain(true);
+  }
+  private fail():void{
+    this.overflow=true;
+    this.buffer='';
   }
   private drain(final:boolean):SseFrame[]{
     const frames:SseFrame[]=[];
@@ -107,14 +123,17 @@ export class SseParser{
       if(!match)break;
       const raw=this.buffer.slice(0,match.index);
       this.buffer=this.buffer.slice(match.index+match[0].length);
+      if(byteLength(raw)>MAX_SSE_FRAME_BYTES){this.fail();return frames;}
       const frame=parseFrame(raw);
       if(frame)frames.push(frame);
     }
     if(final&&this.buffer.trim()){
+      if(byteLength(this.buffer)>MAX_SSE_FRAME_BYTES){this.fail();return frames;}
       const frame=parseFrame(this.buffer);
       this.buffer='';
       if(frame)frames.push(frame);
     }
+    if(byteLength(this.buffer)>MAX_SSE_BUFFER_BYTES)this.fail();
     return frames;
   }
 }
@@ -138,6 +157,11 @@ function parseFrame(raw:string):SseFrame|null{
 function integer(value:unknown):number|null{
   return typeof value==='number'&&Number.isSafeInteger(value)&&value>=0?value:null;
 }
+function frameSeq(id:string):number|null{
+  if(!/^\d+$/.test(id))return null;
+  const value=Number(id);
+  return Number.isSafeInteger(value)&&value>0?value:null;
+}
 function text(value:unknown,max=2_000):string|null{
   return typeof value==='string'&&value.trim().length>0&&value.length<=max?value:null;
 }
@@ -146,11 +170,13 @@ function record(value:unknown):value is Record<string,unknown>{
 }
 /** Validate one SSE frame; unknown or malformed kinds degrade to null, never throw. */
 export function readTurnStreamEvent(frame:SseFrame):TurnStreamEvent|null{
-  let payload:unknown;
-  try{payload=JSON.parse(frame.data);}catch{return null;}
-  if(!record(payload))return null;
-  const kind=frame.event||(typeof payload.kind==='string'?payload.kind:'')||(typeof payload.event==='string'?payload.event:'');
-  const seq=integer(Number(frame.id))??integer(payload.seq);
+  let envelope:unknown;
+  try{envelope=JSON.parse(frame.data);}catch{return null;}
+  if(!record(envelope))return null;
+  // The API envelope is {seq, turn_id, kind, payload}; tolerate flat older shapes too.
+  const payload=record(envelope.payload)?envelope.payload:envelope;
+  const kind=frame.event||(typeof envelope.kind==='string'?envelope.kind:'')||(typeof payload.kind==='string'?payload.kind:'');
+  const seq=frameSeq(frame.id)??integer(envelope.seq)??integer(payload.seq);
   if(seq===null||seq<1)return null;
   if(kind==='turn.started')return {kind,seq,status:'running'};
   if(kind==='part'){

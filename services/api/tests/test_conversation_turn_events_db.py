@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0068_conversation_turn_events'
+HEAD = '0069_conversation_turn_reconciliations'
 
 
 def _user(db, issuer='turn-event-fixture'):
@@ -192,3 +192,116 @@ def test_empty_event_downgrade_round_trips(isolated_migrated):
     with psycopg.connect(isolated_migrated) as db:
         assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
         assert db.execute("SELECT to_regclass('public.conversation_turn_events')").fetchone()[0] is not None
+
+
+def test_reconciliation_table_contract_and_connector_privileges(isolated_migrated):
+    with psycopg.connect(isolated_migrated) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
+        assert db.execute('SELECT relrowsecurity,relforcerowsecurity FROM pg_class '
+            "WHERE oid='conversation_turn_reconciliations'::regclass").fetchone() == (True, True)
+        for verb in ('SELECT', 'INSERT', 'UPDATE', 'DELETE'):
+            assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
+                ('buyeros_worker', 'conversation_turn_reconciliations', verb)).fetchone()[0] is False
+            assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
+                ('buyeros_api', 'conversation_turn_reconciliations', verb)).fetchone()[0] == (
+                    verb in {'SELECT', 'INSERT'})
+        # The only source-turn mutation the API may perform is the single
+        # authoritative transition out of outcome_unknown.
+        assert db.execute("SELECT has_column_privilege('buyeros_api','conversation_turns',"
+            "'status','UPDATE')").fetchone()[0] is True
+        assert db.execute("SELECT count(*) FROM pg_constraint WHERE conname IN ("
+            "'uq_conversation_turn_reconciliations_evidence',"
+            "'uq_conversation_turn_reconciliations_seq')"
+            ).fetchone()[0] == 2
+
+
+def test_reconciliation_uniqueness_and_populated_downgrade(isolated_seeded):
+    from alembic import command
+    from tests.test_conversation_turns_migration_db import config
+    with psycopg.connect(isolated_seeded) as db:
+        user = _user(db, 'turn-reconcile-fixture')
+        thread = _thread(db, user)
+        source = _turn(db, user, thread, status='outcome_unknown')
+        continuation = _turn(db, user, thread, status='failed')
+        digest = 'a' * 64
+        db.execute("INSERT INTO conversation_turn_reconciliations(id,workspace_id,project_id,"
+            "thread_id,source_turn_id,actor_id,evidence_digest,evidence_seq,outcome,code,message,"
+            "continuation_turn_id) VALUES(%s,%s,%s,%s,%s,%s,%s,1,'unknown',"
+            "'RECONCILE_NO_EVIDENCE','no evidence',%s)",
+            (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, source, user, digest,
+             continuation))
+        with pytest.raises(psycopg.errors.UniqueViolation):
+            with db.transaction():
+                db.execute("INSERT INTO conversation_turn_reconciliations(id,workspace_id,"
+                    "project_id,thread_id,source_turn_id,actor_id,evidence_digest,evidence_seq,"
+                    "outcome,code,message,continuation_turn_id) VALUES(%s,%s,%s,%s,%s,%s,%s,2,"
+                    "'failed','RECONCILED_FAILED','failed',%s)",
+                    (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, source, user, digest,
+                     continuation))
+        with pytest.raises(psycopg.errors.UniqueViolation):
+            with db.transaction():
+                db.execute("INSERT INTO conversation_turn_reconciliations(id,workspace_id,"
+                    "project_id,thread_id,source_turn_id,actor_id,evidence_digest,evidence_seq,"
+                    "outcome,code,message,continuation_turn_id) VALUES(%s,%s,%s,%s,%s,%s,%s,1,"
+                    "'failed','RECONCILED_FAILED','failed',%s)",
+                    (uuid.uuid4(), WORKSPACE_A, PROJECT_A, thread, source, user, 'b' * 64,
+                     continuation))
+    with pytest.raises(RuntimeError, match='preserve turn reconciliation evidence'):
+        command.downgrade(config(), '0068_conversation_turn_events')
+    with psycopg.connect(isolated_seeded) as db:
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == HEAD
+        assert db.execute('SELECT count(*) FROM conversation_turn_reconciliations'
+            ).fetchone()[0] == 1
+
+
+def test_event_append_serializes_under_the_thread_row_lock(isolated_seeded):
+    """Concurrent writers get distinct seqs because every append path locks the thread.
+
+    The allocator itself only flushes + MAX; safety depends on the caller holding
+    the discussion row lock (all production callers do). Two concurrent writers
+    that take that lock serialize instead of colliding on UNIQUE(turn_id, seq).
+    """
+    import asyncio
+
+    from sqlalchemy import select
+
+    from buyeros_api.db.conversation_turn_events import ConversationTurnEvent  # noqa: F401
+    from buyeros_api.db.conversation_threads import ConversationThread
+    from buyeros_api.db.session import tenant_session
+    from buyeros_api.execution.engine import async_database_url, run_async
+    from buyeros_api.services.conversation_turn_events import next_turn_event_seq
+
+    with psycopg.connect(isolated_seeded) as db:
+        user = _user(db, 'turn-event-concurrent')
+        thread = _thread(db, user)
+        turn = _turn(db, user, thread, status='needs_input')
+
+    async def scenario():
+        engine = create_async_engine(async_database_url(runtime_role_dsn(isolated_seeded)))
+
+        async def writer(code):
+            async with tenant_session(engine, WORKSPACE_A) as session:
+                await session.execute(select(ConversationThread.id).where(
+                    ConversationThread.workspace_id == WORKSPACE_A,
+                    ConversationThread.id == thread).with_for_update())
+                seq = await next_turn_event_seq(session, WORKSPACE_A, turn)
+                session.add(ConversationTurnEvent(workspace_id=WORKSPACE_A,
+                    project_id=PROJECT_A, thread_id=thread, turn_id=turn, seq=seq,
+                    kind='notice', payload={'code': code, 'message': 'concurrent append'}))
+                await session.flush()
+
+        try:
+            await asyncio.gather(writer('TURN_EVENT_CONCURRENT_A'),
+                writer('TURN_EVENT_CONCURRENT_B'))
+            async with tenant_session(engine, WORKSPACE_A) as session:
+                rows = (await session.execute(select(ConversationTurnEvent.seq,
+                    ConversationTurnEvent.payload).where(
+                    ConversationTurnEvent.turn_id == turn).order_by(
+                    ConversationTurnEvent.seq))).all()
+                assert [seq for seq, _ in rows] == [1, 2]
+                assert {payload['code'] for _, payload in rows} == {
+                    'TURN_EVENT_CONCURRENT_A', 'TURN_EVENT_CONCURRENT_B'}
+        finally:
+            await engine.dispose()
+
+    run_async(scenario())

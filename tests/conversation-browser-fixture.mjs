@@ -104,9 +104,9 @@ export function assistantRow({id,seq,text,turnId,parts}){return {id,seq,role:'as
 export function threadWith({messages=studioThread.messages,version=studioThread.version,access='owner'}){
   return {...studioThread,version,access,messages,title:studioThread.title};
 }
-/** `text/event-stream` body for deterministic streaming fixtures. */
+/** `text/event-stream` body in the API envelope shape `{seq, turn_id, kind, payload}`. */
 export function sse(events){
-  return events.map(([seq,event,payload])=>`id: ${seq}\nevent: ${event}\ndata: ${JSON.stringify(payload)}\n\n`).join('');
+  return events.map(([seq,event,payload])=>`event: ${event}\ndata: ${JSON.stringify({seq,turn_id:streamTurnId,kind:event,payload})}\n\n`).join('');
 }
 export const browserEntry=`
 import React,{useState,useSyncExternalStore} from 'react';

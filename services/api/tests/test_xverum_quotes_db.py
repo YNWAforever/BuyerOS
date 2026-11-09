@@ -107,7 +107,7 @@ def test_missing_tariff_blocks_without_reservation(credit_case):
 
 def test_quote_owner_requires_real_migration(isolated_seeded):
     with psycopg.connect(isolated_seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0068_conversation_turn_events'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0069_conversation_turn_reconciliations'
     assert importlib.util.find_spec('buyeros_api.services.xverum_quotes')
 
 

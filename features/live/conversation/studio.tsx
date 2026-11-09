@@ -330,7 +330,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     }catch{/* Keep streamed parts visible when the refetch also fails. */}
     if(!current()||streamAbort.current!==null)return;
     setStream(prev=>persisted?null:(prev?{...prev,final:true}:prev));
-    if(outcome==='unavailable'&&!persisted)setSendNotice('The live update was interrupted. Showing what was received.');
+    if(outcome==='overflow')setSendNotice('The live update was too large and was stopped. The saved result is still shown.');
+    else if(outcome==='unavailable'&&!persisted)setSendNotice('The live update was interrupted. Showing what was received.');
   }
   async function cancelTurn():Promise<void>{
     if(!loaded||!stream||stream.final||cancelling||loaded.chat.access==='viewer')return;
