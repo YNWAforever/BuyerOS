@@ -775,7 +775,7 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
    assert.equal(await rationale.isVisible(),false,'collapse works');
    assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1);
    const terminal=cards.nth(1);
-   await terminal.getByText('This step cannot run in the current configuration.',{exact:true}).waitFor();
+   await terminal.locator('.conversation-proposal-state').filter({hasText:'This step cannot run in the current configuration.'}).waitFor();
    assert.equal(await terminal.getByRole('button',{name:'Approve',exact:true}).count(),0,'a terminal proposal has no actions');
    assert.equal(await terminal.getByRole('button',{name:'Reject',exact:true}).count(),0);
    await terminal.getByText('Why this proposal',{exact:true}).click();
