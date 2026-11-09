@@ -44,3 +44,23 @@ def test_the_chain_has_exactly_one_head_and_no_broken_links():
                              else (revision.down_revision,) if revision.down_revision else ())
                 if down not in ids]
     assert not dangling, f'down_revision not present in the chain: {dangling}'
+
+import re as _re
+
+INVALID_DDL = (
+    # PostgreSQL has DISABLE ROW LEVEL SECURITY and NO FORCE ROW LEVEL SECURITY;
+    # "NO ROW LEVEL SECURITY" is a syntax error that only shows up on downgrade.
+    _re.compile(r'\bNO\s+ROW\s+LEVEL\s+SECURITY\b', _re.IGNORECASE),
+    _re.compile(r'\bENABLE\s+ROW\s+LEVEL\s+SECURITY\s+DISABLE\b', _re.IGNORECASE),
+)
+
+
+def test_migrations_do_not_contain_invalid_row_security_ddl():
+    offenders = {}
+    for path in sorted((SERVICE_ROOT / 'alembic' / 'versions').glob('*.py')):
+        text = path.read_text(encoding='utf-8')
+        for pattern in INVALID_DDL:
+            match = pattern.search(text)
+            if match:
+                offenders[path.name] = match.group(0)
+    assert not offenders, f'invalid row-level-security DDL in migrations: {offenders}'

@@ -83,7 +83,7 @@ def downgrade():
     op.execute('ALTER TABLE conversation_turn_reconciliations NO FORCE ROW LEVEL SECURITY')
     if db.execute(sa.text('SELECT EXISTS(SELECT 1 FROM conversation_turn_reconciliations)')).scalar_one():
         raise RuntimeError('0069 downgrade blocked: preserve turn reconciliation evidence')
-    op.execute('ALTER TABLE conversation_turn_reconciliations NO ROW LEVEL SECURITY')
+    op.execute('ALTER TABLE conversation_turn_reconciliations DISABLE ROW LEVEL SECURITY')
     op.execute('DROP TABLE conversation_turn_reconciliations')
     op.execute('REVOKE UPDATE(status,updated_at) ON conversation_turns FROM buyeros_api')
     run_path(str(Path(__file__).with_name('0068_conversation_turn_events.py')))['fences']()

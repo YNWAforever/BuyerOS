@@ -1,4 +1,4 @@
-"""Durable conversation-turn events (derived, replayable, tenant scoped).
+﻿"""Durable conversation-turn events (derived, replayable, tenant scoped).
 
 Additive: events are derived data, so pruning them never changes the persisted
 turn status or parts. Append-only for the API role; forced RLS; no worker
@@ -126,7 +126,7 @@ def downgrade():
     op.execute('ALTER TABLE conversation_turn_events NO FORCE ROW LEVEL SECURITY')
     if db.execute(sa.text('SELECT EXISTS(SELECT 1 FROM conversation_turn_events)')).scalar_one():
         raise RuntimeError('0068 downgrade blocked: preserve conversation turn event evidence')
-    op.execute('ALTER TABLE conversation_turn_events NO ROW LEVEL SECURITY')
+    op.execute('ALTER TABLE conversation_turn_events DISABLE ROW LEVEL SECURITY')
     op.execute('DROP TABLE conversation_turn_events')
     op.execute('DROP FUNCTION public.buyeros_turn_event_valid(text,jsonb)')
     run_path(str(Path(__file__).with_name('0067_conversation_buyer.py')))['fences']()
