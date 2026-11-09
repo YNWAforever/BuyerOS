@@ -54,6 +54,33 @@ the recorded turn; a different payload under the same key is
 }
 ```
 
+### Proposal decision decoration (Increment 2.7, read-time only)
+
+Every response that returns persisted assistant parts (turn responses and
+`ServerThread.messages[].parts`) decorates a `proposal` part with the persisted
+decision when one exists:
+
+```json
+"decision": {
+  "choice": "approve | reject",
+  "decided_at": "<persisted ISO-8601 timestamp>",
+  "decided_by": "you | a workspace member"
+}
+```
+
+`decided_by` is a coarse label derived server-side by comparing the persisted
+decision actor with the requesting actor; no user id, email, membership id or
+internal reference is exposed (the query result is reduced to the label before
+serialization). `decided_at` is the persisted decision timestamp, never the
+request time. When no decision row exists the whole optional field is omitted,
+so older clients and pre-decision turns are unchanged. This is **read-time
+derivation**: the stored `parts` JSON, the turn/message rows and the schema are
+never written or extended. Because the decoration lives on the proposal part of
+the source turn, it appears wherever that thread/proposal is returned --
+including decision/cancel responses and reconcile continuations (reconcile
+continuation turns themselves carry no proposal part; the source proposal in the
+returned thread is decorated normally).
+
 ### Turn events, SSE stream and reconciliation (Increment C)
 
 `conversation_turn_events` (Alembic `0068_conversation_turn_events`) stores
