@@ -1,4 +1,4 @@
-/** Fast, deterministic client contracts; no server, database, browser or provider. */
+﻿/** Fast, deterministic client contracts; no server, database, browser or provider. */
 import {mkdirSync,readdirSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
@@ -11,7 +11,7 @@ const files=readdirSync(new URL('../tests/',import.meta.url))
 if(!files.length)throw new Error('No core client tests discovered');
 // In-process isolation preserves named node:test cases on the supported runtime.
 // Tests replace global fetch only within a test and restore it via t.mock.
-const result=spawnSync(process.execPath,['--test','--experimental-test-isolation=none',
+const result=spawnSync(process.execPath,['--test','--test-force-exit','--test-timeout=120000','--experimental-test-isolation=none',
   ...process.argv.slice(2),...files,'tests/audit-research-intent.test.mjs'],{cwd:root,stdio:'inherit'});
 if(result.error)throw result.error;
 process.exit(result.status??1);

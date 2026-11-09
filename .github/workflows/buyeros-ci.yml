@@ -44,6 +44,7 @@ jobs:
           path: artifacts/repair/promotion*
           if-no-files-found: error
   frontend:
+    timeout-minutes: 120
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -229,6 +230,7 @@ jobs:
           if-no-files-found: error
 
   api:
+    timeout-minutes: 150
     runs-on: ubuntu-latest
     services:
       postgres:
