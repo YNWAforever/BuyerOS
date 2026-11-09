@@ -773,7 +773,7 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
    await terminal.getByText('Why this proposal',{exact:true}).click();
    const terminalWhy=terminal.locator('.conversation-proposal-why');
    assert.equal(await terminalWhy.getByText('Unknown',{exact:true}).count(),0,'a decided proposal renders persisted values, not Unknown rows');
-   assert.equal(await terminalWhy.getByText('Reject',{exact:true}).count(),1,'the Decision row shows the persisted choice');
+   assert.equal(await terminalWhy.getByText('Rejected',{exact:true}).count(),1,'the Decision row shows the persisted outcome');
    assert.equal(await terminalWhy.getByText('A workspace member',{exact:true}).count(),1,'Decided by uses the privacy-bounded label');
    const terminalValues=await terminalWhy.locator('dd').allInnerTexts();
    assert.equal(terminalValues.length,8);

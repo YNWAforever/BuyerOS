@@ -32,14 +32,25 @@ const MAX_ARGUMENTS=12;
 const MAX_ARGUMENT_VALUE=200;
 const MAX_EVIDENCE=20;
 const MAX_NOTICES=8;
-// Internal identifiers never belong in the ordinary explainer path.
-const INTERNAL_KEY=/(?:^|_)(?:id|ids|hash|digest|fingerprint|token|secret|locator|protocol|schema|request|trace|digest)(?:$|_)/i;
+// Internal identifiers/keys never belong in the ordinary explainer path. Keys are
+// normalised so camelCase (`clientMessageId`, `sourceIds`) is caught too.
+const INTERNAL_KEY=/(?:^|_)(?:id|ids|uuid|guid|hash|digest|fingerprint|token|secret|locator|protocol|schema|request|trace|email|mail)(?:$|_)/i;
+// Values that look like identifiers/PII/protocol names are dropped even when the
+// key itself is benign.
+const INTERNAL_VALUE=/(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|(?:^|[^0-9a-f])[0-9a-f]{32,}(?:$|[^0-9a-f])|[\w.+-]+@[\w-]+\.[\w.-]+|(?:^|[^a-z0-9])[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+(?:$|[^a-z0-9])|(?:document|buyer|source|output|proposal|run|drive|call)\s*:\s*\S+)/i;
 const POLICY_CODE=/POLICY|BUDGET|ADMISSION|CONFIG|RUNTIME|XVERUM|DRIVE|SOURCE/i;
 function record(value:unknown):value is Record<string,unknown>{
   return typeof value==='object'&&value!==null&&!Array.isArray(value);
 }
+function internalKey(key:string):boolean{
+  const normalized=key.replace(/([a-z0-9])([A-Z])/g,'$1_$2').replace(/([A-Z]+)([A-Z][a-z])/g,'$1_$2').toLowerCase();
+  return INTERNAL_KEY.test(normalized);
+}
 function primitive(value:unknown):string|null{
-  if(typeof value==='string'){const text=value.trim();return text?text.slice(0,MAX_ARGUMENT_VALUE):null;}
+  if(typeof value==='string'){
+    const text=value.trim();
+    return text&&!INTERNAL_VALUE.test(text)?text.slice(0,MAX_ARGUMENT_VALUE):null;
+  }
   if(typeof value==='number'&&Number.isFinite(value))return String(value);
   if(typeof value==='boolean')return value?'Yes':'No';
   if(Array.isArray(value)){
@@ -53,7 +64,7 @@ function readArguments(value:unknown):{items:ExplainerArgument[];known:boolean;t
   const items:ExplainerArgument[]=[];
   let truncated=false;
   for(const [key,raw] of Object.entries(value)){
-    if(INTERNAL_KEY.test(key))continue;
+    if(internalKey(key))continue;
     const text=primitive(raw);
     if(!text)continue;
     if(items.length>=MAX_ARGUMENTS){truncated=true;break;}
@@ -101,6 +112,8 @@ function readPolicyNotices(parts:ReadonlyArray<MessagePart>):ExplainerPolicyNoti
  */
 export function persistedDecision(value:unknown):ExplainerDecision|null{
   if(!record(value))return null;
+  const keys=Object.keys(value);
+  if(keys.length!==3||keys.some(key=>key!=='choice'&&key!=='decided_at'&&key!=='decided_by'))return null;
   const {choice,decided_at,decided_by}=value;
   if(choice!=='approve'&&choice!=='reject')return null;
   if(decided_by!=='you'&&decided_by!=='a workspace member')return null;

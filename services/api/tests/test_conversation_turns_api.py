@@ -820,3 +820,44 @@ def test_proposal_decision_after_reject_and_coarse_label_for_other_member(turn_a
     assert other['decided_by'] == 'a workspace member'
     assert other['decided_at'] == decision['decided_at']
     assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in json.dumps(other)
+    # A read-only viewer sees the same persisted choice/time, coarse label only.
+    current = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
+    grant(client, dsn, current, VIEWER, 'viewer')
+    as_viewer = client.get(f"{THREAD_ROOT}/{thread['id']}",
+        headers=_h(VIEWER)).json()['data']
+    viewer_decision = proposal_parts(as_viewer)[0]['decision']
+    assert viewer_decision['choice'] == 'reject'
+    assert viewer_decision['decided_by'] == 'a workspace member'
+    assert viewer_decision['decided_at'] == decision['decided_at']
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in json.dumps(viewer_decision)
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, VIEWER)) not in json.dumps(viewer_decision)
+
+
+
+def test_foreign_mismatched_decision_row_never_decorates(turn_api):
+    """Direct-DB mismatch must not decorate: containment is thread/turn scoped."""
+    client, dsn = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    proposal = next(part for part in created['turn']['parts']
+        if part['kind'] == 'proposal')
+    other_thread = create_thread(client)
+    operator_user = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    foreign_turn = uuid.uuid4()
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO conversation_turns(id,workspace_id,project_id,thread_id,"
+            "owner_user_id,actor_id,request_fingerprint,language,status,step_count,parts,notices) "
+            "VALUES(%s,%s,%s,%s,%s,%s,%s,'en','needs_input',1,'[]','[]')",
+            (foreign_turn, WORKSPACE_A, PROJECT_A, other_thread['id'], operator_user,
+             operator_user, 'e' * 64))
+        conn.execute("INSERT INTO conversation_turn_decisions(id,workspace_id,project_id,"
+            "thread_id,turn_id,proposal_id,actor_id,decision,request_fingerprint,"
+            "continuation_turn_id,status) VALUES(%s,%s,%s,%s,%s,%s,%s,'approve',%s,%s,'applied')",
+            (uuid.uuid4(), WORKSPACE_A, PROJECT_A, other_thread['id'], foreign_turn,
+             proposal['proposal_id'], operator_user, 'f' * 64, foreign_turn))
+    response = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h())
+    assert response.status_code == 200, response.text
+    parts = proposal_parts(response.json()['data'])
+    assert parts
+    assert all('decision' not in part for part in parts)
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in response.text

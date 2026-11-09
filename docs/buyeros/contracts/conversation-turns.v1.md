@@ -68,6 +68,15 @@ decision when one exists:
 }
 ```
 
+Containment is enforced at read time: the lookup joins the decision to its
+persisted proposal row and requires the decision's own `thread_id`/`turn_id` to
+match the proposal's thread/turn *and* the containing message/turn that returns
+the part. A direct-DB decision row with mismatched thread/turn containment is
+ignored (the field stays absent), never applied to another thread's proposal.
+The stored `choice` is passed through a server-side `approve|reject` allowlist;
+unrecognised or malformed decision rows degrade to an absent field rather than
+an error.
+
 `decided_by` is a coarse label derived server-side by comparing the persisted
 decision actor with the requesting actor; no user id, email, membership id or
 internal reference is exposed (the query result is reduced to the label before

@@ -123,7 +123,7 @@ async def data(session, row, role, *, full=True, viewer=None):
         result.update(messages=[message_data(m) for m in messages], sources=row.sources, runs=row.runs)
         if viewer is not None:
             await decorate_thread_payload(session, row.workspace_id, row.project_id,
-                result, viewer)
+                row.id, result, viewer)
     return result
 
 

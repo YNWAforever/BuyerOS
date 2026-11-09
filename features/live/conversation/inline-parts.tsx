@@ -58,8 +58,7 @@ function ToolActivity({part,actions}:{part:ToolActivityPart;actions:PartActions}
       <div className="conversation-tool-head"><b>{part.title}</b><span className={`pill ${stateTone(part.state)}`}>{t(stateLabel[part.state])}</span></div>
       {part.summary&&<p>{part.summary}</p>}
       <details className="conversation-tool-details"><summary>{t('Details')}</summary>
-        <dl><div><dt>{t('Capability')}</dt><dd>{part.capability}</dd></div>
-          {started&&<div><dt>{t('Started')}</dt><dd>{started}</dd></div>}{finished&&<div><dt>{t('Finished')}</dt><dd>{finished}</dd></div>}
+        <dl>{started&&<div><dt>{t('Started')}</dt><dd>{started}</dd></div>}{finished&&<div><dt>{t('Finished')}</dt><dd>{finished}</dd></div>}
           {part.error_code&&<div><dt>{t('Error code')}</dt><dd><code>{part.error_code}</code></dd></div>}</dl>
       </details>
     </div>

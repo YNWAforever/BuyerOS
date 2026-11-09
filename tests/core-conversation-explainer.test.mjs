@@ -57,6 +57,17 @@ test('the ordinary view model carries no internal ids, hashes or capabilities',(
   assert.equal(serialized.includes(proposal.proposal_id),false,'proposal ids never cross into the explainer');
   assert.equal(serialized.includes('xverum.enrich_company'),false,'protocol capability names stay out of ordinary copy');
   assert.equal(serialized.includes('document:2222'),false,'citation ids stay out of the explainer');
+  // Wider objects: camelCase internal keys and id/hash/PII/protocol-shaped VALUES
+  // are dropped too, even when the key itself is benign.
+  const uuid='99999999-9999-4999-8999-999999999999',digest='a'.repeat(64);
+  const leaky=proposalExplain({proposal:{...proposal,arguments_preview:{
+    company:'DeltaGrid',profile_version:2,clientMessageId:'client-1',sourceIds:['source-1'],companyId:'company-1',requestHash:'deadbeef',
+    reference:uuid,checksum:digest,contact:'reviewer@example.com',capabilityName:'xverum.enrich_company'}},turnParts:[]});
+  assert.deepEqual(leaky.arguments.map(item=>item.label),['company','profile version']);
+  const argumentValues=JSON.stringify(leaky.arguments);
+  for(const leaked of [uuid,digest,'reviewer@example.com','xverum.enrich_company','client-1','source-1','company-1','deadbeef'])
+    assert.equal(argumentValues.includes(leaked),false,`internal-shaped value ${leaked.slice(0,12)} is not projected`);
+  assert.equal(leaky.argumentsKnown,true);
 });
 
 test('argument previews are bounded and structured values are not rendered blindly',()=>{
@@ -79,7 +90,10 @@ test('a persisted decision is surfaced only when it actually exists and is well 
     {choice:'approve',decided_at:'',decided_by:'you'},
     {choice:'approve',decided_by:'you'},
     {decision:{choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'}},
-  ])assert.equal(persistedDecision(malformed),null,'malformed decisions degrade to absent');
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you',actor_id:'11111111-1111-4111-8111-111111111111'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you',extra:true},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you',decided_by_id:'x'},
+  ])assert.equal(persistedDecision(malformed),null,'malformed or wider decisions degrade to absent');
   const mine=persistedDecision({choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you'});
   assert.deepEqual(mine,{choice:'approve',actor:'you',decidedAt:'2026-11-09T10:00:00Z'});
   assert.deepEqual(persistedDecision({choice:'reject',decided_at:'2026-11-09T10:00:00+00:00',decided_by:'a workspace member'}),
@@ -100,9 +114,11 @@ test('a persisted decision is surfaced only when it actually exists and is well 
   assert.equal(rejected.decision.choice,'reject');
   for(const malformed of [null,{},'approve',{choice:'approve'},{choice:'approve',decided_at:'2026-11-09T10:00:00Z'},
     {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'someone'},
-    {choice:'approve',decided_at:'yesterday',decided_by:'you'}]){
+    {choice:'approve',decided_at:'yesterday',decided_by:'you'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you',actor_id:'11111111-1111-4111-8111-111111111111'},
+    {choice:'approve',decided_at:'2026-11-09T10:00:00Z',decided_by:'you',extra:true}]){
     const part=readMessagePart({...base,decision:malformed});
     assert.equal(part.kind,'proposal');
-    assert.equal('decision' in part,false,'the reader drops a malformed decision');
+    assert.equal('decision' in part,false,'the reader drops a malformed or wider decision');
   }
 });

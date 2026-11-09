@@ -48,7 +48,7 @@ export function ProposalExplainer({t,locale,navigate,proposal,turnParts,approval
     decision:persistedDecision(proposal.decision)}),[proposal,turnParts]);
   const unknown=t('Unknown');
   const decidedAt=view.decisionKnown?decidedAtLabel(view.decision?.decidedAt??null,locale):null;
-  const decisionLabel=view.decisionKnown&&view.decision?t(view.decision.choice==='approve'?'Approve':'Reject'):unknown;
+  const decisionLabel=view.decisionKnown&&view.decision?t(view.decision.choice==='approve'?'Approved':'Rejected'):unknown;
   const actorLabel=view.decisionKnown&&view.decision
     ?(view.decision.actor==='you'?t('You'):t('A workspace member')):unknown;
   return <details className="conversation-proposal-why">

@@ -93,6 +93,10 @@ function readCost(value:unknown):ProposalCost|undefined{
 }
 function readProposalDecision(value:unknown):ProposalDecision|undefined{
   if(!record(value))return undefined;
+  // Exact allowlist: any extra/wider key means the shape is not the documented
+  // read-time decoration, so the whole decision degrades to absent.
+  const keys=Object.keys(value);
+  if(keys.length!==3||keys.some(key=>key!=='choice'&&key!=='decided_at'&&key!=='decided_by'))return undefined;
   const {choice,decided_at,decided_by}=value;
   if(choice!=='approve'&&choice!=='reject')return undefined;
   if(!dateString(decided_at))return undefined;
