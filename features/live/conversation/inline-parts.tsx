@@ -1,18 +1,20 @@
 'use client';
-import type {ReactNode} from 'react';
 import {Check,CircleAlert,CircleDashed,CircleSlash,Clock,FileText,Link2,Loader} from 'lucide-react';
 import type {CitationItem,MessagePart,NoticePart,OutputLinkPart,ProposalCost,ProposalPart,ThreadAccess,ToolActivityPart,ToolState,TurnStatus} from './types';
 import {approvalNoticeKey,decisionGate,followUpNoticeKey,proposalUiState,toolStateAfterDecision,type DecisionChoice,type LocalDecision} from './approval';
 import {type TerminalProposal,type TranscriptEntry} from './parts';
+import {ProposalExplainer} from './proposal-explainer';
 
 export type PartActions={
   t:(value:string)=>string;
+  locale:'en'|'zh-HK';
   navigate:(path:string)=>void;
   access:ThreadAccess;
   turnStatusFor:(turnId:string|null)=>TurnStatus|undefined;
   decisionFor:(proposalId:string)=>LocalDecision|undefined;
   terminalFor:(proposalId:string)=>TerminalProposal|undefined;
   toolFor:(capability:string)=>ToolActivityPart|null;
+  partsForTurn:(turnId:string|null)=>ReadonlyArray<MessagePart>;
   decide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;
   deciding:boolean;
 };
@@ -40,22 +42,7 @@ function shortTime(value:string|undefined):string{
   const parsed=Date.parse(value);
   return Number.isFinite(parsed)?new Date(parsed).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}):'';
 }
-/** Untrusted, model-supplied preview data: primitives only, never HTML or links. */
-function Preview({value,t,depth=0}:{value:unknown;t:(value:string)=>string;depth?:number}):ReactNode{
-  if(depth>3)return <span>…</span>;
-  if(value===null||value===undefined)return <span>{t('Unknown')}</span>;
-  if(typeof value==='boolean')return <span>{t(value?'Yes':'No')}</span>;
-  if(typeof value==='number'||typeof value==='string')return <span>{String(value)}</span>;
-  if(Array.isArray(value))return <ul>{value.slice(0,20).map((row,index)=><li key={index}><Preview value={row} t={t} depth={depth+1}/></li>)}</ul>;
-  if(typeof value==='object'){
-    const entries=Object.entries(value as Record<string,unknown>)
-      .filter(([key])=>!/(^id$|_ids?$|token|secret|password|digest|hash|fingerprint|locator)/i.test(key))
-      .slice(0,20);
-    if(!entries.length)return <span>{t('None')}</span>;
-    return <dl>{entries.map(([key,row])=><div key={key}><dt>{t(key.replaceAll('_',' '))}</dt><dd><Preview value={row} t={t} depth={depth+1}/></dd></div>)}</dl>;
-  }
-  return <span>…</span>;
-}
+/** Untrusted preview data now lives in the explainer projection (bounded/allowlisted). */
 function Citations({part,actions}:{part:{items:CitationItem[]};actions:PartActions}){
   return <ul className="conversation-citations" aria-label={actions.t('Sources')}>{part.items.map(item=>
     <li key={item.id}>{item.href
@@ -93,14 +80,13 @@ function Proposal({part,entry,actions}:{part:ProposalPart;entry:TranscriptEntry;
   const notice=approvalNoticeKey(state);
   return <section className={`conversation-proposal is-${state}`} aria-label={t('Approval required')} aria-busy={state==='submitting'}>
     <div className="conversation-proposal-head"><b>{part.title}</b><span className="pill amber">{t('Approval required')}</span></div>
-    {part.rationale&&<p>{part.rationale}</p>}
-    {part.arguments_preview!==undefined&&part.arguments_preview!==null&&<details className="conversation-proposal-preview"><summary>{t('Proposed details')}</summary><Preview value={part.arguments_preview} t={t}/></details>}
     {part.cost&&<ProposalCostLine cost={part.cost} t={t}/>}
     {gate.canDecide
       ?<div className="conversation-proposal-actions"><button type="button" className="live-primary" disabled={actions.deciding} onClick={()=>actions.decide(part,entry.turnId,'approve')}>{t('Approve')}</button><button type="button" disabled={actions.deciding} onClick={()=>actions.decide(part,entry.turnId,'reject')}>{t('Reject')}</button></div>
       :notice?<p className="conversation-proposal-state" role="status">{t(notice)}</p>:null}
     {after&&after!=='proposed'&&after!=='approved'&&<p className={`conversation-proposal-state ${after==='failed'?'error':''}`} role="status">{t(followUpNoticeKey(after))}</p>}
-    <details className="conversation-tool-details"><summary>{t('Details')}</summary><dl><div><dt>{t('Capability')}</dt><dd>{part.capability}</dd></div><div><dt>{t('Proposal')}</dt><dd>{part.proposal_id}</dd></div></dl></details>
+    <ProposalExplainer t={t} locale={actions.locale} navigate={actions.navigate} proposal={part}
+      turnParts={actions.partsForTurn(entry.turnId)} approvalState={state}/>
   </section>;
 }
 function OutputLink({part,actions}:{part:OutputLinkPart;actions:PartActions}){

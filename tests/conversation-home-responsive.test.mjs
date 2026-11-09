@@ -718,6 +718,68 @@ test('outcome_unknown recovery reconciles the saved result without repeating the
  }finally{await harness.close();}
 });
 
+test('proposal explainer expands persisted data, collapses and keeps a terminal card inert',async()=>{
+ const explainerTurnId='d1000000-0000-4000-8000-000000000001',terminalTurnId='d2000000-0000-4000-8000-000000000001';
+ const awaitingProposal={kind:'proposal',proposal_id:'d3000000-0000-4000-8000-000000000001',
+   capability:'xverum.enrich_company',title:'Enrich company',rationale:'Synthetic rationale for the explainer.',
+   arguments_preview:{company:'DeltaGrid',profile_version:2,company_id:'internal-secret'},
+   cost:{kind:'provider_credits',amount:'0',unit:'credits',may_incur_provider_charges:true,known:false},
+   requires_approval:true};
+ const terminalProposal={kind:'proposal',proposal_id:'d4000000-0000-4000-8000-000000000001',
+   capability:'drive.read',title:'Read Drive source',rationale:'Terminal fixture rationale.',
+   arguments_preview:{folder:'Synthetic folder'},
+   cost:{kind:'nonbillable',may_incur_provider_charges:false,known:true},requires_approval:true};
+ const thread=fixture.threadWith({version:3,messages:[
+   fixture.userRow({id:'d8000000-0000-4000-8000-000000000001',seq:1,text:'Explain these proposals',turnId:explainerTurnId}),
+   fixture.assistantRow({id:'d5000000-0000-4000-8000-000000000001',seq:2,text:'Proposal summary',turnId:explainerTurnId,parts:[
+     {kind:'text',text:'Here are two proposals.'},
+     {kind:'citations',items:[{id:`document:${documentId}`,label:'Offer document',kind:'document',href:`/app/discover/edit?document=${documentId}`}]},
+     awaitingProposal,terminalProposal]}),
+   fixture.assistantRow({id:'d6000000-0000-4000-8000-000000000001',seq:3,text:'Drive read failed',turnId:terminalTurnId,parts:[
+     {kind:'tool_activity',call_id:'d7000000-0000-4000-8000-000000000001',capability:'drive.read',title:'Read Drive source',
+      state:'failed',started_at:'2026-11-08T00:00:00.000Z',error_code:'DRIVE_READ_NOT_ENABLED'}]}),
+ ]});
+ const harness=await fixtureHarness({handler:streamingApi({thread:()=>thread})});
+ try{
+   const {page,requests}=harness;
+   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+   const cards=page.locator('.conversation-proposal');
+   await cards.first().waitFor();
+   await page.waitForLoadState('networkidle');
+   const awaiting=cards.first();
+   const rationale=awaiting.getByText('Synthetic rationale for the explainer.',{exact:true});
+   assert.equal(await rationale.count(),1);
+   assert.equal(await rationale.isVisible(),false,'the explainer is collapsed by default');
+   const before=requests.length;
+   await awaiting.getByText('Why this proposal',{exact:true}).click();
+   assert.equal(requests.length,before,'expanding the explainer performs no fetch');
+   const why=awaiting.locator('.conversation-proposal-why');
+   assert.equal(await rationale.isVisible(),true);
+   assert.equal(await why.getByRole('button',{name:'Offer document',exact:true}).count(),1,'evidence citations stay linked');
+   assert.equal(await why.getByText('Cost review required before any paid request.',{exact:true}).count(),1,'known:false keeps the shipped wording');
+   assert.equal(await why.getByText('Awaiting approval',{exact:true}).count(),1,'approval state is visible');
+   assert.equal(await why.getByText('DeltaGrid',{exact:true}).count(),1,'bounded arguments render');
+   assert.equal(await awaiting.getByText('internal-secret',{exact:true}).count(),0,'internal argument values stay hidden');
+   assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1,'existing approval action unchanged');
+   await awaiting.getByText('Why this proposal',{exact:true}).click();
+   assert.equal(await rationale.isVisible(),false,'collapse works');
+   assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1);
+   const terminal=cards.nth(1);
+   await terminal.getByText('This step cannot run in the current configuration.',{exact:true}).waitFor();
+   assert.equal(await terminal.getByRole('button',{name:'Approve',exact:true}).count(),0,'a terminal proposal has no actions');
+   assert.equal(await terminal.getByRole('button',{name:'Reject',exact:true}).count(),0);
+   await terminal.getByText('Why this proposal',{exact:true}).click();
+   const terminalWhy=terminal.locator('.conversation-proposal-why');
+   assert.equal(await terminalWhy.getByText('Unknown',{exact:true}).count(),3,'decision, actor and time render explicit unknown rows');
+   // EN + zh-HK labels for the new disclosure.
+   await page.getByRole('button',{name:'Change language',exact:true}).click();
+   await page.getByText('為何有此建議',{exact:true}).first().waitFor();
+   const zhCard=page.locator('.conversation-proposal').first();
+   await zhCard.getByText('為何有此建議',{exact:true}).click();
+   assert.equal(await zhCard.getByText('理由',{exact:true}).count(),1);
+ }finally{await harness.close();}
+});
+
 // Restored retained-surface scenarios: device discussions and Google Drive remain the
 
 // local-only surfaces they were before the conversation studio became the project home.

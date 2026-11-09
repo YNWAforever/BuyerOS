@@ -192,6 +192,17 @@
 .conversation-proposal-preview dl,.conversation-proposal-preview ul{margin:6px 0 0}
 .conversation-proposal-preview dl>div{margin:3px 0}
 .conversation-proposal-cost{font-weight:600;color:var(--buyeros-copy)}
+/* Increment 2.7: "Why this proposal" persisted-data explainer. */
+.conversation-proposal-why{border-top:1px solid var(--buyeros-border);padding-top:6px;font-size:12px;min-width:0}
+.conversation-proposal-why>summary{cursor:pointer;font-weight:600;color:var(--buyeros-accent-hover);overflow-wrap:anywhere}
+.conversation-why{display:grid;gap:6px;margin:8px 0 0;min-width:0}
+.conversation-why>div{display:grid;grid-template-columns:minmax(84px,0.35fr) minmax(0,1fr);gap:8px;min-width:0}
+.conversation-why dt{font-weight:650;color:var(--buyeros-copy);text-transform:capitalize}
+.conversation-why dd{margin:0;min-width:0;overflow-wrap:anywhere;color:var(--buyeros-ink)}
+.conversation-why ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;min-width:0}
+.conversation-why-arguments b{font-weight:600;color:var(--buyeros-copy)}
+.conversation-why .conversation-citations{margin-top:4px}
+@media(max-width:520px){.conversation-why>div{grid-template-columns:minmax(0,1fr);gap:1px}}
 .conversation-proposal-actions{display:flex;gap:8px;flex-wrap:wrap}
 .conversation-proposal-actions button{min-height:38px!important}
 .conversation-proposal-state{margin:0!important;font-size:12px;color:var(--buyeros-copy)}
