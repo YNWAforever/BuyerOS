@@ -1,4 +1,4 @@
-"""T23 migrations round trip when empty and refuse to erase live references."""
+﻿"""T23 migrations round trip when empty and refuse to erase live references."""
 
 import uuid
 
@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0069_conversation_turn_reconciliations"
+HEAD = "0069_turn_reconciliations"
 
 
 def _config():

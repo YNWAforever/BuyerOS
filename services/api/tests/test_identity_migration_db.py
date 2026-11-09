@@ -1,4 +1,4 @@
-"""Fresh owned database: real expansion, backfill, retained rollback and re-upgrade."""
+﻿"""Fresh owned database: real expansion, backfill, retained rollback and re-upgrade."""
 import uuid
 import psycopg
 import pytest
@@ -105,7 +105,7 @@ def test_supported_0038_upgrade_to_current_head_preserves_history_and_restricted
     config = Config(str(ALEMBIC_INI))
     config.set_main_option('script_location', str(SERVICE_ROOT / 'alembic'))
     heads = ScriptDirectory.from_config(config).get_heads()
-    assert heads == ['0069_conversation_turn_reconciliations']
+    assert heads == ['0069_turn_reconciliations']
     legacy, workspace, membership, preference = (uuid.uuid4() for _ in range(4))
     principal = Principal('urn:c61:neon-only', 'supported-upgrade-' + uuid.uuid4().hex)
     with monkeypatch.context() as context:

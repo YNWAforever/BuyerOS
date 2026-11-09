@@ -1,4 +1,4 @@
-"""T24 draft scope and immutable revision migration safety."""
+﻿"""T24 draft scope and immutable revision migration safety."""
 import uuid
 
 import psycopg
@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
 
-HEAD = "0069_conversation_turn_reconciliations"
+HEAD = "0069_turn_reconciliations"
 
 
 def _config():

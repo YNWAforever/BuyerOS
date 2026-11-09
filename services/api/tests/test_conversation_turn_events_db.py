@@ -1,4 +1,4 @@
-"""PostgreSQL: turn event store contract, RLS/grants, allocator and atomicity.
+﻿"""PostgreSQL: turn event store contract, RLS/grants, allocator and atomicity.
 
 CI-only here (no local PostgreSQL). Fixture/deterministic data only.
 """
@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0069_conversation_turn_reconciliations'
+HEAD = '0069_turn_reconciliations'
 
 
 def _user(db, issuer='turn-event-fixture'):

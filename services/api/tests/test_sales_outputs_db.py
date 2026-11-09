@@ -1,4 +1,4 @@
-"""Task6 canonical outputs: real owned PostgreSQL and deterministic section validation."""
+﻿"""Task6 canonical outputs: real owned PostgreSQL and deterministic section validation."""
 import importlib
 import uuid
 import pytest
@@ -292,7 +292,7 @@ def test_postgres_outputs_force_rls_and_rollback(outputs_pg):
         assert db.execute('SELECT count(*) FROM sales_output_versions').fetchone()[0]==0
     with pytest.raises(RuntimeError,match='preserve populated'): command.downgrade(config(),'0060_sales_tasks')
     with psycopg.connect(c.dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_conversation_turn_reconciliations'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_turn_reconciliations'
         assert db.execute('SELECT count(*) FROM sales_output_versions').fetchone()[0]==1
         assert all(db.execute('SELECT relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(t,)).fetchone()[0] for t in tables)
 

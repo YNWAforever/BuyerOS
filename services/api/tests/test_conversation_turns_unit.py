@@ -1,4 +1,4 @@
-"""Deterministic turn orchestration: planning, parts and replay identity.
+﻿"""Deterministic turn orchestration: planning, parts and replay identity.
 
 No database and no provider: these tests pin the code-owned registry boundary,
 the bounded plan ceiling, the strict citation adapter and the canonical durable
@@ -273,7 +273,7 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0069_conversation_turn_reconciliations']
+    assert required['compatible_heads'] == ['0069_turn_reconciliations']
     for name in ('conversation_turns', 'conversation_turn_proposals',
                  'conversation_turn_decisions', 'conversation_thread_messages',
                  'conversation_turn_events', 'conversation_turn_reconciliations'):
@@ -358,7 +358,7 @@ def test_drive_source_produces_proposal_only_read():
 
 def test_enrichment_intent_is_deterministic_and_text_only():
     assert engine._enrichment_intent('Please verify this company')
-    assert engine._enrichment_intent('補充公司資料')
+    assert engine._enrichment_intent('鋆??砍鞈?')
     assert not engine._enrichment_intent('Summarise the selected documents')
     # The buyer link, not free text, grants tool permission: no buyer -> no proposal.
     plan, staged = engine.build_plan(thread('custom'),

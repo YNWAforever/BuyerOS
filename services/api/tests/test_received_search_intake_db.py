@@ -1,4 +1,4 @@
-"""Native receipt intake on API/worker roles; HTTP and verified contract are synthetic.
+﻿"""Native receipt intake on API/worker roles; HTTP and verified contract are synthetic.
 
 No real provider activation, canonical entity, page retrieval or billing proof.
 """
@@ -298,7 +298,7 @@ def test_intake_migration_rollback_retains_tombstones_and_closes_writes(received
             assert db.execute('SELECT request_hash,response_hash,intent_key FROM search_receipts WHERE id=%s',(c['ref'],)).fetchone()==before
         with pytest.raises(ValueError):consume(c)
     finally:
-        invoke_revision(c['dsn'],config,'0059_conversation_connections','_fences',('0069_conversation_turn_reconciliations',))
+        invoke_revision(c['dsn'],config,'0059_conversation_connections','_fences',('0069_turn_reconciliations',))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert consume(c)['source_count']==1
 

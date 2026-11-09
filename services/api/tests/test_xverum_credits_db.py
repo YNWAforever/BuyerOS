@@ -1,4 +1,4 @@
-"""Real migration and integer ledger acceptance, never ORM-created substitutes."""
+﻿"""Real migration and integer ledger acceptance, never ORM-created substitutes."""
 import psycopg
 import pytest
 from decimal import Decimal
@@ -87,7 +87,7 @@ def test_populated_rollback_preserves_force_rls_and_roles(credit_case):
     with pytest.raises(RuntimeError,match='preserve populated'):command.downgrade(config(),'0061_sales_outputs')
     tables=('connections','project_assignments','credit_accounts','credit_limits','tariffs','quotes','credit_reservations','receipts','credit_settlements')
     with psycopg.connect(c.dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_conversation_turn_reconciliations'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_turn_reconciliations'
         for table in tables:
             table='xverum_'+table
             assert db.execute('SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(table,)).fetchone()==(True,True)

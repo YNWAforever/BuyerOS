@@ -1,4 +1,4 @@
-"""Independent delivery schema/ledger boundary in owned PG; no network or admission route."""
+﻿"""Independent delivery schema/ledger boundary in owned PG; no network or admission route."""
 import contextlib,uuid
 import psycopg,pytest
 from alembic import command
@@ -10,7 +10,7 @@ from tests.test_lookup_quotes_db import quote_case,WORKSPACE_A
 from tests.test_api_tenant_isolation import WORKSPACE_B
 from tests.test_delivery_preparation_db import approved,prepare
 
-HEAD='0069_conversation_turn_reconciliations';PREVIOUS='0047_c61_legacy_source_privacy'
+HEAD='0069_turn_reconciliations';PREVIOUS='0047_c61_legacy_source_privacy'
 TABLES=('delivery_messages','delivery_events','delivery_liabilities')
 
 def config():

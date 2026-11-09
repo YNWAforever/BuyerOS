@@ -1,4 +1,4 @@
-"""Effective, evidence-keyed turn reconciliations (latest wins).
+﻿"""Effective, evidence-keyed turn reconciliations (latest wins).
 
 A reconcile attempt is recorded once per distinct persisted evidence digest for
 a source turn. Equivalent attempts (same evidence) return the recorded
@@ -15,7 +15,7 @@ from runpy import run_path
 from alembic import op
 import sqlalchemy as sa
 
-revision = '0069_conversation_turn_reconciliations'
+revision = '0069_turn_reconciliations'
 down_revision = '0068_conversation_turn_events'
 branch_labels = depends_on = None
 TABLES = ('conversation_turn_reconciliations',)
