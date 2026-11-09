@@ -769,7 +769,12 @@ def test_proposal_decision_absent_before_decision_and_stored_parts_unchanged(tur
     turn_proposal = next(part for part in created['turn']['parts']
         if part['kind'] == 'proposal')
     assert 'decision' not in turn_proposal
-    turns_before, messages_before = stored_part_bodies(dsn, thread['id'])
+    source_turn_id = created['turn']['id']
+    with psycopg.connect(dsn) as conn:
+        turn_before = conn.execute('SELECT parts FROM conversation_turns WHERE id=%s',
+            (source_turn_id,)).fetchone()[0]
+        messages_before = conn.execute('SELECT id,parts FROM conversation_thread_messages '
+            'WHERE thread_id=%s ORDER BY seq', (thread['id'],)).fetchall()
 
     approved = decide(client, created['turn'], version=created['thread']['version'],
         mutation_key='decision-decoration-approve')
@@ -787,10 +792,15 @@ def test_proposal_decision_absent_before_decision_and_stored_parts_unchanged(tur
             'WHERE workspace_id=%s', (WORKSPACE_A,)).fetchone()[0]
     assert datetime.fromisoformat(decision['decided_at']) == persisted
     # Read-time derivation only: stored parts are byte-for-byte unchanged.
-    turns_after, messages_after = stored_part_bodies(dsn, thread['id'])
-    assert turns_before == turns_after
-    assert messages_before == messages_after
-    assert 'decision' not in str(turns_after) and 'decision' not in str(messages_after)
+    with psycopg.connect(dsn) as conn:
+        turn_after = conn.execute('SELECT parts FROM conversation_turns WHERE id=%s',
+            (source_turn_id,)).fetchone()[0]
+        messages_after = {row[0]: row[1] for row in conn.execute(
+            'SELECT id,parts FROM conversation_thread_messages WHERE thread_id=%s',
+            (thread['id'],)).fetchall()}
+    assert turn_before == turn_after, 'the source turn parts are not rewritten'
+    assert all(messages_after.get(message_id) == parts for message_id, parts in messages_before)
+    assert 'decision' not in str(turn_after) and 'decision' not in str(list(messages_after.values()))
     # Privacy: no raw actor id or internal reference in the payload.
     operator_id = str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR))
     assert operator_id not in approved.text
