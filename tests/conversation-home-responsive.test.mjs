@@ -555,13 +555,17 @@ test('Discuss this company starts one linked turn and a terminal enrichment card
   assert.match(await compose.getByLabel('Linked company').innerText(),/DeltaGrid/);
   // Always-approval plus an honest cost review with no invented number.
   assert.equal(await transcript.getByText('Approval required',{exact:true}).count(),1);
-  assert.equal(await transcript.getByText('Cost review required before any paid request.',{exact:true}).count(),1);
+  // Scope to the card's own visible cost line: the collapsed explainer also holds
+  // a cost row in the DOM, so a transcript-wide count would double-count.
+  assert.equal(await transcript.locator('.conversation-proposal-cost').count(),1);
   assert.equal(await page.locator('.conversation-proposal-cost').innerText(),'Cost review required before any paid request.');
   // Approval returns a terminal configuration outcome; the card must become inert.
   await transcript.getByRole('button',{name:'Approve',exact:true}).click();
   await transcript.getByText('Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.').first().waitFor();
-  assert.equal(await transcript.getByText('Failed',{exact:true}).count(),1);
-  assert.equal(await transcript.getByText('This step cannot run in the current configuration.',{exact:true}).count(),1);
+  // The explainer mirrors the terminal state inside its collapsed DOM; scope both
+  // to the card's own visible elements so the counts stay strict but unambiguous.
+  assert.equal(await transcript.locator('.conversation-tool').getByText('Failed',{exact:true}).count(),1);
+  assert.equal(await transcript.locator('.conversation-proposal-state').filter({hasText:'This step cannot run in the current configuration.'}).count(),1);
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0,'terminal configuration leaves no actionable decision');
   assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),0);
   const decision=posts.find(row=>row.path.endsWith('/decisions'));
@@ -760,7 +764,11 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
    assert.equal(await why.getByText('Cost review required before any paid request.',{exact:true}).count(),1,'known:false keeps the shipped wording');
    assert.equal(await why.getByText('Awaiting approval',{exact:true}).count(),1,'approval state is visible');
    assert.equal(await why.getByText('Unknown',{exact:true}).count(),3,'an undecided proposal keeps explicit unknown decision rows');
-   assert.equal(await why.getByText('DeltaGrid',{exact:true}).count(),1,'bounded arguments render');
+   // Arguments render as "<label> <value>" inside one row, so target the row
+   // precisely instead of an exact text match on the value alone.
+   const argument=why.locator('.conversation-why-arguments li').filter({hasText:'DeltaGrid'});
+   assert.equal(await argument.count(),1,'bounded arguments render');
+   assert.equal((await argument.innerText()).replace(/\s+/g,' ').trim(),'company DeltaGrid');
    assert.equal(await awaiting.getByText('internal-secret',{exact:true}).count(),0,'internal argument values stay hidden');
    assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1,'existing approval action unchanged');
    await awaiting.getByText('Why this proposal',{exact:true}).click();
