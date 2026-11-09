@@ -358,7 +358,7 @@ def test_drive_source_produces_proposal_only_read():
 
 def test_enrichment_intent_is_deterministic_and_text_only():
     assert engine._enrichment_intent('Please verify this company')
-    assert engine._enrichment_intent('鋆??砍鞈?')
+    assert engine._enrichment_intent('請查證這間公司')
     assert not engine._enrichment_intent('Summarise the selected documents')
     # The buyer link, not free text, grants tool permission: no buyer -> no proposal.
     plan, staged = engine.build_plan(thread('custom'),
