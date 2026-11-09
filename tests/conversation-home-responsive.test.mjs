@@ -155,9 +155,14 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
  await page.route('**/v1/**',async route=>{
   const request=route.request(),url=new URL(request.url());
   requests.push({method:request.method(),path:url.pathname,search:url.search});
-  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['x-buyeros-if-match']??request.headers()['if-match']});}
+  if(request.method()==='POST'){let body;try{body=request.postData()===null?undefined:request.postDataJSON();}catch{body=undefined;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['x-buyeros-if-match']??request.headers()['if-match']});}
   const answer=await handler({req:request,url,state,requests,posts});
-  if(answer){if(answer.status===204)return route.fulfill({status:204});return route.fulfill({status:answer.status??200,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(answer.json)});}
+  if(answer){
+    if(answer.status===204)return route.fulfill({status:204});
+    if(answer.raw)return route.fulfill({status:answer.raw.status??200,headers:answer.raw.headers??{},body:answer.raw.body??''});
+    if(answer.hold)await answer.hold;
+    return route.fulfill({status:answer.status??200,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(answer.json)});
+  }
   const data=fixture.contextResponse(url);
   return route.fulfill({status:data?200:403,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(data?{data,data_mode:'live',request_id:'conversation-studio'}:{error:{code:'PERMISSION_DENIED',message:'denied'},request_id:'conversation-studio'})});
  });
@@ -434,6 +439,7 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   // access resolves; poll the disabled state so the product rule is asserted, not timing.
   await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');return node instanceof HTMLTextAreaElement&&node.disabled;});
   assert.equal(await viewerComposer.isDisabled(),true);
+  assert.equal(await page.getByRole('button',{name:'Cancel turn',exact:true}).count(),0,'a viewer never gets a mutating cancel action');
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0);
   await page.locator('.conversation-panel').getByRole('tab',{name:'Sources',exact:true}).click();
   assert.equal(await page.locator('.conversation-panel').getByRole('button',{name:'Remove',exact:true}).count(),0);
@@ -561,6 +567,149 @@ test('Discuss this company starts one linked turn and a terminal enrichment card
   const decision=posts.find(row=>row.path.endsWith('/decisions'));
   assert.deepEqual(decision.body,{proposal_id:buyerProposalId,decision:'approve',expected_thread_version:1});
   assert.equal(decision.match,'"1"');
+ }finally{await harness.close();}
+});
+
+/** Increment C fixture: stream event routes layered over the standard API stub. */
+function streamingApi(overrides={}){
+ const base=standardApi();
+ return async input=>{
+  const {req,url}=input,method=req.method(),path=url.pathname;
+  if(method==='OPTIONS'&&path.endsWith('/events'))return {status:204};
+  if(method==='POST'&&path.endsWith('/conversation-turns')&&overrides.turn)return overrides.turn(input);
+  if(method==='GET'&&/\/conversation-turns\/[0-9a-f-]+\/events$/.test(path)&&overrides.events)
+    return overrides.events({...input,after:Number(url.searchParams.get('after')??'0')});
+  if(method==='POST'&&/\/conversation-turns\/[0-9a-f-]+\/cancel$/.test(path)&&overrides.cancel)return overrides.cancel(input);
+  if(method==='POST'&&/\/conversation-turns\/[0-9a-f-]+\/reconcile$/.test(path)&&overrides.reconcile)return overrides.reconcile(input);
+  if(method==='GET'&&/\/conversation-threads\/[0-9a-f-]+$/.test(path)&&overrides.thread)return {json:fixture.envelope(overrides.thread())};
+  return base(input);
+ };
+}
+
+test('streamed turn renders progressively and reconnects from the last cursor without duplicating',async()=>{
+ const streamId=fixture.streamTurnId;
+ let eventRequests=[],releaseSecond,secondResolve,persisted=false;
+ const secondArrived=new Promise(resolve=>{secondResolve=resolve;});
+ const user2=fixture.userRow({id:'c5000000-0000-4000-8000-000000000001',seq:3,text:'Streamed follow-up',turnId:streamId});
+ const pending=fixture.threadWith({messages:[...fixture.studioThread.messages,user2],version:4});
+ const answer=fixture.assistantRow({id:'c6000000-0000-4000-8000-000000000001',seq:4,text:'Persisted streamed answer',turnId:streamId,
+   parts:[{kind:'text',text:'Persisted streamed answer'}]});
+ const persistedThread=fixture.threadWith({messages:[...pending.messages,answer],version:5});
+ const harness=await fixtureHarness({handler:streamingApi({
+   thread:()=>persisted?persistedThread:fixture.studioThread,
+   turn:()=>({json:fixture.envelope({thread:pending,turn:{id:streamId,status:'needs_input',parts:[],notices:[]}})}),
+   events:async({after})=>{
+     eventRequests.push(after);
+     if(eventRequests.length===1)return {raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
+       body:fixture.sse([[1,'turn.started',{status:'running'}],[2,'part',{index:0,part:{kind:'text',text:'Streaming partial answer'}}]])}};
+     secondResolve();
+     await new Promise(resolve=>{releaseSecond=resolve;});
+     persisted=true;
+     return {raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
+       body:fixture.sse([[3,'tool',{call_id:'c7000000-0000-4000-8000-000000000001',capability:'xverum.enrich_company',state:'completed'}],
+         [4,'part',{index:1,part:{kind:'text',text:'Streamed final fragment'}}],[5,'turn.final',{status:'completed'}]])}};
+   },
+ })});
+ try{
+   const {page,posts,errors}=harness;
+   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+   await composer.waitFor();
+   await composer.fill('Streamed follow-up');
+   await page.getByRole('button',{name:'Send message',exact:true}).click();
+   await page.getByText('Streaming partial answer',{exact:true}).waitFor();
+   await page.locator('.conversation-stream').waitFor();
+   assert.equal(await composer.isDisabled(),true,'composer stays disabled while the turn is running');
+   assert.equal(await page.getByRole('button',{name:'Cancel turn',exact:true}).count(),1,'a running turn offers cancel');
+   await page.screenshot({path:shots+'/stream-progress-desktop.png',fullPage:true});
+   await secondArrived;
+   assert.deepEqual(eventRequests,[0,2],'a reconnect resumes after the last seen seq');
+   releaseSecond();
+   await page.getByText('Persisted streamed answer',{exact:true}).waitFor();
+   await page.waitForFunction(()=>document.body.innerText.indexOf('Streaming partial answer')===-1);
+   await page.locator('.conversation-stream').waitFor({state:'detached'});
+   await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');
+     return node instanceof HTMLTextAreaElement&&!node.disabled;});
+   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'reconnect never re-submits the turn');
+   assert.equal(await page.getByText('Streamed follow-up',{exact:true}).count(),1,'no duplicate user row after reconnect');
+   assert.equal(posts.some(row=>/\/decisions$|\/xverum\/|\/quotes?$|\/approve$|\/send$/.test(row.path)),false,'streaming never dispatches paid work');
+   assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('a running turn can be cancelled from the keyboard without a new turn',async()=>{
+ const streamId=fixture.streamTurnId;
+ const user2=fixture.userRow({id:'c8000000-0000-4000-8000-000000000001',seq:3,text:'Cancellable follow-up',turnId:streamId});
+ const pending=fixture.threadWith({messages:[...fixture.studioThread.messages,user2],version:4});
+ const cancelledThread=fixture.threadWith({messages:pending.messages,version:5});
+ let cancelled=false;
+ const harness=await fixtureHarness({handler:streamingApi({
+   thread:()=>cancelled?cancelledThread:fixture.studioThread,
+   turn:()=>({json:fixture.envelope({thread:pending,turn:{id:streamId,status:'needs_input',parts:[],notices:[]}})}),
+   events:()=>({raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
+     body:fixture.sse([[1,'turn.started',{status:'running'}]])}}),
+   cancel:()=>{cancelled=true;return {json:fixture.envelope({thread:cancelledThread,
+     turn:{id:streamId,status:'cancelled',parts:[],notices:[]}})};},
+ })});
+ try{
+   const {page,posts,errors}=harness;
+   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+   await composer.waitFor();
+   await composer.fill('Cancellable follow-up');
+   await page.getByRole('button',{name:'Send message',exact:true}).click();
+   const cancel=page.getByRole('button',{name:'Cancel turn',exact:true});
+   await cancel.waitFor();
+   await cancel.focus();await page.keyboard.press('Enter');
+   await page.locator('.conversation-stream').waitFor({state:'detached'});
+   const request=posts.find(row=>row.path.endsWith('/cancel'));
+   assert.ok(request,'cancel reaches the cancel endpoint');
+   assert.equal(request.body,undefined,'cancel sends no body');
+   assert.equal(request.match,'"4"','cancel keeps the strong thread precondition');
+   assert.ok(request.key);
+   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1);
+   await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');
+     return node instanceof HTMLTextAreaElement&&!node.disabled;});
+   assert.equal(await page.getByText('Cancellable follow-up',{exact:true}).count(),1);
+   assert.equal(posts.some(row=>/\/decisions$|\/xverum\/|\/quotes?$|\/approve$|\/send$/.test(row.path)),false);
+   assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('outcome_unknown recovery reconciles the saved result without repeating the turn',async()=>{
+ const streamId=fixture.streamTurnId;
+ let resolved=false;
+ const unknownParts=[{kind:'notice',code:'XVERUM_DISPATCH_NOT_ENABLED',message:'The provider result is unconfirmed.'},
+   {kind:'tool_activity',call_id:'c9000000-0000-4000-8000-000000000001',capability:'xverum.enrich_company',title:'Enrich company',state:'outcome_unknown'}];
+ const unknownAssistant=fixture.assistantRow({id:'ca000000-0000-4000-8000-000000000001',seq:2,text:'Enrichment outcome unknown',turnId:streamId,parts:unknownParts});
+ const unknownThread=fixture.threadWith({messages:[fixture.studioThread.messages[0],unknownAssistant],version:4});
+ const resolvedAssistant=fixture.assistantRow({id:'cb000000-0000-4000-8000-000000000001',seq:3,text:'Recovered result',turnId:'cc000000-0000-4000-8000-000000000001',
+   parts:[{kind:'text',text:'Recovered result'},{kind:'tool_activity',call_id:'c9000000-0000-4000-8000-000000000001',capability:'xverum.enrich_company',title:'Enrich company',state:'completed'}]});
+ const resolvedThread=fixture.threadWith({messages:[fixture.studioThread.messages[0],resolvedAssistant],version:5});
+ const harness=await fixtureHarness({handler:streamingApi({
+   thread:()=>resolved?resolvedThread:unknownThread,
+   turn:()=>({json:fixture.envelope({thread:unknownThread,turn:{id:streamId,status:'outcome_unknown',parts:unknownParts,notices:[]}})}),
+   events:()=>({raw:{status:200,headers:{'content-type':'text/event-stream','cache-control':'no-store'},
+     body:fixture.sse([[1,'turn.started',{status:'running'}],[2,'turn.final',{status:'outcome_unknown'}]])}}),
+   reconcile:()=>{resolved=true;return {json:fixture.envelope({thread:resolvedThread,
+     turn:{id:'cc000000-0000-4000-8000-000000000001',status:'completed',parts:[{kind:'text',text:'Recovered result'}],notices:[]}})};},
+ })});
+ try{
+   const {page,posts,errors}=harness;
+   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+   await composer.waitFor();
+   await composer.fill('Recover this outcome');
+   await page.getByRole('button',{name:'Send message',exact:true}).click();
+   await page.getByText('The outcome is unconfirmed. Check the saved result before trying again.',{exact:true}).waitFor();
+   await page.getByRole('button',{name:'Check result',exact:true}).click();
+   await page.locator('.conversation-compose').getByText('The saved result was checked.',{exact:true}).waitFor();
+   await page.getByText('Recovered result',{exact:true}).waitFor();
+   assert.equal(await page.getByText('The outcome is unconfirmed. Check the saved result before trying again.',{exact:true}).count(),0,'the recovery action clears after reconciliation');
+   const request=posts.find(row=>row.path.endsWith('/reconcile'));
+   assert.ok(request,'reconcile reaches the read-only recovery endpoint');
+   assert.equal(request.body,undefined,'reconcile sends no mutation payload');
+   assert.equal(request.match,'"4"');
+   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'reconcile never repeats the turn');
+   assert.equal(posts.some(row=>/\/decisions$|\/xverum\/|\/quotes?$|\/approve$|\/send$/.test(row.path)),false,'recovery stays nonbillable');
+   assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });
 

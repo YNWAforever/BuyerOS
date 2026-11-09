@@ -54,6 +54,33 @@ the recorded turn; a different payload under the same key is
 }
 ```
 
+### Turn events, SSE stream and reconciliation (Increment C)
+
+`conversation_turn_events` (Alembic `0068_conversation_turn_events`) stores
+derived, tenant-scoped, append-only turn events: `turn.started` (first),
+`part` `{index, part}`, `tool` `{call_id, capability, state, summary?,
+error_code?}`, `proposal` `{proposal_id, capability, requires_approval}`,
+`notice` `{code, message}` and exactly one terminal `turn.final` `{status}`.
+Events are written in the same transaction as the turn/part/status they
+describe, so the terminal event can never disagree with the persisted turn
+status. Per-turn `seq` is allocated by a shared allocator that flushes pending
+rows first; `UNIQUE(turn_id, seq)`.
+
+`GET ?/conversation-turns/{turn_id}/events?after=<seq>` returns
+`text/event-stream` (`Cache-Control: no-store`, `X-Accel-Buffering: no`),
+replays persisted events with `seq > after`, emits `: heartbeat` comments, and
+live-tails until `turn.final` or a bounded deadline. Reconnecting with the last
+seen seq never duplicates and never re-executes work. A foreign turn is `404`;
+a non-integer/negative cursor is `422`.
+
+`POST ?/conversation-turns/{turn_id}/reconcile` (Idempotency-Key required) is
+valid only for an `outcome_unknown` turn (else `409 INVALID_STATE`). It performs
+a strictly read-only probe of already-persisted evidence (canonical sales task
+and output state; no provider receipts are created), then persists a
+continuation turn with the resolved `completed`/`failed`/`outcome_unknown`
+outcome, its events and an audit row. It never dispatches, reserves or retries
+a provider call; replays return the recorded continuation.
+
 ### Thread company link
 
 `POST /conversation-turns` accepts `buyer_id` **only on the thread-first path**.

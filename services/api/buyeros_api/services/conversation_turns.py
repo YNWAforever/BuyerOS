@@ -14,6 +14,7 @@ import uuid
 from dataclasses import replace
 from datetime import datetime, timezone
 import logging
+import re
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -31,6 +32,7 @@ from ..sales.turn_contracts import (CitationsPart, CitationItem, ExecutionOutcom
     ProposalPart, Recovery, TextPart, ToolActivityPart, TurnDecisionRequest, TurnNotice,
     TurnPayload, TurnPlan, TurnRequest, validate_notices, validate_part_list)
 from .conversation_access import load, not_found, sales_enabled
+from .conversation_turn_events import append_turn_events, read_turn_events
 from .conversation_reply import Grounding, reply_from_grounding, resolve_sources
 
 MAX_THREAD_MESSAGES = 100
@@ -662,6 +664,9 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                 request_fp=saved_fp, steps_count=len(plan.steps),
                 skill_id=skill.id, skill_version=skill.version,
                 parts=tuple(parts), notices=notices, status=status, staged=staged)
+            # Same transaction as the persisted turn/parts/status: the terminal
+            # event can never disagree with conversation_turns.status.
+            await append_turn_events(session, scope, turn, tuple(parts), notices, status)
             from .audit_service import append_audit
             append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
                 action='conversation_turn.created', entity_type='conversation_turn',
@@ -843,6 +848,7 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     thread.version += 1
     thread.updated_at = now()
     await session.flush()
+    await append_turn_events(session, scope, turn, parts, notices, status)
     return turn
 
 
@@ -1138,6 +1144,98 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
     append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
         action='conversation_turn.cancelled', entity_type='conversation_turn',
         entity_id=continuation.id)
+    return thread, role, _payload(continuation)
+
+
+TERMINAL_TURN_STATUSES = frozenset({'completed', 'failed', 'needs_input',
+    'needs_approval', 'cancelled', 'outcome_unknown'})
+
+
+async def turn_status(session, scope: Scope, turn_id):
+    turn = await _turn_by_id(session, scope, turn_id)
+    return None if turn is None else turn.status
+
+
+async def stream_turn(session, scope: Scope, turn_id):
+    """Authorize streaming for the current actor; read ACL only."""
+    turn = await _turn_by_id(session, scope, turn_id)
+    if turn is None:
+        raise not_found()
+    await load(session, scope.workspace_id, scope.project_id, turn.thread_id,
+        scope.actor_id)
+    return turn
+
+
+async def reconcile_turn(session, scope: Scope, turn_id, key: str):
+    """Resolve an outcome_unknown turn from persisted evidence only.
+
+    Strictly read-only probe: it reads the canonical sales task/output state and
+    never creates a stage, quote, receipt, reservation or provider call. The
+    resolved outcome is persisted as a new continuation turn whose events (and
+    terminal event) commit in the same transaction.
+    """
+    from .conversation_turn_recovery import probe_outcome
+    from .audit_service import append_audit
+    turn = await _turn_by_id(session, scope, turn_id)
+    if turn is None:
+        raise not_found()
+    thread, role = await load(session, scope.workspace_id, scope.project_id,
+        turn.thread_id, scope.actor_id, edit=True, lock=True)
+    fingerprint = digest({'operation': 'conversationTurnReconcile',
+        'turn_id': str(turn.id), 'actor_id': str(scope.actor_id),
+        'thread_id': str(thread.id)})
+    continuation_id = uuid.uuid5(uuid.UUID(str(turn.id)), 'conversation-turn-reconcile')
+    existing = await _turn_by_id(session, scope, continuation_id, thread.id)
+    if existing is not None:
+        return thread, role, _payload(existing)
+    outcome = await begin_idempotency(session, workspace_id=scope.workspace_id,
+        actor_id=scope.actor_id, operation_id='conversationTurnReconcile', key=key,
+        body={}, target={'project_id': str(scope.project_id),
+            'turn_id': str(turn.id)}, precondition=None)
+    if outcome.replay:
+        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id), thread.id)
+        if row is None:
+            raise not_found()
+        return thread, role, _payload(row)
+    if turn.status != 'outcome_unknown':
+        raise ApiError(409, 'INVALID_STATE', 'only an outcome_unknown turn can be reconciled')
+    probe = await probe_outcome(session, scope, turn)
+    tool = next((part for part in (turn.parts or [])
+        if isinstance(part, dict) and part.get('kind') == 'tool_activity'), None)
+    call_id = uuid.UUID(tool['call_id']) if tool and tool.get('call_id') else uuid.uuid5(
+        uuid.UUID(str(turn.id)), 'reconcile-probe')
+    capability = tool.get('capability') if tool else 'reconciliation'
+    if not isinstance(capability, str) or not re.match(r'^[a-z][a-z0-9_.]{2,63}$', capability):
+        capability = 'reconciliation'
+    state = {'completed': 'completed', 'failed': 'failed',
+             'unknown': 'outcome_unknown'}[probe.outcome]
+    tool_title = tool.get('title') if tool else 'Reconciled execution'
+    if not isinstance(tool_title, str) or not tool_title.strip():
+        tool_title = 'Reconciled execution'
+    parts = [ToolActivityPart(call_id=call_id, capability=capability,
+        title=tool_title[:240], state=state, started_at=turn.created_at or now(),
+        finished_at=now(), summary=probe.message[:500],
+        error_code=None if probe.outcome == 'completed' else probe.code),
+        TextPart(text=probe.message, language=turn.language)]
+    notices = (TurnNotice(code=probe.code, message=probe.message),)
+    status = {'completed': 'completed', 'failed': 'failed',
+              'unknown': 'outcome_unknown'}[probe.outcome]
+    try:
+        async with session.begin_nested():
+            continuation = await _continuation_turn(session, scope, thread, turn,
+                fingerprint, turn.language, parts=parts, notices=notices,
+                status=status)
+    except IntegrityError as exc:
+        existing = await _turn_by_id(session, scope, continuation_id, thread.id)
+        if existing is None:
+            raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
+                'a concurrent reconciliation is in progress') from exc
+        complete_idempotency(outcome, str(existing.id))
+        return thread, role, _payload(existing)
+    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+        action='conversation_turn.reconciled', entity_type='conversation_turn',
+        entity_id=continuation.id)
+    complete_idempotency(outcome, str(continuation.id))
     return thread, role, _payload(continuation)
 
 

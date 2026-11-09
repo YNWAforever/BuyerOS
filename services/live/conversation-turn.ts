@@ -11,6 +11,7 @@ import {ActionIntent} from './action-intent';
 import {LiveCancelled,LiveError,type LiveClient} from './client';
 import type {SessionScope} from './session';
 import {isUuid,readChatThread,readTurnResult,type ChatThread,type TurnCapability,type TurnDecision,type TurnResult} from '../../features/live/conversation/types';
+import {MAX_STREAM_RECONNECTS,reconnectDelay,readTurnStreamEvent,SseParser,type TurnStreamEvent} from '../../features/live/conversation/stream-events';
 
 export const turnNotices={
   stale:'This discussion changed. Copy any unsaved text, reload and send again.',
@@ -24,6 +25,7 @@ export const turnNotices={
   unknown:'The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',
   invalid:'The conversation response could not be verified. Reload the discussion before retrying.',
   needsInput:'This step needs more information. See the notice in the discussion.',
+  noRecovery:'This turn is no longer awaiting a result check.',
   rejected:'The request was rejected. Review the message and try again.',
   source:'A cited source is unavailable or is no longer approved.',
 } as const;
@@ -37,6 +39,21 @@ export type TurnDecisionInput={
   expectedVersion:number;signal?:AbortSignal;
 };
 export type TurnCancelInput={threadId:string;turnId:string;expectedVersion:number;signal?:AbortSignal};
+export type TurnReconcileInput={threadId:string;turnId:string;expectedVersion:number;signal?:AbortSignal};
+export type TurnStreamOutcome='closed'|'absent'|'unavailable'|'aborted';
+export type TurnStreamHandlers={
+  signal:AbortSignal;baseUrl?:string;after?:number;
+  onEvent:(event:TurnStreamEvent)=>void;
+  onReconnect?:(attempt:number,delayMs:number)=>void;
+};
+function pause(ms:number,signal:AbortSignal):Promise<boolean>{
+  if(signal.aborted)return Promise.resolve(false);
+  return new Promise(resolve=>{
+    const timer=setTimeout(()=>{signal.removeEventListener('abort',stop);resolve(true);},ms);
+    const stop=()=>{clearTimeout(timer);resolve(false);};
+    signal.addEventListener('abort',stop,{once:true});
+  });
+}
 
 const MAX_TEXT=4_000;
 const skillPattern=/^[a-z0-9][a-z0-9-]{0,80}$/;
@@ -55,6 +72,7 @@ export function turnNotice(error:unknown):string{
     if(error.code==='POLICY_BLOCKED')return turnNotices.policy;
     if(error.code==='SALES_ADMISSION_DISABLED')return turnNotices.admission;
     if(error.code==='NEEDS_INPUT')return turnNotices.needsInput;
+    if(error.code==='INVALID_STATE')return turnNotices.noRecovery;
     if(error.code==='CONVERSATION_SOURCE_UNAVAILABLE'||error.code==='SOURCE_UNAVAILABLE')return turnNotices.source;
     if(error.status===403)return turnNotices.forbidden;
     if(error.status===404)return turnNotices.absent;
@@ -65,16 +83,24 @@ export function turnNotice(error:unknown):string{
   return turnNotices.unknown;
 }
 
+/** OPTIONS status classification for the event route (shared with tests). */
+export function streamCapabilityFromStatus(status:number):TurnCapability{
+  if(status===404)return 'absent';
+  if(status===401||status===403)return 'unavailable';
+  if(status>=200&&status<500)return 'available';
+  return 'unavailable';
+}
 /** Turn routes are flag-gated; absence is a normal fallback, not a lost workspace. */
 export class ConversationTurns{
   private intents=new Map<string,ActionIntent<unknown>>();
   private probe:Promise<TurnCapability>|null=null;
+  private streamProbe:Promise<TurnCapability>|null=null;
   private identity:string;
   private root:string;
   constructor(private client:LiveClient,private session:SessionScope,private enabled:boolean){
     this.identity=session.identity();const scope=session.current();
     this.root=`/v1/workspaces/${encodeURIComponent(scope.workspace??'')}/projects/${encodeURIComponent(scope.project??'')}/conversation-turns`;
-    const clear=()=>{this.intents.clear();this.probe=null;};
+    const clear=()=>{this.intents.clear();this.probe=null;this.streamProbe=null;};
     const off=session.subscribeBeforeClear(clear);
     const unsubscribe=session.subscribe(()=>{if(!session.isCurrent(this.identity)){clear();off();unsubscribe();}});
   }
@@ -111,6 +137,112 @@ export class ConversationTurns{
       }
       return 'unavailable';
     }
+  }
+  /**
+   * OPTIONS probe for the event route (increment C). Uses fetch directly so a
+   * missing optional route never trips the workspace access-denied listeners;
+   * 405/2xx prove the path exists, the generic route-miss 404 means no stream.
+   */
+  streamCapability(force=false,baseUrl=''):Promise<TurnCapability>{
+    if(!this.enabled)return Promise.resolve('absent');
+    if(!force&&this.streamProbe)return this.streamProbe;
+    const promise=this.probeStream(baseUrl);
+    this.streamProbe=promise;
+    return promise;
+  }
+  private async probeStream(baseUrl=''):Promise<TurnCapability>{
+    if(!this.session.isCurrent(this.identity)||!this.session.token())return 'unavailable';
+    const placeholder='00000000-0000-4000-8000-000000000000';
+    const base=baseUrl.replace(/\/$/,'');
+    const own=new AbortController(),timer=setTimeout(()=>own.abort(),5_000);
+    try{
+      const response=await fetch(`${base}${this.root}/${placeholder}/events?after=0`,{method:'OPTIONS',cache:'no-store',
+        signal:AbortSignal.any([own.signal,this.session.controller().signal]),
+        headers:{...(this.session.token()?{Authorization:`Bearer ${this.session.token()}`}:{})}});
+      return streamCapabilityFromStatus(response.status);
+    }catch{return 'unavailable';}
+    finally{clearTimeout(timer);}
+  }
+  /**
+   * SSE tail with bounded reconnect and the last seen cursor. Reconnects never
+   * re-submit a turn; the server replays `seq > after` only.
+   */
+  async stream(turnId:string,handlers:TurnStreamHandlers):Promise<TurnStreamOutcome>{
+    this.guard();
+    if(!isUuid(turnId))throw new Error(turnNotices.rejected);
+    const base=(handlers.baseUrl??'').replace(/\/$/,'');
+    const parent=AbortSignal.any([handlers.signal,this.session.controller().signal]);
+    let cursor=Number.isSafeInteger(handlers.after)&&(handlers.after as number)>0?handlers.after as number:0;
+    let attempt=0;
+    while(!parent.aborted){
+      let response:Response;
+      try{
+        response=await fetch(`${base}${this.root}/${encodeURIComponent(turnId)}/events?after=${cursor}`,{
+          method:'GET',signal:parent,cache:'no-store',
+          headers:{Accept:'text/event-stream',...(this.session.token()?{Authorization:`Bearer ${this.session.token()}`}:{})},
+        });
+      }catch{
+        if(parent.aborted)return 'aborted';
+        attempt+=1;
+        if(attempt>MAX_STREAM_RECONNECTS)return 'unavailable';
+        handlers.onReconnect?.(attempt,reconnectDelay(attempt));
+        if(!await pause(reconnectDelay(attempt),parent))return 'aborted';
+        continue;
+      }
+      if(response.status===404||response.status===405)return 'absent';
+      if(response.status===401||response.status===403)return 'unavailable';
+      if(!response.ok){
+        attempt+=1;
+        if(attempt>MAX_STREAM_RECONNECTS)return 'unavailable';
+        handlers.onReconnect?.(attempt,reconnectDelay(attempt));
+        if(!await pause(reconnectDelay(attempt),parent))return 'aborted';
+        continue;
+      }
+      attempt=0;
+      if(!response.body)return 'unavailable';
+      const parser=new SseParser(),reader=response.body.getReader(),decoder=new TextDecoder();
+      let final=false;
+      const apply=(frames:ReturnType<SseParser['push']>)=>{
+        for(const frame of frames){
+          const event=readTurnStreamEvent(frame);
+          if(!event||event.seq<=cursor)continue;
+          cursor=event.seq;handlers.onEvent(event);
+          if(event.kind==='turn.final')final=true;
+        }
+      };
+      try{
+        while(!final){
+          const {done,value}=await reader.read();
+          if(parent.aborted){void reader.cancel().catch(()=>{});return 'aborted';}
+          if(done)break;
+          apply(parser.push(decoder.decode(value,{stream:true})));
+        }
+        if(!final)apply(parser.flush());
+      }catch{
+        if(parent.aborted)return 'aborted';
+      }finally{
+        if(final)void reader.cancel().catch(()=>{});
+        try{reader.releaseLock();}catch{/* already released */}
+      }
+      if(final)return 'closed';
+      // The stream closed before turn.final (deadline, proxy): reconnect from the cursor.
+      attempt+=1;
+      if(attempt>MAX_STREAM_RECONNECTS)return 'unavailable';
+      handlers.onReconnect?.(attempt,reconnectDelay(attempt));
+      if(!await pause(reconnectDelay(attempt),parent))return 'aborted';
+    }
+    return 'aborted';
+  }
+  /** Recovery for outcome_unknown: read-only server probe; never dispatches work. */
+  async reconcile(input:TurnReconcileInput):Promise<TurnResult>{
+    this.guard();
+    if(!isUuid(input.threadId)||!isUuid(input.turnId)||!Number.isSafeInteger(input.expectedVersion))throw new Error(turnNotices.rejected);
+    const suffix=`/${encodeURIComponent(input.turnId)}/reconcile`;
+    const key=JSON.stringify(['reconcile',this.identity,input.threadId,input.turnId,input.expectedVersion]);
+    const raw=await this.intentFor(key).run(key,idempotencyKey=>this.send<unknown>(suffix,undefined,input.expectedVersion,idempotencyKey,input.signal));
+    const result=readTurnResult(raw);
+    if(!result)throw new Error(turnNotices.invalid);
+    return result;
   }
   private async send<T>(suffix:string,body:unknown,expectedVersion:number|null,idempotencyKey:string,signal?:AbortSignal):Promise<T>{
     this.guard();
@@ -165,8 +297,9 @@ export class ConversationTurns{
     if(!isUuid(input.threadId)||!isUuid(input.turnId)||!Number.isSafeInteger(input.expectedVersion))throw new Error(turnNotices.rejected);
     const key=JSON.stringify(['cancel',this.identity,input.threadId,input.turnId,input.expectedVersion]);
     const suffix=`/${encodeURIComponent(input.turnId)}/cancel`;
-    const body={expected_thread_version:input.expectedVersion};
-    const raw=await this.intentFor(key).run(key,idempotencyKey=>this.send<unknown>(suffix,body,input.expectedVersion,idempotencyKey,input.signal));
+    // The cancel route takes no request body; the thread precondition is the strong
+    // If-Match header (X-BuyerOS-If-Match over the wire).
+    const raw=await this.intentFor(key).run(key,idempotencyKey=>this.send<unknown>(suffix,undefined,input.expectedVersion,idempotencyKey,input.signal));
     const result=readTurnResult(raw);
     if(!result)throw new Error(turnNotices.invalid);
     return result;

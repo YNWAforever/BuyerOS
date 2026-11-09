@@ -11,6 +11,7 @@ Contract notes encoded below (Amendment A1/A2 and the turn contract):
   thread-version precondition, which is the intended idempotent-retry contract;
 * inline proposals always require a separate authenticated decision.
 """
+import json
 import uuid
 
 import psycopg
@@ -543,3 +544,145 @@ def test_existing_thread_company_link_cannot_be_repointed(turn_api):
         assert conn.execute('SELECT buyer_id FROM conversation_threads WHERE id=%s',
             (thread['id'],)).fetchone()[0] is None
         assert conn.execute('SELECT count(*) FROM conversation_thread_messages').fetchone()[0] == 1
+
+# --- increment C: durable turn events, SSE stream and reconciliation -------
+
+def events_url(turn, after=0):
+    return f"{TURN_ROOT}/{turn['id']}/events?after={after}"
+
+
+def parse_sse(text):
+    events = []
+    for block in text.strip().split('\n\n'):
+        lines = [line for line in block.splitlines() if line]
+        if not lines or any(line.startswith(':') for line in lines):
+            continue
+        record = {'event': None, 'data': None}
+        for line in lines:
+            if line.startswith('event: '):
+                record['event'] = line[7:]
+            elif line.startswith('data: '):
+                record['data'] = json.loads(line[6:])
+        if record['event'] and record['data'] is not None:
+            events.append(record)
+    return events
+
+
+def seed_failed_sales_task(dsn, thread_id):
+    task = uuid.uuid4()
+    owner = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO sales_tasks(id,workspace_id,project_id,thread_id,"
+            "owner_user_id,actor_id,client_message_id,message_sequence,intent_fingerprint,"
+            "skill_id,skill_version,user_message,arguments,source_refs,intake_history,"
+            "state,revision,event_sequence,output_ids) VALUES(%s,%s,%s,%s,%s,%s,%s,1,%s,"
+            "'understand-documents','1','reconcile fixture','{}'::jsonb,'[]'::jsonb,"
+            "'[]'::jsonb,'failed',1,0,'[]'::jsonb)",
+            (task, WORKSPACE_A, PROJECT_A, thread_id, owner, owner, uuid.uuid4(), 'd' * 64))
+    return task
+
+
+def test_stream_replays_ordered_events_and_reconnect_has_no_duplicates(turn_api):
+    client, dsn = turn_api
+    created = post_turn(client, turn_body()).json()['data']
+    turn = created['turn']
+    response = client.get(events_url(turn), headers=_h())
+    assert response.status_code == 200, response.text
+    assert response.headers['content-type'].startswith('text/event-stream')
+    assert response.headers['cache-control'] == 'no-store'
+    events = parse_sse(response.text)
+    kinds = [event['event'] for event in events]
+    seqs = [event['data']['seq'] for event in events]
+    assert kinds[0] == 'turn.started' and kinds[-1] == 'turn.final'
+    assert kinds.count('turn.final') == 1
+    assert seqs == list(range(1, len(seqs) + 1))
+    assert all(event['data']['turn_id'] == turn['id'] for event in events)
+    assert events[-1]['data']['payload']['status'] == turn['status']
+    # Reconnect with the last seen seq: no duplicate replay, and the terminal
+    # turn ends the stream immediately (never re-executes work).
+    replay = client.get(events_url(turn, seqs[-1]), headers=_h())
+    assert replay.status_code == 200
+    assert parse_sse(replay.text) == []
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM conversation_turn_events WHERE turn_id=%s',
+            (turn['id'],)).fetchone()[0] == len(events)
+
+
+def test_stream_cursor_validation_and_foreign_turn(turn_api):
+    client, _ = turn_api
+    created = post_turn(client, turn_body()).json()['data']
+    turn = created['turn']
+    for cursor in ('-1', 'abc', '1.5'):
+        response = client.get(events_url(turn).replace('after=0', f'after={cursor}'),
+            headers=_h())
+        assert response.status_code == 422, response.text
+    missing = client.get(f"{TURN_ROOT}/{uuid.uuid4()}/events", headers=_h())
+    assert missing.status_code == 404
+    assert missing.json()['code'] == 'NOT_FOUND'
+
+
+def test_reconcile_requires_an_unknown_turn(turn_api):
+    client, _ = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    result = client.post(f"{TURN_ROOT}/{created['turn']['id']}/reconcile",
+        headers=_h(OPERATOR, 'reconcile-invalid-state-key'))
+    assert result.status_code == 409
+    assert result.json()['code'] == 'INVALID_STATE'
+
+
+def test_reconcile_is_read_only_terminal_and_idempotent(turn_api, monkeypatch):
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+    from buyeros_api.sales.turn_contracts import ExecutionOutcome
+
+    task = None
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    task = seed_failed_sales_task(dsn, created['thread']['id'])
+
+    async def unknown_with_task(session, scope, thread, turn, proposal):
+        return ExecutionOutcome(kind='unknown', code='PROVIDER_OUTCOME_UNKNOWN',
+            message='Provider response was lost; reconciliation required.', task_id=task)
+
+    monkeypatch.setitem(engine.EXECUTORS, 'documents.read', unknown_with_task)
+    current = created['thread']['version']
+    unknown = decide(client, created['turn'], version=current, mutation_key='unknown-key')
+    assert unknown.status_code == 200, unknown.text
+    unknown_turn = unknown.json()['data']['turn']
+    assert unknown_turn['status'] == 'outcome_unknown'
+    # Nothing may dispatch while reconciling.
+    from buyeros_api.providers import xverum_mcp
+    monkeypatch.setattr(xverum_mcp, 'XverumTransport',
+        lambda *args, **kwargs: pytest.fail('reconcile must never construct a transport'))
+    url = f"{TURN_ROOT}/{unknown_turn['id']}/reconcile"
+    first = client.post(url, headers=_h(OPERATOR, 'reconcile-resolved-key'))
+    assert first.status_code == 200, first.text
+    reconciled = first.json()['data']['turn']
+    assert reconciled['status'] == 'failed'
+    assert 'RECONCILED_FAILED' in {notice['code'] for notice in reconciled['notices']}
+    activity = next(part for part in reconciled['parts']
+        if part['kind'] == 'tool_activity')
+    assert activity['state'] == 'failed'
+    again = client.post(url, headers=_h(OPERATOR, 'reconcile-resolved-key'))
+    assert again.status_code == 200
+    assert again.json()['data']['turn']['id'] == reconciled['id']
+    # A new key on the still-unknown original returns the recorded resolution.
+    reread = client.post(url, headers=_h(OPERATOR, 'reconcile-new-key'))
+    assert reread.status_code == 200
+    assert reread.json()['data']['turn']['id'] == reconciled['id']
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM sales_executions').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM xverum_stages').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM xverum_tool_receipts').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',
+            (WORKSPACE_A,)).fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM audit_events WHERE action=%s',
+            ('conversation_turn.reconciled',)).fetchone()[0] == 1
+        events = conn.execute('SELECT seq,kind,payload FROM conversation_turn_events '
+            'WHERE turn_id=%s ORDER BY seq', (reconciled['id'],)).fetchall()
+        assert events and events[0][1] == 'turn.started'
+        assert events[-1][1] == 'turn.final'
+        assert events[-1][2] == {'status': 'failed'}
+

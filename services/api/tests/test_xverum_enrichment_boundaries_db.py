@@ -79,7 +79,7 @@ def test_enrichment_schema_roles_and_empty_downgrade(isolated_migrated):
     command.downgrade(config(),'0063_xverum_dispatch')
     command.upgrade(config(),'head')
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0067_conversation_buyer'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0068_conversation_turn_events'
         for name in ('search','model','contact'):
             assert db.execute(f'SELECT public.buyeros_{name}_receipts_writable()').fetchone()[0]
         assert db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0]
@@ -93,7 +93,7 @@ def test_populated_enrichment_downgrade_preserves_review(journey):
     with pytest.raises(RuntimeError,match='0065 downgrade blocked'):
         command.downgrade(config(),'0063_xverum_dispatch')
     with psycopg.connect(c.dsn) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0067_conversation_buyer'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0068_conversation_turn_events'
         assert db.execute('SELECT id FROM xverum_enrichments WHERE id=%s',(p.id,)).fetchone()[0]==p.id
         assert db.execute('SELECT count(*) FROM xverum_enrichment_dependencies WHERE enrichment_id=%s',(p.id,)).fetchone()[0]>0
         assert db.execute("SELECT relforcerowsecurity FROM pg_class WHERE oid='xverum_enrichments'::regclass").fetchone()[0]

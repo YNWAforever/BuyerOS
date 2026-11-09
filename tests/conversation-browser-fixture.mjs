@@ -98,6 +98,16 @@ export function newConversation(firstText='Research this buyer'){ const user={id
    access:'owner',shareCount:0,messages:[user,assistant],sources:[],runs:[]},
   turn:{id:newTurnId,status:'completed',parts:assistant.parts,notices:[]}};
 }
+export const streamTurnId='c4000000-0000-4000-8000-000000000001';
+export function userRow({id,seq,text,turnId=null}){return {id,seq,role:'user',text,client_message_id:null,turn_id:turnId,created_at:at,parts:[]};}
+export function assistantRow({id,seq,text,turnId,parts}){return {id,seq,role:'assistant',text,client_message_id:null,turn_id:turnId,created_at:at,parts};}
+export function threadWith({messages=studioThread.messages,version=studioThread.version,access='owner'}){
+  return {...studioThread,version,access,messages,title:studioThread.title};
+}
+/** `text/event-stream` body for deterministic streaming fixtures. */
+export function sse(events){
+  return events.map(([seq,event,payload])=>`id: ${seq}\nevent: ${event}\ndata: ${JSON.stringify(payload)}\n\n`).join('');
+}
 export const browserEntry=`
 import React,{useState,useSyncExternalStore} from 'react';
 import {createRoot} from 'react-dom/client';

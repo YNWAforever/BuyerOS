@@ -5,9 +5,13 @@
 one transaction. A separate authenticated decision executes one inline proposal
 through the existing typed sales-task / sales-output services.
 """
+import asyncio
+import json
+import time
 import uuid
 
-from fastapi import APIRouter, Depends, Header, Request, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
+from fastapi.responses import StreamingResponse
 
 from ..auth import Principal, get_principal
 from ..errors import ApiError, envelope
@@ -16,7 +20,52 @@ from ...sales.contracts import Scope
 from ...sales.turn_contracts import TurnDecisionRequest, TurnRequest
 from ...services.conversation_access import access
 from ...services import conversation_turns as service
+from ...services.conversation_turn_events import read_turn_events
 from .conversation_threads import data as thread_data
+
+# Bounded streaming window; the client reconnects with its last seq.
+STREAM_POLL_SECONDS = 0.25
+STREAM_HEARTBEAT_SECONDS = 5.0
+STREAM_DEADLINE_SECONDS = 20.0
+TERMINAL_STATUSES = frozenset({'completed', 'failed', 'needs_input',
+    'needs_approval', 'cancelled', 'outcome_unknown'})
+
+
+def _sse(row) -> str:
+    data = json.dumps({'seq': row.seq, 'turn_id': str(row.turn_id),
+        'kind': row.kind, 'payload': row.payload}, separators=(',', ':'),
+        ensure_ascii=False)
+    return f'event: {row.kind}\ndata: {data}\n\n'
+
+
+async def _stream_events(workspace_id, project_id, actor_id, turn_id, after):
+    from ...api.deps import get_engine
+    from ...db.session import tenant_session
+    scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor_id)
+    cursor = after
+    deadline = time.monotonic() + STREAM_DEADLINE_SECONDS
+    last_heartbeat = time.monotonic()
+    while True:
+        async with tenant_session(get_engine(), workspace_id) as session:
+            rows = await read_turn_events(session, scope, turn_id, cursor)
+            status = await service.turn_status(session, scope, turn_id)
+        terminal = False
+        for row in rows:
+            yield _sse(row)
+            cursor = row.seq
+            terminal = terminal or row.kind == 'turn.final'
+        if terminal:
+            return
+        if not rows and status in TERMINAL_STATUSES:
+            # Legacy/terminal turn without persisted events: refetch instead of tailing.
+            return
+        now = time.monotonic()
+        if now >= deadline:
+            return
+        if now - last_heartbeat >= STREAM_HEARTBEAT_SECONDS:
+            yield ': heartbeat\n\n'
+            last_heartbeat = now
+        await asyncio.sleep(STREAM_POLL_SECONDS)
 
 router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-turns',
     tags=['conversation-turns'])
@@ -88,6 +137,38 @@ async def cancel(workspace_id: uuid.UUID, project_id: uuid.UUID, turn_id: uuid.U
                       admission=False) as (session, actor):
         scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
         thread, role, turn = await service.cancel_turn(session, scope, turn_id, expected, key)
+        result = {'thread': await thread_data(session, thread, role),
+                  'turn': turn.model_dump(mode='json')}
+        response.headers['ETag'] = f'"{thread.version}"'
+    return envelope(result, request.state.request_id)
+
+
+@router.get('/{turn_id}/events', operation_id='streamConversationTurnEvents')
+async def stream_events(workspace_id: uuid.UUID, project_id: uuid.UUID,
+    turn_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal),
+    after: int = Query(0, ge=0)):
+    """Persisted turn events as Server-Sent Events; never re-runs a turn."""
+    async with access(workspace_id, project_id, principal) as (session, actor):
+        scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
+        await service.stream_turn(session, scope, turn_id)
+    return StreamingResponse(_stream_events(workspace_id, project_id, actor, turn_id, after),
+        media_type='text/event-stream',
+        headers={'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no'})
+
+
+@router.post('/{turn_id}/reconcile', operation_id='reconcileConversationTurn')
+async def reconcile(workspace_id: uuid.UUID, project_id: uuid.UUID,
+    turn_id: uuid.UUID, request: Request, response: Response,
+    principal: Principal = Depends(get_principal)):
+    """Resolve an outcome_unknown turn from persisted evidence; never dispatches."""
+    key = _key(request)
+    if await request.body():
+        raise ApiError(400, 'INVALID_REQUEST', 'reconcile takes no request body')
+    response.headers['Cache-Control'] = 'no-store'
+    async with access(workspace_id, project_id, principal, sales=True,
+                      admission=False) as (session, actor):
+        scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
+        thread, role, turn = await service.reconcile_turn(session, scope, turn_id, key)
         result = {'thread': await thread_data(session, thread, role),
                   'turn': turn.model_dump(mode='json')}
         response.headers['ETag'] = f'"{thread.version}"'

@@ -273,9 +273,10 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0067_conversation_buyer']
+    assert required['compatible_heads'] == ['0068_conversation_turn_events']
     for name in ('conversation_turns', 'conversation_turn_proposals',
-                 'conversation_turn_decisions', 'conversation_thread_messages'):
+                 'conversation_turn_decisions', 'conversation_thread_messages',
+                 'conversation_turn_events'):
         columns = required['required_relations'][f'public.{name}']
         assert set(columns) == set(Base.metadata.tables[name].columns.keys())
     assert {'public.conversation_turns', 'public.conversation_turn_proposals',
@@ -285,7 +286,8 @@ def test_registered_tables_match_the_readiness_contract():
     assert updates and set(updates[0]['columns']) == {'status', 'revision', 'result', 'updated_at'}
     worker = sales_requirements(worker=True)
     for name in ('public.conversation_thread_messages', 'public.conversation_turns',
-                 'public.conversation_turn_proposals', 'public.conversation_turn_decisions'):
+                 'public.conversation_turn_proposals', 'public.conversation_turn_decisions',
+                 'public.conversation_turn_events'):
         assert name not in worker['required_relations']
         assert not [item for item in worker['required_privileges'] if item['relation'] == name]
 
@@ -295,7 +297,7 @@ def test_turn_routes_register_only_with_conversation_home(monkeypatch):
     monkeypatch.setenv('NEXT_PUBLIC_CONVERSATION_HOME', 'true')
     enabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]
-    assert len(enabled_paths) == 3
+    assert len(enabled_paths) == 5
     monkeypatch.delenv('NEXT_PUBLIC_CONVERSATION_HOME')
     disabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]
