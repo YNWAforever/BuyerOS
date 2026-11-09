@@ -944,7 +944,7 @@ def test_deadline_exceeded_turn_returns_200_failed_with_parts_and_replays(turn_a
         assert replay.status_code == 200
         assert replay.json()['data']['turn']['id'] == turn['id']
         assert conn.execute('SELECT count(*) FROM conversation_turns WHERE thread_id=%s',
-            (turn['thread_id'],)).fetchone()[0] == 1
+            (first.json()['data']['thread']['id'],)).fetchone()[0] == 1
         assert conn.execute('SELECT count(*) FROM conversation_turn_events WHERE turn_id=%s',
             (turn['id'],)).fetchone()[0] == len(events)
 
