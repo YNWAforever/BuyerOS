@@ -54,6 +54,32 @@ the recorded turn; a different payload under the same key is
 }
 ```
 
+### Bounded turn deadline (Increment 3.2)
+
+One synchronous turn is bounded by the reviewed setting
+`turn_deadline_seconds` (default **60**, integer **5?90**, env
+`BUYEROS_TURN_DEADLINE_SECONDS`, no secret). The bound is checked before each
+step start and around long reads; a crossed bound stops starting work, persists
+the parts already produced, appends the terminal `turn.final` event in the same
+transaction, and terminates the turn as `failed` with exactly one persisted
+notice:
+
+```json
+{"code": "TURN_DEADLINE_EXCEEDED", "message": "<localized en | zh-HK>"}
+```
+
+The response is **HTTP 200** with that failed turn ? never a 5xx, never an
+unexplained platform stall. A step that was already dispatched is never
+duplicated; when its liability cannot be known the tool/decision state is
+reported as `outcome_unknown` (otherwise `skipped`). The deadline path creates no
+provider stage, quote, receipt or budget reservation, and an idempotent replay
+of the same `client_message_id`/`Idempotency-Key` returns the recorded failed
+turn without re-execution. The observability bucket (`over_deadline`) is a
+constant in the persisted message; no request id, provider reference or payload
+is exposed. Decision continuations, cancel and reconcile honour the same bound.
+`TURN_BUSY_RETRY` names the bounded single retry taxonomy for short lock waits;
+configuration/admission notice codes are unchanged.
+
 ### Proposal decision decoration (Increment 2.7, read-time only)
 
 Every response that returns persisted assistant parts (turn responses and
