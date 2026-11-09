@@ -14,7 +14,8 @@ from typing import Callable
 from ..sales.turn_contracts import TurnNotice
 
 TURN_DEADLINE_EXCEEDED = 'TURN_DEADLINE_EXCEEDED'
-TURN_BUSY_RETRY = 'TURN_BUSY_RETRY'
+TURN_BUSY_RETRY = 'TURN_BUSY_RETRY'  # reserved taxonomy, not wired in this increment;
+# wiring it requires safely re-taking the discussion row lock, so serialization is unchanged.
 MIN_SECONDS = 5
 MAX_SECONDS = 90
 DEFAULT_SECONDS = 60

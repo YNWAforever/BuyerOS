@@ -69,16 +69,27 @@ notice:
 ```
 
 The response is **HTTP 200** with that failed turn ? never a 5xx, never an
-unexplained platform stall. A step that was already dispatched is never
-duplicated; when its liability cannot be known the tool/decision state is
-reported as `outcome_unknown` (otherwise `skipped`). The deadline path creates no
-provider stage, quote, receipt or budget reservation, and an idempotent replay
-of the same `client_message_id`/`Idempotency-Key` returns the recorded failed
-turn without re-execution. The observability bucket (`over_deadline`) is a
+unexplained platform stall. The deadline message is rendered exactly once: it is
+persisted only as the notice, never duplicated as a TextPart (produced text and
+citation parts are kept; a proposal part is intentionally dropped because a
+failed deadline turn can never accept its decision). Current executors are
+nonbillable local producers, so an executor savepoint is **rolled back** when the
+bound crosses during/after it ? a deadline-failed turn leaves no canonical
+`sales_tasks`/`sales_outputs` row and reports the step `skipped`, never a guessed
+`outcome_unknown`. A future genuinely provider-dispatched step must instead keep
+`outcome_unknown` with its persisted task/receipt reference and a reconcile path
+that accepts that turn status; that path is explicitly out of scope here. The
+deadline-failed continuation is terminal `failed` and therefore deliberately not
+reconcilable (no `outcome_unknown` liability exists after rollback). The deadline
+path creates no provider stage, quote, receipt or budget reservation, and an
+idempotent replay of the same `client_message_id`/`Idempotency-Key` returns the
+recorded failed turn without re-execution. The observability bucket (`over_deadline`) is a
 constant in the persisted message; no request id, provider reference or payload
 is exposed. Decision continuations, cancel and reconcile honour the same bound.
-`TURN_BUSY_RETRY` names the bounded single retry taxonomy for short lock waits;
-configuration/admission notice codes are unchanged.
+`TURN_BUSY_RETRY` is a **reserved taxonomy, not wired in this increment** ? a
+bounded single lock-wait retry would require safely re-taking the discussion
+row lock, so serialization is unchanged; the constant and docs name it for the
+future. Configuration/admission notice codes are unchanged.
 
 ### Proposal decision decoration (Increment 2.7, read-time only)
 

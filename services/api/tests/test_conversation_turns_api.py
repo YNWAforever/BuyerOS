@@ -909,7 +909,21 @@ def test_deadline_exceeded_turn_returns_200_failed_with_parts_and_replays(turn_a
     turn = first.json()['data']['turn']
     assert turn['status'] == 'failed'
     assert deadline_codes(turn) == ['TURN_DEADLINE_EXCEEDED']
-    assert turn['parts'], 'parts produced so far (here the deadline notice) are persisted'
+    from buyeros_api.services.turn_deadline import deadline_message
+    message = deadline_message('en')
+    # MAJOR-2: the deadline message renders through exactly one channel (the
+    # notice). It must not be duplicated as a persisted TextPart.
+    assert turn['parts'] == []
+    reloaded = client.get(f"{THREAD_ROOT}/{first.json()['data']['thread']['id']}",
+        headers=_h()).json()['data']
+    assistant_messages = [m for m in reloaded['messages'] if m['role'] == 'assistant']
+    assert len([m for m in assistant_messages if message in m['text']]) == 1
+    duplicated_parts = [part for m in reloaded['messages']
+        for part in (m.get('parts') or [])
+        if part.get('kind') == 'text' and part.get('text') == message]
+    assert duplicated_parts == []
+    assert len([n for n in turn['notices']
+        if n['code'] == 'TURN_DEADLINE_EXCEEDED']) == 1
     with psycopg.connect(dsn) as conn:
         assert conn.execute('SELECT status FROM conversation_turns WHERE id=%s',
             (turn['id'],)).fetchone()[0] == 'failed'
@@ -1028,3 +1042,96 @@ def test_reconcile_deadline_stops_before_resolution(turn_api, monkeypatch):
             ).fetchone()[0] == 0
         assert conn.execute('SELECT count(*) FROM sales_executions').fetchone()[0] == 0
         assert conn.execute('SELECT count(*) FROM xverum_tool_receipts').fetchone()[0] == 0
+
+
+def test_deadline_crossed_after_executor_rolls_back_spent_work(turn_api, monkeypatch):
+    """BLOCKER: canonical rows created by a slow executor are discarded."""
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+    from buyeros_api.services.turn_deadline import TurnDeadline
+    from buyeros_api.sales.turn_contracts import ExecutionOutcome
+    from buyeros_api.db.sales_tasks import SalesTask
+
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+
+    class Clock:
+        value = 0.0
+
+        def __call__(self):
+            return self.value
+
+        def advance(self, seconds):
+            self.value += seconds
+
+    clock = Clock()
+
+    async def slow_executor(session, scope, thread, source_turn, proposal):
+        # Simulate a slow step that produced canonical rows before the bound
+        # crossed; the savepoint rollback must discard them.
+        clock.advance(10)
+        session.add(SalesTask(id=uuid.uuid4(), workspace_id=scope.workspace_id,
+            project_id=scope.project_id, thread_id=thread.id,
+            owner_user_id=thread.owner_user_id, actor_id=scope.actor_id,
+            client_message_id=uuid.uuid4(), intent_fingerprint='a' * 64,
+            message_sequence=1, skill_id='understand-documents', skill_version='1',
+            user_message='slow step', arguments={}, source_refs=[], intake_history=[],
+            state='failed', revision=1, event_sequence=0, output_ids=[]))
+        await session.flush()
+        return ExecutionOutcome(kind='failed', code='SLOW_TEST', message='slow')
+
+    monkeypatch.setitem(engine.EXECUTORS, 'documents.read', slow_executor)
+    monkeypatch.setattr(engine, 'turn_deadline',
+        lambda: TurnDeadline(seconds=5, clock=clock))
+    response = decide(client, created['turn'], version=created['thread']['version'],
+        mutation_key='deadline-slow-executor-key-a')
+    assert response.status_code == 200, response.text
+    continuation = response.json()['data']['turn']
+    assert continuation['status'] == 'failed'
+    assert deadline_codes(continuation) == ['TURN_DEADLINE_EXCEEDED']
+    activity = next(part for part in continuation['parts']
+        if part['kind'] == 'tool_activity')
+    assert activity['state'] == 'skipped'
+    with psycopg.connect(dsn) as conn:
+        for table in ('sales_tasks', 'sales_outputs', 'sales_executions',
+                      'xverum_stages', 'xverum_tool_receipts'):
+            assert conn.execute(f'SELECT count(*) FROM {table} WHERE workspace_id=%s',
+                (WORKSPACE_A,)).fetchone()[0] == 0, table
+        decision = conn.execute('SELECT status FROM conversation_turn_decisions '
+            'WHERE workspace_id=%s', (WORKSPACE_A,)).fetchone()
+        assert decision[0] == 'failed'
+
+
+def test_late_reject_is_still_a_recorded_rejection(turn_api, monkeypatch):
+    """MAJOR-3: a Reject never dispatches, so it is not converted by the deadline."""
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    monkeypatch.setattr(engine, 'turn_deadline', lambda: ExpiredDeadline())
+    response = decide(client, created['turn'], decision='reject',
+        version=created['thread']['version'], mutation_key='deadline-late-reject-key')
+    assert response.status_code == 200, response.text
+    continuation = response.json()['data']['turn']
+    assert continuation['status'] == 'completed'
+    assert deadline_codes(continuation) == ['PROPOSAL_REJECTED']
+    assert 'TURN_DEADLINE_EXCEEDED' not in deadline_codes(continuation)
+    with psycopg.connect(dsn) as conn:
+        decision = conn.execute('SELECT decision,status FROM conversation_turn_decisions '
+            'WHERE workspace_id=%s', (WORKSPACE_A,)).fetchone()
+        assert decision == ('reject', 'applied')
+
+
+def test_expired_reconcile_on_a_normal_turn_is_409_not_a_deadline_turn(turn_api, monkeypatch):
+    """MAJOR-4: the outcome_unknown guard precedes the deadline check."""
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+
+    created = post_turn(client, turn_body()).json()['data']
+    assert created['turn']['status'] == 'needs_input'
+    monkeypatch.setattr(engine, 'turn_deadline', lambda: ExpiredDeadline())
+    response = client.post(f"{TURN_ROOT}/{created['turn']['id']}/reconcile",
+        headers=_h(OPERATOR, 'deadline-normal-reconcile-key'))
+    assert response.status_code == 409, response.text
+    assert response.json()['code'] == 'INVALID_STATE'
