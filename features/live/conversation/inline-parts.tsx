@@ -1,9 +1,11 @@
 'use client';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {Check,CircleAlert,CircleDashed,CircleSlash,Clock,FileText,Link2,Loader} from 'lucide-react';
 import type {CitationItem,MessagePart,NoticePart,OutputLinkPart,ProposalCost,ProposalPart,ThreadAccess,ToolActivityPart,ToolState,TurnStatus} from './types';
 import {approvalNoticeKey,decisionGate,followUpNoticeKey,proposalUiState,toolStateAfterDecision,type DecisionChoice,type LocalDecision} from './approval';
 import {type TerminalProposal,type TranscriptEntry} from './parts';
 import {ProposalExplainer} from './proposal-explainer';
+import {PREVIEW_SANDBOX,previewNoticeKey,type PreviewOutcome} from './output-preview';
 
 export type PartActions={
   t:(value:string)=>string;
@@ -15,6 +17,7 @@ export type PartActions={
   terminalFor:(proposalId:string)=>TerminalProposal|undefined;
   toolFor:(capability:string)=>ToolActivityPart|null;
   partsForTurn:(turnId:string|null)=>ReadonlyArray<MessagePart>;
+  previewOutput:(outputId:string,revision:number)=>Promise<PreviewOutcome>;
   decide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;
   deciding:boolean;
 };
@@ -88,12 +91,54 @@ function Proposal({part,entry,actions}:{part:ProposalPart;entry:TranscriptEntry;
       turnParts={actions.partsForTurn(entry.turnId)} approvalState={state}/>
   </section>;
 }
+type PreviewState={kind:'idle'}|{kind:'loading'}|{kind:'ready';html:string;truncated:boolean}|{kind:'error';error:'denied'|'missing'|'unavailable'};
+/**
+ * Collapsed-by-default, lazy once-per-mount preview. The frame only ever receives
+ * server-authored HTML via srcDoc after the status has been inspected, and it is
+ * sandboxed with no tokens so the content cannot script or navigate the app.
+ */
+function OutputPreview({part,actions}:{part:OutputLinkPart;actions:PartActions}){
+  const t=actions.t;
+  const [state,setState]=useState<PreviewState>({kind:'idle'});
+  const active=useRef(0);
+  const load=useCallback(async()=>{
+    const request=++active.current;
+    setState({kind:'loading'});
+    const outcome=await actions.previewOutput(part.output_id,part.revision);
+    if(request!==active.current)return;
+    setState(outcome.kind==='ready'?{kind:'ready',html:outcome.html,truncated:outcome.truncated}:{kind:'error',error:outcome.error});
+  },[actions,part.output_id,part.revision]);
+  useEffect(()=>()=>{active.current+=1;},[]);
+  return <details className="conversation-output-preview"
+    style={{flexBasis:'100%',fontSize:12,minWidth:0,borderTop:'1px solid var(--buyeros-border)',paddingTop:6}}
+    onToggle={event=>{
+      if(event.currentTarget.open&&state.kind==='idle')void load();
+    }}>
+    <summary style={{cursor:'pointer',fontWeight:600,color:'var(--buyeros-accent-hover)'}}>{t('Preview')}</summary>
+    <div className="conversation-output-preview-body" style={{display:'flex',flexDirection:'column',gap:6,marginTop:6,minWidth:0}}
+      aria-live="polite">
+      {state.kind==='loading'&&<p style={{margin:0,overflowWrap:'anywhere'}}>{t('Loading preview…')}</p>}
+      {state.kind==='error'&&<>
+        <p style={{margin:0,overflowWrap:'anywhere'}} role="status">{t(previewNoticeKey(state.error))}</p>
+        {state.error==='unavailable'&&<button type="button" style={{alignSelf:'flex-start'}} onClick={()=>void load()}>{t('Retry preview')}</button>}
+      </>}
+      {state.kind==='ready'&&<>
+        <iframe className="conversation-output-preview-frame" sandbox={PREVIEW_SANDBOX} srcDoc={state.html}
+          referrerPolicy="no-referrer" title={`${t('Preview')}: ${part.title}`}
+          style={{width:'100%',height:'18rem',maxHeight:'18rem',border:'1px solid var(--buyeros-border)',
+            borderRadius:'var(--buyeros-radius-small)',background:'var(--buyeros-surface)'}}/>
+        {state.truncated&&<p style={{margin:0,overflowWrap:'anywhere'}}>{t(previewNoticeKey('truncated'))}</p>}
+      </>}
+    </div>
+  </details>;
+}
 function OutputLink({part,actions}:{part:OutputLinkPart;actions:PartActions}){
   const t=actions.t;
   return <article className="conversation-output">
     <FileText size={17} aria-hidden="true"/>
     <div><b>{part.title}</b><p><span className="pill gray">{t(part.status.replaceAll('_',' '))}</span> <span>{t('Revision')} {part.revision}</span></p></div>
     {part.href&&<button type="button" onClick={()=>actions.navigate(part.href!)}>{t('Open saved output')}</button>}
+    <OutputPreview key={`${part.output_id}:${part.revision}`} part={part} actions={actions}/>
   </article>;
 }
 function Notice({part,actions}:{part:NoticePart;actions:PartActions}){

@@ -175,7 +175,20 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
 async function waitForDestination(page,expected){await page.waitForFunction(value=>window.lastDestination===value,expected);}
 
 test('conversation-first transcript renders typed inline parts and inline decisions',async()=>{
- const harness=await fixtureHarness();
+ const previewRequests=[];
+ let previewDenied=false;
+ const baseApi=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  const {req,url}=input;
+  if(req.method()==='GET'&&/\/sales-outputs\/[0-9a-f-]+\/preview$/.test(url.pathname)){
+   previewRequests.push({path:url.pathname,search:url.search});
+   if(previewDenied)return {status:403,json:{code:'FORBIDDEN',message:'private server detail'}};
+   return {raw:{status:200,headers:{'content-type':'text/html; charset=utf-8',
+     'content-security-policy':"default-src 'none'; sandbox",'referrer-policy':'no-referrer','cache-control':'no-store'},
+     body:'<!doctype html><html><body><h1>Research brief preview</h1><p>Server rendered.</p></body></html>'}};
+  }
+  return baseApi(input);
+ }});
  try{
   const {page,errors,posts,origin}=harness;
   const transcript=page.locator('.conversation-transcript');
@@ -193,7 +206,30 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   // Both inline entry points exist before either navigation can unmount the studio.
   assert.equal(await transcript.getByRole('button',{name:'Open saved output',exact:true}).count(),1);
   assert.equal(await transcript.getByRole('button',{name:'Offer document',exact:true}).count(),1);
+  // Increment 2.5: preview is lazy — nothing is fetched before expansion.
+  assert.equal(previewRequests.length,0,'no preview request before expansion');
+  assert.equal(await transcript.locator('iframe').count(),0);
   await page.screenshot({path:shots+'/transcript-inline-parts-desktop.png',fullPage:true});
+  // Expand once: exactly one authenticated request at the output's own revision,
+  // rendered as server-authored HTML in a strictly sandboxed frame.
+  const outputCard=transcript.locator('.conversation-output').first();
+  await outputCard.getByText('Preview',{exact:true}).click();
+  const previewFrame=page.locator('iframe.conversation-output-preview-frame');
+  await previewFrame.waitFor();
+  assert.equal(previewRequests.length,1,'exactly one preview request per expansion');
+  assert.match(previewRequests[0].path,new RegExp(`/sales-outputs/${outputId}/preview$`));
+  assert.equal(previewRequests[0].search,'?revision=1');
+  assert.equal(await previewFrame.getAttribute('sandbox'),'','the frame is sandboxed with no tokens');
+  assert.equal(await previewFrame.getAttribute('referrerpolicy'),'no-referrer');
+  assert.match(await previewFrame.getAttribute('srcdoc'),/Research brief preview/);
+  assert.match(await previewFrame.getAttribute('title'),/Preview: Research brief/);
+  assert.equal(await transcript.getByRole('button',{name:'Open saved output',exact:true}).count(),1,'open stays available while previewing');
+  await outputCard.getByText('Preview',{exact:true}).click();
+  assert.equal(await previewFrame.isVisible(),false,'collapse hides the frame');
+  await outputCard.getByText('Preview',{exact:true}).click();
+  await previewFrame.waitFor();
+  assert.equal(previewRequests.length,1,'re-expansion is cached, never refetched');
+  await outputCard.getByText('Preview',{exact:true}).click();
   // Citations are real links to the canonical record.
   await transcript.getByRole('button',{name:'Offer document',exact:true}).click();
   await waitForDestination(page,`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
@@ -222,7 +258,23 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   await page.getByRole('button',{name:'Change language',exact:true}).click();
   await page.getByRole('button',{name:'拒絕',exact:true}).waitFor();
   await page.getByRole('button',{name:'批准',exact:true}).waitFor();
+  await page.getByText('預覽',{exact:true}).first().waitFor();
   await page.screenshot({path:shots+'/zh-hk-desktop.png',fullPage:true});
+  // Denied preview: honest notice, no frame, open action unchanged, no auto-retry.
+  previewDenied=true;
+  await page.reload();
+  await stylePage();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  const deniedCard=page.locator('.conversation-transcript .conversation-output').first();
+  const beforeDenied=previewRequests.length;
+  await deniedCard.getByText('Preview',{exact:true}).click();
+  await page.getByText('You no longer have access to this output.',{exact:true}).waitFor();
+  assert.equal(previewRequests.length,beforeDenied+1,'one denied preview request');
+  assert.equal(await page.locator('iframe.conversation-output-preview-frame').count(),0,'a denied preview renders no frame');
+  assert.equal(await page.locator('.conversation-transcript').getByRole('button',{name:'Open saved output',exact:true}).count(),1);
+  const deniedCount=previewRequests.length;
+  await page.waitForTimeout(400);
+  assert.equal(previewRequests.length,deniedCount,'a denied preview is never retried automatically');
   assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });

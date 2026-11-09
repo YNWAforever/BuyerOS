@@ -955,4 +955,11 @@ export const liveZh: Record<string,string> = {
   'Decided at':'決定時間',
   'No provider charge':'沒有供應商費用',
   'A workspace member':'工作區成員',
+  'Preview':'預覽',
+  'Loading preview…':'正在載入預覽…',
+  'Preview unavailable':'預覽無法使用',
+  'Retry preview':'重試預覽',
+  'Preview truncated':'預覽內容已截短',
+  'You no longer have access to this output.':'你已無權檢視此輸出。',
+  'This output is no longer available.':'此輸出已不再可用。',
 };
