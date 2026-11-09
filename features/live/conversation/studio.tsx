@@ -286,11 +286,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     terminalFor:proposalId=>terminal.get(proposalId),
     toolFor:capabilityName=>latestToolActivity(entries,capabilityName),
     partsForTurn:turnId=>turnId?entries.filter(entry=>entry.turnId===turnId).flatMap(entry=>entry.parts):[],
-    previewOutput:async(outputId,revision)=>{
+    previewOutput:async(outputId,revision,signal)=>{
       const scope=session.current();
-      if(!session.isCurrent(identity)||!scope.workspace||!scope.project)return {kind:'error',error:'unavailable'};
+      if(!session.isCurrent(identity)||!scope.workspace||!scope.project||!session.token())
+        return {kind:'error',error:'unavailable'};
       return fetchOutputPreview({baseUrl:apiBaseUrl,workspace:scope.workspace,project:scope.project,
-        outputId,revision,token:session.token()});
+        outputId,revision,token:session.token(),signal});
     },
     decide:(part,turnId,choice)=>{void decide(part,turnId,choice);},
     deciding,

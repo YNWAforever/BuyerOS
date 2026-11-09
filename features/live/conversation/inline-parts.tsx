@@ -5,7 +5,7 @@ import type {CitationItem,MessagePart,NoticePart,OutputLinkPart,ProposalCost,Pro
 import {approvalNoticeKey,decisionGate,followUpNoticeKey,proposalUiState,toolStateAfterDecision,type DecisionChoice,type LocalDecision} from './approval';
 import {type TerminalProposal,type TranscriptEntry} from './parts';
 import {ProposalExplainer} from './proposal-explainer';
-import {PREVIEW_SANDBOX,previewNoticeKey,type PreviewOutcome} from './output-preview';
+import {PREVIEW_SANDBOX,previewNoticeKey,sandboxedPreviewHtml,type PreviewOutcome} from './output-preview';
 
 export type PartActions={
   t:(value:string)=>string;
@@ -17,7 +17,7 @@ export type PartActions={
   terminalFor:(proposalId:string)=>TerminalProposal|undefined;
   toolFor:(capability:string)=>ToolActivityPart|null;
   partsForTurn:(turnId:string|null)=>ReadonlyArray<MessagePart>;
-  previewOutput:(outputId:string,revision:number)=>Promise<PreviewOutcome>;
+  previewOutput:(outputId:string,revision:number,signal?:AbortSignal)=>Promise<PreviewOutcome>;
   decide:(part:ProposalPart,turnId:string|null,choice:DecisionChoice)=>void;
   deciding:boolean;
 };
@@ -101,14 +101,27 @@ function OutputPreview({part,actions}:{part:OutputLinkPart;actions:PartActions})
   const t=actions.t;
   const [state,setState]=useState<PreviewState>({kind:'idle'});
   const active=useRef(0);
+  const controller=useRef<AbortController|null>(null);
   const load=useCallback(async()=>{
     const request=++active.current;
+    controller.current?.abort();
+    const local=new AbortController();
+    controller.current=local;
     setState({kind:'loading'});
-    const outcome=await actions.previewOutput(part.output_id,part.revision);
-    if(request!==active.current)return;
+    let outcome:PreviewOutcome;
+    try{
+      outcome=await actions.previewOutput(part.output_id,part.revision,local.signal);
+    }catch{
+      outcome={kind:'error',error:'unavailable'};
+    }
+    if(request!==active.current||local.signal.aborted)return;
     setState(outcome.kind==='ready'?{kind:'ready',html:outcome.html,truncated:outcome.truncated}:{kind:'error',error:outcome.error});
   },[actions,part.output_id,part.revision]);
-  useEffect(()=>()=>{active.current+=1;},[]);
+  useEffect(()=>()=>{
+    active.current+=1;
+    controller.current?.abort();
+    controller.current=null;
+  },[]);
   return <details className="conversation-output-preview"
     style={{flexBasis:'100%',fontSize:12,minWidth:0,borderTop:'1px solid var(--buyeros-border)',paddingTop:6}}
     onToggle={event=>{
@@ -123,7 +136,7 @@ function OutputPreview({part,actions}:{part:OutputLinkPart;actions:PartActions})
         {state.error==='unavailable'&&<button type="button" style={{alignSelf:'flex-start'}} onClick={()=>void load()}>{t('Retry preview')}</button>}
       </>}
       {state.kind==='ready'&&<>
-        <iframe className="conversation-output-preview-frame" sandbox={PREVIEW_SANDBOX} srcDoc={state.html}
+        <iframe className="conversation-output-preview-frame" sandbox={PREVIEW_SANDBOX} srcDoc={sandboxedPreviewHtml(state.html)}
           referrerPolicy="no-referrer" title={`${t('Preview')}: ${part.title}`}
           style={{width:'100%',height:'18rem',maxHeight:'18rem',border:'1px solid var(--buyeros-border)',
             borderRadius:'var(--buyeros-radius-small)',background:'var(--buyeros-surface)'}}/>

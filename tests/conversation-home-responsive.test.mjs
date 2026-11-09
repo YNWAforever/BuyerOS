@@ -221,7 +221,10 @@ test('conversation-first transcript renders typed inline parts and inline decisi
   assert.equal(previewRequests[0].search,'?revision=1');
   assert.equal(await previewFrame.getAttribute('sandbox'),'','the frame is sandboxed with no tokens');
   assert.equal(await previewFrame.getAttribute('referrerpolicy'),'no-referrer');
-  assert.match(await previewFrame.getAttribute('srcdoc'),/Research brief preview/);
+  const previewDoc=await previewFrame.getAttribute('srcdoc');
+  assert.match(previewDoc,/^<meta http-equiv="Content-Security-Policy" content="default-src 'none'">/,
+    'srcdoc prepends the endpoint CSP because response headers do not apply to a srcdoc document');
+  assert.match(previewDoc,/Research brief preview/);
   assert.match(await previewFrame.getAttribute('title'),/Preview: Research brief/);
   assert.equal(await transcript.getByRole('button',{name:'Open saved output',exact:true}).count(),1,'open stays available while previewing');
   await outputCard.getByText('Preview',{exact:true}).click();
