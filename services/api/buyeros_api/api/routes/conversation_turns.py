@@ -101,7 +101,7 @@ async def create(workspace_id: uuid.UUID, project_id: uuid.UUID, payload: TurnRe
         thread, role, turn = await service.create_turn(session, scope, payload, key)
         turn_payload = turn.model_dump(mode='json')
         await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
-            turn.thread_id, turn.id, turn_payload, actor)
+            thread.id, turn.id, turn_payload, actor)
         result = {'thread': await thread_data(session, thread, role, viewer=actor),
                   'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
@@ -124,7 +124,7 @@ async def decide(workspace_id: uuid.UUID, project_id: uuid.UUID, turn_id: uuid.U
             payload, key)
         turn_payload = turn.model_dump(mode='json')
         await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
-            turn.thread_id, turn.id, turn_payload, actor)
+            thread.id, turn.id, turn_payload, actor)
         result = {'thread': await thread_data(session, thread, role, viewer=actor),
                   'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
@@ -146,7 +146,7 @@ async def cancel(workspace_id: uuid.UUID, project_id: uuid.UUID, turn_id: uuid.U
         thread, role, turn = await service.cancel_turn(session, scope, turn_id, expected, key)
         turn_payload = turn.model_dump(mode='json')
         await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
-            turn.thread_id, turn.id, turn_payload, actor)
+            thread.id, turn.id, turn_payload, actor)
         result = {'thread': await thread_data(session, thread, role, viewer=actor),
                   'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
@@ -181,7 +181,7 @@ async def reconcile(workspace_id: uuid.UUID, project_id: uuid.UUID,
         thread, role, turn = await service.reconcile_turn(session, scope, turn_id, key)
         turn_payload = turn.model_dump(mode='json')
         await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
-            turn.thread_id, turn.id, turn_payload, actor)
+            thread.id, turn.id, turn_payload, actor)
         result = {'thread': await thread_data(session, thread, role, viewer=actor),
                   'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'

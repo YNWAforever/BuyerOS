@@ -44,7 +44,7 @@ class PytestRequiredDiscoveryTests(unittest.TestCase):
   self.assertLess(body.index(discover),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post))
   self.assertIn('services/'+name+'/artifacts/c61-full-discovery.txt',body)
  def test_original_API_requires_full_native_collection_and_exact_execution(self):
-  self.assert_original_job('api',4007,'worker')
+  self.assert_original_job('api',4009,'worker')
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('  api:\n',1)[1].split('\n  worker:',1)[0]
   install='pnpm exec playwright install --with-deps chromium'
   self.assertIn(install,body)
