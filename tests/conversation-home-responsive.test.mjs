@@ -1004,6 +1004,9 @@ test('the slash menu lists the offered skill library and inserts without sending
  try{
   const {page,requests,posts,errors}=harness;
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  // The textarea's accessible name is localized; after the zh-HK switch use the
+  // stable DOM id so the same composer is addressed in either locale.
+  const messageBox=page.locator('#conversation-message');
   const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
@@ -1072,23 +1075,23 @@ test('the slash menu lists the offered skill library and inserts without sending
   const turnsBeforeDrift=turnPosts().length;
   await page.getByRole('button',{name:'Change language',exact:true}).click();
   await page.getByText('此技能不適用於目前語言。',{exact:true}).waitFor();
-  assert.equal(await composer.inputValue(),'Help me prepare a report export from current results.','the staged prompt stays editable');
-  await composer.press('Enter');
+  assert.equal(await messageBox.inputValue(),'Help me prepare a report export from current results.','the staged prompt stays editable');
+  await messageBox.press('Enter');
   for(let attempt=0;attempt<100&&turnPosts().length===turnsBeforeDrift;attempt+=1)await page.waitForTimeout(50);
   assert.equal(turnPosts().length,turnsBeforeDrift+1,'the plain text still sends once');
   assert.equal(turnPosts().at(-1).body.skill_id,undefined,'a locale-disabled skill id is never sent');
   // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
-  await composer.fill('/');
+  await messageBox.fill('/');
   const zhList=page.getByRole('listbox',{name:'技能指令'});
   await zhList.waitFor();
   assert.equal(await zhList.getByRole('option').count(),8);
-  await composer.fill('/pdf');
+  await messageBox.fill('/pdf');
   await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
   const disabled=zhList.getByRole('option').first();
   assert.equal(await disabled.getAttribute('aria-disabled'),'true','a locale-incompatible skill is disabled, not hidden');
   assert.equal(await zhList.getByText('此技能不適用於目前語言。').count()>=1,true);
-  await composer.press('Enter');
-  assert.equal(await composer.inputValue(),'/pdf','a disabled command cannot be inserted');
+  await messageBox.press('Enter');
+  assert.equal(await messageBox.inputValue(),'/pdf','a disabled command cannot be inserted');
   // The open library never overflows a 320px viewport.
   await page.setViewportSize({width:320,height:1000});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the open slash menu fits 320px');
