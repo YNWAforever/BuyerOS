@@ -236,7 +236,7 @@ def sales_requirements(*, worker=False):
     privileges.append({'relation':'public.sales_content_tombstones','columns':['completed_at'],'privilege':'UPDATE'})
     if not worker:
         privileges.append({'relation':'public.sales_executions','columns':['accounting_revision','accounted_bound','settled_usd'],'privilege':'UPDATE'})
-    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations','0070_turn_rate_windows'], 'compatible_heads':['0070_turn_rate_windows'],
+    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations','0070_turn_rate_windows','0071_conversation_retention'], 'compatible_heads':['0071_conversation_retention'],
         'required_relations':relations, 'required_rls':list(relations),
         'required_privileges':privileges,
         'required_functions':[f'public.buyeros_{service}_receipts_writable()' for service in ('search','model','contact')],

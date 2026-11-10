@@ -115,7 +115,7 @@ def test_0054_upgrade_preserves_original_source_checks_and_fences(isolated_seede
         before = db.execute("SELECT * FROM buyer_source_checks WHERE id=%s", (check,)).fetchone()
     command.upgrade(config, "head")
     with psycopg.connect(isolated_seeded) as db:
-        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0070_turn_rate_windows",)
+        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0071_conversation_retention",)
         assert db.execute("SELECT * FROM buyer_source_checks WHERE id=%s", (check,)).fetchone() == before
         assert db.execute(
             "SELECT buyeros_search_receipts_writable(),buyeros_model_receipts_writable(),"

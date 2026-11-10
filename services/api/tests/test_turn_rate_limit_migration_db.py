@@ -14,7 +14,7 @@ from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, WORKSPACE_B
 from tests.test_conversation_turns_migration_db import config
 
-HEAD = '0070_turn_rate_windows'
+HEAD = '0071_conversation_retention'
 PREVIOUS = '0069_turn_reconciliations'
 TABLE = 'conversation_turn_rate_windows'
 WINDOW = datetime(2026, 11, 10, 12, 0, tzinfo=timezone.utc)
@@ -35,6 +35,9 @@ def test_rate_window_table_is_tenant_scoped_and_closed_to_the_worker(isolated_mi
         for verb in ('SELECT', 'INSERT', 'UPDATE'):
             assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
                 ('buyeros_worker', TABLE, verb)).fetchone()[0] is False
+        # Retention (0071) grants only the delete the bounded sweeper needs.
+        assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
+            ('buyeros_worker', TABLE, 'DELETE')).fetchone()[0] is True
         for verb, expected in (('SELECT', True), ('INSERT', True), ('UPDATE', True),
                                ('DELETE', False)):
             assert db.execute('SELECT has_table_privilege(%s,%s,%s)',

@@ -13,7 +13,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT, runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0070_turn_rate_windows'
+HEAD = '0071_conversation_retention'
 PREVIOUS = '0065_sales_lifecycle'
 NEW_TABLES = ('conversation_turns', 'conversation_turn_proposals',
               'conversation_turn_decisions')
