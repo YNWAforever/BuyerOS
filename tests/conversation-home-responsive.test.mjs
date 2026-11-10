@@ -852,6 +852,91 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
  }finally{await harness.close();}
 });
 
+test('composer attaches a document through the existing ingest path and persists the source',async()=>{
+ let releaseComplete;const completeGate=new Promise(resolve=>{releaseComplete=resolve;});
+ let uploadStarts=0,uploadChunks=0,uploadCompletes=0,attachFailures=1,access='owner';
+ const sourcePuts=[];
+ let manifest=null;
+ let thread={...fixture.studioThread,sources:[],version:3,access};
+ const baseApi=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  const {req,url}=input,method=req.method(),path=url.pathname;
+  if(method==='POST'&&path===prefix+'/offer-document-uploads'){
+   manifest=req.postDataJSON();uploadStarts+=1;
+   return {json:fixture.envelope({id:'e1000000-0000-4000-8000-000000000001',workspace_id:workspace,project_id:project,
+     filename:manifest.filename,media_type:manifest.media_type,byte_length:manifest.byte_length,source_sha256:manifest.source_sha256,
+     chunk_size:2097152,chunk_count:Math.ceil(manifest.byte_length/2097152),received_chunks:[],status:'uploading'})};
+  }
+  if(method==='PUT'&&/\/offer-document-uploads\/[0-9a-f-]+\/chunks\/\d+$/.test(path)){uploadChunks+=1;return {json:fixture.envelope({})};}
+  if(method==='POST'&&/\/offer-document-uploads\/[0-9a-f-]+\/complete$/.test(path)){
+   uploadCompletes+=1;await completeGate;
+   return {json:fixture.envelope({id:documentId,workspace_id:workspace,project_id:project,filename:manifest.filename,
+     media_type:manifest.media_type,status:'ready',version:1,sha256:manifest.source_sha256})};
+  }
+  if(/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(path)&&method==='PUT'){
+   const body=req.postDataJSON();
+   sourcePuts.push({body,match:req.headers()['x-buyeros-if-match']??req.headers()['if-match']});
+   if(attachFailures>0){attachFailures-=1;return {status:500,json:{code:'INTERNAL_ERROR',message:'private detail'}};}
+   thread={...thread,sources:body.sources,version:thread.version+1,access};
+   return {json:fixture.envelope(thread)};
+  }
+  if(/\/conversation-threads\/[0-9a-f-]+$/.test(path)&&method==='GET')
+   return {json:fixture.envelope({...thread,access})};
+  return baseApi(input);
+ }});
+ try{
+  const {page,requests,errors}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  const fileInput=page.getByLabel('Attach document');
+  await fileInput.waitFor({state:'attached'});
+  const uploadRequestCount=()=>requests.filter(row=>row.path.includes('/offer-document-uploads')).length;
+  assert.equal(uploadRequestCount(),0,'no upload request before a file is selected');
+  await fileInput.setInputFiles({name:'fixture-notes.md',mimeType:'text/markdown',buffer:Buffer.from('# Fixture notes\n')});
+  const progress=page.getByRole('progressbar');
+  await progress.waitFor();
+  assert.equal(await progress.getAttribute('aria-valuemin'),'0');
+  assert.equal(await progress.getAttribute('aria-valuemax'),'100');
+  assert.match(await progress.getAttribute('aria-valuenow'),/^\d+$/);
+  assert.equal(await page.getByLabel('Attach document').count(),0,'the attach control is hidden while in flight');
+  releaseComplete();
+  // First source write fails: honest notice + retry, and no optimistic attached state.
+  await page.getByText('The attachment could not be added to this discussion. Try again.',{exact:true}).waitFor();
+  const panel=page.locator('.conversation-panel');
+  await panel.getByRole('tab',{name:'Sources',exact:true}).click();
+  assert.equal(await page.locator('.conversation-selected-sources li').count(),0,'no optimistic attached source');
+  assert.equal(sourcePuts.length,1);
+  assert.equal(sourcePuts[0].match,'"3"');
+  assert.deepEqual(sourcePuts[0].body.sources,[{id:`document:${documentId}`,label:'Offer document'}]);
+  await page.getByRole('button',{name:'Retry attachment',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-selected-sources li').length===1);
+  assert.equal(sourcePuts.length,2);
+  assert.equal(sourcePuts[1].match,'"3"','the retry uses the current thread version');
+  assert.deepEqual(sourcePuts[1].body.sources,[{id:`document:${documentId}`,label:'Offer document'}]);
+  assert.equal(uploadStarts,1);assert.equal(uploadChunks,1);assert.equal(uploadCompletes,1,'one upload per file; retries never re-ingest');
+  assert.equal(await page.getByRole('progressbar').count(),0,'progress clears when the attachment is idle again');
+  await page.getByLabel('Attach document').waitFor({state:'attached'});
+  // Context panel shows the persisted source and its ingestion status.
+  await panel.locator('.conversation-selected-sources').getByText('Offer document',{exact:true}).waitFor();
+  await panel.getByText('project-evidence.pdf',{exact:false}).first().waitFor();
+  assert.ok(await panel.getByText('ready',{exact:true}).count()>=1,'the ingestion status is visible');
+  // zh-HK label
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByLabel('附加文件').waitFor({state:'attached'});
+  // Viewer: no control and no upload/source requests.
+  access='viewer';
+  const uploadsBefore=uploadRequestCount(),putsBefore=sourcePuts.length;
+  await page.reload();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  await page.waitForLoadState('networkidle');
+  assert.equal(await page.locator('input[type=file]').count(),0,'a viewer never sees the attach control');
+  assert.equal(uploadRequestCount(),uploadsBefore,'a viewer issues no upload request');
+  assert.equal(sourcePuts.length,putsBefore,'a viewer issues no source write');
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
 // Restored retained-surface scenarios: device discussions and Google Drive remain the
 
 // local-only surfaces they were before the conversation studio became the project home.

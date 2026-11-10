@@ -76,6 +76,7 @@ function SourcePicker({t,client,session,threadId,canViewOffer,selected,onToggleS
       {section.items.map(item=><label key={item.id} className="conversation-source-option">
         <input type="checkbox" disabled={busy} checked={selected.some(source=>source.id===item.id)} onChange={event=>onToggleSource({id:item.id,label:item.label},event.target.checked)}/>
         <span>{item.title!==item.label&&!item.id.startsWith('results:')?item.title:t(item.label)}</span>
+        {item.id.startsWith('document:')&&item.status?<span className="pill gray">{t(item.status.replaceAll('_',' '))}</span>:null}
       </label>)}
     </section>)}
     <p className="conversation-panel-note">{t('A saved selection does not grant access. Current project permissions apply.')}</p>

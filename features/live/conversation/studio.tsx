@@ -2,7 +2,8 @@
 import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {Ellipsis,Menu,PanelRight} from 'lucide-react';
 import type {LiveClient} from '@/services/live/client';
-import {LiveCancelled} from '@/services/live/client';
+import {LiveCancelled,LiveError} from '@/services/live/client';
+import type {UploadContext} from '@/services/live/document-upload';
 import type {SessionScope} from '@/services/live/session';
 import {scopedThreadApi,threadNotice,threadNotices,type ServerThread} from '@/services/live/conversation-threads';
 import {chatThread,scopedTurns,turnNotice,turnNotices} from '@/services/live/conversation-turn';
@@ -18,11 +19,12 @@ import {ConversationDrafts} from './draft';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
 import {emptyTurnStream,reduceTurnEvent,streamIsLive,streamStep,type TurnStreamState} from './stream-events';
 import {fetchOutputPreview} from './output-preview';
+import {attachmentBusy,attachmentPercent,type AttachmentState,attachThreadSource} from './attachment';
 import {useDataMode} from '@/features/providers/data-mode';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
 import {ConversationTranscript} from './transcript';
-import {ConversationComposer,type ComposerChip} from './composer';
+import {ConversationComposer,type ComposerAttachment,type ComposerChip} from './composer';
 import {ConversationPanel,type PanelTab} from './context-panel';
 import type {PartActions} from './inline-parts';
 
@@ -152,7 +154,14 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [cancelling,setCancelling]=useState(false);
   const [reconciling,setReconciling]=useState(false);
   const [recoveredTurns,setRecoveredTurns]=useState<ReadonlySet<string>>(()=>new Set());
+  const [attachment,setAttachment]=useState<AttachmentState>({phase:'idle'});
   const streamAbort=useRef<AbortController|null>(null);
+  const attachmentAbort=useRef<AbortController|null>(null);
+  const attachFileRef=useRef<File|null>(null);
+  const attachDocumentRef=useRef<string|null>(null);
+  // The uploader is loaded lazily: the OFF discussion controller must never pull
+  // ingest code (or its browser-only dependencies) into its module graph.
+  const uploaderRef=useRef<ReturnType<typeof import('@/services/live/document-upload').createDocumentUpload>|null>(null);
   const [deciding,setDeciding]=useState(false),decidingRef=useRef(false);
   const [sourcesBusy,setSourcesBusy]=useState(false);
   const [panelPreference,setPanelPreference]=useState<boolean|null>(null);
@@ -207,6 +216,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     // provisional entries so persisted data is the only source for the new view.
     streamAbort.current?.abort();streamAbort.current=null;
     setStream(null);setReconnecting(false);setRecoveredTurns(new Set());
+    attachmentAbort.current?.abort();attachmentAbort.current=null;
+    attachFileRef.current=null;attachDocumentRef.current=null;setAttachment({phase:'idle'});
     if(!targetId){setLoaded(null);setThreadState('new');setThreadNoticeText('');setTurns([]);setEphemeral([]);setDecisions({});return;}
     let active=true;
     setThreadState(previous=>previous==='ready'?'reloading':'loading');
@@ -228,7 +239,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   },[api,targetId,identity,session,reload]);
   useEffect(()=>{setTitle(loaded?.chat.title??'');},[loaded?.chat.id,loaded?.chat.title]);
   // Abort a live stream when the studio unmounts (route/scope change).
-  useEffect(()=>()=>{streamAbort.current?.abort();streamAbort.current=null;},[]);
+  useEffect(()=>()=>{
+    streamAbort.current?.abort();streamAbort.current=null;
+    attachmentAbort.current?.abort();attachmentAbort.current=null;
+  },[]);
 
   useEffect(()=>{
     let active=true;
@@ -400,6 +414,89 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   function startNewTurn():void{
     try{document.getElementById('conversation-message')?.focus();}catch{/* Focus is best-effort. */}
   }
+  /** One attach attempt: reuse the existing uploader, then persist the source ref. */
+  async function attachFile(file:File):Promise<void>{
+    if(!loaded||attachmentBusy(attachment)||loaded.chat.access==='viewer')return;
+    const scope=session.current();
+    if(!scope.workspace||!scope.project||!scope.actor||!session.token()){
+      setAttachment({phase:'failed',failure:'upload',message:t('The attachment could not be uploaded. Try again.'),retryable:true});
+      return;
+    }
+    attachmentAbort.current?.abort();
+    const controller=new AbortController();
+    attachmentAbort.current=controller;
+    attachFileRef.current=file;attachDocumentRef.current=null;
+    setAttachment({phase:'uploading',percent:0});
+    try{
+      let workflow=uploaderRef.current;
+      if(!workflow){
+        const {createDocumentUpload}=await import('@/services/live/document-upload');
+        let storage:Storage|undefined;
+        try{if(typeof window!=='undefined')storage=window.sessionStorage;}catch{/* memory fallback stays available */}
+        workflow=createDocumentUpload(client,storage);
+        uploaderRef.current=workflow;
+      }
+      const signal=AbortSignal.any([controller.signal,session.controller().signal]);
+      const uploadContext:UploadContext={actor:scope.actor,workspace:scope.workspace,project:scope.project,identity,
+        token:session.token(),signal,isCurrent:()=>current()&&session.isCurrent(identity)};
+      const document=await workflow.upload(file,uploadContext,
+        progress=>{if(current()&&!controller.signal.aborted)setAttachment(state=>state.phase==='uploading'?{phase:'uploading',percent:Math.max(0,Math.min(100,progress.percent))}:state);});
+      if(!current()||controller.signal.aborted)return;
+      attachmentAbort.current=null;
+      attachFileRef.current=null;attachDocumentRef.current=document.id;
+      setAttachment({phase:'attaching'});
+      await attachDocumentToThread(document.id);
+    }catch(error){
+      if(!current()||controller.signal.aborted||error instanceof LiveCancelled)return;
+      attachmentAbort.current=null;
+      if(error instanceof LiveError){
+        setAttachment({phase:'failed',failure:'upload',message:t('The attachment could not be uploaded. Try again.'),retryable:true});
+        attachFileRef.current=file;
+      }else{
+        const message=error instanceof Error&&error.message.trim()?error.message:t('The attachment could not be uploaded. Try again.');
+        setAttachment({phase:'failed',failure:'rejected',message,retryable:false});
+        attachFileRef.current=null;
+      }
+    }
+  }
+  /** Persist `document:<id>` on the thread, refetching once on a stale version. */
+  async function attachDocumentToThread(documentId:string):Promise<void>{
+    if(!loaded)return;
+    setAttachment({phase:'attaching'});
+    try{
+      const threadId=loaded.chat.id;
+      const outcome=await attachThreadSource<ServerThread>({
+        thread:loaded.raw,documentId,
+        save:(thread,sources)=>api.sources(thread,sources),
+        refresh:async()=>api.get(threadId),
+        isStale:error=>error instanceof LiveError&&(error.status===412||error.code==='STALE_REVISION'),
+      });
+      if(!current())return;
+      if(outcome.kind==='failed'){
+        attachDocumentRef.current=documentId;
+        setAttachment({phase:'failed',failure:'attach',message:t('The attachment could not be added to this discussion. Try again.'),retryable:true});
+        return;
+      }
+      const chat=chatThread(outcome.thread);
+      if(!chat){
+        attachDocumentRef.current=documentId;
+        setAttachment({phase:'failed',failure:'attach',message:t('The attachment could not be added to this discussion. Try again.'),retryable:true});
+        return;
+      }
+      setLoaded({raw:outcome.thread,chat});
+      attachFileRef.current=null;attachDocumentRef.current=null;
+      setAttachment({phase:'attached'});
+    }catch{
+      if(!current())return;
+      attachDocumentRef.current=documentId;
+      setAttachment({phase:'failed',failure:'attach',message:t('The attachment could not be added to this discussion. Try again.'),retryable:true});
+    }
+  }
+  function retryAttachment():void{
+    if(attachment.phase!=='failed'||!attachment.retryable)return;
+    if(attachDocumentRef.current)void attachDocumentToThread(attachDocumentRef.current);
+    else if(attachFileRef.current)void attachFile(attachFileRef.current);
+  }
   async function sendFallback(text:string,clientMessageId:string):Promise<boolean>{
     if(!loaded){
       const created=await api.create(deriveTitle(text),text);
@@ -505,6 +602,20 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const threadTitle=loaded?.chat.title??t('New discussion');
   const step=running&&stream?streamStep(stream):'working';
   const statusLine=sending?t('Preparing a reply…'):sendNotice?t(sendNotice):threadNoticeText&&threadState==='ready'?t(threadNoticeText):'';
+  // Attach exists only for a persisted discussion the viewer can edit; archived and
+  // viewer threads never mount the control, so they issue no upload/source requests.
+  const archivedLoaded=list.items.some(row=>row.id===threadId&&row.archived===true);
+  const attachAvailable=threadId!==null&&loaded!==null&&loaded.chat.access!=='viewer'&&!archivedLoaded;
+  const attachmentView:ComposerAttachment|null=attachAvailable?{
+    visible:!attachmentBusy(attachment),
+    busy:attachmentBusy(attachment),
+    percent:attachmentPercent(attachment),
+    label:attachment.phase==='attaching'?t('Adding attachment…'):t('Uploading attachment'),
+    notice:attachment.phase==='failed'?attachment.message:'',
+    retryable:attachment.phase==='failed'&&attachment.retryable,
+    onFile:(file:File)=>void attachFile(file),
+    onRetry:retryAttachment,
+  }:null;
   return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')}>
     <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>setMobileView('conversation')}/>
     <ConversationThreadList t={t} locale={locale} items={list.items.filter(row=>archived||!row.archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
@@ -552,7 +663,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           // get an enabled composer while the thread resolves, and a failed load stays inert.
           canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
           projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-          sendFailed={sendFailed} notice={sendNotice||urlNotice} onSend={send}/>}
+          sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>}
       <details className="conversation-secondary" open={guidedOpen}
         onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
         {loaded

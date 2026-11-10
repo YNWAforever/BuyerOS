@@ -157,4 +157,10 @@ Object.assign(zh,{
   'Preview truncated':'預覽內容已截短',
   'You no longer have access to this output.':'你已無權檢視此輸出。',
   'This output is no longer available.':'此輸出已不再可用。',
+  'Attach document':'附加文件',
+  'Uploading attachment':'正在上傳附件',
+  'Adding attachment…':'正在加入附件…',
+  'Retry attachment':'重試附件',
+  'The attachment could not be uploaded. Try again.':'附件未能上傳，請再試一次。',
+  'The attachment could not be added to this discussion. Try again.':'未能將附件加入此討論，請再試一次。',
 });
