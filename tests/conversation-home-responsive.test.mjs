@@ -857,7 +857,7 @@ test('composer attaches a document through the existing ingest path and persists
  let releaseComplete;const completeGate=new Promise(resolve=>{releaseComplete=resolve;});
  let uploadStarts=0,uploadChunks=0,uploadCompletes=0,attachFailures=1,access='owner';
  const sourcePuts=[];
- let manifest=null;
+ let manifest=null,uploadedDocument=null;
  let thread={...fixture.studioThread,sources:[],version:3,access};
  const baseApi=standardApi();
  const harness=await fixtureHarness({handler:async input=>{
@@ -871,13 +871,16 @@ test('composer attaches a document through the existing ingest path and persists
   if(method==='PUT'&&/\/offer-document-uploads\/[0-9a-f-]+\/chunks\/\d+$/.test(path)){uploadChunks+=1;return {json:fixture.envelope({})};}
   if(method==='POST'&&/\/offer-document-uploads\/[0-9a-f-]+\/complete$/.test(path)){
    uploadCompletes+=1;await completeGate;
-   return {json:fixture.envelope({id:documentId,workspace_id:workspace,project_id:project,filename:manifest.filename,
-     media_type:manifest.media_type,status:'ready',version:1,sha256:manifest.source_sha256})};
+   uploadedDocument={workspace_id:workspace,project_id:project,data_mode:'live',id:documentId,filename:manifest.filename,
+     media_type:manifest.media_type,status:'ready',version:1,sha256:manifest.source_sha256,fact_candidates:[]};
+   return {json:fixture.envelope(uploadedDocument)};
   }
+  // Stateful project context: once the upload completes, the server-side document list
+  // must include the just-ingested document (production behaviour), not a static fixture.
   if(method==='GET'&&path.endsWith('/offer-documents')){
-   const filename=uploadStarts>0?'fixture-notes.md':'project-evidence.pdf';
-   return {json:fixture.envelope({items:[{workspace_id:workspace,project_id:project,id:documentId,filename,status:'ready',version:1,
-     ...(uploadStarts>0&&manifest?{sha256:manifest.source_sha256}:{}),fact_candidates:[]}],total:1,offset:0,limit:20})};
+   const rows=uploadedDocument?[uploadedDocument]:
+     [{workspace_id:workspace,project_id:project,data_mode:'live',id:documentId,filename:'project-evidence.pdf',status:'ready',version:1,fact_candidates:[]}];
+   return {json:fixture.envelope({items:rows,total:rows.length,offset:0,limit:20})};
   }
   if(/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(path)&&method==='PUT'){
    const body=req.postDataJSON();
