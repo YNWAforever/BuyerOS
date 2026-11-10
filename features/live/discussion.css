@@ -138,7 +138,7 @@
 /* Transcript */
 .conversation-transcript-wrap{position:relative;display:flex;flex-direction:column;min-height:0}
 .conversation-show-earlier{align-self:center;margin:6px 0 0;min-height:32px!important;padding:3px 12px!important;font-size:12px!important;color:var(--buyeros-muted)!important;background:var(--buyeros-surface)!important;border:1px solid var(--buyeros-border)!important;border-radius:999px!important}
-.conversation-transcript{overflow-y:auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:18px;min-height:300px;max-height:min(62vh,660px);scrollbar-width:thin}
+.conversation-transcript{overflow-y:auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:18px;min-height:300px;max-height:min(62vh,660px);scrollbar-width:thin;overflow-anchor:none}
 .conversation-empty{display:flex;align-items:center;justify-content:center;min-height:220px;padding:20px;text-align:center}
 .conversation-empty h2{font-size:clamp(19px,2vw,24px);max-width:26ch;line-height:1.4;color:var(--buyeros-copy)}
 .conversation-day{display:flex;flex-direction:column;gap:14px;min-width:0}

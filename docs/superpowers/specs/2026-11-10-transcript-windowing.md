@@ -37,6 +37,19 @@ contract or losing content, so a full 100-message discussion stays responsive.
 - No backend, `.github` (except the core gate constant), dependency or part-type
   change; do not rename existing classes/semantics relied on by the 29 scenarios.
 
+## Implementation notes (as shipped)
+
+- Window state is scoped to the thread with a 
+esetKey prop; the transcript is
+  **not** remounted via an element key. Bisecting the browser gate locally showed
+  that keying the subtree (key 	hreadId) left two committed transcript subtrees in
+  the DOM in React 19 (2 transcript roots, duplicate text nodes), which failed the
+  strict-mode locators of the existing scenarios. The reducer-derived window keeps a
+  fresh initial subset per thread without a remount.
+- Scroll anchoring stores the first visible message element and restores its top in a
+  layout effect; the transcript sets overflow-anchor:none so the browser does not
+  also adjust scrollTop and double the correction.
+
 ## Tests
 
 - Unit: window state reducer — initial visible subset, reveal batch math, boundary

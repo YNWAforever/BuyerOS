@@ -18,7 +18,10 @@ type Props={
   busy:boolean;
   statusLine:string;
   emptyTitle:string;
+  /** Changes when the reader switches threads, so a new thread starts a fresh window. */
+  resetKey:string;
 };
+type WindowedState=TranscriptWindowState&{resetKey:string};
 function timeLabel(createdAt:number|null,locale:'en'|'zh-HK'):string{
   if(createdAt===null)return '';
   return new Date(createdAt).toLocaleTimeString(locale==='zh-HK'?'zh-HK':'en-GB',{hour:'2-digit',minute:'2-digit'});
@@ -31,19 +34,18 @@ function dayLabel(dayStart:number|null,locale:'en'|'zh-HK',t:(value:string)=>str
   return new Date(dayStart).toLocaleDateString(locale==='zh-HK'?'zh-HK':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
 /** Continuous transcript: day groups, sequence labels, autoscroll with an explicit jump. */
-export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle}:Props){
+export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle,resetKey}:Props){
   const scroller=useRef<HTMLDivElement>(null),atBottom=useRef(true),primed=useRef(false);
   const [showJump,setShowJump]=useState(false);
   const [announceLive,setAnnounceLive]=useState(true);
   // Offset is read once per mount; day groups then match the reader's zone.
   const [offset]=useState(readerOffset);
-  const anchorHeight=useRef(0),pendingAnchor=useRef(false);
+  const anchorElement=useRef<HTMLElement|null>(null),anchorTop=useRef(0),pendingAnchor=useRef(false);
   const persisted=entries.filter(entry=>!entry.ephemeral);
-  // The studio remounts this transcript when a thread becomes loaded (keyed by
-  // thread id), so this lazy read captures the persisted history at first paint and
-  // only the latest bounded window mounts. Live additions still reconcile below.
-  const [windowedState,setWindowedState]=useState<TranscriptWindowState>(()=>initialWindow(persisted.length));
-  const windowed=receiveEntryTotal(windowedState,persisted.length);
+  // The window is scoped to the thread instead of remounting the transcript:
+  // keying the subtree duplicated the committed transcript in React 19.
+  const [windowedState,setWindowedState]=useState<WindowedState>(()=>({...initialWindow(persisted.length),resetKey}));
+  const windowed=receiveEntryTotal(windowedState.resetKey===resetKey?windowedState:initialWindow(persisted.length),persisted.length);
   const visibleKeys=new Set(windowSlice(persisted,windowed).map(entry=>entry.key));
   // Live/streamed entries are never windowed or hidden; persisted order is kept.
   const visible=entries.filter(entry=>entry.ephemeral||visibleKeys.has(entry.key));
@@ -58,9 +60,14 @@ export function ConversationTranscript({t,locale,entries,actions,busy,statusLine
     const node=scroller.current;
     if(!node||!earlier)return;
     const next=revealEarlier(windowed);
-    anchorHeight.current=node.scrollHeight;
+    // Anchor the first visible message so revealing history never moves the reader.
+    const view=node.getBoundingClientRect();
+    const first=[...node.querySelectorAll<HTMLElement>('article.conversation-message')]
+      .find(article=>article.getBoundingClientRect().bottom>view.top)??null;
+    anchorElement.current=first;
+    anchorTop.current=first?first.getBoundingClientRect().top:0;
     pendingAnchor.current=true;
-    setWindowedState(next);
+    setWindowedState({...next,resetKey});
     // Historical entries are additions to a role=log; mute the live region for
     // the reveal commit so they are not announced as new messages.
     setAnnounceLive(false);
@@ -72,10 +79,13 @@ export function ConversationTranscript({t,locale,entries,actions,busy,statusLine
     if(!node)return;
     if(pendingAnchor.current){
       pendingAnchor.current=false;
-      const added=node.scrollHeight-anchorHeight.current;
-      if(added>0)node.scrollTop+=added;
-      // Anchor the message the reader was looking at; only show the jump when
-      // the anchored viewport is no longer at the tail.
+      const first=anchorElement.current;
+      if(first){
+        const delta=first.getBoundingClientRect().top-anchorTop.current;
+        if(delta)node.scrollTop+=delta;
+      }
+      anchorElement.current=null;
+      // Only show the jump when the anchored viewport is no longer at the tail.
       atBottom.current=node.scrollHeight-node.scrollTop-node.clientHeight<120;
       setShowJump(!atBottom.current&&entries.length>0);
       return;
