@@ -58,7 +58,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
   }
   const slashMatch=/^\/(\S*)$/.exec(text),slashOpen=slashMatch!==null,slash=slashMatch?.[1]??'';
   const filtered=slashOpen?chips.filter(chip=>!slash||chip.label.toLowerCase().includes(slash.toLowerCase())||chip.prompt.toLowerCase().includes(slash.toLowerCase())):chips;
-  return <section className="conversation-compose" aria-label={t('Message composer')}>
+  return <section className="conversation-compose" aria-label={t('Message composer')} style={{minWidth:0,maxWidth:'100%'}}>
     {capabilityNotice&&<p className="conversation-compose-notice" role="status">{t(capabilityNotice)}{capability==='unavailable'&&<button type="button" onClick={onRetryCapability}>{t('Retry')}</button>}</p>}
     {notice&&<p className="conversation-compose-notice" role="status">{t(notice)}</p>}
     {attachment?.notice&&<p className="conversation-compose-notice" role="status">{t(attachment.notice)}
@@ -68,23 +68,26 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
     {(text.trim()===''||slashOpen)&&chips.length>0&&<div className="conversation-chips" role="group" aria-label={t('Quick actions')} data-skill-ids={chips.some(chip=>chip.skillId)?'ready':'pending'}>
       {filtered.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
     </div>}
-    <div className="conversation-compose-box">
+    <div className="conversation-compose-box" style={{minWidth:0,maxWidth:'100%',boxSizing:'border-box'}}>
       <div className="conversation-compose-context"><span className="conversation-project">{projectName??t('This project')}</span>{companyName&&<span className="conversation-company" aria-label={t('Linked company')}><Building2 size={12} aria-hidden="true"/>{companyName}</span>}{capability==='absent'&&<span className="pill gray">{t('Notes only')}</span>}</div>
       {attachment?.busy&&<div role="progressbar" aria-label={attachment.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={attachment.percent}
-        style={{height:4,width:'100%',background:'var(--buyeros-border)',borderRadius:2,overflow:'hidden',marginTop:2}}>
-        <span style={{display:'block',height:'100%',width:`${attachment.percent}%`,background:'var(--buyeros-accent)',transition:'width .2s'}}/>
+        style={{height:4,width:'100%',maxWidth:'100%',minWidth:0,boxSizing:'border-box',background:'var(--buyeros-border)',borderRadius:2,overflow:'hidden',marginTop:2}}>
+        <span style={{display:'block',height:'100%',width:`${attachment.percent}%`,maxWidth:'100%',background:'var(--buyeros-accent)',transition:'width .2s'}}/>
       </div>}
       <label className="conversation-sr" htmlFor="conversation-message">{t('Message BuyerOS')}</label>
       <textarea id="conversation-message" ref={area} rows={2} maxLength={4000} value={text} disabled={!canWrite}
         aria-describedby="conversation-compose-help" placeholder={t('Ask about this project, or choose a quick action')}
         onChange={event=>change(event.target.value)} onKeyDown={onKeyDown}/>
-      <div className="conversation-compose-actions">
+      <div className="conversation-compose-actions" style={{minWidth:0}}>
         <small id="conversation-compose-help">{t('Enter to send · Shift+Enter for a new line')}</small>
-        {attachment?.visible&&!attachment.busy&&<label style={{display:'inline-flex',alignItems:'center',cursor:canWrite?'pointer':'default',padding:'0 4px'}}>
+        {attachment?.visible&&!attachment.busy&&<label htmlFor="conversation-attach" style={{display:'inline-flex',alignItems:'center',flex:'0 1 auto',minWidth:0,maxWidth:'100%',cursor:canWrite?'pointer':'default',padding:'0 4px'}}>
           <Paperclip size={16} aria-hidden="true"/>
-          <input type="file" className="conversation-sr" accept={UPLOAD_ACCEPT}
-            aria-label={t('Attach document')} disabled={!canWrite}
-            onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)attachment.onFile(file);}}/>
+          {/* Zero-size anchored wrapper: the native input can never contribute intrinsic width. */}
+          <span style={{position:'absolute',width:0,height:0,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'}}>
+            <input id="conversation-attach" type="file" accept={UPLOAD_ACCEPT}
+              aria-label={t('Attach document')} disabled={!canWrite}
+              onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)attachment.onFile(file);}}/>
+          </span>
         </label>}
         {sendFailed&&<button type="button" className="conversation-retry" disabled={busy||!canWrite} onClick={()=>void submit(text,currentSkill)}>{t('Retry send')}</button>}
         <button type="button" className="live-primary conversation-send" disabled={busy||!canWrite||!text.trim()} aria-label={t(busy?'Sending…':'Send message')} onClick={()=>void submit(text,currentSkill)}>
