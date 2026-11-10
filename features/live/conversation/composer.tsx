@@ -61,7 +61,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
   return <section className="conversation-compose" aria-label={t('Message composer')} style={{minWidth:0,maxWidth:'100%'}}>
     {capabilityNotice&&<p className="conversation-compose-notice" role="status">{t(capabilityNotice)}{capability==='unavailable'&&<button type="button" onClick={onRetryCapability}>{t('Retry')}</button>}</p>}
     {notice&&<p className="conversation-compose-notice" role="status">{t(notice)}</p>}
-    {attachment?.notice&&<p className="conversation-compose-notice" role="status">{t(attachment.notice)}
+    {attachment?.notice&&<p className="conversation-compose-notice" role="status"><span style={{minWidth:0,overflowWrap:'anywhere'}}>{t(attachment.notice)}</span>
       {attachment.retryable&&<button type="button" onClick={attachment.onRetry}>{t('Retry attachment')}</button>}</p>}
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
     {!drafts.available&&<p className="conversation-compose-note">{t('This browser will not keep unsent text after reload.')}</p>}

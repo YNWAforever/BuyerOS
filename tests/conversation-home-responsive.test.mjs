@@ -920,8 +920,9 @@ test('composer attaches a document through the existing ingest path and persists
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'composer fits 320px while uploading');
   await page.setViewportSize({width:1280,height:800});
   releaseComplete();
-  // First source write fails: honest notice + retry, and no optimistic attached state.
+  // First source write fails: honest attach-specific retryable notice, no optimistic source.
   await page.getByText('The attachment could not be added to this discussion. Try again.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Retry attachment',exact:true}).count(),1,'the attach failure keeps a retry affordance');
   await page.setViewportSize({width:320,height:1000});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the failure notice fits 320px');
   await page.setViewportSize({width:1280,height:800});
