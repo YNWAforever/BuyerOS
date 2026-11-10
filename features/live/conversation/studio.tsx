@@ -18,6 +18,7 @@ import {LiveUnavailable} from '../unavailable';
 import {ConversationDrafts} from './draft';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
 import {emptyTurnStream,reduceTurnEvent,streamIsLive,streamStep,type TurnStreamState} from './stream-events';
+import {buildSkillCommands,type CatalogueSkill} from './skill-library';
 import {fetchOutputPreview} from './output-preview';
 import {attachmentBusy,attachmentPercent,classifyUploadFailure,createAttachmentGuard,nextAttachmentPercent,type AttachmentState,attachThreadSource} from './attachment';
 import {useDataMode} from '@/features/providers/data-mode';
@@ -146,6 +147,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [capability,setCapability]=useState<TurnCapability>('checking');
   const [capabilityNotice,setCapabilityNotice]=useState('');
   const [skillIds,setSkillIds]=useState<ReadonlySet<string>|null>(null);
+  const [catalogue,setCatalogue]=useState<ReadonlyArray<CatalogueSkill>>([]);
   const [projectName,setProjectName]=useState<string|null>(null);
   const [sending,setSending]=useState(false),sendRef=useRef(false);
   const [sendNotice,setSendNotice]=useState(''),[sendFailed,setSendFailed]=useState(false);
@@ -255,8 +257,11 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   },[client,session,identity]);
   useEffect(()=>{if(!canViewOffer)return;let active=true;
     void salesTasks(client,session).skills().then(page=>{
-      if(active&&session.isCurrent(identity)&&Array.isArray(page.skills))setSkillIds(new Set(page.skills.map(skill=>skill.id)));
-    }).catch(()=>{if(active)setSkillIds(null);});
+      if(active&&session.isCurrent(identity)&&Array.isArray(page.skills)){
+        setSkillIds(new Set(page.skills.map(skill=>skill.id)));
+        setCatalogue(page.skills.map(skill=>({id:skill.id,version:skill.version,languages:skill.languages})));
+      }
+    }).catch(()=>{if(active){setSkillIds(null);setCatalogue([]);}});
     return()=>{active=false;};
   },[client,session,canViewOffer,identity]);
 
@@ -297,6 +302,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     const candidate=chipSkills[template.id];
     return {key:template.id,label:t(template.title),prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null};
   }),[t,skillIds]);
+  // Slash commands come from the fetched catalogue (offered ids only), never a hardcoded list.
+  const commands=useMemo(()=>buildSkillCommands({skills:catalogue,offered:skillIds??new Set(),locale,translate:t}),
+    [catalogue,skillIds,locale,t]);
   const actions=useMemo<PartActions>(()=>({
     t,locale,navigate,access:loaded?.chat.access??'viewer',
     turnStatusFor:turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined,
@@ -682,11 +690,11 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       </div>}
       {awaitingHomeThread
         ?<div className="conversation-compose conversation-compose-pending" role="status" aria-busy="true">{t('Loading discussion…')}</div>
-        :<ConversationComposer key={targetId??'new'} t={t} threadKey={targetId??'new'} drafts={drafts}
+        :<ConversationComposer key={targetId??'new'} t={t} locale={locale} threadKey={targetId??'new'} drafts={drafts}
           // A saved thread stays read-only until its access is known: a viewer must never
           // get an enabled composer while the thread resolves, and a failed load stays inert.
           canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
-          projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
+          projectName={projectName} companyName={companyLabel} chips={chips} commands={commands} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
           sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>}
       <details className="conversation-secondary" open={guidedOpen}
         onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>

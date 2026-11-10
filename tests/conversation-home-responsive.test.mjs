@@ -989,6 +989,81 @@ test('a directly opened archived thread offers no attach control and issues no w
  }finally{await harness.close();}
 });
 
+test('the slash menu lists the offered skill library and inserts without sending',async()=>{
+ const catalogue=JSON.parse(readFileSync('services/api/buyeros_api/sales/catalogue.json','utf8'));
+ const skills=catalogue.skills.map(skill=>({...skill,
+   languages:skill.id==='sales-report-pdf'?['en']:skill.languages}));
+ const baseApi=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  const {req,url}=input;
+  if(req.method()==='GET'&&url.pathname.endsWith('/sales/skills'))
+   return {json:fixture.envelope({skills})};
+  return baseApi(input);
+ }});
+ try{
+  const {page,requests,posts,errors}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  await page.locator('[data-skill-ids="ready"]').waitFor();
+  const beforeRequests=requests.length;
+  await composer.fill('/');
+  const listbox=page.getByRole('listbox',{name:'Skill commands'});
+  await listbox.waitFor();
+  assert.equal(requests.length,beforeRequests,'opening the library issues no request');
+  assert.equal(await listbox.getByRole('option').count(),8,'at most eight options are visible');
+  assert.equal(await page.getByText('9 more',{exact:false}).count(),1,'the more count is truthful (17 offered, 8 shown)');
+  const firstId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  await composer.press('ArrowDown');
+  await page.waitForFunction(first=>document.querySelector('#conversation-skill-menu [aria-selected="true"]')?.id!==first,firstId);
+  const secondId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  assert.notEqual(secondId,firstId,'ArrowDown moves the active option');
+  assert.equal(await composer.getAttribute('aria-activedescendant'),secondId,'the textarea keeps focus and points at the active option');
+  // Filter to a skill that is not one of the six guided templates.
+  await composer.fill('/objections');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  assert.equal(requests.length,beforeRequests,'filtering issues no request');
+  await composer.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value.startsWith('Help me prepare responses to likely buyer objections.'));
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'selecting a command never sends');
+  assert.equal(await listbox.count(),0,'selecting closes the menu');
+  // A second Enter is the only thing that sends, with the catalogued skill id.
+  await composer.press('Enter');
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,1,'a slash selection plus Enter sends exactly one turn');
+  assert.equal(turns[0].body.skill_id,'sales-objections');
+  assert.match(turns[0].body.text,/likely buyer objections/);
+  // Escape closes without sending and keeps the typed text.
+  const postsBefore=posts.length;
+  await composer.fill('/');
+  await listbox.waitFor();
+  await composer.press('Escape');
+  await listbox.waitFor({state:'detached'});
+  assert.equal(posts.length,postsBefore,'Escape never sends');
+  assert.equal(await composer.inputValue(),'/','the slash text is kept after Escape');
+  // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
+  await composer.fill('');
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await composer.fill('/');
+  const zhList=page.getByRole('listbox',{name:'技能指令'});
+  await zhList.waitFor();
+  assert.equal(await zhList.getByRole('option').count(),8);
+  await composer.fill('/pdf');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  const disabled=zhList.getByRole('option').first();
+  assert.equal(await disabled.getAttribute('aria-disabled'),'true','a locale-incompatible skill is disabled, not hidden');
+  assert.equal(await zhList.getByText('此技能不適用於目前語言。').count(),1);
+  await composer.press('Enter');
+  assert.equal(await composer.inputValue(),'/pdf','a disabled command cannot be inserted');
+  // The open library never overflows a 320px viewport.
+  await page.setViewportSize({width:320,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the open slash menu fits 320px');
+  await page.setViewportSize({width:1280,height:800});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
 // Restored retained-surface scenarios: device discussions and Google Drive remain the
 
 // local-only surfaces they were before the conversation studio became the project home.
