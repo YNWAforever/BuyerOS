@@ -259,7 +259,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     void salesTasks(client,session).skills().then(page=>{
       if(active&&session.isCurrent(identity)&&Array.isArray(page.skills)){
         setSkillIds(new Set(page.skills.map(skill=>skill.id)));
-        setCatalogue(page.skills.map(skill=>({id:skill.id,version:skill.version,languages:skill.languages})));
+        setCatalogue(page.skills.map(skill=>({id:skill.id,languages:skill.languages})));
       }
     }).catch(()=>{if(active){setSkillIds(null);setCatalogue([]);}});
     return()=>{active=false;};
@@ -302,9 +302,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     const candidate=chipSkills[template.id];
     return {key:template.id,label:t(template.title),prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null};
   }),[t,skillIds]);
-  // Slash commands come from the fetched catalogue (offered ids only), never a hardcoded list.
-  const commands=useMemo(()=>buildSkillCommands({skills:catalogue,offered:skillIds??new Set(),locale,translate:t}),
-    [catalogue,skillIds,locale,t]);
+  // Translation identity changes on every render; keep the command memo stable and
+  // rebuild only when the catalogue, offered set or locale actually changes.
+  const translateRef=useRef(t);
+  translateRef.current=t;
+  const commands=useMemo(()=>buildSkillCommands({skills:catalogue,offered:skillIds??new Set(),locale,
+    translate:value=>translateRef.current(value)}),[catalogue,skillIds,locale]);
   const actions=useMemo<PartActions>(()=>({
     t,locale,navigate,access:loaded?.chat.access??'viewer',
     turnStatusFor:turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined,

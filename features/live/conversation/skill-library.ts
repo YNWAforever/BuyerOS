@@ -3,7 +3,7 @@
  * catalogue (offered ids only), grouped by an authored category map. This module
  * is pure: selection inserts a prompt; sending stays with the composer.
  */
-export type CatalogueSkill={id:string;version?:string|number;languages?:ReadonlyArray<string>};
+export type CatalogueSkill={id:string;languages?:ReadonlyArray<string>};
 export type SkillCommand={
   id:string;label:string;prompt:string;categoryId:SkillCategoryId;categoryLabel:string;
   available:boolean;reason:string;
@@ -45,37 +45,44 @@ export const SKILL_AUTHORING:Record<string,{label:string;prompt:string}>={
 export const SKILL_UNAVAILABLE_REASON='This skill is not available in the current language.';
 export const SKILL_MENU_LABEL='Skill commands';
 export const SKILL_MENU_EMPTY='No matching skills.';
-export const SKILL_MORE_LABEL='More skills';
+export const GENERIC_SKILL_PROMPT='Use the {label} skill.';
 export const MAX_VISIBLE_SKILLS=8;
+/** Deterministic readable fallback for an offered skill without authored copy. */
+export function derivedSkillLabel(id:string):string{
+  const parts=id.split(/[-_.:]+/).filter(Boolean);
+  if(parts.length>1&&['sales','xverum','drive'].includes(parts[0].toLowerCase()))parts.shift();
+  const words=(parts.length?parts:['skill']).map(word=>word.toLowerCase());
+  const joined=words.join(' ');
+  return joined.charAt(0).toUpperCase()+joined.slice(1);
+}
 function categoryFor(id:string):SkillCategoryId{
   return CATEGORY_BY_SKILL[id]??'project';
 }
 /**
- * Offered-only catalogue → menu commands. Commands never carry a version/hash:
- * the server pins catalogue versions, the client only sends `skill_id`.
+ * Offered-only catalogue → menu commands. Every offered skill is reachable: an id
+ * without authored copy gets a deterministic readable label and the generic prompt.
+ * Commands never carry a version/hash: the server pins versions, the client sends id.
  */
 export function buildSkillCommands(input:{
   skills:ReadonlyArray<CatalogueSkill>;offered:ReadonlySet<string>;locale:'en'|'zh-HK';
   translate:(value:string)=>string;
 }):SkillCommand[]{
-  const authoring=SKILL_AUTHORING;
+  const generic=input.translate(GENERIC_SKILL_PROMPT);
   return input.skills
     .filter(skill=>skill&&typeof skill.id==='string'&&input.offered.has(skill.id))
     .map((skill,index)=>({skill,index}))
-    .filter(({skill})=>Boolean(authoring[skill.id]))
     .sort((left,right)=>{
       const order=CATEGORY_ORDER.indexOf(categoryFor(left.skill.id))-CATEGORY_ORDER.indexOf(categoryFor(right.skill.id));
       return order||left.index-right.index;
     })
     .map(({skill})=>{
-      const authored=authoring[skill.id];
+      const authored=SKILL_AUTHORING[skill.id];
+      const label=authored?input.translate(authored.label):derivedSkillLabel(skill.id);
+      const prompt=authored?input.translate(authored.prompt):generic.replace('{label}',label);
       const categoryId=categoryFor(skill.id);
       const available=Array.isArray(skill.languages)?skill.languages.includes(input.locale):false;
       return {
-        id:skill.id,
-        label:input.translate(authored.label),
-        prompt:input.translate(authored.prompt),
-        categoryId,
+        id:skill.id,label,prompt,categoryId,
         categoryLabel:input.translate(CATEGORY_LABELS[categoryId]),
         available,
         reason:available?'':input.translate(SKILL_UNAVAILABLE_REASON),
@@ -123,6 +130,20 @@ export function skillMenuKey(key:string,activeIndex:number,count:number):SkillMe
 export function commandInsertion(command:SkillCommand):{text:string;skillId:string}|null{
   if(!command||!command.available)return null;
   return {text:command.prompt,skillId:command.id};
+}
+/** IME composition owns Enter/Arrows; the slash menu must never consume them. */
+export function menuKeyIgnoredDuringComposition(isComposing:boolean):boolean{
+  return isComposing;
+}
+/**
+ * Re-validates the selected skill at send time. A skill that became unavailable
+ * (catalogue/locale drift) is never sent: the caller clears it and warns honestly.
+ */
+export function resolveSendSkill(commands:ReadonlyArray<SkillCommand>,selectedId:string|null):{skillId:string|null;unavailable:boolean}{
+  if(!selectedId)return {skillId:null,unavailable:false};
+  const command=commands.find(item=>item.id===selectedId);
+  if(command&&command.available)return {skillId:selectedId,unavailable:false};
+  return {skillId:null,unavailable:true};
 }
 export function skillMoreLabel(more:number,locale:'en'|'zh-HK'):string{
   return locale==='zh-HK'?`還有 ${more} 項`:`${more} more`;

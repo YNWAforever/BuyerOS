@@ -1007,4 +1007,5 @@ export const liveZh: Record<string,string> = {
   'This skill is not available in the current language.':'此技能不適用於目前語言。',
   'Skill commands':'技能指令',
   'No matching skills.':'沒有符合的技能。',
+  'Use the {label} skill.':'使用「{label}」技能。',
 };

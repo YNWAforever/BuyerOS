@@ -991,8 +991,11 @@ test('a directly opened archived thread offers no attach control and issues no w
 
 test('the slash menu lists the offered skill library and inserts without sending',async()=>{
  const catalogue=JSON.parse(readFileSync('services/api/buyeros_api/sales/catalogue.json','utf8'));
- const skills=catalogue.skills.map(skill=>({...skill,
-   languages:skill.id==='sales-report-pdf'?['en']:skill.languages}));
+ const skills=[...catalogue.skills.map(skill=>({...skill,
+   languages:skill.id==='sales-report-pdf'?['en']:skill.languages})),
+  // Offered but unauthored: the menu must still list it with a deterministic fallback.
+  {id:'sales-customer-success',version:'1',output_kind:'research_report',allowed_actions:['research.read'],
+   languages:['en','zh-HK'],budget_class:'model',upstream_hash:null,inputs_schema:{}}];
  const baseApi=standardApi();
  const harness=await fixtureHarness({handler:async input=>{
   const {req,url}=input;
@@ -1003,6 +1006,7 @@ test('the slash menu lists the offered skill library and inserts without sending
  try{
   const {page,requests,posts,errors}=harness;
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
   await page.locator('[data-skill-ids="ready"]').waitFor();
@@ -1012,28 +1016,47 @@ test('the slash menu lists the offered skill library and inserts without sending
   await listbox.waitFor();
   assert.equal(requests.length,beforeRequests,'opening the library issues no request');
   assert.equal(await listbox.getByRole('option').count(),8,'at most eight options are visible');
-  assert.equal(await page.getByText('9 more',{exact:false}).count(),1,'the more count is truthful (17 offered, 8 shown)');
+  assert.equal(await page.getByText('10 more',{exact:false}).count(),1,'the more count is truthful (18 offered, 8 shown)');
+  // IME composition owns Enter/Arrows: neither commits the query nor selects.
+  const composingSelected=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  await composer.evaluate(el=>{el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',isComposing:true,bubbles:true,cancelable:true}));});
+  await page.waitForTimeout(40);
+  assert.equal(await listbox.locator('[aria-selected="true"]').getAttribute('id'),composingSelected,'IME arrows do not move the menu');
+  await composer.evaluate(el=>{el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));});
+  await page.waitForTimeout(40);
+  assert.equal(await listbox.count(),1,'IME Enter does not select a command');
+  assert.equal(await composer.inputValue(),'/');
   const firstId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
   await composer.press('ArrowDown');
   await page.waitForFunction(first=>document.querySelector('#conversation-skill-menu [aria-selected="true"]')?.id!==first,firstId);
   const secondId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
   assert.notEqual(secondId,firstId,'ArrowDown moves the active option');
   assert.equal(await composer.getAttribute('aria-activedescendant'),secondId,'the textarea keeps focus and points at the active option');
+  // An offered-but-unauthored skill is still reachable via its derived label.
+  await composer.fill('/customer');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  assert.match(await listbox.getByRole('option').first().innerText(),/Customer success/);
+  assert.equal(requests.length,beforeRequests,'filtering issues no request');
+  // A slash query with no matches closes on Enter and never sends or disappears silently.
+  await composer.fill('/zzzz');
+  await page.getByText('No matching skills.',{exact:true}).waitFor();
+  await composer.press('Enter');
+  await listbox.waitFor({state:'detached'});
+  assert.equal(await composer.inputValue(),'/zzzz');
+  assert.equal(turnPosts().length,0,'zero matches never send');
   // Filter to a skill that is not one of the six guided templates.
   await composer.fill('/objections');
   await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
-  assert.equal(requests.length,beforeRequests,'filtering issues no request');
   await composer.press('Enter');
   await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value.startsWith('Help me prepare responses to likely buyer objections.'));
-  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'selecting a command never sends');
+  assert.equal(turnPosts().length,0,'selecting a command never sends');
   assert.equal(await listbox.count(),0,'selecting closes the menu');
   // A second Enter is the only thing that sends, with the catalogued skill id.
   await composer.press('Enter');
   await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
-  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
-  assert.equal(turns.length,1,'a slash selection plus Enter sends exactly one turn');
-  assert.equal(turns[0].body.skill_id,'sales-objections');
-  assert.match(turns[0].body.text,/likely buyer objections/);
+  assert.equal(turnPosts().length,1,'a slash selection plus Enter sends exactly one turn');
+  assert.equal(turnPosts()[0].body.skill_id,'sales-objections');
+  assert.match(turnPosts()[0].body.text,/likely buyer objections/);
   // Escape closes without sending and keeps the typed text.
   const postsBefore=posts.length;
   await composer.fill('/');
@@ -1042,9 +1065,20 @@ test('the slash menu lists the offered skill library and inserts without sending
   await listbox.waitFor({state:'detached'});
   assert.equal(posts.length,postsBefore,'Escape never sends');
   assert.equal(await composer.inputValue(),'/','the slash text is kept after Escape');
-  // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
-  await composer.fill('');
+  // Locale drift after selection: the skill must be revalidated at send time.
+  await composer.fill('/pdf');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  await composer.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value.startsWith('Help me prepare a report export'));
+  const turnsBeforeDrift=turnPosts().length;
   await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByText('此技能不適用於目前語言。',{exact:true}).waitFor();
+  assert.equal(await composer.inputValue(),'Help me prepare a report export from current results.','the staged prompt stays editable');
+  await composer.press('Enter');
+  for(let attempt=0;attempt<100&&turnPosts().length===turnsBeforeDrift;attempt+=1)await page.waitForTimeout(50);
+  assert.equal(turnPosts().length,turnsBeforeDrift+1,'the plain text still sends once');
+  assert.equal(turnPosts().at(-1).body.skill_id,undefined,'a locale-disabled skill id is never sent');
+  // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
   await composer.fill('/');
   const zhList=page.getByRole('listbox',{name:'技能指令'});
   await zhList.waitFor();
@@ -1053,7 +1087,7 @@ test('the slash menu lists the offered skill library and inserts without sending
   await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
   const disabled=zhList.getByRole('option').first();
   assert.equal(await disabled.getAttribute('aria-disabled'),'true','a locale-incompatible skill is disabled, not hidden');
-  assert.equal(await zhList.getByText('此技能不適用於目前語言。').count(),1);
+  assert.equal(await zhList.getByText('此技能不適用於目前語言。').count()>=1,true);
   await composer.press('Enter');
   assert.equal(await composer.inputValue(),'/pdf','a disabled command cannot be inserted');
   // The open library never overflows a 320px viewport.

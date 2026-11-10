@@ -1,11 +1,11 @@
 'use client';
-import {useLayoutEffect,useRef,useState,type KeyboardEvent} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent} from 'react';
 import {ArrowUp,Building2,Paperclip,Sparkles} from 'lucide-react';
 import {UPLOAD_ACCEPT} from '@/services/live/document-upload';
 import type {ConversationDrafts} from './draft';
 import type {TurnCapability} from './types';
-import {SKILL_MENU_EMPTY,SKILL_MENU_LABEL,commandInsertion,filterSkillCommands,
-  groupSkillCommands,skillMenuKey,skillMoreLabel,visibleSkillCommands,type SkillCommand} from './skill-library';
+import {SKILL_MENU_EMPTY,SKILL_MENU_LABEL,SKILL_UNAVAILABLE_REASON,commandInsertion,filterSkillCommands,
+  groupSkillCommands,menuKeyIgnoredDuringComposition,resolveSendSkill,skillMenuKey,skillMoreLabel,visibleSkillCommands,type SkillCommand} from './skill-library';
 
 export type ComposerChip={key:string;label:string;prompt:string;skillId:string|null};
 export type ComposerAttachment={
@@ -36,6 +36,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
   const [text,setText]=useState(()=>drafts.read(threadKey)?.text??'');
   const [pending,setPending]=useState(false);
   const [currentSkill,setCurrentSkill]=useState<string|null>(null);
+  const [skillNotice,setSkillNotice]=useState('');
   const [menuDismissed,setMenuDismissed]=useState(false);
   const [activeIndex,setActiveIndex]=useState(0);
   const area=useRef<HTMLTextAreaElement>(null);
@@ -47,31 +48,45 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
   function change(value:string){
     setText(value);
     setCurrentSkill(null);
+    setSkillNotice('');
     setMenuDismissed(false);
     setActiveIndex(0);
     drafts.write(threadKey,value);
   }
+  // Locale or catalogue drift can disable the selected skill; never send it silently.
+  useEffect(()=>{
+    if(!currentSkill)return;
+    if(commands.some(command=>command.id===currentSkill&&command.available))return;
+    // Clears a stale selection after locale/catalogue drift; the notice is the honest transition.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentSkill(null);setSkillNotice(t(SKILL_UNAVAILABLE_REASON));
+  },[commands,currentSkill,t]);
   async function submit(raw:string,skillId:string|null){
     if(busy||!canWrite||!raw.trim())return;
+    const resolved=resolveSendSkill(commands,skillId);
+    if(resolved.unavailable){setSkillNotice(t(SKILL_UNAVAILABLE_REASON));}
     // Persist before the call so a reload or a lost response keeps the same id.
     const draft=drafts.write(threadKey,raw);
     if(!draft)return;
     setPending(true);
     try{
-      if(await onSend(raw,draft.clientMessageId,skillId)){drafts.clear(threadKey);setText('');setCurrentSkill(null);}
+      if(await onSend(raw,draft.clientMessageId,resolved.skillId)){drafts.clear(threadKey);setText('');setCurrentSkill(null);setSkillNotice('');}
     }finally{setPending(false);}
   }
   function choose(command:SkillCommand|undefined){
-    if(!command)return;
+    if(!command||!canWrite||busy)return;
     const insertion=commandInsertion(command);
     if(!insertion)return;
+    setSkillNotice('');
     change(insertion.text);
     setCurrentSkill(insertion.skillId);
     setMenuDismissed(true);
     area.current?.focus();
   }
   function onKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){
+    if(menuKeyIgnoredDuringComposition(event.nativeEvent.isComposing))return;
     if(menuOpen){
+      if(event.key==='Enter'&&visible.length===0){event.preventDefault();setMenuDismissed(true);return;}
       const action=skillMenuKey(event.key,active,visible.length);
       if(action.type==='move'){event.preventDefault();setActiveIndex(action.index);return;}
       if(action.type==='close'){event.preventDefault();setMenuDismissed(true);area.current?.focus();return;}
@@ -81,7 +96,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void submit(text,currentSkill);}
   }
   const slashMatch=/^\/(\S*)$/.exec(text),slashOpen=slashMatch!==null;
-  const menuCandidate=slashOpen&&commands.length>0&&!menuDismissed;
+  const menuCandidate=slashOpen&&commands.length>0&&!menuDismissed&&canWrite&&!busy;
   const menuOpen=menuCandidate;
   const matches=menuCandidate?filterSkillCommands(commands,slashMatch?.[1]??''):[];
   const {items:visible,more}=visibleSkillCommands(matches);
@@ -97,6 +112,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
   return <section className="conversation-compose" aria-label={t('Message composer')} style={{minWidth:0,maxWidth:'100%'}}>
     {capabilityNotice&&<p className="conversation-compose-notice" role="status">{t(capabilityNotice)}{capability==='unavailable'&&<button type="button" onClick={onRetryCapability}>{t('Retry')}</button>}</p>}
     {notice&&<p className="conversation-compose-notice" role="status">{t(notice)}</p>}
+    {skillNotice&&<p className="conversation-compose-notice" role="status">{skillNotice}</p>}
     {attachment?.notice&&<p className="conversation-compose-notice" role="status"><span style={{minWidth:0,overflowWrap:'anywhere'}}>{t(attachment.notice)}</span>
       {attachment.retryable&&<button type="button" onClick={attachment.onRetry}>{t('Retry attachment')}</button>}</p>}
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
@@ -132,7 +148,8 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
       <label className="conversation-sr" htmlFor="conversation-message">{t('Message BuyerOS')}</label>
       <textarea id="conversation-message" ref={area} rows={2} maxLength={4000} value={text} disabled={!canWrite}
         aria-describedby="conversation-compose-help" placeholder={t('Ask about this project, or choose a quick action')}
-        {...menuAria} onChange={event=>change(event.target.value)} onKeyDown={onKeyDown}/>
+        {...menuAria} onChange={event=>change(event.target.value)} onKeyDown={onKeyDown}
+        onBlur={()=>setMenuDismissed(true)}/>
       <div className="conversation-compose-actions" style={{minWidth:0}}>
         <small id="conversation-compose-help">{t('Enter to send · Shift+Enter for a new line')}</small>
         {attachment?.visible&&!attachment.busy&&<label htmlFor="conversation-attach" style={{display:'inline-flex',alignItems:'center',flex:'0 1 auto',minWidth:0,maxWidth:'100%',cursor:canWrite?'pointer':'default',padding:'0 4px'}}>

@@ -218,4 +218,5 @@ Object.assign(zh,{
   'Outreach':'外聯',
   'Follow-up':'後續跟進',
   'Analysis':'分析',
+  'Use the {label} skill.':'使用「{label}」技能。',
 });

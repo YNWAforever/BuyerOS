@@ -5,9 +5,9 @@ import {readFileSync} from 'node:fs';
 import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
-const {SKILL_AUTHORING,SKILL_MENU_EMPTY,SKILL_MENU_LABEL,SKILL_UNAVAILABLE_REASON,MAX_VISIBLE_SKILLS,
-  buildSkillCommands,filterSkillCommands,visibleSkillCommands,groupSkillCommands,skillMenuKey,commandInsertion,
-  skillMoreLabel}=await import('../features/live/conversation/skill-library.ts');
+const {SKILL_AUTHORING,SKILL_MENU_EMPTY,SKILL_MENU_LABEL,SKILL_UNAVAILABLE_REASON,GENERIC_SKILL_PROMPT,
+  MAX_VISIBLE_SKILLS,derivedSkillLabel,buildSkillCommands,filterSkillCommands,visibleSkillCommands,groupSkillCommands,
+  skillMenuKey,commandInsertion,resolveSendSkill,menuKeyIgnoredDuringComposition,skillMoreLabel}=await import('../features/live/conversation/skill-library.ts');
 const {liveZh}=await import('../features/live/locale.ts');
 
 const identity=value=>value;
@@ -79,6 +79,39 @@ test('locale-incompatible skills are disabled with a localized reason',()=>{
   assert.equal(localised.find(command=>command.id==='sales-proposal').available,true);
 });
 
+test('an offered skill without authored copy still gets a readable fallback command',()=>{
+  assert.equal(derivedSkillLabel('sales-customer-success'),'Customer success');
+  assert.equal(derivedSkillLabel('customer-success'),'Customer success');
+  assert.equal(derivedSkillLabel('drive.read'),'Read');
+  const unauthored=buildSkillCommands({skills:[{id:'sales-customer-success',languages:['en','zh-HK']}],
+    offered:new Set(['sales-customer-success']),locale:'en',translate:identity});
+  assert.equal(unauthored.length,1,'every offered skill is reachable, authored or not');
+  assert.equal(unauthored[0].label,'Customer success');
+  assert.equal(unauthored[0].prompt,'Use the Customer success skill.');
+  assert.equal(unauthored[0].categoryId,'project');
+  assert.equal(filterSkillCommands(unauthored,'customer').length,1,'the fallback label/prompt is filterable');
+  const zhFallback=buildSkillCommands({skills:[{id:'sales-customer-success',languages:['en','zh-HK']}],
+    offered:new Set(['sales-customer-success']),locale:'zh-HK',translate:key=>liveZh[key]??key});
+  assert.equal(zhFallback[0].prompt,liveZh[GENERIC_SKILL_PROMPT].replace('{label}','Customer success'));
+  const mismatch=buildSkillCommands({skills:[{id:'sales-customer-success',languages:['en']}],
+    offered:new Set(['sales-customer-success']),locale:'zh-HK',translate:key=>liveZh[key]??key});
+  assert.equal(mismatch[0].available,false);
+});
+
+test('composition keys are ignored and a drifted skill is never sent',()=>{
+  assert.equal(menuKeyIgnoredDuringComposition(true),true);
+  assert.equal(menuKeyIgnoredDuringComposition(false),false);
+  const available=buildSkillCommands({skills:[{id:'sales-objections',languages:['en','zh-HK']}],
+    offered:new Set(['sales-objections']),locale:'en',translate:identity});
+  assert.deepEqual(resolveSendSkill(available,'sales-objections'),{skillId:'sales-objections',unavailable:false});
+  const disabled=buildSkillCommands({skills:[{id:'sales-objections',languages:['en']}],
+    offered:new Set(['sales-objections']),locale:'zh-HK',translate:identity});
+  assert.deepEqual(resolveSendSkill(disabled,'sales-objections'),{skillId:null,unavailable:true},
+    'a skill disabled by locale drift is cleared, never sent');
+  assert.deepEqual(resolveSendSkill(available,'removed-from-catalogue'),{skillId:null,unavailable:true});
+  assert.deepEqual(resolveSendSkill(available,null),{skillId:null,unavailable:false});
+});
+
 test('selection inserts the localized prompt and records only the skill id',()=>{
   const command=commands.find(item=>item.id==='sales-objections');
   assert.deepEqual(commandInsertion(command),{text:SKILL_AUTHORING['sales-objections'].prompt,skillId:'sales-objections'});
@@ -96,4 +129,5 @@ test('every authored skill/category/menu string has EN and zh-HK copy',()=>{
   assert.equal(typeof liveZh[SKILL_UNAVAILABLE_REASON],'string');
   assert.equal(typeof liveZh[SKILL_MENU_LABEL],'string');
   assert.equal(typeof liveZh[SKILL_MENU_EMPTY],'string');
+  assert.equal(typeof liveZh[GENERIC_SKILL_PROMPT],'string');
 });
