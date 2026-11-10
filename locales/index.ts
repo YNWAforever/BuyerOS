@@ -219,4 +219,8 @@ Object.assign(zh,{
   'Follow-up':'後續跟進',
   'Analysis':'分析',
   'Use the {label} skill.':'使用「{label}」技能。',
+  'Pin discussion':'固定討論',
+  'Unpin discussion':'取消固定討論',
+  'Archive discussion':'封存討論',
+  'Restore discussion':'還原討論',
 });

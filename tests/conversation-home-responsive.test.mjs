@@ -88,7 +88,7 @@ const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
 const uuidPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 function standardApi(options={}){
- const {absent=false,failFirstSend=false,contentOnly=false,skills=null}=options;
+ const {absent=false,failFirstSend=false,contentOnly=false,skills=null,manage=false,access=null,second=false}=options;
  return async ({req,url,state})=>{
   const method=req.method();
   if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')
@@ -96,8 +96,26 @@ function standardApi(options={}){
   if(url.pathname===prefix)return {json:fixture.envelope({id:project,workspace_id:workspace,status:'active',offer_revision:1,active_icp_version_id:fixture.profileId,name:'Fixture project'})};
   if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:skills??[{id:'sales-research'},{id:'review-buyers'}]})};
   if(url.pathname.endsWith('/sales-tasks/capability'))return {json:fixture.envelope({admission_enabled:true})};
+  const preferencePut=url.pathname.match(/\/conversation-threads\/([0-9a-f-]+)\/preferences$/);
+  if(preferencePut&&method==='PUT'){
+   const body=req.postDataJSON();
+   if(!manage)return {status:404,json:{code:'NOT_FOUND',message:'not managed'}};
+   if(state.failPreferences)return {status:500,json:{code:'INTERNAL',message:'private server detail'}};
+   state.preferences={...(state.preferences??{}),[preferencePut[1]]:{pinned:body.pinned===true,archived:body.archived===true}};
+   return {json:fixture.envelope(state.preferences[preferencePut[1]])};
+  }
   if(url.pathname.endsWith('/conversation-threads')&&method==='GET'){
    const searching=Boolean(url.searchParams.get('q'))||url.searchParams.get('archived')==='true';
+   if(manage){
+    const archivedView=url.searchParams.get('archived')==='true',q=(url.searchParams.get('q')??'').trim().toLowerCase();
+    const project=row=>{const stored=(state.preferences??{})[row.id];
+     return {...row,access:state.access??access??row.access,pinned:stored?.pinned===true,archived:stored?.archived===true};};
+    let rows=[fixture.studioSummary,...(second?[{...fixture.studioSummary,id:fixture.newThreadId,title:'Other discussion',
+     updatedAt:fixture.studioSummary.updatedAt+120_000,archived:false,pinned:false}]:[])].map(project);
+    if(archivedView)rows=rows.filter(row=>row.archived);
+    if(q)rows=rows.filter(row=>row.title.toLowerCase().includes(q));
+    return {json:fixture.envelope({items:rows,total:rows.length,offset:0,limit:50})};
+   }
    const items=searching?[]:[fixture.studioSummary];
    return {json:fixture.envelope({items,total:items.length,offset:0,limit:50})};
   }
@@ -106,6 +124,10 @@ function standardApi(options={}){
    if(state.createdThread&&state.createdThread.id===threadGet[1]){state.thread=state.createdThread;return {json:fixture.envelope(state.createdThread)};}
    const resolved=contentOnly?{...fixture.studioThread,sources:[],messages:[{...fixture.userMessage},
      {...fixture.assistantMessage,parts:[{kind:'text',text:'Here is the brief.'}]}]}:fixture.studioThread;
+   if(manage){
+    const stored=(state.preferences??{})[threadGet[1]];
+    return {json:fixture.envelope({...resolved,access:state.access??access??resolved.access,archived:stored?.archived===true})};
+   }
    state.thread=state.thread??resolved;
    return {json:fixture.envelope(resolved)};
   }
@@ -150,11 +172,12 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
  await server.listen();
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
  const page=await browser.newPage();page.setDefaultTimeout(30000);
- const requests=[],posts=[],errors=[],state={thread:null,createdThread:null,turnCalls:0};
+ const requests=[],posts=[],errors=[],state={thread:null,createdThread:null,turnCalls:0,preferences:{},failPreferences:false};
  page.on('pageerror',error=>errors.push(error.message));
  await page.route('**/v1/**',async route=>{
   const request=route.request(),url=new URL(request.url());
-  requests.push({method:request.method(),path:url.pathname,search:url.search});
+  const writeBody=request.method()==='GET'?undefined:(()=>{try{return request.postDataJSON();}catch{return undefined;}})();
+  requests.push({method:request.method(),path:url.pathname,search:url.search,...(writeBody===undefined?{}:{body:writeBody})});
   if(request.method()==='POST'){let body;try{body=request.postData()===null?undefined:request.postDataJSON();}catch{body=undefined;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['x-buyeros-if-match']??request.headers()['if-match']});}
   const answer=await handler({req:request,url,state,requests,posts});
   if(answer){
@@ -1099,6 +1122,105 @@ test('the slash menu lists the offered skill library and inserts without sending
   await page.setViewportSize({width:1280,height:800});
   assert.deepEqual(errors,[]);
  }finally{await harness.close();}
+});
+
+test('discussion preferences pin, archive, reload and the share ACL stay honest',async()=>{
+ const harness=await fixtureHarness({handler:standardApi({manage:true,second:true})});
+ try{
+  const {page,requests,errors,state}=harness;
+  const rows=()=>page.locator('.conversation-thread-items button');
+  const row=title=>rows().filter({hasText:title});
+  const prefWrites=()=>requests.filter(entry=>entry.method==='PUT'&&/\/preferences$/.test(entry.path));
+  const openMenu=async()=>{const details=page.locator('.conversation-menu');
+   if(!(await details.evaluate(node=>node.open)))await page.locator('summary[aria-label="Discussion menu"]').click();};
+  await page.locator('[data-skill-ids="ready"]').waitFor();
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-thread-items button').length===2);
+  await page.locator('summary[aria-label="Discussion menu"]').waitFor();
+  // Recency order first; pinning moves the current row to the front.
+  assert.equal(await rows().first().getAttribute('aria-label'),'Other discussion');
+  assert.equal(await row('Research buyer').locator('svg').count(),0,'an unpinned row has no pin glyph');
+  await openMenu();
+  const pin=page.getByRole('button',{name:'Pin discussion',exact:true});
+  assert.equal(await pin.getAttribute('aria-pressed'),'false');
+  await pin.click();
+  const unpin=page.getByRole('button',{name:'Unpin discussion',exact:true});
+  await unpin.waitFor();
+  assert.equal(await unpin.getAttribute('aria-pressed'),'true','the pin toggle reflects the stored preference');
+  await page.waitForFunction(()=>document.querySelector('.conversation-thread-items button')?.getAttribute('aria-label')==='Research buyer');
+  assert.equal(await row('Research buyer').locator('svg').count(),1,'the pinned row shows the pin glyph');
+  assert.deepEqual(prefWrites().at(-1).body,{pinned:true,archived:false},'pin preserves the archived flag');
+  // Reload: the preference is server-backed, not a local lie.
+  await page.reload();
+  await page.waitForFunction(()=>document.querySelectorAll('.conversation-thread-items button').length===2);
+  await page.waitForFunction(()=>document.querySelector('.conversation-thread-items button')?.getAttribute('aria-label')==='Research buyer');
+  await page.locator('summary[aria-label="Discussion menu"]').waitFor();
+  await openMenu();
+  assert.equal(await page.getByRole('button',{name:'Unpin discussion',exact:true}).getAttribute('aria-pressed'),'true','the pin preference survives reload');
+  // Archive: out of the normal list, into the archive view; pinned is preserved.
+  await page.getByRole('button',{name:'Archive discussion',exact:true}).click();
+  await page.getByRole('button',{name:'Restore discussion',exact:true}).waitFor();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.conversation-thread-items button')].every(button=>button.getAttribute('aria-label')!=='Research buyer'));
+  assert.deepEqual(prefWrites().at(-1).body,{pinned:true,archived:true},'archive preserves the pinned flag');
+  await page.getByRole('button',{name:'Archive view',exact:true}).click();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.conversation-thread-items button')].some(button=>button.getAttribute('aria-label')==='Research buyer'));
+  // Restore returns it to the normal list.
+  await openMenu();
+  await page.getByRole('button',{name:'Restore discussion',exact:true}).click();
+  await page.getByRole('button',{name:'Archive discussion',exact:true}).waitFor();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.conversation-thread-items button')].every(button=>button.getAttribute('aria-label')!=='Research buyer'));
+  assert.deepEqual(prefWrites().at(-1).body,{pinned:true,archived:false},'restore preserves the pinned flag');
+  await page.getByRole('button',{name:'Archived discussions',exact:true}).click();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.conversation-thread-items button')].some(button=>button.getAttribute('aria-label')==='Research buyer'));
+  assert.equal(await rows().first().getAttribute('aria-label'),'Research buyer','the restored pinned row is first');
+  // Honest failure: no optimistic lie, the row and toggle keep the prior state.
+  state.failPreferences=true;
+  await openMenu();
+  await page.getByRole('button',{name:'Unpin discussion',exact:true}).click();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Unpin discussion',exact:true}).getAttribute('aria-pressed'),'true','a failed preference never flips the toggle');
+  assert.equal(await rows().first().getAttribute('aria-label'),'Research buyer','the row keeps its pinned-first place');
+  state.failPreferences=false;
+  // The open menu remains inside a 320px viewport.
+  await page.setViewportSize({width:320,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the open discussion menu fits 320px');
+  await page.setViewportSize({width:1280,height:800});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+ // Viewers and editors may pin/archive, but the owner-only share control is absent.
+ const viewer=await fixtureHarness({handler:standardApi({manage:true,access:'viewer'})});
+ try{
+  const {page,requests,errors}=viewer;
+  const summary=page.locator('summary[aria-label="Discussion menu"]');
+  await summary.waitFor();
+  await page.locator('.conversation-head').getByText('Shared with you',{exact:false}).first().waitFor();
+  await summary.click();
+  assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0,'a viewer has no Share discussion control');
+  await page.getByRole('button',{name:'Pin discussion',exact:true}).click();
+  const unpin=page.getByRole('button',{name:'Unpin discussion',exact:true});
+  await unpin.waitFor();
+  assert.equal(await unpin.getAttribute('aria-pressed'),'true','a viewer can pin its own view');
+  const writes=()=>requests.filter(entry=>entry.method==='PUT'&&/\/preferences$/.test(entry.path));
+  assert.deepEqual(writes().at(-1).body,{pinned:true,archived:false});
+  await page.getByRole('button',{name:'Archive discussion',exact:true}).click();
+  await page.getByRole('button',{name:'Restore discussion',exact:true}).waitFor();
+  assert.deepEqual(writes().at(-1).body,{pinned:true,archived:true},'the viewer archive keeps its pin');
+  assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0);
+  // The same rule holds for an editor: personal pin/archive yes, owner share dialog no.
+  const {state}=viewer;
+  state.access='editor';
+  await page.reload();
+  const editorSummary=page.locator('summary[aria-label="Discussion menu"]');
+  await editorSummary.waitFor();
+  await page.locator('.conversation-head').getByText('Editor',{exact:false}).first().waitFor();
+  await editorSummary.click();
+  assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0,'an editor has no Share discussion control');
+  const editorUnpin=page.getByRole('button',{name:'Unpin discussion',exact:true});
+  await editorUnpin.waitFor();
+  assert.equal(await editorUnpin.getAttribute('aria-pressed'),'true','the editor keeps its own preference');
+  await editorUnpin.click();
+  await page.getByRole('button',{name:'Pin discussion',exact:true}).waitFor();
+  assert.deepEqual(errors,[]);
+ }finally{await viewer.close();}
 });
 
 // Restored retained-surface scenarios: device discussions and Google Drive remain the
