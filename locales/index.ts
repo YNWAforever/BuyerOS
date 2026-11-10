@@ -223,4 +223,9 @@ Object.assign(zh,{
   'Unpin discussion':'取消固定討論',
   'Archive discussion':'封存討論',
   'Restore discussion':'還原討論',
+ 'Send':'傳送',
+ 'Remove':'移除',
+ 'Approved':'已批准',
+ 'Cancel':'取消',
+ 'Close':'關閉',
 });
