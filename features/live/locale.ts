@@ -867,6 +867,7 @@ export const liveZh: Record<string,string> = {
   'Retry send':'重試傳送',
   'Retry':'重試',
   'Shared':'已分享',
+  'Show earlier messages':'顯示較早訊息',
   'Show discussions':'顯示討論',
   'Shown in this tab only':'僅顯示於此分頁',
   'Start a discussion before selecting sources.':'請先開始討論才選擇來源。',

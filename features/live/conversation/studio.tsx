@@ -755,7 +755,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         ?<div className="conversation-load"><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/><button type="button" onClick={()=>navigate('/app/discussions/new')}>{t('New discussion')}</button></div>
         :threadState==='unavailable'
           ?<div className="conversation-load"><p role="alert">{t(threadNoticeText||threadNotices.unavailable)}</p><button type="button" onClick={()=>setReload(value=>value+1)}>{t('Retry')}</button></div>
-          :<ConversationTranscript t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
+          :<ConversationTranscript key={loaded?.chat.id??'pending'} t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
       {running&&<div className="conversation-stream" role="status" aria-live="polite">
         <span className="conversation-stream-label">{reconnecting?t('Reconnecting…'):step==='approval'?t('Approval required'):step==='step'?t('Running a step…'):t('Working…')}</span>
         {loaded&&loaded.chat.access!=='viewer'&&<button type="button" className="conversation-cancel" disabled={cancelling} onClick={()=>void cancelTurn()}>{t(cancelling?'Cancelling…':'Cancel turn')}</button>}

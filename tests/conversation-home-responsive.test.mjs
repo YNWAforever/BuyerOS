@@ -1701,3 +1701,99 @@ test('conversation studio reflows at the 200% zoom viewport and keeps zh-HK',asy
   assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });
+
+test('a 100-message transcript renders a bounded window and reveals history without losing live replies',async()=>{
+ // Increment 3.3: 100 persisted messages are the server cap. Only the latest
+ // bounded window mounts; each reveal is anchored and no request is made.
+ const longThread=fixture.threadWith({messages:Array.from({length:100},(_,index)=>fixture.userRow({
+  id:'e9000000-0000-4000-8000-'+String(index+1).padStart(12,'0'),seq:index+1,text:`Window message ${index+1}`}))});
+ const baseApi=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  const {req,url,state}=input;
+  if(req.method()==='GET'&&url.pathname.endsWith('/conversation-threads/'+threadId)){
+   state.thread=state.thread??longThread;
+   return {json:fixture.envelope(state.thread)};
+  }
+  return baseApi(input);
+ }});
+ try{
+  const {page,errors,requests}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  const messages=()=>transcript.locator('article.conversation-message');
+  const partTexts=()=>transcript.locator('article.conversation-message .conversation-part-text').allTextContents();
+  const waitForCount=expected=>page.waitForFunction(value=>document.querySelectorAll('.conversation-transcript article.conversation-message').length===value,expected);
+  const showEarlier=page.getByRole('button',{name:'Show earlier messages',exact:true});
+  await page.getByText('Window message 100',{exact:true}).waitFor();
+  assert.equal(await messages().count(),25,'only the latest window is mounted initially');
+  assert.equal(await page.getByText('Window message 76',{exact:true}).count(),1,'the window starts at the latest 25');
+  assert.equal(await page.getByText('Window message 75',{exact:true}).count(),0,'the older 75 stay unmounted');
+  await showEarlier.waitFor();
+  assert.equal(await transcript.getByRole('button',{name:'Show earlier messages',exact:true}).count(),0,
+   'the control sits outside the role=log live region');
+  assert.equal(await transcript.getAttribute('role'),'log');
+  // 320px: the control wraps without sideways overflow.
+  await page.setViewportSize({width:320,height:900});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the transcript window fits 320px');
+  assert.equal(await showEarlier.isVisible(),true,'the control stays reachable at 320px');
+  // Revealing earlier messages is in-memory and anchors the visible message
+  // even when the reader has scrolled away from the tail.
+  await transcript.evaluate(node=>{node.scrollTop=Math.max(0,node.scrollHeight-node.clientHeight-200);node.dispatchEvent(new Event('scroll'));});
+  const before=await transcript.evaluate(node=>({top:node.scrollTop,height:node.scrollHeight,view:node.clientHeight}));
+  const requestsBefore=requests.filter(item=>/\/conversation-(threads|turns)(\/|$)/.test(item.path)).length;
+  await showEarlier.click();
+  await waitForCount(50);
+  const after=await transcript.evaluate(node=>({top:node.scrollTop,height:node.scrollHeight,view:node.clientHeight}));
+  assert.ok(Math.abs((after.top-before.top)-(after.height-before.height))<=1,
+   `revealing anchors the viewport (scroll ${before.top}->${after.top}, height ${before.height}->${after.height})`);
+  assert.ok(after.top<after.height-after.view-100,'the anchored reader is not snapped to the tail');
+  assert.equal(requests.filter(item=>/\/conversation-(threads|turns)(\/|$)/.test(item.path)).length,requestsBefore,
+   'showing earlier messages makes no network request');
+  let texts=await partTexts();
+  assert.equal(texts.length,50,'one activation adds exactly one batch');
+  assert.equal(new Set(texts).size,50,'revealed entries are exactly once');
+  assert.equal(texts[0],'Window message 51');
+  assert.equal(texts.at(-1),'Window message 100');
+  // 200% zoom (640px CSS viewport): the next batch is still reachable.
+  await page.setViewportSize({width:640,height:900});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=640,'the window fits the zoom viewport');
+  assert.equal(await showEarlier.isVisible(),true,'the control stays reachable at 200% zoom');
+  await showEarlier.click();
+  await waitForCount(75);
+  // zh-HK: the remaining history reveals with the translated label, then the control goes.
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  const zhShowEarlier=page.getByRole('button',{name:'顯示較早訊息',exact:true});
+  await zhShowEarlier.waitFor();
+  await zhShowEarlier.click();
+  await waitForCount(100);
+  assert.equal(await zhShowEarlier.count(),0,'the control disappears once everything is revealed');
+  texts=await partTexts();
+  assert.equal(texts.length,100,'the full reveal loses no entry');
+  assert.equal(new Set(texts).size,100,'the full reveal duplicates no entry');
+  assert.equal(texts[0],'Window message 1','the reveal keeps persisted order');
+  assert.equal(texts.at(-1),'Window message 100');
+  // Existing jump-to-latest semantics: only away from the tail, then it hides.
+  await transcript.evaluate(node=>{node.scrollTop=0;node.dispatchEvent(new Event('scroll'));});
+  const jump=page.getByRole('button',{name:'跳到最新',exact:true});
+  await jump.waitFor();
+  await jump.click();
+  await page.waitForFunction(()=>{const node=document.querySelector('.conversation-transcript');
+   return node&&node.scrollHeight-node.scrollTop-node.clientHeight<2;});
+  assert.equal(await jump.count(),0,'jump-to-latest hides at the latest content');
+  // A live reply still arrives and stays visible at the latest position.
+  await page.locator('#conversation-message').fill('Live reply request');
+  await page.locator('.conversation-send').click();
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  await waitForCount(102);
+  assert.equal(await page.getByText('Window message 1',{exact:true}).count(),1,'the live entry does not displace revealed history');
+  const liveVisible=await page.evaluate(()=>{
+   const node=document.querySelector('.conversation-transcript');
+   const target=[...node.querySelectorAll('.conversation-part-text')].find(item=>item.textContent==='Here is the follow-up.');
+   if(!target)return false;
+   const box=target.getBoundingClientRect(),scroll=node.getBoundingClientRect();
+   return box.top>=scroll.top-1&&box.bottom<=scroll.bottom+1;
+  });
+  assert.equal(liveVisible,true,'the live reply is visible at the latest position');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=640,'the zh-HK live state fits the zoom viewport');
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});

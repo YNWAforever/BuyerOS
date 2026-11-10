@@ -4,6 +4,7 @@ import {ArrowDown} from 'lucide-react';
 import type {TranscriptEntry} from './parts';
 import {groupTranscript} from './parts';
 import {MessageParts,type PartActions} from './inline-parts';
+import {hasEarlier,initialWindow,receiveEntryTotal,revealEarlier,windowSlice,TRANSCRIPT_WINDOW,type TranscriptWindowState} from './transcript-window';
 function readerOffset():number{
   // The studio mounts client-side; the server render (tests/static markup) keeps UTC.
   return typeof window==='undefined'?0:new Date().getTimezoneOffset();
@@ -33,20 +34,55 @@ function dayLabel(dayStart:number|null,locale:'en'|'zh-HK',t:(value:string)=>str
 export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle}:Props){
   const scroller=useRef<HTMLDivElement>(null),atBottom=useRef(true),primed=useRef(false);
   const [showJump,setShowJump]=useState(false);
+  const [announceLive,setAnnounceLive]=useState(true);
   // Offset is read once per mount; day groups then match the reader's zone.
   const [offset]=useState(readerOffset);
+  const anchorHeight=useRef(0),pendingAnchor=useRef(false);
+  const persisted=entries.filter(entry=>!entry.ephemeral);
+  // The studio remounts this transcript when a thread becomes loaded (keyed by
+  // thread id), so this lazy read captures the persisted history at first paint and
+  // only the latest bounded window mounts. Live additions still reconcile below.
+  const [windowedState,setWindowedState]=useState<TranscriptWindowState>(()=>initialWindow(persisted.length));
+  const windowed=receiveEntryTotal(windowedState,persisted.length);
+  const visibleKeys=new Set(windowSlice(persisted,windowed).map(entry=>entry.key));
+  // Live/streamed entries are never windowed or hidden; persisted order is kept.
+  const visible=entries.filter(entry=>entry.ephemeral||visibleKeys.has(entry.key));
+  const earlier=hasEarlier(windowed);
   function scrollToLatest(behavior:ScrollBehavior='smooth'){
     const node=scroller.current;
     if(!node)return;
     node.scrollTo({top:node.scrollHeight,behavior});
     atBottom.current=true;setShowJump(false);
   }
+  function showEarlierMessages(){
+    const node=scroller.current;
+    if(!node||!earlier)return;
+    const next=revealEarlier(windowed);
+    anchorHeight.current=node.scrollHeight;
+    pendingAnchor.current=true;
+    setWindowedState(next);
+    // Historical entries are additions to a role=log; mute the live region for
+    // the reveal commit so they are not announced as new messages.
+    setAnnounceLive(false);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>setAnnounceLive(true)));
+    if(!hasEarlier(next))requestAnimationFrame(()=>scroller.current?.focus({preventScroll:true}));
+  }
   useLayoutEffect(()=>{
     const node=scroller.current;
     if(!node)return;
-    if(!primed.current&&entries.length){primed.current=true;node.scrollTop=node.scrollHeight;atBottom.current=true;return;}
+    if(pendingAnchor.current){
+      pendingAnchor.current=false;
+      const added=node.scrollHeight-anchorHeight.current;
+      if(added>0)node.scrollTop+=added;
+      // Anchor the message the reader was looking at; only show the jump when
+      // the anchored viewport is no longer at the tail.
+      atBottom.current=node.scrollHeight-node.scrollTop-node.clientHeight<120;
+      setShowJump(!atBottom.current&&entries.length>0);
+      return;
+    }
+    if(!primed.current&&visible.length){primed.current=true;node.scrollTop=node.scrollHeight;atBottom.current=true;return;}
     if(atBottom.current)scrollToLatest('auto');
-  },[entries.length]);
+  },[entries.length,windowed.start,visible.length]);
   function onScroll(){
     const node=scroller.current;
     if(!node)return;
@@ -54,9 +90,10 @@ export function ConversationTranscript({t,locale,entries,actions,busy,statusLine
     atBottom.current=bottom;
     setShowJump(!bottom&&entries.length>0);
   }
-  const groups=groupTranscript(entries,offset);
+  const groups=groupTranscript(visible,offset);
   return <div className="conversation-transcript-wrap">
-    <div className="conversation-transcript" role="log" aria-label={t('Discussion messages')} aria-live="polite" aria-relevant="additions" ref={scroller} onScroll={onScroll}>
+    {earlier&&<button type="button" className="conversation-show-earlier" onClick={showEarlierMessages}>{t('Show earlier messages')}</button>}
+    <div className="conversation-transcript" role="log" aria-label={t('Discussion messages')} aria-live={announceLive?'polite':'off'} aria-relevant="additions" ref={scroller} onScroll={onScroll} tabIndex={persisted.length>TRANSCRIPT_WINDOW?-1:undefined}>
       {!entries.length&&<div className="conversation-empty"><h2>{emptyTitle}</h2></div>}
       {groups.map(group=><section className="conversation-day" key={group.key} aria-label={dayLabel(group.dayStart,locale,t)||undefined}>
         {group.dayStart!==null&&<h3 className="conversation-day-label">{dayLabel(group.dayStart,locale,t)}</h3>}
