@@ -165,6 +165,22 @@ It never dispatches, reserves or retries a provider call. Migrations:
 (API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
 `conversation_turns` for the single source transition; no worker grants).
 
+### Turn admission ceiling
+
+`POST /conversation-turns` also passes a dedicated **per-workspace** ceiling
+before any turn/task/budget/idempotency write. Settings:
+`BUYEROS_TURN_PER_MINUTE` (`turn_per_minute`, default `30`, `0` disables).
+Admission is one atomic upsert into `conversation_turn_rate_windows` (migration
+`0070_turn_rate_windows`: PK `(workspace_id, window_start)` for the current UTC
+minute, forced RLS; API `SELECT,INSERT,UPDATE`; no worker grants), committed in
+an independent transaction so a later failure cannot roll the counter back. The
+check runs after authentication, project access and idempotency replay
+detection; a completed replay is returned without consuming admission. At the
+ceiling the request fails with `429 TURN_RATE_LIMITED` (retryable) and leaves no
+turn, event, task, budget or idempotency row. The counter is workspace-wide (all
+members share it), so another workspace is unaffected. Decisions, cancel and
+reconcile are not rate limited by this ceiling.
+
 ### Thread company link
 
 `POST /conversation-turns` accepts `buyer_id` **only on the thread-first path**.

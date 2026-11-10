@@ -39,6 +39,9 @@ def enabled(monkeypatch):
     monkeypatch.setenv('NEXT_PUBLIC_CONVERSATION_HOME', 'true')
     monkeypatch.setenv('BUYEROS_SALES_SKILLS_ENABLED', 'true')
     monkeypatch.setenv('BUYEROS_SALES_WORKSPACE_IDS', WORKSPACE_A)
+    # Existing turn fixtures are not a volume test; dedicated admission tests
+    # set their own BUYEROS_TURN_PER_MINUTE.
+    monkeypatch.setenv('BUYEROS_TURN_PER_MINUTE', '0')
 
 
 @pytest.fixture

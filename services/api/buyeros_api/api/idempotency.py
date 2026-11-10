@@ -1,6 +1,7 @@
 """Project-mutation idempotency, reusing the P4 record and the P5 conflict rule."""
 
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
 from sqlalchemy import select
@@ -35,12 +36,18 @@ def request_fingerprint(operation_id: str, target: dict, precondition: str | Non
 async def begin_idempotency(
     session, *, workspace_id, actor_id, operation_id: str, key: str, body: dict,
     target: dict | None = None, precondition: str | None = None,
+    before_insert: Callable[[], Awaitable[None]] | None = None,
 ) -> IdempotencyOutcome:
     """Return the completed record on a replay, or insert an in_progress one.
 
     The contract's `IdempotencyKey` is 8..200 opaque characters; anything else is 400. The same
     key with a different body is 409, matching `confirm_service.same_request`; a recorded record
     that is still `in_progress` is a conflict rather than a silent second mutation.
+
+    ``before_insert`` runs only when this key is new, after replay/conflict
+    resolution and before the record is written. Conversation turns use it for
+    workspace admission, so a completed replay never consumes a slot and a
+    rejected first attempt leaves no idempotency residue.
     """
     from ..db.contact import IdempotencyRecord
     from ..services.confirm_service import IdempotencyConflict, request_fingerprint as body_fingerprint, same_request
@@ -73,6 +80,10 @@ async def begin_idempotency(
     existing = (await session.execute(_scope())).scalar_one_or_none()
     if existing is not None:
         return _resolve(existing)
+
+    # New key: admission (or any other precondition) runs before the record write.
+    if before_insert is not None:
+        await before_insert()
 
     record = IdempotencyRecord(
         workspace_id=workspace_id,

@@ -273,10 +273,11 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0069_turn_reconciliations']
+    assert required['compatible_heads'] == ['0070_turn_rate_windows']
     for name in ('conversation_turns', 'conversation_turn_proposals',
                  'conversation_turn_decisions', 'conversation_thread_messages',
-                 'conversation_turn_events', 'conversation_turn_reconciliations'):
+                 'conversation_turn_events', 'conversation_turn_reconciliations',
+                 'conversation_turn_rate_windows'):
         columns = required['required_relations'][f'public.{name}']
         assert set(columns) == set(Base.metadata.tables[name].columns.keys())
     assert {'public.conversation_turns', 'public.conversation_turn_proposals',
@@ -287,7 +288,8 @@ def test_registered_tables_match_the_readiness_contract():
     worker = sales_requirements(worker=True)
     for name in ('public.conversation_thread_messages', 'public.conversation_turns',
                  'public.conversation_turn_proposals', 'public.conversation_turn_decisions',
-                 'public.conversation_turn_events', 'public.conversation_turn_reconciliations'):
+                 'public.conversation_turn_events', 'public.conversation_turn_reconciliations',
+                 'public.conversation_turn_rate_windows'):
         assert name not in worker['required_relations']
         assert not [item for item in worker['required_privileges'] if item['relation'] == name]
 

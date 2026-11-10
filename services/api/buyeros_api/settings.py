@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     read_per_minute: int = Field(default=600, ge=1, le=10000)
     # Bounds one synchronous conversation turn's server work; reviewed, no secret.
     turn_deadline_seconds: int = Field(default=60, ge=5, le=90)
+    # Dedicated per-workspace conversation-turn ceiling (0 disables it).
+    turn_per_minute: int = Field(default=30, ge=0, le=1000)
     write_per_minute: int = Field(default=300, ge=1, le=10000)
     expensive_read_per_minute: int = Field(default=120, ge=1, le=10000)
     expensive_write_per_minute: int = Field(default=60, ge=1, le=10000)

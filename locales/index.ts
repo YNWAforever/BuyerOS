@@ -94,6 +94,7 @@ Object.assign(zh,{
   'The approved step did not return a confirmed result. Check the result before retrying.':'已批准的步驟未回傳確認結果，重試前請先檢查結果。',
   'This discussion changed. Copy any unsaved text, reload and send again.':'討論已變更。請複製未送出的文字、重新載入後再傳送。',
   'The conversation did not respond. Your message is still here.':'對話沒有回應，你的訊息仍保留在此。',
+ 'Too many turns were started just now. Wait a moment and try again.':'剛剛開始了太多處理，請稍候片刻再試。',
   'Continuous replies are not available here. Your message is still saved as a note.':'此處暫不提供連續回覆，你的訊息仍會儲存為筆記。',
   'You do not have permission to act in this discussion.':'你無權在此討論中操作。',
   'The approved budget cannot cover this step. Nothing was executed.':'已批准的預算不足以支付此步驟，未執行任何操作。',

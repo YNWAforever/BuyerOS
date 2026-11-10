@@ -10,7 +10,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0069_turn_reconciliations"
+HEAD = "0070_turn_rate_windows"
 
 
 def _config():

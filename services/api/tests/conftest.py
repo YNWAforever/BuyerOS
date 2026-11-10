@@ -250,6 +250,9 @@ def seeded(migrated):
         _clear_workspace_dependents(conn)
         conn.execute("DELETE FROM api_rate_windows WHERE workspace_id IN (%s, %s)",
                      _SHARED_WORKSPACES)
+        if conn.execute("SELECT to_regclass('public.conversation_turn_rate_windows')").fetchone()[0]:
+            conn.execute("DELETE FROM conversation_turn_rate_windows WHERE workspace_id IN (%s, %s)",
+                         _SHARED_WORKSPACES)
         conn.execute("DELETE FROM workspace_preferences WHERE workspace_id IN (%s, %s)",
                      _SHARED_WORKSPACES)
         conn.execute("DELETE FROM audit_events WHERE workspace_id IN (%s, %s)",
@@ -309,6 +312,8 @@ def _dispose_api_engines(request):
         with psycopg.connect(_MIGRATED_DSN, autocommit=True) as conn:
             if conn.execute("SELECT to_regclass('public.api_rate_windows')").fetchone()[0]:
                 conn.execute("DELETE FROM api_rate_windows")
+            if conn.execute("SELECT to_regclass('public.conversation_turn_rate_windows')").fetchone()[0]:
+                conn.execute("DELETE FROM conversation_turn_rate_windows")
 
 
 def runtime_role_dsn(dsn: str) -> str:
