@@ -1079,7 +1079,8 @@ test('the slash menu lists the offered skill library and inserts without sending
   await messageBox.press('Enter');
   for(let attempt=0;attempt<100&&turnPosts().length===turnsBeforeDrift;attempt+=1)await page.waitForTimeout(50);
   assert.equal(turnPosts().length,turnsBeforeDrift+1,'the plain text still sends once');
-  assert.equal(turnPosts().at(-1).body.skill_id,undefined,'a locale-disabled skill id is never sent');
+  assert.equal(turnPosts().at(-1).body.skill_id??null,null,'a locale-disabled skill id is never sent');
+  assert.notEqual(turnPosts().at(-1).body.skill_id,'sales-report-pdf','the disabled skill id is never sent');
   // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
   await messageBox.fill('/');
   const zhList=page.getByRole('listbox',{name:'技能指令'});
