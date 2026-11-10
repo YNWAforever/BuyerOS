@@ -1031,12 +1031,14 @@ test('the slash menu lists the offered skill library and inserts without sending
   // stable DOM id so the same composer is addressed in either locale.
   const messageBox=page.locator('#conversation-message');
   // The slash menu is gated on !busy: wait for a completed send to settle before
-  // typing again, otherwise the send's clear can race the reopened menu.
+  // typing again, otherwise the send's clear can race the reopened menu. Detect
+  // idle structurally (empty enabled composer, no busy ellipsis label) so the wait
+  // stays independent of the current locale's Send translation.
   const waitComposerIdle=async()=>{await page.waitForFunction(()=>{
     const message=document.querySelector('#conversation-message');
+    if(!(message instanceof HTMLTextAreaElement)||message.disabled||message.value!=='')return false;
     const send=document.querySelector('.conversation-send');
-    return message instanceof HTMLTextAreaElement&&!message.disabled&&message.value===''&&
-      send instanceof HTMLButtonElement&&send.textContent?.trim()==='Send';
+    return !(send instanceof HTMLButtonElement)||!send.textContent.includes('…');
   });};
   const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
@@ -1514,6 +1516,7 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   const outline=async()=>page.evaluate(()=>{const node=document.activeElement,style=getComputedStyle(node);
     return {id:node?.id??'',tag:node?.tagName??'',cls:typeof node?.className==='string'?node.className:'',
       parentCls:typeof node?.parentElement?.className==='string'?node.parentElement.className:'',
+      inThreadList:!!node?.closest?.('.conversation-thread-items'),inChips:!!node?.closest?.('.conversation-chips'),
       text:(node?.textContent??'').trim().slice(0,60),outlineStyle:style.outlineStyle,outlineWidth:style.outlineWidth};});
   await page.locator('.conversation-studio').focus();
   const walked=[];
@@ -1523,8 +1526,8 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
    if(item.id==='conversation-message')break;
   }
   assert.ok(walked.some(item=>item.cls.includes('conversation-new')),'tab order reaches the thread list');
-  assert.ok(walked.some(item=>item.parentCls.includes('conversation-thread-items')),'a thread row is reachable');
-  assert.ok(walked.some(item=>item.parentCls.includes('conversation-chips')),'chips are reachable');
+  assert.ok(walked.some(item=>item.inThreadList),'a thread row is reachable');
+  assert.ok(walked.some(item=>item.inChips),'chips are reachable');
   const textarea=walked.find(item=>item.id==='conversation-message');
   assert.ok(textarea,'tab order reaches the composer');
   assert.notEqual(textarea.outlineStyle,'none','the composer shows a visible focus indicator');
