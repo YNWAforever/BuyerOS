@@ -1030,6 +1030,14 @@ test('the slash menu lists the offered skill library and inserts without sending
   // The textarea's accessible name is localized; after the zh-HK switch use the
   // stable DOM id so the same composer is addressed in either locale.
   const messageBox=page.locator('#conversation-message');
+  // The slash menu is gated on !busy: wait for a completed send to settle before
+  // typing again, otherwise the send's clear can race the reopened menu.
+  const waitComposerIdle=async()=>{await page.waitForFunction(()=>{
+    const message=document.querySelector('#conversation-message');
+    const send=document.querySelector('.conversation-send');
+    return message instanceof HTMLTextAreaElement&&!message.disabled&&message.value===''&&
+      send instanceof HTMLButtonElement&&send.textContent?.trim()==='Send';
+  });};
   const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
@@ -1083,6 +1091,7 @@ test('the slash menu lists the offered skill library and inserts without sending
   assert.equal(turnPosts()[0].body.skill_id,'sales-objections');
   assert.match(turnPosts()[0].body.text,/likely buyer objections/);
   // Escape closes without sending and keeps the typed text.
+  await waitComposerIdle();
   const postsBefore=posts.length;
   await composer.fill('/');
   await listbox.waitFor();
@@ -1105,6 +1114,7 @@ test('the slash menu lists the offered skill library and inserts without sending
   assert.equal(turnPosts().at(-1).body.skill_id??null,null,'a locale-disabled skill id is never sent');
   assert.notEqual(turnPosts().at(-1).body.skill_id,'sales-report-pdf','the disabled skill id is never sent');
   // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
+  await waitComposerIdle();
   await messageBox.fill('/');
   const zhList=page.getByRole('listbox',{name:'技能指令'});
   await zhList.waitFor();
