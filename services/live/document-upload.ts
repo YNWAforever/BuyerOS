@@ -8,6 +8,32 @@ type Chunk=components['schemas']['DocumentContentChunk'];
 type Manifest=components['schemas']['DocumentUploadStart'];
 type Pending={version:1;actor:string;workspace:string;project:string;manifest:Manifest;key:string;uploadId?:string};
 export type UploadProgress={phase:'hashing'|'uploading'|'completing'|'complete';percent:number};
+/** Semantic upload failures: callers classify by code, never by error class. */
+export type UploadErrorCode='rejected'|'expired'|'parse_failed'|'in_progress'|'recoverable_io';
+export class UploadError extends Error{
+  constructor(readonly code:UploadErrorCode,message:string,readonly retryable:boolean){
+    super(message);this.name='UploadError';
+  }
+}
+/** Canonical copy shared by the uploader and the localized attachment UI. */
+export const uploadMessages={
+  format:'Select PowerPoint up to 20 MiB, or PDF, text or Markdown up to 5 MiB.',
+  differentFile:'Select the same file as the unresolved upload. Keep the original file.',
+  inProgress:'An attachment upload is already in progress.',
+  invalidStatus:'Invalid upload status. Keep the original file and check the connection.',
+  savedMismatch:'Saved attachment does not match the original file.',
+  recoveryUnreadable:'Upload recovery is unreadable. Keep the original file.',
+  recoveryScope:'Upload recovery belongs to a different scope or is invalid.',
+  parseFailed:'The file could not be parsed. Staged bytes were removed.',
+  expired:'Upload expired. Select the original file to start again.',
+  statusMismatch:'Upload status does not match the original operation.',
+  missingReceipt:'Completed upload is missing its document receipt.',
+  segmentMismatch:'Received segment does not match the original file hash.',
+} as const;
+/** Single source of truth for accepted formats/sizes (also used by the composer). */
+export const UPLOAD_ACCEPTED_EXTENSIONS=['pdf','txt','md','pptx'] as const;
+export const UPLOAD_ACCEPT=UPLOAD_ACCEPTED_EXTENSIONS.map(extension=>`.${extension}`).join(',');
+export const UPLOAD_MAX_BYTES={standard:5*1024*1024,pptx:20*1024*1024} as const;
 const CHUNK=2097152;
 const PREFIX='buyeros:document-upload:v1:';
 const MIME:Record<string,Manifest['media_type']>={pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',pdf:'application/pdf',txt:'text/plain',md:'text/markdown'};
@@ -24,14 +50,14 @@ function checkedStage(stage:Stage,manifest:Manifest,ctx:UploadContext):Stage{
     ||!Array.isArray(stage.received_chunks)||stage.received_chunks.length>10||!['uploading','completed','failed','expired'].includes(stage.status)
     ||stage.received_chunks.some(c=>!Number.isInteger(c.index)||c.index<0||c.index>=stage.chunk_count||!/^[a-f0-9]{64}$/.test(c.sha256))
     ||new Set(stage.received_chunks.map(c=>c.index)).size!==stage.received_chunks.length)
-    throw new Error('Invalid upload status. Keep the original file and check the connection.');
+    throw new UploadError('recoverable_io',uploadMessages.invalidStatus,true);
   return stage;
 }
 function checkedDocument(doc:Document,manifest:Manifest,ctx:UploadContext):Document{
   guard(ctx);
   if(!doc||doc.workspace_id!==ctx.workspace||doc.project_id!==ctx.project||doc.sha256!==manifest.source_sha256
     ||doc.filename!==manifest.filename||doc.media_type!==manifest.media_type||doc.status!=='ready')
-    throw new Error('Saved attachment does not match the original file.');
+    throw new UploadError('recoverable_io',uploadMessages.savedMismatch,true);
   return doc;
 }
 
@@ -44,29 +70,29 @@ export function createDocumentUpload(client:LiveClient,storage?:Pick<Storage,'ge
   function pending(ctx:UploadContext):Pending|null{
     const value=store.getItem(storageKey(ctx));if(!value)return null;
     let record:Pending;
-    try{record=JSON.parse(value);}catch{throw new Error('Upload recovery is unreadable. Keep the original file.');}
+    try{record=JSON.parse(value);}catch{throw new UploadError('rejected',uploadMessages.recoveryUnreadable,false);}
     if(record.version!==1||record.actor!==ctx.actor||record.workspace!==ctx.workspace||record.project!==ctx.project
       ||typeof record.key!=='string'||record.key.length<8||record.key.length>200||!record.manifest
       ||!Number.isInteger(record.manifest.byte_length)||record.manifest.byte_length<1||record.manifest.byte_length>20*1024*1024
       ||typeof record.manifest.filename!=='string'||typeof record.manifest.media_type!=='string'||!/^[a-f0-9]{64}$/.test(record.manifest.source_sha256)
-      ||(record.uploadId!==undefined&&(typeof record.uploadId!=='string'||!record.uploadId)))throw new Error('Upload recovery belongs to a different scope or is invalid.');
+      ||(record.uploadId!==undefined&&(typeof record.uploadId!=='string'||!record.uploadId)))throw new UploadError('rejected',uploadMessages.recoveryScope,false);
     return record;
   }
   return {pending,
     async upload(file:File,ctx:UploadContext,onProgress:(value:UploadProgress)=>void=()=>{}):Promise<Document>{
-      guard(ctx);if(busy)throw new Error('An attachment upload is already in progress.');busy=true;
-      const request=<T>(path:string,options:Partial<LiveRequest>={})=>{
+      guard(ctx);if(busy)throw new UploadError('in_progress',uploadMessages.inProgress,true);busy=true;
+      function request<T>(path:string,options:Partial<LiveRequest>={}):Promise<T>{
         guard(ctx);return client.request<T>({path,token:ctx.token,scope:ctx.identity,signal:ctx.signal,...options});
-      };
+      }
       try{
         const suffix=file.name.split('.').at(-1)?.toLowerCase()??'',mime=MIME[suffix];
-        if(!mime||file.size<1||file.size>(suffix==='pptx'?20:5)*1024*1024)throw new Error('Select PowerPoint up to 20 MiB, or PDF, text or Markdown up to 5 MiB.');
+        if(!mime||file.size<1||file.size>(suffix==='pptx'?UPLOAD_MAX_BYTES.pptx:UPLOAD_MAX_BYTES.standard))throw new UploadError('rejected',uploadMessages.format,false);
         onProgress({phase:'hashing',percent:0});
         const bytes=await file.arrayBuffer();guard(ctx);
         const digest=await sha256(bytes);guard(ctx);
         const manifest:Manifest={filename:file.name,media_type:mime,byte_length:bytes.byteLength,source_sha256:digest};
         let record=pending(ctx);
-        if(record&&!sameManifest(record.manifest,manifest))throw new Error('Select the same file as the unresolved upload. Keep the original file.');
+        if(record&&!sameManifest(record.manifest,manifest))throw new UploadError('rejected',uploadMessages.differentFile,false);
         record??={version:1,actor:ctx.actor,workspace:ctx.workspace,project:ctx.project,manifest,key:crypto.randomUUID()};
         const save=()=>{guard(ctx);store.setItem(storageKey(ctx),JSON.stringify(record));};
         save();
@@ -79,9 +105,9 @@ export function createDocumentUpload(client:LiveClient,storage?:Pick<Storage,'ge
           guard(ctx);checkedStage(stage,manifest,ctx);record.uploadId=stage.id;save();
         }
         guard(ctx);checkedStage(stage,manifest,ctx);
-        if(stage.id!==record.uploadId)throw new Error('Upload status does not match the original operation.');
+        if(stage.id!==record.uploadId)throw new UploadError('recoverable_io',uploadMessages.statusMismatch,true);
         const resolve=async()=>{
-          if(!stage.document_id)throw new Error('Completed upload is missing its document receipt.');
+          if(!stage.document_id)throw new UploadError('recoverable_io',uploadMessages.missingReceipt,true);
           const doc=await request<Document>(`${base(ctx)}/offer-documents/${part(stage.document_id)}`);
           return checkedDocument(doc,manifest,ctx);
         };
@@ -89,7 +115,10 @@ export function createDocumentUpload(client:LiveClient,storage?:Pick<Storage,'ge
         if(stage.status==='completed')doc=await resolve();
         else{
           if(stage.status==='failed'||stage.status==='expired'){
-            store.removeItem(storageKey(ctx));throw new Error(stage.status==='expired'?'Upload expired. Select the original file to start again.':'The file could not be parsed. Staged bytes were removed.');
+            store.removeItem(storageKey(ctx));
+            throw stage.status==='expired'
+              ?new UploadError('expired',uploadMessages.expired,true)
+              :new UploadError('parse_failed',uploadMessages.parseFailed,false);
           }
           const url=`${base(ctx)}/offer-document-uploads/${part(stage.id)}`;
           for(let index=0;index<stage.chunk_count;index++){
@@ -97,7 +126,7 @@ export function createDocumentUpload(client:LiveClient,storage?:Pick<Storage,'ge
             const rawBody=new Uint8Array(bytes.slice(index*CHUNK,(index+1)*CHUNK));
             const hash=await sha256(rawBody);guard(ctx);
             const received=stage.received_chunks.find(c=>c.index===index);
-            if(received&&received.sha256!==hash)throw new Error('Received segment does not match the original file hash.');
+            if(received&&received.sha256!==hash)throw new UploadError('recoverable_io',uploadMessages.segmentMismatch,true);
             if(!received){
               await request<Stage>(`${url}/chunks/${index}`,{method:'PUT',rawBody,chunkSha256:hash,idempotencyKey:`${record.key}:${index}`});
               guard(ctx);

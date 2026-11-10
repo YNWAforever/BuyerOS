@@ -6,6 +6,38 @@
 import type {SelectedSource} from './types';
 
 export const ATTACHED_DOCUMENT_LABEL='Offer document';
+export type UploadFailureCode='rejected'|'expired'|'parse_failed'|'in_progress'|'recoverable_io';
+const UPLOAD_CODES:ReadonlySet<string>=new Set(['rejected','expired','parse_failed','in_progress','recoverable_io']);
+/** Structural view of services/live/document-upload.UploadError (no static import). */
+export function uploadFailureShape(error:unknown):{code:UploadFailureCode;message:string;retryable:boolean}|null{
+  if(typeof error!=='object'||error===null)return null;
+  const candidate=error as {name?:unknown;code?:unknown;message?:unknown;retryable?:unknown};
+  if(candidate.name!=='UploadError'||typeof candidate.code!=='string'||!UPLOAD_CODES.has(candidate.code))return null;
+  if(typeof candidate.message!=='string'||!candidate.message.trim())return null;
+  return {code:candidate.code as UploadFailureCode,message:candidate.message,retryable:candidate.retryable===true};
+}
+export type UploadClassification={failure:'rejected'|'upload';message:string;retryable:boolean};
+/**
+ * Semantic upload-failure classification. Typed upload codes decide retryability;
+ * transport/server errors are retryable uploads; anything unknown fails closed as a
+ * rejection with localized copy (never raw internal English).
+ */
+export function classifyUploadFailure(error:unknown,transportMessage:string):UploadClassification{
+  const typed=uploadFailureShape(error);
+  if(typed)return {failure:typed.code==='rejected'?'rejected':'upload',message:typed.message,retryable:typed.retryable};
+  const transport=typeof error==='object'&&error!==null&&'status' in error;
+  return {failure:transport?'upload':'rejected',message:transportMessage,retryable:transport};
+}
+/** Progress never regresses, even if a resume reports an earlier phase. */
+export function nextAttachmentPercent(current:number,next:number):number{
+  return Math.max(current,Math.max(0,Math.min(100,Math.round(next))));
+}
+/** Synchronous guard for a handler that React state has not re-rendered yet. */
+export function createAttachmentGuard(){
+  let locked=false;
+  return {begin(){if(locked)return false;locked=true;return true;},end(){locked=false;},get locked(){return locked;}};
+}
+export type AttachmentGuard=ReturnType<typeof createAttachmentGuard>;
 export type AttachmentFailure='rejected'|'upload'|'attach';
 export type AttachmentState=
   |{phase:'idle'}
@@ -32,7 +64,7 @@ export function attachmentReduce(state:AttachmentState,event:AttachmentEvent):At
     case 'start':
       return busy(state)?state:{phase:'uploading',percent:0};
     case 'progress':
-      return state.phase==='uploading'?{phase:'uploading',percent:Math.max(0,Math.min(100,Math.round(event.percent)))}:state;
+      return state.phase==='uploading'?{phase:'uploading',percent:nextAttachmentPercent(state.percent,event.percent)}:state;
     case 'uploaded':
       return state.phase==='uploading'?{phase:'attaching'}:state;
     case 'attached':

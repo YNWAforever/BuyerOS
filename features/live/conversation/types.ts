@@ -39,7 +39,7 @@ export type ChatRunReference={id:string;label:string;status:string};
 export type ChatMessage={id:string;text:string;role:MessageRole;seq:number|null;clientMessageId:string|null;
   createdAt:number|null;parts:MessagePart[];turnId:string|null};
 export type ChatThread={id:string;version:number;templateId:string;title:string;createdAt:number;updatedAt:number;
-  access:ThreadAccess;shareCount:number;buyerId:string|null;messages:ChatMessage[];sources:SelectedSource[];runs:ChatRunReference[]};
+  access:ThreadAccess;shareCount:number;buyerId:string|null;archived:boolean;messages:ChatMessage[];sources:SelectedSource[];runs:ChatRunReference[]};
 export type TurnResult={thread:ChatThread;turn:ConversationTurn};
 export type TurnCapability='checking'|'available'|'absent'|'unavailable';
 export type TurnDecision='approve'|'reject';
@@ -235,7 +235,8 @@ export function readChatThread(value:unknown):ChatThread|null{
   const buyerIdRaw=value.buyerId??value.buyer_id;
   const buyerId=typeof buyerIdRaw==='string'&&buyerIdRaw.length>0&&buyerIdRaw.length<=200?buyerIdRaw:null;
   return {id:value.id,version:value.version,templateId:value.templateId,title:value.title,createdAt:value.createdAt,
-    updatedAt:value.updatedAt,access,shareCount:int(value.shareCount)?value.shareCount as number:0,buyerId,messages,sources,runs};
+    updatedAt:value.updatedAt,access,shareCount:int(value.shareCount)?value.shareCount as number:0,buyerId,
+    archived:value.archived===true,messages,sources,runs};
 }
 export function readTurnResult(value:unknown):TurnResult|null{
   if(!record(value))return null;

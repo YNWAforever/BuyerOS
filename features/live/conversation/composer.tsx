@@ -1,6 +1,7 @@
 'use client';
 import {useLayoutEffect,useRef,useState,type KeyboardEvent} from 'react';
 import {ArrowUp,Building2,Paperclip,Sparkles} from 'lucide-react';
+import {UPLOAD_ACCEPT} from '@/services/live/document-upload';
 import type {ConversationDrafts} from './draft';
 import type {TurnCapability} from './types';
 
@@ -60,7 +61,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
   return <section className="conversation-compose" aria-label={t('Message composer')}>
     {capabilityNotice&&<p className="conversation-compose-notice" role="status">{t(capabilityNotice)}{capability==='unavailable'&&<button type="button" onClick={onRetryCapability}>{t('Retry')}</button>}</p>}
     {notice&&<p className="conversation-compose-notice" role="status">{t(notice)}</p>}
-    {attachment?.notice&&<p className="conversation-compose-notice" role="status">{attachment.notice}
+    {attachment?.notice&&<p className="conversation-compose-notice" role="status">{t(attachment.notice)}
       {attachment.retryable&&<button type="button" onClick={attachment.onRetry}>{t('Retry attachment')}</button>}</p>}
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
     {!drafts.available&&<p className="conversation-compose-note">{t('This browser will not keep unsent text after reload.')}</p>}
@@ -81,7 +82,7 @@ export function ConversationComposer({t,threadKey,drafts,canWrite,sending,projec
         <small id="conversation-compose-help">{t('Enter to send · Shift+Enter for a new line')}</small>
         {attachment?.visible&&!attachment.busy&&<label style={{display:'inline-flex',alignItems:'center',cursor:canWrite?'pointer':'default',padding:'0 4px'}}>
           <Paperclip size={16} aria-hidden="true"/>
-          <input type="file" className="conversation-sr" accept=".pdf,.txt,.md,.pptx"
+          <input type="file" className="conversation-sr" accept={UPLOAD_ACCEPT}
             aria-label={t('Attach document')} disabled={!canWrite}
             onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)attachment.onFile(file);}}/>
         </label>}

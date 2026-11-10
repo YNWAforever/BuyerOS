@@ -27,6 +27,7 @@ type Props={
   access:ThreadAccess;
   threadId:string|null;
   threadVersion:number;
+  contextRevision:number;
   canEdit:boolean;
   canViewOffer:boolean;
   client:LiveClient;
@@ -51,21 +52,22 @@ function tabIcon(tab:PanelTab){
 function PanelLabel({tab,t}:{tab:PanelTab;t:(value:string)=>string}){
   return <>{tabIcon(tab)}{t(tab==='results'?'Results':tab==='sources'?'Sources':'Decisions')}</>;
 }
-function SourcePicker({t,client,session,threadId,canViewOffer,selected,onToggleSource,busy,navigate}:{
+function SourcePicker({t,client,session,threadId,canViewOffer,selected,onToggleSource,busy,navigate,contextRevision}:{
   t:(value:string)=>string;client:LiveClient;session:SessionScope;threadId:string|null;canViewOffer:boolean;
   selected:SelectedSource[];onToggleSource:(source:SelectedSource,selected:boolean)=>void;busy:boolean;navigate:(path:string)=>void;
+  contextRevision:number;
 }){
   const [sections,setSections]=useState<ContextSection[]|null>(null),[notice,setNotice]=useState('');
   const read=useRef<string|null>(null);
   useEffect(()=>{
     if(!canViewOffer||!threadId)return;
-    const key=`${session.identity()}:${threadId}`;
+    const key=`${session.identity()}:${threadId}:${contextRevision}`;
     if(read.current===key)return;
     read.current=key;let active=true;
     void loadDiscussionContext(client,session,{enabled:true,canViewOffer,canViewResults:false,signal:session.controller().signal})
       .then(rows=>{if(active)setSections(rows);}).catch(()=>{if(active)setNotice('Project context is unavailable. Try again later.');});
     return()=>{active=false;};
-  },[client,session,canViewOffer,threadId]);
+  },[client,session,canViewOffer,threadId,contextRevision]);
   if(!threadId)return <p>{t('Start a discussion before selecting sources.')}</p>;
   return <div className="conversation-sources-picker">
     <div className="conversation-panel-row"><b>{t('Project context')}</b><button type="button" onClick={()=>navigate('/app/discover/edit#offer-documents')}>{t('Open offer documents')}</button></div>
@@ -95,17 +97,17 @@ function ResultsTab({t,results,runs,navigate}:{t:(value:string)=>string;results:
     </article>)}
   </div>;
 }
-function SourcesTab({t,citations,selectedSources,canEdit,onToggleSource,sourcesBusy,onRemoveDrive,drive,threadId,canViewOffer,client,session,navigate}:{
+function SourcesTab({t,citations,selectedSources,canEdit,onToggleSource,sourcesBusy,onRemoveDrive,drive,threadId,canViewOffer,client,session,navigate,contextRevision}:{
   t:(value:string)=>string;citations:CitationItem[];selectedSources:SelectedSource[];canEdit:boolean;
   onToggleSource:(source:SelectedSource,selected:boolean)=>void;sourcesBusy:boolean;onRemoveDrive:()=>void;drive:ReactNode;threadId:string|null;
-  canViewOffer:boolean;client:LiveClient;session:SessionScope;navigate:(path:string)=>void;
+  canViewOffer:boolean;client:LiveClient;session:SessionScope;navigate:(path:string)=>void;contextRevision:number;
 }){
   return <div className="conversation-sources">
     {citations.length>0&&<><h4>{t('Cited sources')}</h4><ul className="conversation-citations" aria-label={t('Cited sources')}>{citations.map(item=><li key={item.id}>{item.href?<button type="button" onClick={()=>navigate(item.href!)}><Link2 size={13} aria-hidden="true"/>{t(item.label)}</button>:<span className="pill gray">{t(item.label)}</span>}</li>)}</ul></>}
     <h4>{t('Selected sources')} ({selectedSources.length})</h4>
     {selectedSources.length?<ul className="conversation-selected-sources">{selectedSources.map(source=><li key={source.id}><span>{t(source.label)}</span>{canEdit&&<button type="button" disabled={sourcesBusy} onClick={()=>onToggleSource(source,false)}>{t('Remove')}</button>}</li>)}</ul>:<p className="conversation-panel-empty">{t('No sources selected.')}</p>}
     {canEdit&&selectedSources.some(source=>source.id.startsWith('drive:'))&&<button type="button" disabled={sourcesBusy} onClick={onRemoveDrive}>{t('Remove unavailable Google Drive selections')}</button>}
-    <SourcePicker t={t} client={client} session={session} threadId={threadId} canViewOffer={canViewOffer} selected={selectedSources} onToggleSource={onToggleSource} busy={sourcesBusy} navigate={navigate}/>
+    <SourcePicker t={t} client={client} session={session} threadId={threadId} canViewOffer={canViewOffer} selected={selectedSources} onToggleSource={onToggleSource} busy={sourcesBusy} navigate={navigate} contextRevision={contextRevision}/>
     <details className="conversation-panel-details"><summary>{t('Google Drive')}</summary>{drive}</details>
   </div>;
 }
@@ -131,7 +133,7 @@ function DecisionsTab({t,proposals,entries,access,onDecide,deciding,decisionFor,
 }
 /** Right contextual panel. It only renders when the discussion has content for it. */
 export function ConversationPanel(props:Props){
-  const {t,tab,tabs,onTab,results,runs,citations,selectedSources,proposals,entries,access,threadId,canEdit,onDecide,deciding,decisionFor,turnStatusFor,drive,onClose}=props;
+  const {t,tab,tabs,onTab,results,runs,citations,selectedSources,proposals,entries,access,threadId,contextRevision,canEdit,onDecide,deciding,decisionFor,turnStatusFor,drive,onClose}=props;
   return <aside className="conversation-panel" aria-label={t('Discussion context')}>
     <div className="conversation-panel-head">
       <div role="tablist" aria-label={t('Discussion context')} className="conversation-panel-tabs">
@@ -141,7 +143,7 @@ export function ConversationPanel(props:Props){
     </div>
     <div className="conversation-panel-body" role="tabpanel" id={`conversation-panel-${tab}`} aria-labelledby={`conversation-tab-${tab}`}>
       {tab==='results'&&<ResultsTab t={t} results={results} runs={runs} navigate={props.navigate}/>}
-      {tab==='sources'&&<SourcesTab t={t} citations={citations} selectedSources={selectedSources} canEdit={canEdit} onToggleSource={props.onToggleSource} sourcesBusy={props.sourcesBusy} onRemoveDrive={props.onRemoveDrive} drive={drive} threadId={threadId} canViewOffer={props.canViewOffer} client={props.client} session={props.session} navigate={props.navigate}/>}
+      {tab==='sources'&&<SourcesTab t={t} citations={citations} selectedSources={selectedSources} canEdit={canEdit} onToggleSource={props.onToggleSource} sourcesBusy={props.sourcesBusy} onRemoveDrive={props.onRemoveDrive} drive={drive} threadId={threadId} canViewOffer={props.canViewOffer} client={props.client} session={props.session} navigate={props.navigate} contextRevision={contextRevision}/>}
       {tab==='decisions'&&<DecisionsTab t={t} proposals={proposals} entries={entries} access={access} onDecide={onDecide} deciding={deciding} decisionFor={decisionFor} terminalFor={props.terminalFor} turnStatusFor={turnStatusFor}/>}
     </div>
   </aside>;

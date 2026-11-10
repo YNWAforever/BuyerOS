@@ -1,4 +1,4 @@
-﻿# Conversation turns v1 ??backend contract (2026-11-08)
+# Conversation turns v1 ??backend contract (2026-11-08)
 
 Status: implemented in the backend increment behind
 `NEXT_PUBLIC_CONVERSATION_HOME=true`. This file is a read model for clients and
@@ -173,6 +173,13 @@ project, that the actor has the native buyer-read permission, and rejects
 unknown/foreign ids with `404` (no existence leak). The link is immutable for
 the discussion: a later turn that supplies a different `buyer_id` fails with
 `409 BUYER_LINK_MISMATCH`. `ServerThread` gains `"buyerId": "uuid | null"`.
+
+`ServerThread` also includes `"archived": bool` in the thread read model
+(GET/PATCH/sources and turn responses). It is the **requesting viewer's own**
+`ThreadPreference` value for that thread and defaults to `false` when no
+preference row exists; it is read-only in the thread payload (setting it remains
+the existing `PUT …/preferences`). `pinned` stays out of the thread payload; list
+items keep their existing pinned/archived projection and filters, unchanged.
 
 A turn-first request has no selected source yet (Amendment A1 creates the
 thread shell); the created turn is therefore honestly `needs_input` with a

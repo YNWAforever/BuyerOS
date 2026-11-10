@@ -6,7 +6,11 @@ import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
 const {ATTACHED_DOCUMENT_LABEL,attachmentReduce,attachmentBusy,attachmentPercent,documentSource,
-  sourceAlreadyAttached,attachThreadSource}=await import('../features/live/conversation/attachment.ts');
+  sourceAlreadyAttached,attachThreadSource,classifyUploadFailure,createAttachmentGuard,nextAttachmentPercent}=await import('../features/live/conversation/attachment.ts');
+const {UploadError,uploadMessages,UPLOAD_ACCEPT,UPLOAD_ACCEPTED_EXTENSIONS,UPLOAD_MAX_BYTES,createDocumentUpload}=await import('../services/live/document-upload.ts');
+const {ConversationThreads}=await import('../services/live/conversation-threads.ts');
+const {SessionScope}=await import('../services/live/session.ts');
+const {liveZh}=await import('../features/live/locale.ts');
 
 const documentId='33333333-3333-4333-8333-333333333333';
 
@@ -27,10 +31,14 @@ test('attachment state machine moves idle → uploading(progress) → attaching 
   assert.deepEqual(attachmentReduce(state,{type:'reset'}),{phase:'idle'});
 });
 
-test('progress is clamped and a start cannot interrupt an in-flight attachment',()=>{
+test('progress is clamped, monotonic and a start cannot interrupt an in-flight attachment',()=>{
   const uploading=attachmentReduce({phase:'idle'},{type:'start'});
   assert.deepEqual(attachmentReduce(uploading,{type:'progress',percent:-5}),{phase:'uploading',percent:0});
   assert.deepEqual(attachmentReduce(uploading,{type:'progress',percent:300}),{phase:'uploading',percent:100});
+  assert.deepEqual(attachmentReduce(uploading,{type:'progress',percent:70}),{phase:'uploading',percent:70});
+  assert.deepEqual(attachmentReduce({phase:'uploading',percent:70},{type:'progress',percent:30}),{phase:'uploading',percent:70},'progress never regresses');
+  assert.equal(nextAttachmentPercent(70,30),70);
+  assert.equal(nextAttachmentPercent(70,85),85);
   assert.equal(attachmentReduce(uploading,{type:'start'}),uploading,'duplicate start is ignored while busy');
   const attaching=attachmentReduce(uploading,{type:'uploaded'});
   assert.equal(attachmentReduce(attaching,{type:'start'}),attaching);
@@ -134,4 +142,65 @@ test('duplicate suppression avoids writes and other failures stay honest',async(
     isStale:error=>error.status===412,
   });
   assert.equal(refreshFailed.kind,'failed');
+});
+
+test('upload failures classify by semantic code, never by error class',async()=>{
+  for(const [code,retryable] of [['rejected',false],['expired',true],['parse_failed',false],['in_progress',true],['recoverable_io',true]]){
+    const classified=classifyUploadFailure(new UploadError(code,uploadMessages.format,retryable),'Transport fallback');
+    assert.equal(classified.failure,code==='rejected'?'rejected':'upload',`${code} maps to an upload phase`);
+    assert.equal(classified.retryable,retryable,`${code} retryability comes from the code`);
+    assert.equal(typeof liveZh[classified.message],'string',`${code} keeps canonical, translated copy`);
+  }
+  for(const message of Object.values(uploadMessages))assert.equal(typeof liveZh[message],'string','canonical uploader copy is localized');
+  const transport=classifyUploadFailure({status:503,code:'UNAVAILABLE'},'Transport fallback');
+  assert.deepEqual(transport,{failure:'upload',message:'Transport fallback',retryable:true},'transport failures stay retryable');
+  const unknown=classifyUploadFailure(new Error('private detail'),'Generic fallback');
+  assert.deepEqual(unknown,{failure:'rejected',message:'Generic fallback',retryable:false},'unknown failures fail closed with localized copy');
+  const uploader=createDocumentUpload({request:async()=>{throw new Error('must not call');}});
+  const ctx={actor:'a',workspace:'w',project:'p',identity:'id',token:'t',signal:new AbortController().signal,isCurrent:()=>true};
+  const file=new File(['bytes'],'unsupported.exe',{type:'application/octet-stream'});
+  await assert.rejects(uploader.upload(file,ctx),error=>error instanceof UploadError&&error.code==='rejected'&&error.retryable===false);
+});
+
+test('accepted formats and limits come from the uploader module',()=>{
+  assert.equal(UPLOAD_ACCEPT,'.pdf,.txt,.md,.pptx');
+  assert.deepEqual([...UPLOAD_ACCEPTED_EXTENSIONS],['pdf','txt','md','pptx']);
+  assert.equal(UPLOAD_MAX_BYTES.standard,5*1024*1024);
+  assert.equal(UPLOAD_MAX_BYTES.pptx,20*1024*1024);
+});
+
+test('a synchronous guard closes the double-selection race',()=>{
+  const guard=createAttachmentGuard();
+  assert.equal(guard.locked,false);
+  assert.equal(guard.begin(),true);
+  assert.equal(guard.locked,true);
+  assert.equal(guard.begin(),false,'a second selection is rejected before React re-renders');
+  guard.end();
+  assert.equal(guard.locked,false);
+  assert.equal(guard.begin(),true);
+});
+
+test('thread sources PUT and refresh combine the attach signal with the session signal',async()=>{
+  const session=new SessionScope({mode:'live',actor:'a',workspace:'w',project:'p'});session.setToken('synthetic');
+  const calls=[];
+  const client={request:request=>new Promise((resolve,reject)=>{
+    calls.push(request.signal);
+    if(request.signal.aborted){reject(new Error('aborted'));return;}
+    request.signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});
+  })};
+  const threads=new ConversationThreads(client,session,true);
+  const thread={id:'11111111-1111-4111-8111-111111111111',version:3,sources:[]};
+  const controller=new AbortController();
+  const put=threads.sources(thread,[],controller.signal);
+  await new Promise(resolve=>setTimeout(resolve,0));
+  controller.abort();
+  await assert.rejects(put);
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].aborted,true,'the sources PUT receives the combined aborted signal');
+  const refreshed=new AbortController();
+  const get=threads.get(thread.id,refreshed.signal);
+  await new Promise(resolve=>setTimeout(resolve,0));
+  refreshed.abort();
+  await assert.rejects(get);
+  assert.equal(calls.at(-1).aborted,true,'the stale refresh GET receives the combined aborted signal');
 });

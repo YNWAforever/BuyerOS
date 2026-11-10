@@ -289,6 +289,7 @@ test('a new discussion sends exactly one turn for its first message and retries 
   const transcript=page.locator('.conversation-transcript');
   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
   await page.getByRole('heading',{name:'What would you like to achieve for this project?'}).waitFor();
+  assert.equal(await page.locator('input[type=file]').count(),0,'attach is hidden on /new');
   // Home entry performs an explicit, method-checked read set; the capability probe is OPTIONS.
   await page.waitForLoadState('networkidle');
   const initial=requests.filter(row=>row.path.startsWith('/v1/'));
@@ -854,7 +855,7 @@ test('proposal explainer expands persisted data, collapses and keeps a terminal 
 
 test('composer attaches a document through the existing ingest path and persists the source',async()=>{
  let releaseComplete;const completeGate=new Promise(resolve=>{releaseComplete=resolve;});
- let uploadStarts=0,uploadChunks=0,uploadCompletes=0,attachFailures=1,access='owner';
+ let uploadStarts=0,uploadChunks=0,uploadCompletes=0,attachFailures=1,access='owner',contextReads=0;
  const sourcePuts=[];
  let manifest=null;
  let thread={...fixture.studioThread,sources:[],version:3,access};
@@ -872,6 +873,12 @@ test('composer attaches a document through the existing ingest path and persists
    uploadCompletes+=1;await completeGate;
    return {json:fixture.envelope({id:documentId,workspace_id:workspace,project_id:project,filename:manifest.filename,
      media_type:manifest.media_type,status:'ready',version:1,sha256:manifest.source_sha256})};
+  }
+  if(method==='GET'&&path.endsWith('/offer-documents')){
+   contextReads+=1;
+   const filename=uploadStarts>0?'fixture-notes.md':'project-evidence.pdf';
+   return {json:fixture.envelope({items:[{workspace_id:workspace,project_id:project,id:documentId,filename,status:'ready',version:1,
+     ...(uploadStarts>0&&manifest?{sha256:manifest.source_sha256}:{}),fact_candidates:[]}],total:1,offset:0,limit:20})};
   }
   if(/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(path)&&method==='PUT'){
    const body=req.postDataJSON();
@@ -891,6 +898,12 @@ test('composer attaches a document through the existing ingest path and persists
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
   const fileInput=page.getByLabel('Attach document');
   await fileInput.waitFor({state:'attached'});
+  // Open the context Sources tab first so we can prove the post-attach context refresh
+  // replaces the stale cached project context rather than only updating thread sources.
+  const panel=page.locator('.conversation-panel');
+  await panel.getByRole('tab',{name:'Sources',exact:true}).click();
+  await panel.getByText('project-evidence.pdf',{exact:false}).first().waitFor();
+  const contextReadsBefore=contextReads;
   const uploadRequestCount=()=>requests.filter(row=>row.path.includes('/offer-document-uploads')).length;
   assert.equal(uploadRequestCount(),0,'no upload request before a file is selected');
   await fileInput.setInputFiles({name:'fixture-notes.md',mimeType:'text/markdown',buffer:Buffer.from('# Fixture notes\n')});
@@ -903,8 +916,6 @@ test('composer attaches a document through the existing ingest path and persists
   releaseComplete();
   // First source write fails: honest notice + retry, and no optimistic attached state.
   await page.getByText('The attachment could not be added to this discussion. Try again.',{exact:true}).waitFor();
-  const panel=page.locator('.conversation-panel');
-  await panel.getByRole('tab',{name:'Sources',exact:true}).click();
   assert.equal(await page.locator('.conversation-selected-sources li').count(),0,'no optimistic attached source');
   assert.equal(sourcePuts.length,1);
   assert.equal(sourcePuts[0].match,'"3"');
@@ -917,10 +928,13 @@ test('composer attaches a document through the existing ingest path and persists
   assert.equal(uploadStarts,1);assert.equal(uploadChunks,1);assert.equal(uploadCompletes,1,'one upload per file; retries never re-ingest');
   assert.equal(await page.getByRole('progressbar').count(),0,'progress clears when the attachment is idle again');
   await page.getByLabel('Attach document').waitFor({state:'attached'});
-  // Context panel shows the persisted source and its ingestion status.
+  // Context panel shows the persisted source, and the stale cached context is
+  // refreshed so the uploaded document's own row + ingestion status appear.
   await panel.locator('.conversation-selected-sources').getByText('Offer document',{exact:true}).waitFor();
-  await panel.getByText('project-evidence.pdf',{exact:false}).first().waitFor();
-  assert.ok(await panel.getByText('ready',{exact:true}).count()>=1,'the ingestion status is visible');
+  await panel.getByText('fixture-notes.md',{exact:false}).first().waitFor();
+  assert.ok(contextReads>contextReadsBefore,'attaching invalidates and refetches the context');
+  assert.equal(await panel.getByText('project-evidence.pdf',{exact:false}).count(),0,'the stale cached document row is replaced');
+  assert.ok(await panel.getByText('ready',{exact:true}).count()>=1,'the uploaded document’s own ingestion status is visible');
   // zh-HK label
   await page.getByRole('button',{name:'Change language',exact:true}).click();
   await page.getByLabel('附加文件').waitFor({state:'attached'});
@@ -934,6 +948,28 @@ test('composer attaches a document through the existing ingest path and persists
   assert.equal(uploadRequestCount(),uploadsBefore,'a viewer issues no upload request');
   assert.equal(sourcePuts.length,putsBefore,'a viewer issues no source write');
   assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('a directly opened archived thread offers no attach control and issues no writes',async()=>{
+ const baseApi=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  const {req,url}=input;
+  // Direct open: the list is empty, so archived can only come from the thread payload.
+  if(url.pathname.endsWith('/conversation-threads')&&req.method()==='GET')
+   return {json:fixture.envelope({items:[],total:0,offset:0,limit:50})};
+  if(/\/conversation-threads\/[0-9a-f-]+$/.test(url.pathname)&&req.method()==='GET')
+   return {json:fixture.envelope({...fixture.studioThread,archived:true,access:'editor'})};
+  return baseApi(input);
+ }});
+ try{
+  const {page,requests}=harness;
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  assert.equal(await page.locator('input[type=file]').count(),0,'an archived thread never shows the attach control');
+  assert.equal(await page.getByRole('progressbar').count(),0);
+  assert.equal(requests.filter(row=>row.path.includes('/offer-document-uploads')).length,0,'an archived thread issues no upload request');
+  assert.equal(requests.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(row.path)).length,0,'an archived thread issues no source write');
  }finally{await harness.close();}
 });
 

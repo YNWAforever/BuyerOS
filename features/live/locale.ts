@@ -968,4 +968,12 @@ export const liveZh: Record<string,string> = {
   'Retry attachment':'重試附件',
   'The attachment could not be uploaded. Try again.':'附件未能上傳，請再試一次。',
   'The attachment could not be added to this discussion. Try again.':'未能將附件加入此討論，請再試一次。',
+  'An attachment upload is already in progress.':'附件正在上傳。',
+  'Invalid upload status. Keep the original file and check the connection.':'上傳狀態無效。請保留原始檔案並檢查連線。',
+  'Saved attachment does not match the original file.':'已儲存的附件與原始檔案不符。',
+  'Upload recovery is unreadable. Keep the original file.':'無法讀取上傳恢復資料。請保留原始檔案。',
+  'Upload recovery belongs to a different scope or is invalid.':'上傳恢復資料屬於其他範圍或已失效。',
+  'Upload status does not match the original operation.':'上傳狀態與原本的操作不符。',
+  'Completed upload is missing its document receipt.':'已完成的上傳缺少文件憑證。',
+  'Received segment does not match the original file hash.':'已接收的區段與原始檔案雜湊不符。',
 };
