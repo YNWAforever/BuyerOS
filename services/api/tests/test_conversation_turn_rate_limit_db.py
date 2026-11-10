@@ -12,9 +12,9 @@ import pytest
 from buyeros_api.settings import get_settings
 from buyeros_api.services import turn_rate_limit
 from tests.test_buyer_review_db import (ADMIN, PROJECT_A, PROJECT_B, WORKSPACE_A,
-    WORKSPACE_B, _h)
-from tests.test_conversation_turns_api import (TURN_ROOT, key, post_turn, turn_api,
-    turn_body)
+    WORKSPACE_B, _h, api)
+from tests.test_conversation_turns_api import (TURN_ROOT, enabled, key, post_turn,
+    turn_api, turn_body)
 
 WINDOW = datetime(2026, 11, 10, 12, 0, tzinfo=timezone.utc)
 TABLES = ('conversation_threads', 'conversation_turns', 'conversation_turn_events',

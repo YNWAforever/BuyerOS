@@ -41,7 +41,7 @@ def upgrade():
     CREATE TABLE conversation_turn_rate_windows (
       workspace_id uuid NOT NULL,
       window_start timestamptz NOT NULL,
-      hits integer NOT NULL CHECK(hits > 0),
+      hits integer NOT NULL CONSTRAINT ck_conversation_turn_rate_windows_positive_hits CHECK(hits > 0),
       PRIMARY KEY(workspace_id, window_start)
     );
     CREATE INDEX ix_conversation_turn_rate_windows_expiry
