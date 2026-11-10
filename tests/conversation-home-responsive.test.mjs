@@ -88,13 +88,13 @@ const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
 const uuidPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 function standardApi(options={}){
- const {absent=false,failFirstSend=false,contentOnly=false}=options;
+ const {absent=false,failFirstSend=false,contentOnly=false,skills=null}=options;
  return async ({req,url,state})=>{
   const method=req.method();
   if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')
    return absent?{status:404,json:{code:'NOT_FOUND',message:'request failed'}}:{status:204};
   if(url.pathname===prefix)return {json:fixture.envelope({id:project,workspace_id:workspace,status:'active',offer_revision:1,active_icp_version_id:fixture.profileId,name:'Fixture project'})};
-  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[{id:'sales-research'},{id:'review-buyers'}]})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:skills??[{id:'sales-research'},{id:'review-buyers'}]})};
   if(url.pathname.endsWith('/sales-tasks/capability'))return {json:fixture.envelope({admission_enabled:true})};
   if(url.pathname.endsWith('/conversation-threads')&&method==='GET'){
    const searching=Boolean(url.searchParams.get('q'))||url.searchParams.get('archived')==='true';
@@ -990,25 +990,24 @@ test('a directly opened archived thread offers no attach control and issues no w
 });
 
 test('the slash menu lists the offered skill library and inserts without sending',async()=>{
- const catalogue=JSON.parse(readFileSync('services/api/buyeros_api/sales/catalogue.json','utf8'));
- const skills=[...catalogue.skills.map(skill=>({...skill,
-   languages:skill.id==='sales-report-pdf'?['en']:skill.languages})),
-  // Offered but unauthored: the menu must still list it with a deterministic fallback.
-  {id:'sales-customer-success',version:'1',output_kind:'research_report',allowed_actions:['research.read'],
-   languages:['en','zh-HK'],budget_class:'model',upstream_hash:null,inputs_schema:{}}];
- const baseApi=standardApi();
- const harness=await fixtureHarness({handler:async input=>{
-  const {req,url}=input;
-  if(req.method()==='GET'&&url.pathname.endsWith('/sales/skills'))
-   return {json:fixture.envelope({skills})};
-  return baseApi(input);
- }});
+ // Contract-valid SkillDefinitions (the generated client's fields are present) for the
+ // 17 authored catalogue skills plus one offered-but-unauthored id.
+ const authoredIds=['sales-prospect','sales-research','sales-quick','sales-qualify','sales-contacts','sales-outreach',
+   'sales-followup','sales-prep','sales-proposal','sales-objections','sales-icp','sales-competitors','sales-report',
+   'sales-report-pdf','first-project','understand-documents','review-buyers'];
+ const skills=[...authoredIds.map(id=>({id,version:'1',inputs_schema:{},output_kind:'research_report',
+   allowed_actions:['research.read'],languages:id==='sales-report-pdf'?['en']:['en','zh-HK'],
+   budget_class:'model',upstream_hash:null})),
+  {id:'sales-customer-success',version:'1',inputs_schema:{},output_kind:'research_report',
+   allowed_actions:['research.read'],languages:['en','zh-HK'],budget_class:'model',upstream_hash:null}];
+ const harness=await fixtureHarness({handler:standardApi({skills})});
  try{
   const {page,requests,posts,errors}=harness;
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
   const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  assert.deepEqual(errors,[],'the studio renders without a page error under the catalogue fixture');
   await page.locator('[data-skill-ids="ready"]').waitFor();
   const beforeRequests=requests.length;
   await composer.fill('/');

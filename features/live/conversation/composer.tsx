@@ -61,9 +61,11 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentSkill(null);setSkillNotice(t(SKILL_UNAVAILABLE_REASON));
   },[commands,currentSkill,t]);
-  async function submit(raw:string,skillId:string|null){
+  async function submit(raw:string,skillId:string|null,validateSkill=true){
     if(busy||!canWrite||!raw.trim())return;
-    const resolved=resolveSendSkill(commands,skillId);
+    // Slash selections are revalidated against current catalogue/locale drift; guided
+    // template chips keep their existing registry-gated mapping.
+    const resolved=validateSkill?resolveSendSkill(commands,skillId):{skillId,unavailable:false};
     if(resolved.unavailable){setSkillNotice(t(SKILL_UNAVAILABLE_REASON));}
     // Persist before the call so a reload or a lost response keeps the same id.
     const draft=drafts.write(threadKey,raw);
@@ -118,7 +120,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
     {!drafts.available&&<p className="conversation-compose-note">{t('This browser will not keep unsent text after reload.')}</p>}
     {text.trim()===''&&!slashOpen&&chips.length>0&&<div className="conversation-chips" role="group" aria-label={t('Quick actions')} data-skill-ids={chips.some(chip=>chip.skillId)?'ready':'pending'}>
-      {chips.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
+      {chips.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId,false)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
     </div>}
     <div className="conversation-compose-box" style={{minWidth:0,maxWidth:'100%',boxSizing:'border-box'}}>
       <div className="conversation-compose-context"><span className="conversation-project">{projectName??t('This project')}</span>{companyName&&<span className="conversation-company" aria-label={t('Linked company')}><Building2 size={12} aria-hidden="true"/>{companyName}</span>}{capability==='absent'&&<span className="pill gray">{t('Notes only')}</span>}</div>
