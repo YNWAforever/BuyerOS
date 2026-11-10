@@ -1173,12 +1173,19 @@ test('discussion preferences pin, archive, reload and the share ACL stay honest'
   await page.waitForFunction(()=>[...document.querySelectorAll('.conversation-thread-items button')].some(button=>button.getAttribute('aria-label')==='Research buyer'));
   assert.equal(await rows().first().getAttribute('aria-label'),'Research buyer','the restored pinned row is first');
   // Honest failure: no optimistic lie, the row and toggle keep the prior state.
+  const draftText='Keep this draft through a failed preference.';
+  await page.locator('#conversation-message').fill(draftText);
   state.failPreferences=true;
   await openMenu();
   await page.getByRole('button',{name:'Unpin discussion',exact:true}).click();
-  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
+  // The same notice also feeds the transcript status line; assert the inline one only.
+  const inlineNotice=page.locator('p.conversation-inline-notice')
+    .filter({hasText:'Workspace discussions are unavailable. Your unsaved text is still here.'});
+  await inlineNotice.waitFor();
+  assert.equal((await inlineNotice.textContent())?.trim(),'Workspace discussions are unavailable. Your unsaved text is still here.');
   assert.equal(await page.getByRole('button',{name:'Unpin discussion',exact:true}).getAttribute('aria-pressed'),'true','a failed preference never flips the toggle');
   assert.equal(await rows().first().getAttribute('aria-label'),'Research buyer','the row keeps its pinned-first place');
+  assert.equal(await page.locator('#conversation-message').inputValue(),draftText,'a failed preference never loses the draft');
   state.failPreferences=false;
   // The open menu remains inside a 320px viewport.
   await page.setViewportSize({width:320,height:1000});
