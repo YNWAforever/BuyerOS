@@ -1,6 +1,6 @@
 'use client';
 import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
-import {Ellipsis,Menu,PanelRight} from 'lucide-react';
+import {Archive,Ellipsis,Menu,Pin,PanelRight} from 'lucide-react';
 import type {LiveClient} from '@/services/live/client';
 import {LiveCancelled,LiveError} from '@/services/live/client';
 import type {UploadContext} from '@/services/live/document-upload';
@@ -24,6 +24,7 @@ import {attachmentBusy,attachmentPercent,classifyUploadFailure,createAttachmentG
 import {useDataMode} from '@/features/providers/data-mode';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
+import {applyStoredListPreference,persistThreadPreference,preferenceAllowed,shareControlVisible,visibleThreadRows} from './thread-management';
 import {ConversationTranscript} from './transcript';
 import {ConversationComposer,type ComposerAttachment,type ComposerChip} from './composer';
 import {ConversationPanel,type PanelTab} from './context-panel';
@@ -134,6 +135,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   useLayoutEffect(()=>{if(!canViewOffer)api.forgetReply();},[api,canViewOffer]);
 
   const [list,setList]=useState<{items:ThreadListItem[];total:number;loading:boolean;notice:string}>({items:[],total:0,loading:true,notice:''});
+  const [listRevision,setListRevision]=useState(0);
+  const [preferenceBusy,setPreferenceBusy]=useState(false);
   const [query,setQuery]=useState(''),debouncedQuery=useDebounced(query,250);
   const [archived,setArchived]=useState(false);
   const [autoId,setAutoId]=useState<string|null>(null),autoTried=useRef(false);
@@ -199,7 +202,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       setList(state=>({...state,loading:false,notice:threadNotice(error)}));
     });
     return()=>{active=false;};
-  },[api,archived,debouncedQuery,identity,session]);
+  },[api,archived,debouncedQuery,identity,session,listRevision]);
   useEffect(()=>{autoTried.current=false;setAutoId(null);},[threadId,fresh]);
   useEffect(()=>{
     if(threadId||fresh||autoTried.current||list.loading)return;
@@ -617,6 +620,28 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       if(current())navigate('/app/discussions/new');
     }catch(error){if(!(error instanceof LiveCancelled)&&current())setThreadNoticeText(threadNotice(error));}
   }
+  /**
+   * Personal viewer preference: never optimistic. The row and menu update only
+   * from the server's stored payload; a failure keeps state and shows the inline notice.
+   */
+  async function changePreference(change:'pin'|'archive'){
+    if(!loaded||preferenceBusy||!preferenceAllowed(loaded.chat.access))return;
+    const thread=loaded.chat;
+    const currentPreferences={pinned:list.items.some(row=>row.id===thread.id&&row.pinned===true),
+      archived:thread.archived===true};
+    setPreferenceBusy(true);setThreadNoticeText('');
+    try{
+      const {stored}=await persistThreadPreference(api,thread.id,currentPreferences,change);
+      if(!current())return;
+      setLoaded(state=>state&&state.chat.id===thread.id?{raw:state.raw,
+        chat:{...state.chat,archived:stored.archived}}:state);
+      setList(state=>({...state,items:applyStoredListPreference(state.items,thread.id,stored),notice:''}));
+      // Re-read the list so a later archived-view/search read agrees with the server.
+      setListRevision(value=>value+1);
+    }catch(error){
+      if(!(error instanceof LiveCancelled)&&current())setThreadNoticeText(threadNotice(error));
+    }finally{if(current())setPreferenceBusy(false);}
+  }
   useEffect(()=>{
     const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'&&mobileView!=='conversation')setMobileView('conversation');};
     window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
@@ -640,6 +665,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   // Archived comes from the loaded thread payload; the list row is a supplementary
   // fallback for the moment before the thread read resolves. Either hides attach.
   const archivedLoaded=loaded?.chat.archived===true||list.items.some(row=>row.id===loaded?.chat.id&&row.archived===true);
+  const pinnedLoaded=loaded!==null&&list.items.some(row=>row.id===loaded.chat.id&&row.pinned===true);
+  const shareAvailable=loaded!==null&&shareControlVisible(loaded.chat.access);
   const attachAvailable=!fresh&&loaded!==null&&loaded.chat.access!=='viewer'&&!archivedLoaded;
   const attachmentView:ComposerAttachment|null=attachAvailable?{
     visible:!attachmentBusy(attachment),
@@ -653,7 +680,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   }:null;
   return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')}>
     <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>setMobileView('conversation')}/>
-    <ConversationThreadList t={t} locale={locale} items={list.items.filter(row=>archived||!row.archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
+    <ConversationThreadList t={t} locale={locale} items={visibleThreadRows(list.items,archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
       notice={list.notice} loading={list.loading} query={query} archived={archived}
       onQuery={setQuery} onToggleArchived={()=>setArchived(value=>!value)} onNew={()=>navigate('/app/discussions/new')}
       onOpen={id=>navigate(`/app/discussions/s/${id}`)} onMore={list.items.length<list.total?()=>void moreThreads():undefined}
@@ -667,9 +694,13 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         </div>
         <div className="conversation-head-actions">
           {loaded&&<details className="conversation-menu"><summary aria-label={t('Discussion menu')}><Ellipsis size={18} aria-hidden="true"/><span className="conversation-sr">{t('Discussion menu')}</span></summary>
-            <form onSubmit={event=>{event.preventDefault();void renameThread();}}><label>{t('Discussion title')}<input maxLength={80} value={title} onChange={event=>setTitle(event.target.value)}/></label><button type="submit" disabled={!title.trim()||title.trim()===loaded.chat.title}>{t('Rename discussion')}</button></form>
-            <ShareThread api={api} thread={loaded.raw} t={t} onChange={updated=>{void loadThread(updated,loaded.chat);}} onError={error=>setThreadNoticeText(threadNotice(error))}/>
-            <button type="button" onClick={()=>void removeThread()}>{t('Delete discussion')}</button>
+            <div className="conversation-menu-panel">
+              <form onSubmit={event=>{event.preventDefault();void renameThread();}}><label>{t('Discussion title')}<input maxLength={80} value={title} onChange={event=>setTitle(event.target.value)}/></label><button type="submit" disabled={!title.trim()||title.trim()===loaded.chat.title}>{t('Rename discussion')}</button></form>
+              <button type="button" aria-pressed={pinnedLoaded} disabled={preferenceBusy} onClick={()=>void changePreference('pin')}><Pin size={15} aria-hidden="true"/>{t(pinnedLoaded?'Unpin discussion':'Pin discussion')}</button>
+              <button type="button" disabled={preferenceBusy} onClick={()=>void changePreference('archive')}><Archive size={15} aria-hidden="true"/>{t(archivedLoaded?'Restore discussion':'Archive discussion')}</button>
+              {shareAvailable&&<ShareThread api={api} thread={loaded.raw} t={t} onChange={updated=>{void loadThread(updated,loaded.chat);}} onError={error=>setThreadNoticeText(threadNotice(error))}/>}
+              <button type="button" onClick={()=>void removeThread()}>{t('Delete discussion')}</button>
+            </div>
           </details>}
           <button type="button" className="conversation-icon-button" onClick={()=>{setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>
         </div>

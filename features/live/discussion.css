@@ -128,9 +128,10 @@
 .conversation-menu>summary::-webkit-details-marker{display:none}
 .conversation-menu[open]>summary{background:var(--buyeros-accent-soft);border-color:var(--buyeros-accent-border);color:var(--buyeros-accent-hover)}
 .conversation-menu[open]{z-index:15}
-.conversation-menu[open]>form,.conversation-menu[open]>button{position:relative}
-.conversation-menu[open]>form{display:flex;flex-direction:column;gap:6px;margin-top:6px;padding:10px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-small);background:var(--buyeros-surface);position:absolute;right:0;top:100%;width:min(260px,calc(100vw - 40px));z-index:20}
-.conversation-menu[open]>button{display:flex!important;width:100%;margin-top:6px;justify-content:flex-start!important}
+.conversation-menu[open]>.conversation-menu-panel{display:flex;position:absolute;right:0;top:100%;margin-top:6px;width:min(260px,calc(100vw - 40px));z-index:20;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-small);background:var(--buyeros-surface)}
+.conversation-menu-panel{display:none}
+.conversation-menu-panel form{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;border:0;background:transparent;position:static;width:auto}
+.conversation-menu-panel>button{display:flex!important;width:100%;margin:0;justify-content:flex-start!important;gap:6px}
 .conversation-load{padding:28px 18px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .conversation-inline-notice{margin:0;padding:8px 14px;font-size:12px;color:var(--buyeros-warning);background:var(--buyeros-warning-soft);border-bottom:1px solid var(--buyeros-warning-border);overflow-wrap:anywhere}
 
@@ -323,7 +324,7 @@
   .conversation-message{max-width:100%}
   .conversation-compose{padding:8px 10px 10px}
   .conversation-chips button{max-width:78vw;overflow:hidden;text-overflow:ellipsis}
-  .conversation-menu[open]>form{width:min(240px,calc(100vw - 24px))}
+  .conversation-menu[open]>.conversation-menu-panel{width:min(240px,calc(100vw - 24px))}
 }
 @media(max-width:360px){.conversation-compose-actions small{display:none}.conversation-chips{display:none}}
 

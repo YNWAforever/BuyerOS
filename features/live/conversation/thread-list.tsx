@@ -1,6 +1,7 @@
 'use client';
 import {Plus,Pin,Search,X} from 'lucide-react';
 import type {ServerSummary} from '@/services/live/conversation-threads';
+import {sortThreadRows} from './thread-management';
 
 export type ThreadListItem=ServerSummary&{pinned?:boolean;archived?:boolean};
 type Props={
@@ -28,7 +29,7 @@ function dateLabel(updatedAt:number,locale:'en'|'zh-HK'):string{
 }
 /** Recent discussions beside the transcript; selection never invents a thread. */
 export function ConversationThreadList({t,locale,items,total,currentId,fresh,notice,loading,query,archived,onQuery,onToggleArchived,onNew,onOpen,onMore,onClose}:Props){
-  const ordered=[...items].sort((a,b)=>Number(b.pinned??false)-Number(a.pinned??false)||b.updatedAt-a.updatedAt);
+  const ordered=sortThreadRows(items);
   return <aside className="conversation-threads" aria-label={t('Discussions')}>
     <div className="conversation-threads-head">
       <button type="button" className="live-primary conversation-new" onClick={onNew} data-active={fresh||undefined}><Plus size={15} aria-hidden="true"/>{t('New discussion')}</button>
