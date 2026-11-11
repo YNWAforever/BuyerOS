@@ -1,4 +1,4 @@
-"""T04: same-workspace cross-project links must fail in PostgreSQL itself."""
+﻿"""T04: same-workspace cross-project links must fail in PostgreSQL itself."""
 
 import json
 
@@ -193,7 +193,7 @@ def test_0013_preflight_reports_legacy_conflict_without_deleting_it(isolated_see
             assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014_buyer_management"
         command.upgrade(config, "head")
         with psycopg.connect(seeded) as owner:
-            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0067_conversation_buyer"
+            assert owner.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0069_turn_reconciliations"
     finally:
         with psycopg.connect(seeded, autocommit=True) as owner:
             owner.execute("UPDATE projects SET active_icp_version_id=NULL WHERE id=%s", (PROJECT_A,))

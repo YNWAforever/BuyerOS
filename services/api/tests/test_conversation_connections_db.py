@@ -1,4 +1,4 @@
-"""Drive schema fences, data class, and two-tenant forced RLS."""
+﻿"""Drive schema fences, data class, and two-tenant forced RLS."""
 import uuid
 from urllib.parse import urlsplit, urlunsplit
 import psycopg
@@ -10,7 +10,7 @@ from tests.test_conversation_threads_db import config
 from tests.test_buyer_review_db import WORKSPACE_A,WORKSPACE_B,PROJECT_A,PROJECT_B
 
 TABLE='conversation_drive_connections'
-HEAD='0067_conversation_buyer'
+HEAD='0069_turn_reconciliations'
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-"""T27 outcome provenance, append-only runtime grants and rollback boundaries."""
+﻿"""T27 outcome provenance, append-only runtime grants and rollback boundaries."""
 import uuid
 
 import psycopg
@@ -11,7 +11,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import OPERATOR, WORKSPACE_A, PROJECT, quote_case
 
-HEAD = "0067_conversation_buyer"
+HEAD = "0069_turn_reconciliations"
 
 
 def _config():

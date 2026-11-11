@@ -6,6 +6,7 @@
 import type {ChatThread,CitationItem,ConversationTurn,MessagePart,MessageRole,NoticePart,
   OutputLinkPart,ProposalPart,SelectedSource,ToolActivityPart} from './types';
 import {isTerminalNoticeCode} from './approval';
+import {streamParts,type TurnStreamState} from './stream-events';
 
 export type EphemeralReply={id:string;text:string;citations:CitationItem[]};
 export type TranscriptEntry={
@@ -156,4 +157,18 @@ export function companyFromEntries(entries:ReadonlyArray<TranscriptEntry>):{id:s
     if(buyer)return {id:buyer.id,label:buyer.label};
   }
   return null;
+}
+/**
+ * Provisional transcript entry for a live turn. Persisted data wins: when the
+ * refetched thread already contains that turn, nothing provisional is appended.
+ */
+export function mergeStreamedEntry(entries:ReadonlyArray<TranscriptEntry>,stream:TurnStreamState|null):TranscriptEntry[]{
+  if(!stream)return [...entries];
+  // Only a persisted ASSISTANT row for this turn proves the parts survived; the
+  // user row of the same turn is not evidence that persistable parts exist.
+  if(entries.some(entry=>entry.turnId===stream.turnId&&entry.role==='assistant'))return [...entries];
+  const parts=streamParts(stream);
+  if(!parts.length)return [...entries];
+  return [...entries,{key:`stream:${stream.turnId}`,role:'assistant',message:{id:stream.turnId,text:''},
+    parts,turnId:stream.turnId,seq:null,createdAt:null,ephemeral:true}];
 }

@@ -1,4 +1,4 @@
-"""The lead journal must not weaken tenant or append-only boundaries."""
+﻿"""The lead journal must not weaken tenant or append-only boundaries."""
 import uuid
 
 import psycopg
@@ -115,7 +115,7 @@ def test_0054_upgrade_preserves_original_source_checks_and_fences(isolated_seede
         before = db.execute("SELECT * FROM buyer_source_checks WHERE id=%s", (check,)).fetchone()
     command.upgrade(config, "head")
     with psycopg.connect(isolated_seeded) as db:
-        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0067_conversation_buyer",)
+        assert db.execute("SELECT version_num FROM alembic_version").fetchone() == ("0069_turn_reconciliations",)
         assert db.execute("SELECT * FROM buyer_source_checks WHERE id=%s", (check,)).fetchone() == before
         assert db.execute(
             "SELECT buyeros_search_receipts_writable(),buyeros_model_receipts_writable(),"

@@ -1,4 +1,4 @@
-"""C18 actual quote/confirm/worker/runtime-role/encrypted result; owned fake HTTP."""
+﻿"""C18 actual quote/confirm/worker/runtime-role/encrypted result; owned fake HTTP."""
 import asyncio,uuid,hashlib,json
 from dataclasses import replace
 from datetime import datetime,timedelta,timezone
@@ -139,7 +139,7 @@ def test_contact_runtime_rls_immutable_private_result_and_populated_rollback(con
             assert await store.get(ref)==saved
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
         finally:
-            invoke_revision(case['dsn'],config,'0059_conversation_connections','_fences',('0067_conversation_buyer',))
+            invoke_revision(case['dsn'],config,'0059_conversation_connections','_fences',('0069_turn_reconciliations',))
             monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved
     asyncio.run(engines(case,exercise))

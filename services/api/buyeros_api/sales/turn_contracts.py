@@ -173,6 +173,56 @@ def part_payload(part) -> dict:
     return part.model_dump(mode="json")
 
 
+TURN_EVENT_KINDS = ("turn.started", "part", "tool", "proposal", "notice", "turn.final")
+
+
+class TurnStartedPayload(Contract):
+    status: Literal["running"] = "running"
+
+
+class PartEventPayload(Contract):
+    index: Annotated[StrictInt, Field(ge=0, le=MAX_MESSAGE_PARTS - 1)]
+    part: TurnPart
+
+
+class ToolEventPayload(Contract):
+    call_id: UUID
+    capability: Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_.]{2,63}$")]
+    state: ActivityState
+    summary: Annotated[str, StringConstraints(max_length=500)] | None = None
+    error_code: Code | None = None
+
+
+class ProposalEventPayload(Contract):
+    proposal_id: UUID
+    capability: Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_.]{2,63}$")]
+    requires_approval: Literal[True] = True
+
+
+class NoticeEventPayload(Contract):
+    code: Code
+    message: Annotated[str, StringConstraints(min_length=1, max_length=500)]
+
+
+class TurnFinalPayload(Contract):
+    status: TurnStatus
+
+
+class TurnEventRecord(Contract):
+    seq: Annotated[StrictInt, Field(ge=1)]
+    kind: Literal["turn.started", "part", "tool", "proposal", "notice", "turn.final"]
+    payload: dict[str, JsonValue] = Field(max_length=16)
+
+
+class ReconcileResult(Contract):
+    """Bounded outcome of a read-only reconciliation probe for one evidence state."""
+
+    outcome: Literal["completed", "failed", "unknown"]
+    code: Code
+    message: Annotated[str, StringConstraints(min_length=1, max_length=500)]
+    evidence_digest: Annotated[str, StringConstraints(pattern=r"^[a-f0-9]{64}$")]
+
+
 class ExecutionOutcome(Contract):
     """Bounded result of one approved continuation step.
 

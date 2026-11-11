@@ -1,4 +1,4 @@
-"""Populated rollback never revives private unknown payload or releases its hold."""
+﻿"""Populated rollback never revives private unknown payload or releases its hold."""
 import asyncio
 from datetime import datetime,timezone
 import psycopg,pytest
@@ -38,7 +38,7 @@ def test_unknown_redacted_payload_and_hash_survive_downgrade_and_reupgrade(conta
             assert paused['epoch']==epoch and paused['enabled'] is False and paused['applied'] is False
             with pytest.raises(ValueError,match='0042'):await store.claim(intent)
         finally:
-            invoke_revision(case['dsn'],config,'0059_conversation_connections','_fences',('0067_conversation_buyer',))
+            invoke_revision(case['dsn'],config,'0059_conversation_connections','_fences',('0069_turn_reconciliations',))
             monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(case['dsn']));get_settings.cache_clear()
         assert await store.get(ref)==saved and not (await store.claim(intent))[1] and held(case)[1]==0
     asyncio.run(expiring_engines(case,exercise))

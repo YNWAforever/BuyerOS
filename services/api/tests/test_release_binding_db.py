@@ -1,4 +1,4 @@
-"""Real owned PostgreSQL verification of the release probe's runtime pool."""
+﻿"""Real owned PostgreSQL verification of the release probe's runtime pool."""
 import pytest
 import psycopg
 from sqlalchemy.exc import ProgrammingError
@@ -16,7 +16,7 @@ async def test_binding_reads_current_runtime_database_without_elevated_login(see
         owner.execute('GRANT SELECT(version_num) ON public.alembic_version TO buyeros_api')
     try:
         value=await read_runtime_binding(engine,'a'*40,'dpl_ownedtest')
-        assert value['schema_head']=='0067_conversation_buyer'
+        assert value['schema_head']=='0069_turn_reconciliations'
         assert value['db_target_sha256']==database_target_sha256(dsn)
         assert value['deployment_id']=='dpl_ownedtest'
         assert dsn not in str(value)

@@ -14,6 +14,7 @@ import uuid
 from dataclasses import replace
 from datetime import datetime, timezone
 import logging
+import re
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -31,6 +32,7 @@ from ..sales.turn_contracts import (CitationsPart, CitationItem, ExecutionOutcom
     ProposalPart, Recovery, TextPart, ToolActivityPart, TurnDecisionRequest, TurnNotice,
     TurnPayload, TurnPlan, TurnRequest, validate_notices, validate_part_list)
 from .conversation_access import load, not_found, sales_enabled
+from .conversation_turn_events import append_turn_events, read_turn_events
 from .conversation_reply import Grounding, reply_from_grounding, resolve_sources
 
 MAX_THREAD_MESSAGES = 100
@@ -662,6 +664,9 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                 request_fp=saved_fp, steps_count=len(plan.steps),
                 skill_id=skill.id, skill_version=skill.version,
                 parts=tuple(parts), notices=notices, status=status, staged=staged)
+            # Same transaction as the persisted turn/parts/status: the terminal
+            # event can never disagree with conversation_turns.status.
+            await append_turn_events(session, scope, turn, tuple(parts), notices, status)
             from .audit_service import append_audit
             append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
                 action='conversation_turn.created', entity_type='conversation_turn',
@@ -820,7 +825,7 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     turn_id = uuid.uuid5(uuid.UUID(str(source_turn.id)), f'continuation:{request_fp}')
     existing = await _turn_by_id(session, scope, turn_id, thread.id)
     if existing is not None:
-        return existing
+        return existing, False
     if await _message_count(session, thread) + 1 > MAX_THREAD_MESSAGES:
         raise ApiError(409, 'MESSAGE_LIMIT',
             'discussion note limit reached; start another discussion')
@@ -843,7 +848,8 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     thread.version += 1
     thread.updated_at = now()
     await session.flush()
-    return turn
+    await append_turn_events(session, scope, turn, parts, notices, status)
+    return turn, True
 
 
 def decision_fingerprint(scope: Scope, thread_id, source_turn_id,
@@ -921,7 +927,7 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         raise ApiError(409, 'INVALID_STATE', 'this turn has no open proposal')
     try:
         async with session.begin_nested():
-            continuation, decided = await _apply_decision(session, scope, thread,
+            continuation, effective = await _apply_decision(session, scope, thread,
                 source_turn, proposal, request, fingerprint)
     except IntegrityError as exc:
         if not is_expected_conflict(exc, DECISION_CONFLICT_CONSTRAINTS):
@@ -941,11 +947,14 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
             raise not_found()
         return thread, role, _payload(row), True
     complete_idempotency(outcome, str(continuation.id))
-    from .audit_service import append_audit
-    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
-        action='conversation_turn.decided', entity_type='conversation_turn',
-        entity_id=continuation.id)
-    return thread, role, _payload(continuation), decided
+    if effective:
+        # Exactly one audit row per effective decision transition; an
+        # idempotent replay of an existing continuation appends nothing.
+        from .audit_service import append_audit
+        append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+            action='conversation_turn.decided', entity_type='conversation_turn',
+            entity_id=continuation.id)
+    return thread, role, _payload(continuation), effective
 
 
 async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
@@ -959,13 +968,13 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
                 language=source_turn.language)]
         notices = (TurnNotice(code='PROPOSAL_REJECTED',
             message='The reviewer rejected this proposal.'),)
-        continuation = await _continuation_turn(session, scope, thread, source_turn,
+        continuation, created = await _continuation_turn(session, scope, thread, source_turn,
             fingerprint, source_turn.language, parts=parts, notices=notices, status='completed')
         proposal.status = 'rejected'
         proposal.revision += 1
         _record_decision(session, scope, source_turn, proposal, request, fingerprint,
             continuation, 'applied')
-        return continuation, False
+        return continuation, created
     # Approval: revalidate current membership, role, project, language, sales
     # admission and policy/budget gate state *now*, then execute once.
     project = await _project(session, scope)
@@ -973,18 +982,18 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
     if not proposal_only and not sales_enabled(scope.workspace_id):
         return await _blocked_continuation(session, scope, thread, source_turn, proposal,
             fingerprint, 'SALES_ADMISSION_DISABLED',
-            'Guided sales execution is disabled for this workspace.'), False
+            'Guided sales execution is disabled for this workspace.')
     if source_turn.language not in (project.language_preferences or []):
         return await _blocked_continuation(session, scope, thread, source_turn, proposal,
             fingerprint, 'LANGUAGE_UNAVAILABLE',
-            'This project no longer supports the reviewed language.'), False
+            'This project no longer supports the reviewed language.')
     from .xverum_dispatch import gates
     await gates(session, scope.workspace_id)  # current policy + budget serialization
     executor = _executor(proposal.capability)
     if executor is None:
         return await _finish_failure(session, scope, thread, source_turn, proposal,
             request, fingerprint, 'failed', 'CAPABILITY_NOT_AVAILABLE',
-            'No reviewed executor is registered for this capability.'), False
+            'No reviewed executor is registered for this capability.')
     try:
         result = await executor(session, scope, thread, source_turn, proposal)
     except ApiError as exc:
@@ -994,11 +1003,11 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
         # savepoint stay recovery-visible, but the decision and proposal become
         # terminal so the same proposal can never be approved again.
         return await _finish_failure(session, scope, thread, source_turn, proposal,
-            request, fingerprint, 'failed', exc.code, exc.message), False
+            request, fingerprint, 'failed', exc.code, exc.message)
     except Exception:
         return await _finish_failure(session, scope, thread, source_turn, proposal,
             request, fingerprint, 'failed', 'EXECUTION_REJECTED',
-            'Current policy, source authority or configuration rejected this execution.'), False
+            'Current policy, source authority or configuration rejected this execution.')
     status = {'output': 'completed', 'notice': 'needs_input',
               'failed': 'failed', 'unknown': 'outcome_unknown'}[result.kind]
     proposal_status = {'output': 'executed', 'notice': 'failed',
@@ -1013,7 +1022,7 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
     parts.append(TextPart(text=result.message, language=source_turn.language))
     notices = () if result.kind == 'output' else (TurnNotice(code=result.code,
         message=result.message),)
-    continuation = await _continuation_turn(session, scope, thread, source_turn,
+    continuation, created = await _continuation_turn(session, scope, thread, source_turn,
         fingerprint, source_turn.language, parts=parts, notices=notices, status=status)
     proposal.status = proposal_status
     proposal.revision += 1
@@ -1023,7 +1032,7 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
         'task_id': str(result.task_id) if result.task_id else None}
     _record_decision(session, scope, source_turn, proposal, request, fingerprint,
         continuation, 'applied')
-    return continuation, False
+    return continuation, created
 
 
 async def _blocked_continuation(session, scope, thread, source_turn, proposal,
@@ -1032,11 +1041,11 @@ async def _blocked_continuation(session, scope, thread, source_turn, proposal,
                 started_at=proposal.created_at or now()),
         TextPart(text=message, language=source_turn.language)]
     notices = (TurnNotice(code=code, message=message),)
-    continuation = await _continuation_turn(session, scope, thread, source_turn,
+    continuation, created = await _continuation_turn(session, scope, thread, source_turn,
         fingerprint, source_turn.language, parts=parts, notices=notices, status='needs_input')
     # Non-terminal: the proposal stays open so it can be approved after the
     # workspace is configured. No decision row is recorded (recoverable notice).
-    return continuation
+    return continuation, created
 
 
 async def _finish_failure(session, scope, thread, source_turn, proposal, request,
@@ -1046,7 +1055,7 @@ async def _finish_failure(session, scope, thread, source_turn, proposal, request
                 started_at=proposal.created_at or now(), finished_at=now()),
         TextPart(text=message, language=source_turn.language)]
     notices = (TurnNotice(code=code, message=message),)
-    continuation = await _continuation_turn(session, scope, thread, source_turn,
+    continuation, created = await _continuation_turn(session, scope, thread, source_turn,
         fingerprint, source_turn.language, parts=parts, notices=notices, status=status)
     # Terminal: persist proposal/decision state even though the executor failed,
     # so a failed or uncertain step is visible and cannot be re-approved.
@@ -1057,7 +1066,7 @@ async def _finish_failure(session, scope, thread, source_turn, proposal, request
         'task_id': None}
     _record_decision(session, scope, source_turn, proposal, request, fingerprint,
         continuation, 'failed')
-    return continuation
+    return continuation, created
 
 
 def _record_decision(session, scope: Scope, source_turn, proposal, request, fingerprint,
@@ -1099,7 +1108,7 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         complete_idempotency(outcome, str(source_turn.id))
         return thread, role, _payload(source_turn)
     _check_version(thread.version, expected_version)
-    continuation = None
+    continuation, created = None, False
     try:
         async with session.begin_nested():
             proposals = (await session.execute(select(ConversationTurnProposal).where(
@@ -1118,9 +1127,9 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
                     language=source_turn.language))
             notices = (TurnNotice(code='TURN_CANCELLED',
                 message='This turn was cancelled; no undispatched step remains.'),)
-            continuation = await _continuation_turn(session, scope, thread, source_turn,
-                fingerprint, source_turn.language, parts=parts, notices=notices,
-                status='cancelled')
+            continuation, created = await _continuation_turn(session, scope, thread,
+                source_turn, fingerprint, source_turn.language, parts=parts,
+                notices=notices, status='cancelled')
             for proposal in proposals:
                 proposal.status = 'cancelled'
                 proposal.revision += 1
@@ -1134,10 +1143,141 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         complete_idempotency(outcome, str(recorded.id))
         return thread, role, _payload(recorded)
     complete_idempotency(outcome, str(continuation.id))
+    if created:
+        from .audit_service import append_audit
+        append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+            action='conversation_turn.cancelled', entity_type='conversation_turn',
+            entity_id=continuation.id)
+    return thread, role, _payload(continuation)
+
+
+TERMINAL_TURN_STATUSES = frozenset({'completed', 'failed', 'needs_input',
+    'needs_approval', 'cancelled', 'outcome_unknown'})
+
+
+async def turn_status(session, scope: Scope, turn_id):
+    turn = await _turn_by_id(session, scope, turn_id)
+    return None if turn is None else turn.status
+
+
+async def stream_turn(session, scope: Scope, turn_id):
+    """Authorize streaming for the current actor; read ACL only."""
+    turn = await _turn_by_id(session, scope, turn_id)
+    if turn is None:
+        raise not_found()
+    await load(session, scope.workspace_id, scope.project_id, turn.thread_id,
+        scope.actor_id)
+    return turn
+
+
+async def reconcile_turn(session, scope: Scope, turn_id, key: str):
+    """Resolve an outcome_unknown turn from persisted evidence only.
+
+    Effective resolutions are keyed by a digest of the observed evidence:
+    an equivalent attempt (any key/actor) returns the recorded continuation with
+    no new probe result and no audit row; a later attempt with new authoritative
+    evidence records the next resolution and may transition the source turn out
+    of ``outcome_unknown`` exactly once. Replay after a terminal resolution keeps
+    returning the recorded result. All evidence reads are read-only: no stage,
+    quote, receipt, reservation or provider call is created.
+    """
+    from .conversation_turn_recovery import probe_outcome
+    from ..db.conversation_turn_reconciliations import ConversationTurnReconciliation
     from .audit_service import append_audit
-    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
-        action='conversation_turn.cancelled', entity_type='conversation_turn',
-        entity_id=continuation.id)
+    turn = await _turn_by_id(session, scope, turn_id)
+    if turn is None:
+        raise not_found()
+    thread, role = await load(session, scope.workspace_id, scope.project_id,
+        turn.thread_id, scope.actor_id, edit=True, lock=True)
+    outcome = await begin_idempotency(session, workspace_id=scope.workspace_id,
+        actor_id=scope.actor_id, operation_id='conversationTurnReconcile', key=key,
+        body={}, target={'project_id': str(scope.project_id),
+            'turn_id': str(turn.id)}, precondition=None)
+    if outcome.replay:
+        row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id), thread.id)
+        if row is None:
+            raise not_found()
+        return thread, role, _payload(row)
+
+    def latest_resolution():
+        return select(ConversationTurnReconciliation).where(
+            ConversationTurnReconciliation.workspace_id == scope.workspace_id,
+            ConversationTurnReconciliation.source_turn_id == turn.id).order_by(
+                ConversationTurnReconciliation.evidence_seq.desc()).limit(1)
+
+    latest = (await session.execute(latest_resolution())).scalar_one_or_none()
+    probe = await probe_outcome(session, scope, turn)
+    if latest is not None and latest.evidence_digest == probe.evidence_digest:
+        recorded = await _turn_by_id(session, scope, latest.continuation_turn_id, thread.id)
+        if recorded is None:
+            raise not_found()
+        complete_idempotency(outcome, str(recorded.id))
+        return thread, role, _payload(recorded)
+    if turn.status != 'outcome_unknown':
+        raise ApiError(409, 'INVALID_STATE',
+            'this turn is already resolved; authoritative evidence changed after reconciliation')
+
+    tool = next((part for part in (turn.parts or [])
+        if isinstance(part, dict) and part.get('kind') == 'tool_activity'), None)
+    call_id = uuid.UUID(tool['call_id']) if tool and tool.get('call_id') else uuid.uuid5(
+        uuid.UUID(str(turn.id)), 'reconcile-probe')
+    capability = tool.get('capability') if tool else 'reconciliation'
+    if not isinstance(capability, str) or not re.match(r'^[a-z][a-z0-9_.]{2,63}$', capability):
+        capability = 'reconciliation'
+    state = {'completed': 'completed', 'failed': 'failed',
+             'unknown': 'outcome_unknown'}[probe.outcome]
+    tool_title = tool.get('title') if tool else 'Reconciled execution'
+    if not isinstance(tool_title, str) or not tool_title.strip():
+        tool_title = 'Reconciled execution'
+    parts = [ToolActivityPart(call_id=call_id, capability=capability,
+        title=tool_title[:240], state=state, started_at=turn.created_at or now(),
+        finished_at=now(), summary=probe.message[:500],
+        error_code=None if probe.outcome == 'completed' else probe.code),
+        TextPart(text=probe.message, language=turn.language)]
+    notices = (TurnNotice(code=probe.code, message=probe.message),)
+    status = {'completed': 'completed', 'failed': 'failed',
+              'unknown': 'outcome_unknown'}[probe.outcome]
+    fingerprint = digest({'operation': 'conversationTurnReconcile',
+        'turn_id': str(turn.id), 'thread_id': str(thread.id),
+        'evidence_digest': probe.evidence_digest})
+    try:
+        async with session.begin_nested():
+            continuation, _created = await _continuation_turn(session, scope, thread,
+                turn, fingerprint, turn.language, parts=parts, notices=notices,
+                status=status)
+            current = (await session.execute(latest_resolution())).scalar_one_or_none()
+            if current is not None and current.evidence_digest == probe.evidence_digest:
+                recorded = await _turn_by_id(session, scope,
+                    current.continuation_turn_id, thread.id)
+                complete_idempotency(outcome, str(recorded.id))
+                return thread, role, _payload(recorded)
+            next_seq = 1 if current is None else current.evidence_seq + 1
+            session.add(ConversationTurnReconciliation(
+                workspace_id=scope.workspace_id, project_id=scope.project_id,
+                thread_id=thread.id, source_turn_id=turn.id,
+                actor_id=scope.actor_id, evidence_digest=probe.evidence_digest,
+                evidence_seq=next_seq, outcome=probe.outcome, code=probe.code,
+                message=probe.message, continuation_turn_id=continuation.id))
+            if status != 'outcome_unknown':
+                # Single authoritative transition out of outcome_unknown.
+                turn.status = status
+                turn.updated_at = now()
+            append_audit(session, workspace_id=scope.workspace_id,
+                actor_id=scope.actor_id, action='conversation_turn.reconciled',
+                entity_type='conversation_turn', entity_id=continuation.id)
+            await session.flush()
+    except IntegrityError as exc:
+        current = await session.execute(latest_resolution())
+        current = current.scalar_one_or_none()
+        if current is None:
+            raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
+                'a concurrent reconciliation is in progress') from exc
+        recorded = await _turn_by_id(session, scope, current.continuation_turn_id, thread.id)
+        if recorded is None:
+            raise not_found()
+        complete_idempotency(outcome, str(recorded.id))
+        return thread, role, _payload(recorded)
+    complete_idempotency(outcome, str(continuation.id))
     return thread, role, _payload(continuation)
 
 

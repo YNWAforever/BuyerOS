@@ -1,4 +1,4 @@
-"""T24 sender metadata migration preserves reviewed identity history."""
+﻿"""T24 sender metadata migration preserves reviewed identity history."""
 import uuid
 
 import psycopg
@@ -9,7 +9,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0067_conversation_buyer"
+HEAD = "0069_turn_reconciliations"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 
 

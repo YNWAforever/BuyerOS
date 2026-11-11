@@ -1,4 +1,4 @@
-"""Owned PostgreSQL acceptance for staged Xverum admission."""
+﻿"""Owned PostgreSQL acceptance for staged Xverum admission."""
 import importlib.util
 import psycopg
 import pytest
@@ -107,7 +107,7 @@ def test_missing_tariff_blocks_without_reservation(credit_case):
 
 def test_quote_owner_requires_real_migration(isolated_seeded):
     with psycopg.connect(isolated_seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0067_conversation_buyer'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0069_turn_reconciliations'
     assert importlib.util.find_spec('buyeros_api.services.xverum_quotes')
 
 

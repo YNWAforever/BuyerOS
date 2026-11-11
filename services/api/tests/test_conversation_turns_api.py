@@ -11,6 +11,7 @@ Contract notes encoded below (Amendment A1/A2 and the turn contract):
   thread-version precondition, which is the intended idempotent-retry contract;
 * inline proposals always require a separate authenticated decision.
 """
+import json
 import uuid
 
 import psycopg
@@ -543,3 +544,192 @@ def test_existing_thread_company_link_cannot_be_repointed(turn_api):
         assert conn.execute('SELECT buyer_id FROM conversation_threads WHERE id=%s',
             (thread['id'],)).fetchone()[0] is None
         assert conn.execute('SELECT count(*) FROM conversation_thread_messages').fetchone()[0] == 1
+
+# --- increment C: durable turn events, SSE stream and reconciliation -------
+
+def events_url(turn, after=0):
+    return f"{TURN_ROOT}/{turn['id']}/events?after={after}"
+
+
+def parse_sse(text):
+    events = []
+    for block in text.strip().split('\n\n'):
+        lines = [line for line in block.splitlines() if line]
+        if not lines or any(line.startswith(':') for line in lines):
+            continue
+        record = {'event': None, 'data': None}
+        for line in lines:
+            if line.startswith('event: '):
+                record['event'] = line[7:]
+            elif line.startswith('data: '):
+                record['data'] = json.loads(line[6:])
+        if record['event'] and record['data'] is not None:
+            events.append(record)
+    return events
+
+
+def seed_sales_task(dsn, thread_id, state='ready_for_review'):
+    task = uuid.uuid4()
+    owner = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO sales_tasks(id,workspace_id,project_id,thread_id,"
+            "owner_user_id,actor_id,client_message_id,message_sequence,intent_fingerprint,"
+            "skill_id,skill_version,user_message,arguments,source_refs,intake_history,"
+            "state,revision,event_sequence,output_ids) VALUES(%s,%s,%s,%s,%s,%s,%s,1,%s,"
+            "'understand-documents','1','reconcile fixture','{}'::jsonb,'[]'::jsonb,"
+            "'[]'::jsonb,%s,1,0,'[]'::jsonb)",
+            (task, WORKSPACE_A, PROJECT_A, thread_id, owner, owner, uuid.uuid4(), 'd' * 64,
+             state))
+    return task
+
+
+def test_reconcile_unknown_then_new_evidence_and_idempotent_replays(turn_api, monkeypatch):
+    """Recovery is read-only, evidence-keyed, replay-safe and can upgrade later.
+
+    * first reconcile finds no terminal evidence -> recorded ``outcome_unknown``
+      resolution, one audit row, source stays recoverable;
+    * same key, equivalent new key and a different editor replay the recorded
+      result with no second probe result and no extra audit row;
+    * new authoritative evidence creates the next resolution, transitions the
+      source turn out of ``outcome_unknown`` once and resolves to ``failed``;
+    * after the terminal transition, changed evidence is 409;
+    * nothing ever dispatches/reserves/receives.
+    """
+    client, dsn = turn_api
+    from buyeros_api.services import conversation_turns as engine
+    from buyeros_api.sales.turn_contracts import ExecutionOutcome
+    from buyeros_api.providers import xverum_mcp
+
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    task = seed_sales_task(dsn, created['thread']['id'], state='ready_for_review')
+
+    async def unknown_with_task(session, scope, thread, turn, proposal):
+        return ExecutionOutcome(kind='unknown', code='PROVIDER_OUTCOME_UNKNOWN',
+            message='Provider response was lost; reconciliation required.', task_id=task)
+
+    monkeypatch.setitem(engine.EXECUTORS, 'documents.read', unknown_with_task)
+    monkeypatch.setattr(xverum_mcp, 'XverumTransport',
+        lambda *args, **kwargs: pytest.fail('reconcile must never construct a transport'))
+    current = created['thread']['version']
+    unknown = decide(client, created['turn'], version=current, mutation_key='unknown-key')
+    assert unknown.status_code == 200, unknown.text
+    unknown_turn = unknown.json()['data']['turn']
+    assert unknown_turn['status'] == 'outcome_unknown'
+    url = f"{TURN_ROOT}/{unknown_turn['id']}/reconcile"
+
+    first = client.post(url, headers=_h(OPERATOR, 'reconcile-key-a'))
+    assert first.status_code == 200, first.text
+    first_turn = first.json()['data']['turn']
+    assert first_turn['status'] == 'outcome_unknown'
+    assert 'RECONCILE_NO_EVIDENCE' in {notice['code']
+        for notice in first_turn['notices']}
+    same_key = client.post(url, headers=_h(OPERATOR, 'reconcile-key-a'))
+    assert same_key.status_code == 200
+    assert same_key.json()['data']['turn']['id'] == first_turn['id']
+    equivalent = client.post(url, headers=_h(OPERATOR, 'reconcile-key-b'))
+    assert equivalent.status_code == 200
+    assert equivalent.json()['data']['turn']['id'] == first_turn['id']
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM audit_events WHERE action=%s',
+            ('conversation_turn.reconciled',)).fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM conversation_turn_reconciliations'
+            ).fetchone()[0] == 1
+        assert conn.execute('SELECT status FROM conversation_turns WHERE id=%s',
+            (unknown_turn['id'],)).fetchone()[0] == 'outcome_unknown'
+
+    # New authoritative evidence: the persisted task now records a failure.
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("UPDATE sales_tasks SET state='failed' WHERE id=%s", (task,))
+    resolved = client.post(url, headers=_h(OPERATOR, 'reconcile-key-c'))
+    assert resolved.status_code == 200, resolved.text
+    resolved_turn = resolved.json()['data']['turn']
+    assert resolved_turn['status'] == 'failed'
+    assert 'RECONCILED_FAILED' in {notice['code'] for notice in resolved_turn['notices']}
+    activity = next(part for part in resolved_turn['parts']
+        if part['kind'] == 'tool_activity')
+    assert activity['state'] == 'failed'
+    # Equivalent replay (same evidence) returns the recorded terminal result.
+    terminal_replay = client.post(url, headers=_h(OPERATOR, 'reconcile-key-d'))
+    assert terminal_replay.status_code == 200
+    assert terminal_replay.json()['data']['turn']['id'] == resolved_turn['id']
+    # A different editor with the same evidence must not duplicate recovery.
+    latest_thread = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
+    grant(client, dsn, latest_thread, REVIEWER, 'editor')
+    other_editor = client.post(url, headers=_h(REVIEWER, 'reconcile-key-e'))
+    assert other_editor.status_code == 200
+    assert other_editor.json()['data']['turn']['id'] == resolved_turn['id']
+    # Changed evidence after the terminal transition is a real conflict.
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("UPDATE sales_tasks SET state='cancelled' WHERE id=%s", (task,))
+    late = client.post(url, headers=_h(OPERATOR, 'reconcile-key-f'))
+    assert late.status_code == 409, late.text
+    assert late.json()['code'] == 'INVALID_STATE'
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT status FROM conversation_turns WHERE id=%s',
+            (unknown_turn['id'],)).fetchone()[0] == 'failed'
+        assert conn.execute('SELECT count(*) FROM sales_tasks').fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM sales_executions').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM xverum_stages').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM xverum_tool_receipts').fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM budget_reservations WHERE workspace_id=%s',
+            (WORKSPACE_A,)).fetchone()[0] == 0
+        audit_rows = conn.execute('SELECT count(*) FROM audit_events WHERE action=%s',
+            ('conversation_turn.reconciled',)).fetchone()[0]
+        assert audit_rows == 2  # one per effective (unique-evidence) resolution
+        rows = conn.execute('SELECT evidence_seq,outcome,continuation_turn_id '
+            'FROM conversation_turn_reconciliations ORDER BY evidence_seq').fetchall()
+        assert [(seq, outcome) for seq, outcome, _ in rows] == [(1, 'unknown'), (2, 'failed')]
+        assert rows[1][2] == uuid.UUID(resolved_turn['id'])
+        events = conn.execute('SELECT seq,kind,payload FROM conversation_turn_events '
+            'WHERE turn_id=%s ORDER BY seq', (resolved_turn['id'],)).fetchall()
+        assert events and events[0][1] == 'turn.started'
+        assert events[-1][1] == 'turn.final'
+        assert events[-1][2] == {'status': 'failed'}
+
+
+def test_stream_replays_ordered_events_and_reconnect_has_no_duplicates(turn_api):
+    client, dsn = turn_api
+    created = post_turn(client, turn_body()).json()['data']
+    turn = created['turn']
+    response = client.get(events_url(turn), headers=_h())
+    assert response.status_code == 200, response.text
+    assert response.headers['content-type'].startswith('text/event-stream')
+    assert response.headers['cache-control'] == 'no-store'
+    events = parse_sse(response.text)
+    kinds = [event['event'] for event in events]
+    seqs = [event['data']['seq'] for event in events]
+    assert kinds[0] == 'turn.started' and kinds[-1] == 'turn.final'
+    assert kinds.count('turn.final') == 1
+    assert seqs == list(range(1, len(seqs) + 1))
+    assert all(event['data']['turn_id'] == turn['id'] for event in events)
+    assert events[-1]['data']['payload']['status'] == turn['status']
+    replay = client.get(events_url(turn, seqs[-1]), headers=_h())
+    assert replay.status_code == 200
+    assert parse_sse(replay.text) == []
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM conversation_turn_events WHERE turn_id=%s',
+            (turn['id'],)).fetchone()[0] == len(events)
+
+
+def test_stream_cursor_validation_and_foreign_turn(turn_api):
+    client, _ = turn_api
+    created = post_turn(client, turn_body()).json()['data']
+    turn = created['turn']
+    for cursor in ('-1', 'abc', '1.5'):
+        response = client.get(events_url(turn).replace('after=0', f'after={cursor}'),
+            headers=_h())
+        assert response.status_code == 422, response.text
+    missing = client.get(f"{TURN_ROOT}/{uuid.uuid4()}/events", headers=_h())
+    assert missing.status_code == 404
+    assert missing.json()['code'] == 'NOT_FOUND'
+
+
+def test_reconcile_requires_an_unknown_turn(turn_api):
+    client, _ = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    result = client.post(f"{TURN_ROOT}/{created['turn']['id']}/reconcile",
+        headers=_h(OPERATOR, 'reconcile-invalid-state-key'))
+    assert result.status_code == 409
+    assert result.json()['code'] == 'INVALID_STATE'

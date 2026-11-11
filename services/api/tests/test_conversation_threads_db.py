@@ -1,4 +1,4 @@
-"""Stage 3 schema invariants exercised through PostgreSQL and runtime roles."""
+﻿"""Stage 3 schema invariants exercised through PostgreSQL and runtime roles."""
 import uuid
 import psycopg
 import pytest
@@ -116,7 +116,7 @@ def test_empty_downgrade_upgrade_repoints_all_receipt_fences(isolated_migrated):
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
     command.upgrade(cfg,'head')
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0067_conversation_buyer'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_turn_reconciliations'
         assert all(db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0] for service in ['search','model','contact'])
 
 
@@ -129,5 +129,5 @@ def test_populated_downgrade_refuses_and_preserves_rls(isolated_seeded):
         command.downgrade(config(),'0057_conversation_model')
     with psycopg.connect(isolated_seeded) as db:
         assert db.execute('SELECT title FROM conversation_threads WHERE id=%s',(ident,)).fetchone()[0]=='preserved'
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0067_conversation_buyer'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0069_turn_reconciliations'
         assert all(db.execute('SELECT relforcerowsecurity FROM pg_class WHERE oid=%s::regclass',(table,)).fetchone()[0] for table in TABLES)

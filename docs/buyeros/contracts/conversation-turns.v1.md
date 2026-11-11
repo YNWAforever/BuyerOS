@@ -1,4 +1,4 @@
-# Conversation turns v1 — backend contract (2026-11-08)
+﻿# Conversation turns v1 ??backend contract (2026-11-08)
 
 Status: implemented in the backend increment behind
 `NEXT_PUBLIC_CONVERSATION_HOME=true`. This file is a read model for clients and
@@ -11,11 +11,11 @@ All under `/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-turn
 
 | Method + path | Purpose |
 | --- | --- |
-| `POST /conversation-turns` | One bounded turn. `thread_id` optional: absent ⇒ create thread + first user message + assistant parts atomically. |
+| `POST /conversation-turns` | One bounded turn. `thread_id` optional: absent ??create thread + first user message + assistant parts atomically. |
 | `POST /conversation-turns/{turn_id}/decisions` | Explicit approve/reject of one persisted inline proposal. Returns a continuation turn. |
 | `POST /conversation-turns/{turn_id}/cancel` | Stops undispatched steps; reports already-dispatched liability honestly. |
 
-Headers: `Authorization: Bearer …`, `Idempotency-Key: <8..200 chars>`,
+Headers: `Authorization: Bearer ?圳, `Idempotency-Key: <8..200 chars>`,
 `If-Match: "<thread.version>"` (required for an existing `thread_id`, decisions
 and cancel). Responses use the existing `{data, request_id, data_mode}` envelope
 and are `no-store`.
@@ -44,15 +44,53 @@ the recorded turn; a different payload under the same key is
 
 ```json
 {
-  "thread": { "…ServerThread with messages[]…" },
+  "thread": { "?吁erverThread with messages[]?? },
   "turn": {
     "id": "uuid",
     "status": "completed | needs_input | needs_approval | failed | outcome_unknown | cancelled",
     "parts": [ "MessagePart" ],
-    "notices": [ { "code": "…", "message": "…", "recovery": {"label": "…", "href": "/…"} } ]
+    "notices": [ { "code": "??, "message": "??, "recovery": {"label": "??, "href": "/??} } ]
   }
 }
 ```
+
+### Turn events, SSE stream and reconciliation (Increment C)
+
+`conversation_turn_events` (Alembic `0068_conversation_turn_events`) stores
+derived, tenant-scoped, append-only turn events: `turn.started` (first),
+`part` `{index, part}`, `tool` `{call_id, capability, state, summary?,
+error_code?}`, `proposal` `{proposal_id, capability, requires_approval}`,
+`notice` `{code, message}` and exactly one terminal `turn.final` `{status}`.
+Events are written in the same transaction as the turn/part/status they
+describe, so the terminal event can never disagree with the persisted turn
+status. Per-turn `seq` is allocated by a shared allocator that flushes pending
+rows first; `UNIQUE(turn_id, seq)`.
+
+`GET ?/conversation-turns/{turn_id}/events?after=<seq>` returns
+`text/event-stream` (`Cache-Control: no-store`, `X-Accel-Buffering: no`),
+replays persisted events with `seq > after`, emits `: heartbeat` comments, and
+live-tails until `turn.final` or a bounded deadline. Reconnecting with the last
+seen seq never duplicates and never re-executes work. A foreign turn is `404`;
+a non-integer/negative cursor is `422`.
+
+`POST ?/conversation-turns/{turn_id}/reconcile` (Idempotency-Key required) is
+valid for an `outcome_unknown` turn (else `409 INVALID_STATE`). It performs a
+strictly read-only probe of already-persisted evidence (canonical sales task and
+output state; no provider receipts are created) and records an **effective
+resolution** in `conversation_turn_reconciliations`, keyed by a digest of the
+observed evidence:
+- an equivalent attempt (same evidence, any key or editor) returns the recorded
+  continuation with no new probe result and no extra audit row;
+- a later attempt with new authoritative evidence records the next
+  `evidence_seq` and may transition the source turn out of `outcome_unknown`
+  exactly once (to `completed` or `failed`); after that transition, changed
+  evidence yields `409 INVALID_STATE`;
+- audit adds exactly one `conversation_turn.reconciled` row per effective
+  resolution, never per attempt.
+It never dispatches, reserves or retries a provider call. Migrations:
+`0068_conversation_turn_events`, `0069_turn_reconciliations`
+(API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
+`conversation_turns` for the single source transition; no worker grants).
 
 ### Thread company link
 
@@ -73,7 +111,7 @@ persisted step counter stays within the reviewed ceiling.
 Grounding includes the linked buyer as a citation item
 `{"id": "buyer:<uuid>", "label": "<display name>", "kind": "buyer"}`; only the
 minimal projection (id, company id, canonical display name, domain, review
-state) is used — never contact data.
+state) is used ??never contact data.
 
 ### Thread messages
 
@@ -92,7 +130,7 @@ thread. Unknown `role`/`parts[].kind` must degrade to plain `text`.
 | --- | --- |
 | `text` | `{text, language}` |
 | `citations` | `{items: [{id, label, kind, href?}]}` |
-| `tool_activity` | `{call_id, capability, title, state, started_at, finished_at?, summary?, error_code?}`; state is `proposed → approved → running → completed / failed / skipped / outcome_unknown` |
+| `tool_activity` | `{call_id, capability, title, state, started_at, finished_at?, summary?, error_code?}`; state is `proposed ??approved ??running ??completed / failed / skipped / outcome_unknown` |
 | `proposal` | `{proposal_id, capability, title, rationale, arguments_preview, cost?, requires_approval: true}` |
 | `output_link` | `{output: {output_id, kind, revision, status}, title, href?}` |
 | `notice` | `{code, message, recovery?}` |
@@ -139,13 +177,13 @@ Alembic revisions `0066_conversation_turns` and `0067_conversation_buyer`:
   `xverum.enrich_company`/`drive.read`; the parts validator is a backward-safe
   superset (buyer citation kind, credit-cost `known` flag). Downgrade refuses
   while any company link or proposal-only capability decision exists.
-- `conversation_turns` — one row per user turn or continuation; unique
+- `conversation_turns` ??one row per user turn or continuation; unique
   `(workspace_id, thread_id, client_message_id)` and unique
   `(workspace_id, actor_id, client_message_id)` so a duplicate submission cannot
   create a second thread or a second turn.
-- `conversation_turn_proposals` — trusted typed arguments/source refs, preview,
+- `conversation_turn_proposals` ??trusted typed arguments/source refs, preview,
   status and revision; unique per proposal id.
-- `conversation_turn_decisions` — at most one effective decision per proposal
+- `conversation_turn_decisions` ??at most one effective decision per proposal
   (`unique(workspace_id, proposal_id)`), with the continuation turn id.
 
 Forced RLS on every table; no `buyeros_worker` grants; thread deletion cascades
