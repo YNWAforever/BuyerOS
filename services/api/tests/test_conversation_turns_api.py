@@ -695,7 +695,9 @@ def test_reconcile_unknown_then_new_evidence_and_idempotent_replays(turn_api, mo
             'WHERE turn_id=%s ORDER BY seq', (resolved_turn['id'],)).fetchall()
         assert events and events[0][1] == 'turn.started'
         assert events[-1][1] == 'turn.final'
-        assert events[-1][2] == {'status': 'failed'}
+        assert events[-1][2]['status'] == 'failed'
+        assert set(events[-1][2]) <= {'status', 'finished_at'}
+        assert events[-1][2]['finished_at'].endswith('Z')
 
 
 def test_stream_replays_ordered_events_and_reconnect_has_no_duplicates(turn_api):
@@ -937,7 +939,9 @@ def test_deadline_exceeded_turn_returns_200_failed_with_parts_and_replays(turn_a
             'WHERE turn_id=%s ORDER BY seq', (turn['id'],)).fetchall()
         assert events[0][1] == 'turn.started'
         assert events[-1][1] == 'turn.final'
-        assert events[-1][2] == {'status': 'failed'}
+        assert events[-1][2]['status'] == 'failed'
+        assert set(events[-1][2]) <= {'status', 'finished_at'}
+        assert events[-1][2]['finished_at'].endswith('Z')
         for table in ('sales_tasks', 'sales_executions', 'xverum_stages',
                       'xverum_tool_receipts', 'budget_reservations'):
             assert conn.execute(f'SELECT count(*) FROM {table} WHERE workspace_id=%s',

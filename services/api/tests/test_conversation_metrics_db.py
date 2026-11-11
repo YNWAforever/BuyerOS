@@ -13,7 +13,7 @@ METRICS = f'/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_A}/conversation-turns
 
 
 def test_metrics_summarize_this_project_only(turn_api):
-    client, _ = turn_api
+    client, dsn = turn_api
     created = post_turn(client, turn_body())
     assert created.status_code == 200, created.text
     response = client.get(METRICS, headers=_h())
@@ -30,11 +30,22 @@ def test_metrics_summarize_this_project_only(turn_api):
     assert data['proposals']['total'] == 0
     assert data['budget']['priced_proposals'] == 0
     assert data['budget']['estimated'] == []
-    # Another project in the same workspace never sees this project's turns.
+    # A project in another workspace is not addressable from this workspace.
     other = client.get(f'/v1/workspaces/{WORKSPACE_A}/projects/{PROJECT_B}'
                        '/conversation-turns/metrics', headers=_h())
-    assert other.status_code == 200, other.text
-    assert other.json()['data']['turns']['total'] == 0
+    assert other.status_code == 404, other.text
+    assert other.json()['code'] == 'NOT_FOUND'
+    # A different project in the same workspace has its own empty window.
+    project_c = 'c0000000-0000-4000-8000-000000000003'
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute('INSERT INTO projects(id, workspace_id, name, company_name, offer, markets,'
+                   ' language_preferences, version) VALUES'
+                   " (%s, %s, 'ProjectC', 'ProjectC Co', 'Seeded offer C', '{US}', '{en}', 1)",
+                   (project_c, WORKSPACE_A))
+    sibling = client.get(f'/v1/workspaces/{WORKSPACE_A}/projects/{project_c}'
+                         '/conversation-turns/metrics', headers=_h())
+    assert sibling.status_code == 200, sibling.text
+    assert sibling.json()['data']['turns']['total'] == 0
 
 
 def test_metrics_latency_uses_observed_boundaries(turn_api):
