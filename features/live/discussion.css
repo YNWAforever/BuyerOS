@@ -286,6 +286,13 @@
 .conversation-source-option input{margin-top:3px;flex-shrink:0}
 .conversation-source-option span{overflow-wrap:anywhere;min-width:0}
 .conversation-decisions{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+/* Turn metrics dashboard: dense definition rows, one line per measure. */
+.conversation-metrics{display:flex;flex-direction:column;gap:10px;min-width:0}
+.conversation-metrics section{display:flex;flex-direction:column;gap:3px;min-width:0}
+.conversation-metric-list{margin:0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.conversation-metric-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12px;min-width:0}
+.conversation-metric-row dt{color:var(--buyeros-muted);min-width:0;overflow-wrap:anywhere}
+.conversation-metric-row dd{margin:0;color:var(--buyeros-copy);font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
 .conversation-decisions li{border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-small);padding:9px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .conversation-decisions b{font-size:13px;overflow-wrap:anywhere}
 .conversation-decisions p{margin:0}

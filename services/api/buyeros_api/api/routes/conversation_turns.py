@@ -20,6 +20,7 @@ from ..idempotency import if_match_version
 from ...sales.contracts import Scope
 from ...sales.turn_contracts import TurnDecisionRequest, TurnRequest
 from ...services.conversation_access import access
+from ...services import conversation_metrics
 from ...services import conversation_turns as service
 from ...services import turn_rate_limit
 from ...services.conversation_turn_events import read_turn_events
@@ -168,6 +169,19 @@ async def stream_events(workspace_id: uuid.UUID, project_id: uuid.UUID,
     return StreamingResponse(_stream_events(workspace_id, project_id, actor, turn_id, after),
         media_type='text/event-stream',
         headers={'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no'})
+
+
+@router.get('/metrics', operation_id='readConversationTurnMetrics')
+async def metrics(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
+    principal: Principal = Depends(get_principal),
+    window_days: int = Query(conversation_metrics.DEFAULT_WINDOW_DAYS, ge=1,
+        le=conversation_metrics.MAX_WINDOW_DAYS)):
+    """Bounded aggregate turn/proposal/budget metrics for this project."""
+    async with access(workspace_id, project_id, principal) as (session, actor):
+        scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
+        data = await conversation_metrics.turn_metrics(session, scope,
+            window_days=window_days)
+    return envelope(data, request.state.request_id)
 
 
 @router.post('/{turn_id}/reconcile', operation_id='reconcileConversationTurn')

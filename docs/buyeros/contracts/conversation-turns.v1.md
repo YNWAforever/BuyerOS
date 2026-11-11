@@ -165,6 +165,23 @@ It never dispatches, reserves or retries a provider call. Migrations:
 (API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
 `conversation_turns` for the single source transition; no worker grants).
 
+### Turn metrics and budget dashboard (Increment 3.6)
+
+`GET ?/conversation-turns/metrics?window_days=<n>` returns project-scoped
+aggregates derived only from persisted rows: turn counts by status, per-turn
+latency (`turn.started` → `turn.final` event timestamps), inline proposal counts
+by capability and decision, tool states including unknown outcomes,
+`CONVERSATION_MODEL_UNAVAILABLE` notice counts, and a budget summary built from
+`ConversationTurnProposal.cost` (`priced_proposals`, `unknown_price_proposals`,
+`no_cost_proposals`, `may_incur_provider_charges`, and `estimated` decimal
+strings per unit). `window_days` is bounded to `1..30` (default `7`); a
+missing/out-of-range value is `422 INVALID_REQUEST`, never silently widened. The
+window filter uses event creation time so retained turns without events are not
+double counted. The response carries aggregate counts only — no message text,
+proposal arguments or user content — and the read never dispatches, reserves or
+re-prices a provider call. Unknown prices are reported as unknown and never
+summed as zero.
+
 ### Turn admission ceiling
 
 `POST /conversation-turns` also passes a dedicated **per-workspace** ceiling

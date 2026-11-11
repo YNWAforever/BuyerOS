@@ -299,7 +299,7 @@ def test_turn_routes_register_only_with_conversation_home(monkeypatch):
     monkeypatch.setenv('NEXT_PUBLIC_CONVERSATION_HOME', 'true')
     enabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]
-    assert len(enabled_paths) == 5
+    assert len(enabled_paths) == 6
     monkeypatch.delenv('NEXT_PUBLIC_CONVERSATION_HOME')
     disabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]

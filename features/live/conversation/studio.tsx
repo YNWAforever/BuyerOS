@@ -697,7 +697,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   if(panel.results.length||loaded?.chat.runs.length)contentTabs.push('results');
   if(panel.selectedSources.length||panel.citations.length)contentTabs.push('sources');
   if(panel.proposals.length)contentTabs.push('decisions');
-  const panelTabs=contentTabs.length?contentTabs:(canViewOffer&&loaded?['sources' as PanelTab]:['results' as PanelTab]);
+  const baseTabs:PanelTab[]=contentTabs.length?contentTabs:(canViewOffer&&loaded?['sources' as PanelTab]:['results' as PanelTab]);
+  // Metrics are aggregate project data: available for every access role once the
+  // discussion (and therefore the project scope) is loaded.
+  const panelTabs:PanelTab[]=loaded&&!baseTabs.includes('metrics')?[...baseTabs,'metrics']:baseTabs;
   const tab:PanelTab=activeTab&&panelTabs.includes(activeTab)?activeTab:panelTabs[0];
   const panelOpen=panelPreference??contentTabs.length>0;
   // On the project home the newest thread is resolved after the list read. Keep the
