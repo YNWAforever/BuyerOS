@@ -584,7 +584,7 @@ async def _stage_turn(session, scope: Scope, thread, payload: TurnRequest, *,
 
 
 async def _stage_deadline_create(session, scope: Scope, thread, payload: TurnRequest,
-                                request_fp, *, parts=(), notices=()):
+                                request_fp, *, parts=(), notices=(), started_at=None):
     """Persist the produced parts + one terminal deadline notice, failed.
 
     Rendering channel: the localized deadline message lives in the persisted
@@ -604,7 +604,8 @@ async def _stage_deadline_create(session, scope: Scope, thread, payload: TurnReq
         client_message_id=payload.client_message_id, user_text=payload.text,
         request_fp=request_fp, steps_count=0, skill_id=skill.id,
         skill_version=skill.version, parts=tuple(values), notices=merged, status='failed')
-    await append_turn_events(session, scope, turn, tuple(values), merged, 'failed')
+    await append_turn_events(session, scope, turn, tuple(values), merged, 'failed',
+        started_at=started_at, finished_at=now())
     from .audit_service import append_audit
     append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
         action='conversation_turn.created', entity_type='conversation_turn',
@@ -692,6 +693,10 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
     if thread is not None:
         _check_version(thread.version, payload.expected_thread_version)
     deadline = turn_deadline()
+    # Application-observed boundary: every event row of a turn shares the
+    # database transaction timestamp, so latency comes from these payload
+    # instants rather than from event.created_at.
+    started_at = now()
     saved_fp = request_fingerprint(scope, payload, thread.id if thread is not None else None)
     try:
         async with session.begin_nested():
@@ -719,7 +724,7 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                             'to relink it.'))
             if not deadline.should_start():
                 turn = await _stage_deadline_create(session, scope, thread, payload,
-                    saved_fp, notices=tuple(source_notices))
+                    saved_fp, notices=tuple(source_notices), started_at=started_at)
             else:
                 grounding, grounding_notices = await _grounding(session, scope, thread, buyer)
                 skill = skill_for(thread, payload)
@@ -732,7 +737,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                     produced = _dedupe_notices([*source_notices, *grounding_notices,
                         *answer_notices])
                     turn = await _stage_deadline_create(session, scope, thread, payload,
-                        saved_fp, parts=tuple(answer_values), notices=produced)
+                        saved_fp, parts=tuple(answer_values), notices=produced,
+                        started_at=started_at)
                 else:
                     plan, staged = build_plan(thread, payload, skill, project, grounding,
                         buyer=buyer, drive_ids=tuple(drive_ids),
@@ -744,7 +750,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                         *answer_notices, *plan.notices])
                     if not deadline.should_start():
                         turn = await _stage_deadline_create(session, scope, thread, payload,
-                            saved_fp, parts=tuple(parts), notices=notices)
+                            saved_fp, parts=tuple(parts), notices=notices,
+                            started_at=started_at)
                     else:
                         if plan.proposals:
                             status = 'needs_approval'
@@ -760,7 +767,7 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                         # Same transaction as the persisted turn/parts/status: the
                         # terminal event can never disagree with conversation_turns.status.
                         await append_turn_events(session, scope, turn, tuple(parts), notices,
-                            status)
+                            status, started_at=started_at, finished_at=now())
                         from .audit_service import append_audit
                         append_audit(session, workspace_id=scope.workspace_id,
                             actor_id=scope.actor_id, action='conversation_turn.created',
@@ -916,6 +923,7 @@ async def _user_text(session, scope, turn_id) -> str:
 
 async def _continuation_turn(session, scope: Scope, thread, source_turn, request_fp,
                              payload_language, *, parts, notices, status):
+    started_at = now()
     turn_id = uuid.uuid5(uuid.UUID(str(source_turn.id)), f'continuation:{request_fp}')
     existing = await _turn_by_id(session, scope, turn_id, thread.id)
     if existing is not None:
@@ -942,7 +950,8 @@ async def _continuation_turn(session, scope: Scope, thread, source_turn, request
     thread.version += 1
     thread.updated_at = now()
     await session.flush()
-    await append_turn_events(session, scope, turn, parts, notices, status)
+    await append_turn_events(session, scope, turn, parts, notices, status,
+        started_at=started_at, finished_at=now())
     return turn, True
 
 

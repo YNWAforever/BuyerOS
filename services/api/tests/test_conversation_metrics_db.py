@@ -37,6 +37,31 @@ def test_metrics_summarize_this_project_only(turn_api):
     assert other.json()['data']['turns']['total'] == 0
 
 
+def test_metrics_latency_uses_observed_boundaries(turn_api):
+    client, dsn = turn_api
+    created = post_turn(client, turn_body())
+    assert created.status_code == 200, created.text
+    turn_id = created.json()['data']['turn']['id']
+    with psycopg.connect(dsn, autocommit=True) as db:
+        # One transaction writes every event, so created_at is identical for the
+        # whole turn; latency must come from the observed payload instants.
+        assert db.execute('SELECT count(DISTINCT created_at) FROM conversation_turn_events'
+                          ' WHERE turn_id=%s', (turn_id,)).fetchone()[0] == 1
+        db.execute("UPDATE conversation_turn_events SET payload = payload || %s::jsonb"
+                   " WHERE turn_id=%s AND kind='turn.started'",
+                   ('{"started_at":"2026-11-11T00:00:00Z"}', turn_id))
+        db.execute("UPDATE conversation_turn_events SET payload = payload || %s::jsonb"
+                   " WHERE turn_id=%s AND kind='turn.final'",
+                   ('{"finished_at":"2026-11-11T00:00:01.500Z"}', turn_id))
+    response = client.get(METRICS, headers=_h())
+    assert response.status_code == 200, response.text
+    latency = response.json()['data']['latency_ms']
+    assert latency['samples'] == 1
+    assert latency['p50'] == 1500
+    assert latency['p95'] == 1500
+    assert latency['max'] == 1500
+
+
 def test_metrics_window_is_bounded_and_excludes_aged_turns(turn_api):
     client, dsn = turn_api
     created = post_turn(client, turn_body())

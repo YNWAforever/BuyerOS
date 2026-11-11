@@ -1024,6 +1024,8 @@ export const liveZh: Record<string,string> = {
   'Turn metrics are unavailable.':'暫時無法取得對話指標。',
   'Turn metrics are unavailable. Try again later.':'暫時無法取得對話指標，請稍後再試。',
   'Turn metrics are not available for this role.':'你的角色無法查看對話指標。',
+  'Your session has ended. Sign in again to read turn metrics.':'登入時效已結束，請重新登入後查看對話指標。',
+  'Needs approval':'待批准',
   'Last 7 days':'最近 7 天',
   'No turns in the last 7 days.':'最近 7 天沒有對話。',
   'Turn volume':'對話量',

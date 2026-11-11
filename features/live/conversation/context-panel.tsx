@@ -3,7 +3,7 @@ import {useEffect,useRef,useState,type KeyboardEvent,type ReactNode} from 'react
 import {ChartNoAxesCombined,FileText,Gauge,Link2,ShieldCheck,X} from 'lucide-react';
 import {LiveCancelled} from '@/services/live/client';
 import {loadTurnMetrics,MetricsLoadError} from '@/services/live/conversation-metrics';
-import {METRICS_WINDOW_DAYS,formatLatency,formatMetricAmount,hasTurnSamples,
+import {METRICS_WINDOW_DAYS,formatLatency,formatMetricAmount,hasTurns,
   statusRows,type TurnStatusRow,type TurnMetrics} from './metrics';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
@@ -174,7 +174,7 @@ function MetricsTab({t,locale,client,session}:{
   if(state.kind==='loading')return <p className="conversation-panel-empty" role="status">{t('Loading turn metrics…')}</p>;
   if(state.kind==='failed')return <p className="conversation-panel-empty" role="status">{t(state.notice)}</p>;
   const metrics=state.metrics;
-  if(!hasTurnSamples(metrics))return <div className="conversation-metrics">
+  if(!hasTurns(metrics))return <div className="conversation-metrics">
     <p className="conversation-panel-note">{t('Last 7 days')}</p>
     <p className="conversation-panel-empty">{t('No turns in the last 7 days.')}</p>
   </div>;

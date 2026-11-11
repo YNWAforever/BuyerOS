@@ -173,10 +173,11 @@ async def stream_events(workspace_id: uuid.UUID, project_id: uuid.UUID,
 
 @router.get('/metrics', operation_id='readConversationTurnMetrics')
 async def metrics(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
-    principal: Principal = Depends(get_principal),
+    response: Response, principal: Principal = Depends(get_principal),
     window_days: int = Query(conversation_metrics.DEFAULT_WINDOW_DAYS, ge=1,
         le=conversation_metrics.MAX_WINDOW_DAYS)):
     """Bounded aggregate turn/proposal/budget metrics for this project."""
+    response.headers['Cache-Control'] = 'no-store'
     async with access(workspace_id, project_id, principal) as (session, actor):
         scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
         data = await conversation_metrics.turn_metrics(session, scope,

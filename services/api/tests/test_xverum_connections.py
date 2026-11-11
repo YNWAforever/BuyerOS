@@ -49,7 +49,7 @@ def provisional_pg(isolated_seeded):
     """Historical fixture name; now uses ONLY actual0062 DDL and grants."""
     import psycopg
     with psycopg.connect(isolated_seeded) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0071_conversation_retention'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0072_turn_event_boundaries'
     return isolated_seeded
 
 
