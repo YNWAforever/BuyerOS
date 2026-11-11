@@ -4,6 +4,7 @@ import {ArrowDown} from 'lucide-react';
 import type {TranscriptEntry} from './parts';
 import {groupTranscript} from './parts';
 import {MessageParts,type PartActions} from './inline-parts';
+import {hasEarlier,initialWindow,receiveEntryTotal,revealEarlier,windowSlice,TRANSCRIPT_WINDOW,type TranscriptWindowState} from './transcript-window';
 function readerOffset():number{
   // The studio mounts client-side; the server render (tests/static markup) keeps UTC.
   return typeof window==='undefined'?0:new Date().getTimezoneOffset();
@@ -17,7 +18,10 @@ type Props={
   busy:boolean;
   statusLine:string;
   emptyTitle:string;
+  /** Changes when the reader switches threads, so a new thread starts a fresh window. */
+  resetKey:string;
 };
+type WindowedState=TranscriptWindowState&{resetKey:string};
 function timeLabel(createdAt:number|null,locale:'en'|'zh-HK'):string{
   if(createdAt===null)return '';
   return new Date(createdAt).toLocaleTimeString(locale==='zh-HK'?'zh-HK':'en-GB',{hour:'2-digit',minute:'2-digit'});
@@ -30,23 +34,65 @@ function dayLabel(dayStart:number|null,locale:'en'|'zh-HK',t:(value:string)=>str
   return new Date(dayStart).toLocaleDateString(locale==='zh-HK'?'zh-HK':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
 /** Continuous transcript: day groups, sequence labels, autoscroll with an explicit jump. */
-export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle}:Props){
+export function ConversationTranscript({t,locale,entries,actions,busy,statusLine,emptyTitle,resetKey}:Props){
   const scroller=useRef<HTMLDivElement>(null),atBottom=useRef(true),primed=useRef(false);
   const [showJump,setShowJump]=useState(false);
+  const [announceLive,setAnnounceLive]=useState(true);
   // Offset is read once per mount; day groups then match the reader's zone.
   const [offset]=useState(readerOffset);
+  const anchorElement=useRef<HTMLElement|null>(null),anchorTop=useRef(0),pendingAnchor=useRef(false);
+  const persisted=entries.filter(entry=>!entry.ephemeral);
+  // The window is scoped to the thread instead of remounting the transcript:
+  // keying the subtree duplicated the committed transcript in React 19.
+  const [windowedState,setWindowedState]=useState<WindowedState>(()=>({...initialWindow(persisted.length),resetKey}));
+  const windowed=receiveEntryTotal(windowedState.resetKey===resetKey?windowedState:initialWindow(persisted.length),persisted.length);
+  const visibleKeys=new Set(windowSlice(persisted,windowed).map(entry=>entry.key));
+  // Live/streamed entries are never windowed or hidden; persisted order is kept.
+  const visible=entries.filter(entry=>entry.ephemeral||visibleKeys.has(entry.key));
+  const earlier=hasEarlier(windowed);
   function scrollToLatest(behavior:ScrollBehavior='smooth'){
     const node=scroller.current;
     if(!node)return;
     node.scrollTo({top:node.scrollHeight,behavior});
     atBottom.current=true;setShowJump(false);
   }
+  function showEarlierMessages(){
+    const node=scroller.current;
+    if(!node||!earlier)return;
+    const next=revealEarlier(windowed);
+    // Anchor the first visible message so revealing history never moves the reader.
+    const view=node.getBoundingClientRect();
+    const first=[...node.querySelectorAll<HTMLElement>('article.conversation-message')]
+      .find(article=>article.getBoundingClientRect().bottom>view.top)??null;
+    anchorElement.current=first;
+    anchorTop.current=first?first.getBoundingClientRect().top:0;
+    pendingAnchor.current=true;
+    setWindowedState({...next,resetKey});
+    // Historical entries are additions to a role=log; mute the live region for
+    // the reveal commit so they are not announced as new messages.
+    setAnnounceLive(false);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>setAnnounceLive(true)));
+    if(!hasEarlier(next))requestAnimationFrame(()=>scroller.current?.focus({preventScroll:true}));
+  }
   useLayoutEffect(()=>{
     const node=scroller.current;
     if(!node)return;
-    if(!primed.current&&entries.length){primed.current=true;node.scrollTop=node.scrollHeight;atBottom.current=true;return;}
+    if(pendingAnchor.current){
+      pendingAnchor.current=false;
+      const first=anchorElement.current;
+      if(first){
+        const delta=first.getBoundingClientRect().top-anchorTop.current;
+        if(delta)node.scrollTop+=delta;
+      }
+      anchorElement.current=null;
+      // Only show the jump when the anchored viewport is no longer at the tail.
+      atBottom.current=node.scrollHeight-node.scrollTop-node.clientHeight<120;
+      setShowJump(!atBottom.current&&entries.length>0);
+      return;
+    }
+    if(!primed.current&&visible.length){primed.current=true;node.scrollTop=node.scrollHeight;atBottom.current=true;return;}
     if(atBottom.current)scrollToLatest('auto');
-  },[entries.length]);
+  },[entries.length,windowed.start,visible.length]);
   function onScroll(){
     const node=scroller.current;
     if(!node)return;
@@ -54,9 +100,10 @@ export function ConversationTranscript({t,locale,entries,actions,busy,statusLine
     atBottom.current=bottom;
     setShowJump(!bottom&&entries.length>0);
   }
-  const groups=groupTranscript(entries,offset);
+  const groups=groupTranscript(visible,offset);
   return <div className="conversation-transcript-wrap">
-    <div className="conversation-transcript" role="log" aria-label={t('Discussion messages')} aria-live="polite" aria-relevant="additions" ref={scroller} onScroll={onScroll}>
+    {earlier&&<button type="button" className="conversation-show-earlier" onClick={showEarlierMessages}>{t('Show earlier messages')}</button>}
+    <div className="conversation-transcript" role="log" aria-label={t('Discussion messages')} aria-live={announceLive?'polite':'off'} aria-relevant="additions" ref={scroller} onScroll={onScroll} tabIndex={persisted.length>TRANSCRIPT_WINDOW?-1:undefined}>
       {!entries.length&&<div className="conversation-empty"><h2>{emptyTitle}</h2></div>}
       {groups.map(group=><section className="conversation-day" key={group.key} aria-label={dayLabel(group.dayStart,locale,t)||undefined}>
         {group.dayStart!==null&&<h3 className="conversation-day-label">{dayLabel(group.dayStart,locale,t)}</h3>}
