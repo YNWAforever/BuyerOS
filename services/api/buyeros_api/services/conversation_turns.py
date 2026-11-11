@@ -33,6 +33,7 @@ from ..sales.turn_contracts import (CitationsPart, CitationItem, ExecutionOutcom
     TurnPayload, TurnPlan, TurnRequest, validate_notices, validate_part_list)
 from .conversation_access import load, not_found, sales_enabled
 from .conversation_turn_events import append_turn_events, read_turn_events
+from .turn_deadline import TURN_DEADLINE_EXCEEDED, deadline_notice, turn_deadline
 from .conversation_reply import Grounding, reply_from_grounding, resolve_sources
 
 MAX_THREAD_MESSAGES = 100
@@ -582,6 +583,70 @@ async def _stage_turn(session, scope: Scope, thread, payload: TurnRequest, *,
     return turn
 
 
+async def _stage_deadline_create(session, scope: Scope, thread, payload: TurnRequest,
+                                request_fp, *, parts=(), notices=()):
+    """Persist the produced parts + one terminal deadline notice, failed.
+
+    Rendering channel: the localized deadline message lives in the persisted
+    notice only (the assistant message text falls back to it). Produced text /
+    citation parts are kept. Proposal parts are intentionally dropped: a failed
+    deadline turn can never accept their decision, so persisting the part or its
+    proposal row would be unreachable UI state. Everything persisted here is
+    faithful; nothing spent is silently retained (canonical writes are rolled
+    back before this helper is called).
+    """
+    language = payload.language
+    notice = deadline_notice(language)
+    values = [part for part in parts if not isinstance(part, ProposalPart)]
+    merged = _dedupe_notices([*notices, notice])
+    skill = skill_for(thread, payload)
+    turn = await _stage_turn(session, scope, thread, payload,
+        client_message_id=payload.client_message_id, user_text=payload.text,
+        request_fp=request_fp, steps_count=0, skill_id=skill.id,
+        skill_version=skill.version, parts=tuple(values), notices=merged, status='failed')
+    await append_turn_events(session, scope, turn, tuple(values), merged, 'failed')
+    from .audit_service import append_audit
+    append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+        action='conversation_turn.created', entity_type='conversation_turn',
+        entity_id=turn.id)
+    return turn
+
+
+async def _deadline_simple_continuation(session, scope: Scope, thread, source_turn,
+                                        fingerprint, language):
+    """Terminal failed continuation; the notice is the one rendering channel."""
+    notice = deadline_notice(language)
+    continuation, _fresh = await _continuation_turn(session, scope, thread, source_turn,
+        fingerprint, language, parts=[], notices=(notice,), status='failed')
+    return continuation
+
+
+async def _deadline_failure(session, scope: Scope, thread, source_turn, proposal,
+                            request, fingerprint):
+    """Decision continuation that timed out before/around a nonbillable step.
+
+    The executor savepoint is rolled back before this helper is reached, so no
+    canonical task/output row survives and the step is terminal ``skipped`` --
+    never a guessed ``outcome_unknown``. If a future provider-dispatched step is
+    added it must NOT use this helper: it must persist the task/receipt reference
+    and ``outcome_unknown`` on a turn status that ``reconcile`` accepts.
+    """
+    language = source_turn.language
+    notice = deadline_notice(language)
+    parts = [_decision_part(proposal, 'skipped', summary=notice.message[:500],
+                error_code=TURN_DEADLINE_EXCEEDED,
+                started_at=proposal.created_at or now(), finished_at=now())]
+    continuation, created = await _continuation_turn(session, scope, thread, source_turn,
+        fingerprint, language, parts=parts, notices=(notice,), status='failed')
+    proposal.status = 'failed'
+    proposal.revision += 1
+    proposal.result = {'code': TURN_DEADLINE_EXCEEDED, 'output_id': None,
+        'output_revision': None, 'task_id': None}
+    _record_decision(session, scope, source_turn, proposal, request, fingerprint,
+        continuation, 'failed')
+    return continuation, created
+
+
 async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
     thread = None
     buyer = None
@@ -617,6 +682,7 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
         return await _replay(session, scope, row, payload)
     if thread is not None:
         _check_version(thread.version, payload.expected_thread_version)
+    deadline = turn_deadline()
     saved_fp = request_fingerprint(scope, payload, thread.id if thread is not None else None)
     try:
         async with session.begin_nested():
@@ -642,35 +708,54 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                     source_notices.append(TurnNotice(code='BUYER_LINK_UNAVAILABLE',
                         message='The linked buyer is no longer readable; ask a project editor '
                             'to relink it.'))
-            grounding, grounding_notices = await _grounding(session, scope, thread, buyer)
-            skill = skill_for(thread, payload)
-            drive_ids = await _drive_sources(session, scope, thread)
-            plan, staged = build_plan(thread, payload, skill, project, grounding,
-                buyer=buyer, drive_ids=tuple(drive_ids),
-                sales_ok=sales_enabled(scope.workspace_id),
-                language_ok=payload.language in (project.language_preferences or []))
-            parts, answer_notices = answer_parts(grounding, payload.language)
-            parts.extend(plan.proposals)
-            notices = _dedupe_notices([*source_notices, *grounding_notices,
-                *answer_notices, *plan.notices])
-            if plan.proposals:
-                status = 'needs_approval'
-            elif not grounding.citations:
-                status = 'needs_input'
+            if not deadline.should_start():
+                turn = await _stage_deadline_create(session, scope, thread, payload,
+                    saved_fp, notices=tuple(source_notices))
             else:
-                status = 'completed'
-            turn = await _stage_turn(session, scope, thread, payload,
-                client_message_id=payload.client_message_id, user_text=payload.text,
-                request_fp=saved_fp, steps_count=len(plan.steps),
-                skill_id=skill.id, skill_version=skill.version,
-                parts=tuple(parts), notices=notices, status=status, staged=staged)
-            # Same transaction as the persisted turn/parts/status: the terminal
-            # event can never disagree with conversation_turns.status.
-            await append_turn_events(session, scope, turn, tuple(parts), notices, status)
-            from .audit_service import append_audit
-            append_audit(session, workspace_id=scope.workspace_id, actor_id=scope.actor_id,
-                action='conversation_turn.created', entity_type='conversation_turn',
-                entity_id=turn.id)
+                grounding, grounding_notices = await _grounding(session, scope, thread, buyer)
+                skill = skill_for(thread, payload)
+                drive_ids = await _drive_sources(session, scope, thread)
+                answer_values, answer_notices = answer_parts(grounding, payload.language)
+                if not deadline.should_start():
+                    # Keep the faithful answer/citation parts produced so far;
+                    # only proposal parts are intentionally dropped (a failed
+                    # deadline turn can never accept their decision).
+                    produced = _dedupe_notices([*source_notices, *grounding_notices,
+                        *answer_notices])
+                    turn = await _stage_deadline_create(session, scope, thread, payload,
+                        saved_fp, parts=tuple(answer_values), notices=produced)
+                else:
+                    plan, staged = build_plan(thread, payload, skill, project, grounding,
+                        buyer=buyer, drive_ids=tuple(drive_ids),
+                        sales_ok=sales_enabled(scope.workspace_id),
+                        language_ok=payload.language in (project.language_preferences or []))
+                    parts = list(answer_values)
+                    parts.extend(plan.proposals)
+                    notices = _dedupe_notices([*source_notices, *grounding_notices,
+                        *answer_notices, *plan.notices])
+                    if not deadline.should_start():
+                        turn = await _stage_deadline_create(session, scope, thread, payload,
+                            saved_fp, parts=tuple(parts), notices=notices)
+                    else:
+                        if plan.proposals:
+                            status = 'needs_approval'
+                        elif not grounding.citations:
+                            status = 'needs_input'
+                        else:
+                            status = 'completed'
+                        turn = await _stage_turn(session, scope, thread, payload,
+                            client_message_id=payload.client_message_id, user_text=payload.text,
+                            request_fp=saved_fp, steps_count=len(plan.steps),
+                            skill_id=skill.id, skill_version=skill.version,
+                            parts=tuple(parts), notices=notices, status=status, staged=staged)
+                        # Same transaction as the persisted turn/parts/status: the
+                        # terminal event can never disagree with conversation_turns.status.
+                        await append_turn_events(session, scope, turn, tuple(parts), notices,
+                            status)
+                        from .audit_service import append_audit
+                        append_audit(session, workspace_id=scope.workspace_id,
+                            actor_id=scope.actor_id, action='conversation_turn.created',
+                            entity_type='conversation_turn', entity_id=turn.id)
     except IntegrityError as exc:
         if not is_expected_conflict(exc, TURN_CONFLICT_CONSTRAINTS):
             raise_unexpected_integrity(exc, 'conversation_turn.create')
@@ -925,10 +1010,11 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
         raise not_found()
     if source_turn.status != 'needs_approval' or proposal.status != 'proposed':
         raise ApiError(409, 'INVALID_STATE', 'this turn has no open proposal')
+    deadline = turn_deadline()
     try:
         async with session.begin_nested():
             continuation, effective = await _apply_decision(session, scope, thread,
-                source_turn, proposal, request, fingerprint)
+                source_turn, proposal, request, fingerprint, deadline=deadline)
     except IntegrityError as exc:
         if not is_expected_conflict(exc, DECISION_CONFLICT_CONSTRAINTS):
             raise_unexpected_integrity(exc, 'conversation_turn.decide')
@@ -958,7 +1044,7 @@ async def decide(session, scope: Scope, turn_id, request: TurnDecisionRequest, k
 
 
 async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
-                          request: TurnDecisionRequest, fingerprint):
+                          request: TurnDecisionRequest, fingerprint, *, deadline=None):
     started = proposal.created_at or now()
     if request.decision == 'reject':
         parts = [_decision_part(proposal, 'skipped', summary='Rejected by the reviewer.',
@@ -989,13 +1075,37 @@ async def _apply_decision(session, scope: Scope, thread, source_turn, proposal,
             'This project no longer supports the reviewed language.')
     from .xverum_dispatch import gates
     await gates(session, scope.workspace_id)  # current policy + budget serialization
+    if deadline is not None and not deadline.should_start():
+        # The bound was crossed during gate serialization; no step was dispatched.
+        return await _deadline_failure(session, scope, thread, source_turn, proposal,
+            request, fingerprint)
     executor = _executor(proposal.capability)
     if executor is None:
         return await _finish_failure(session, scope, thread, source_turn, proposal,
             request, fingerprint, 'failed', 'CAPABILITY_NOT_AVAILABLE',
             'No reviewed executor is registered for this capability.')
     try:
-        result = await executor(session, scope, thread, source_turn, proposal)
+        savepoint = await session.begin_nested()
+        try:
+            result = await executor(session, scope, thread, source_turn, proposal)
+        except BaseException:
+            # Existing failure semantics: durable effects a failing executor
+            # already produced stay recovery-visible; the decision becomes
+            # terminal below. Only a deadline crossing discards spent work.
+            await savepoint.commit()
+            raise
+        if deadline is not None and not deadline.should_start():
+            # The current executors are nonbillable local producers: roll the
+            # savepoint back so a deadline-failed turn cannot leave canonical
+            # sales_tasks/sales_outputs rows (or any other spent work) behind.
+            # A future provider-dispatched step MUST NOT be rolled back this
+            # way: it must persist its task/receipt reference and
+            # ``outcome_unknown`` on a turn status that ``reconcile`` accepts
+            # (explicitly out of scope for this increment).
+            await savepoint.rollback()
+            return await _deadline_failure(session, scope, thread, source_turn, proposal,
+                request, fingerprint)
+        await savepoint.commit()
     except ApiError as exc:
         if exc.status_code in {403, 404}:
             raise
@@ -1108,6 +1218,15 @@ async def cancel_turn(session, scope: Scope, turn_id, expected_version: int, key
         complete_idempotency(outcome, str(source_turn.id))
         return thread, role, _payload(source_turn)
     _check_version(thread.version, expected_version)
+    deadline = turn_deadline()
+    if not deadline.should_start():
+        deadline_fp = digest({'operation': 'cancelConversationTurnDeadline',
+            'turn_id': str(source_turn.id)})
+        async with session.begin_nested():
+            continuation = await _deadline_simple_continuation(session, scope, thread,
+                source_turn, deadline_fp, source_turn.language)
+        complete_idempotency(outcome, str(continuation.id))
+        return thread, role, _payload(continuation)
     continuation, created = None, False
     try:
         async with session.begin_nested():
@@ -1206,17 +1325,48 @@ async def reconcile_turn(session, scope: Scope, turn_id, key: str):
                 ConversationTurnReconciliation.evidence_seq.desc()).limit(1)
 
     latest = (await session.execute(latest_resolution())).scalar_one_or_none()
+    # Contract guard first: reconcile is only for outcome_unknown turns. An
+    # already-resolved turn returns the recorded resolution for equivalent
+    # evidence, 409 for changed evidence, and never a deadline turn.
+    if turn.status != 'outcome_unknown':
+        if latest is not None:
+            probe = await probe_outcome(session, scope, turn)
+            if latest.evidence_digest == probe.evidence_digest:
+                recorded = await _turn_by_id(session, scope,
+                    latest.continuation_turn_id, thread.id)
+                if recorded is None:
+                    raise not_found()
+                complete_idempotency(outcome, str(recorded.id))
+                return thread, role, _payload(recorded)
+        raise ApiError(409, 'INVALID_STATE',
+            'only an outcome_unknown turn can be reconciled')
+
+    deadline = turn_deadline()
+
+    async def deadline_continuation():
+        deadline_fp = digest({'operation': 'conversationTurnReconcileDeadline',
+            'turn_id': str(turn.id)})
+        async with session.begin_nested():
+            return await _deadline_simple_continuation(session, scope, thread, turn,
+                deadline_fp, turn.language)
+
+    async def deadline_stop():
+        continuation = await deadline_continuation()
+        complete_idempotency(outcome, str(continuation.id))
+        return thread, role, _payload(continuation)
+
+    if not deadline.should_start():
+        return await deadline_stop()
+
     probe = await probe_outcome(session, scope, turn)
+    if not deadline.should_start():
+        return await deadline_stop()
     if latest is not None and latest.evidence_digest == probe.evidence_digest:
         recorded = await _turn_by_id(session, scope, latest.continuation_turn_id, thread.id)
         if recorded is None:
             raise not_found()
         complete_idempotency(outcome, str(recorded.id))
         return thread, role, _payload(recorded)
-    if turn.status != 'outcome_unknown':
-        raise ApiError(409, 'INVALID_STATE',
-            'this turn is already resolved; authoritative evidence changed after reconciliation')
-
     tool = next((part for part in (turn.parts or [])
         if isinstance(part, dict) and part.get('kind') == 'tool_activity'), None)
     call_id = uuid.UUID(tool['call_id']) if tool and tool.get('call_id') else uuid.uuid5(

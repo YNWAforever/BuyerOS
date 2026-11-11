@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     live_read_enabled: bool = True
     reconciliation_enabled: bool = True
     read_per_minute: int = Field(default=600, ge=1, le=10000)
+    # Bounds one synchronous conversation turn's server work; reviewed, no secret.
+    turn_deadline_seconds: int = Field(default=60, ge=5, le=90)
     write_per_minute: int = Field(default=300, ge=1, le=10000)
     expensive_read_per_minute: int = Field(default=120, ge=1, le=10000)
     expensive_write_per_minute: int = Field(default=60, ge=1, le=10000)
