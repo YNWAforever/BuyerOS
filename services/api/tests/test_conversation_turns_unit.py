@@ -273,7 +273,7 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0071_conversation_retention']
+    assert required['compatible_heads'] == ['0072_turn_event_boundaries']
     for name in ('conversation_turns', 'conversation_turn_proposals',
                  'conversation_turn_decisions', 'conversation_thread_messages',
                  'conversation_turn_events', 'conversation_turn_reconciliations',

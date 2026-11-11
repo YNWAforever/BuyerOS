@@ -160,7 +160,7 @@ def test_postgres_populated_downgrade_preserves_data_and_force_rls(task_rows):
 
 def test_sales_schema_has_single_additive_head():
     scripts = ScriptDirectory(str(SERVICE_ROOT / 'alembic'))
-    assert scripts.get_heads() == ['0071_conversation_retention']
+    assert scripts.get_heads() == ['0072_turn_event_boundaries']
     assert scripts.get_revision('0060_sales_tasks').down_revision == '0059_conversation_connections'
     assert scripts.get_revision('0061_sales_outputs').down_revision == '0060_sales_tasks'
 
@@ -174,7 +174,7 @@ def sales_readiness_db(isolated_seeded):
 
 def inspect_sales(dsn, statements=None):
     from tests.test_schema_readiness_db import contract, inspect
-    return inspect(dsn,contract(dsn,required_revisions=['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations','0070_turn_rate_windows','0071_conversation_retention'],compatible_heads=['0071_conversation_retention']),statements)
+    return inspect(dsn,contract(dsn,required_revisions=['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations','0070_turn_rate_windows','0071_conversation_retention','0072_turn_event_boundaries'],compatible_heads=['0072_turn_event_boundaries']),statements)
 
 
 def test_postgres_review_r3_valid_sales_readiness_only_reads_catalogs(sales_readiness_db):

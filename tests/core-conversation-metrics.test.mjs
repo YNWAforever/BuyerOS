@@ -6,7 +6,7 @@ import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
 const {METRICS_WINDOW_DAYS,MetricsUnverified,metricsPath,readTurnMetrics,formatLatency,formatMetricAmount,
-  statusRows,hasTurnSamples}=await import('../features/live/conversation/metrics.ts');
+  statusRows,hasTurns}=await import('../features/live/conversation/metrics.ts');
 
 const workspace='11111111-1111-4111-8111-111111111111',project='22222222-2222-4222-8222-222222222222';
 function fixture(overrides={}){
@@ -86,7 +86,8 @@ test('status rows keep the contract order and zero-fill small windows',()=>{
   assert.deepEqual(rows.map(row=>row.status),
     ['completed','needs_input','needs_approval','failed','outcome_unknown','cancelled']);
   assert.deepEqual(rows.map(row=>row.count),[2,0,0,0,0,0]);
-  assert.equal(hasTurnSamples(readTurnMetrics(fixture())),true);
-  assert.equal(hasTurnSamples(readTurnMetrics(fixture({latency_ms:{samples:0,p50:null,p95:null,max:null}}))),false);
-  assert.equal(hasTurnSamples(readTurnMetrics(fixture({turns:{total:0,by_status:{}}}))),false);
+  // Latency samples are never the empty-state signal: turns are.
+  assert.equal(hasTurns(readTurnMetrics(fixture())),true);
+  assert.equal(hasTurns(readTurnMetrics(fixture({latency_ms:{samples:0,p50:null,p95:null,max:null}}))),true);
+  assert.equal(hasTurns(readTurnMetrics(fixture({turns:{total:0,by_status:{}}}))),false);
 });

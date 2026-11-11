@@ -9,11 +9,12 @@ import type {SessionScope} from './session';
 import {METRICS_WINDOW_DAYS, metricsPath, readTurnMetrics, type TurnMetrics} from
   '../../features/live/conversation/metrics';
 
-export type MetricsLoadFailure = 'denied' | 'unavailable';
+export type MetricsLoadFailure = 'denied' | 'auth' | 'unavailable';
 
 export class MetricsLoadError extends Error {
   constructor(readonly failure: MetricsLoadFailure) {
     super(failure === 'denied' ? 'Turn metrics are not available for this role.'
+      : failure === 'auth' ? 'Your session has ended. Sign in again to read turn metrics.'
       : 'Turn metrics are unavailable. Try again later.');
   }
 }
@@ -33,7 +34,9 @@ export async function loadTurnMetrics(client: LiveClient, session: SessionScope,
     return readTurnMetrics(value);
   } catch (error) {
     if (error instanceof LiveCancelled) throw error;
-    const denied = error instanceof LiveError && (error.status === 401 || error.status === 403);
-    throw new MetricsLoadError(denied ? 'denied' : 'unavailable');
+    const status = error instanceof LiveError ? error.status : null;
+    // 403 = role cannot read this project; 401 = the session itself expired.
+    throw new MetricsLoadError(status === 403 ? 'denied'
+      : status === 401 ? 'auth' : 'unavailable');
   }
 }

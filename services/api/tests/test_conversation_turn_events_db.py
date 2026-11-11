@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0071_conversation_retention'
+HEAD = '0072_turn_event_boundaries'
 
 
 def _user(db, issuer='turn-event-fixture'):
@@ -65,6 +65,21 @@ def test_event_store_contract_rls_and_grants(isolated_migrated):
             "jsonb_build_object('status','completed'))").fetchone()[0] is True
         assert db.execute("SELECT public.buyeros_turn_event_valid('turn.final', "
             "jsonb_build_object('status','running'))").fetchone()[0] is False
+        # 0072: optional application-observed boundaries; old events stay valid.
+        assert db.execute("SELECT public.buyeros_turn_event_valid('turn.started', "
+            "jsonb_build_object('status','running','started_at','2026-11-11T12:00:00Z'))"
+            ).fetchone()[0] is True
+        assert db.execute("SELECT public.buyeros_turn_event_valid('turn.final', "
+            "jsonb_build_object('status','completed',"
+            "'finished_at','2026-11-11T12:00:01.250Z'))").fetchone()[0] is True
+        assert db.execute("SELECT public.buyeros_turn_event_valid('turn.started', "
+            "jsonb_build_object('status','running','started_at','not-an-instant'))"
+            ).fetchone()[0] is False
+        assert db.execute("SELECT public.buyeros_turn_event_valid('turn.final', "
+            "jsonb_build_object('status','completed','finished_at',42))").fetchone()[0] is False
+        assert db.execute("SELECT public.buyeros_turn_event_valid('turn.final', "
+            "jsonb_build_object('status','completed','unknown_field','x'))"
+            ).fetchone()[0] is False
 
 
 def test_event_validator_rejects_bad_payload_and_unique_seq(isolated_seeded):

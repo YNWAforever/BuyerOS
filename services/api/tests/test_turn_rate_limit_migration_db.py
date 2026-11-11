@@ -14,7 +14,7 @@ from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, WORKSPACE_B
 from tests.test_conversation_turns_migration_db import config
 
-HEAD = '0071_conversation_retention'
+HEAD = '0072_turn_event_boundaries'
 PREVIOUS = '0069_turn_reconciliations'
 TABLE = 'conversation_turn_rate_windows'
 WINDOW = datetime(2026, 11, 10, 12, 0, tzinfo=timezone.utc)

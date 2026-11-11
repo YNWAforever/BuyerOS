@@ -1,10 +1,11 @@
 """Bounded, tenant-scoped conversation turn metrics for dashboards.
 
-Everything here is derived from persisted rows: turn statuses, per-turn event
-timestamps, inline proposals/decisions and notices. No new table, no extra
-producer and no provider call. The window is bounded (1..30 days) so a dashboard
-read cannot scan unbounded history, and every query is scoped to the current
-workspace + project under forced RLS.
+Everything here is derived from persisted rows: turn statuses,
+application-observed turn boundary instants, inline proposals/decisions and
+notices. No new table, no extra producer and no provider call. Event history is
+filtered by a bounded 1..30 day time window (the supporting composite index is a
+recorded Phase 3 follow-up) and every query is scoped to the current workspace +
+project under forced RLS.
 
 User content is used only for aggregate counts: response bodies, thread text and
 proposal arguments never leave this module.
@@ -48,6 +49,18 @@ def percentile(values, fraction: float) -> int | None:
     return int(round(value))
 
 
+def _observed_instant(value) -> datetime | None:
+    """Parse an app-observed UTC instant from an event payload, if present."""
+    if not isinstance(value, str):
+        return None
+    text = value[:-1] + '+00:00' if value.endswith('Z') else value
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
+
+
 def _latency_ms(started: datetime, finished: datetime) -> float | None:
     if started is None or finished is None or finished < started:
         return None
@@ -71,15 +84,19 @@ def _budget(proposal_rows) -> dict:
         if not isinstance(cost, dict):
             no_cost += 1
             continue
-        known = cost.get('known', True)
-        unit = cost.get('unit')
-        amount = _amount(cost.get('amount'))
         if cost.get('may_incur_provider_charges') is True:
             may_incur += 1
-        if known is False:
+        if cost.get('kind') == 'nonbillable':
+            # Deterministic/docs work: no tariff exists and none may be invented.
+            no_cost += 1
+            continue
+        known = cost.get('known')
+        if known is not True:
             unknown_price += 1
             continue
         priced += 1
+        unit = cost.get('unit')
+        amount = _amount(cost.get('amount'))
         if unit in ('USD', 'credits') and amount is not None:
             estimated[unit] = estimated.get(unit, Decimal('0')) + amount
     return {
@@ -118,20 +135,38 @@ async def turn_metrics(session, scope: Scope, *, window_days: int = DEFAULT_WIND
     total = sum(by_status.values())
 
     latency_rows = (await session.execute(
-        select(
-            ConversationTurnEvent.turn_id,
-            func.min(ConversationTurnEvent.created_at).filter(
-                ConversationTurnEvent.kind == 'turn.started'),
-            func.max(ConversationTurnEvent.created_at).filter(
-                ConversationTurnEvent.kind == 'turn.final'),
-        )
+        select(ConversationTurnEvent.turn_id, ConversationTurnEvent.kind,
+               ConversationTurnEvent.payload, ConversationTurnEvent.created_at)
         .where(ConversationTurnEvent.workspace_id == workspace_id,
                ConversationTurnEvent.project_id == project_id,
-               ConversationTurnEvent.created_at >= cutoff)
-        .group_by(ConversationTurnEvent.turn_id))).all()
-    durations = [duration for started, finished in
-                 ((row[1], row[2]) for row in latency_rows)
-                 if (duration := _latency_ms(started, finished)) is not None]
+               ConversationTurnEvent.kind.in_(('turn.started', 'turn.final')),
+               ConversationTurnEvent.created_at >= cutoff))).all()
+    # Every event of one turn is written inside the turn's transaction, so all
+    # events share created_at and it cannot express elapsed time. Latency comes
+    # from the application-observed boundary instants carried by the payloads.
+    boundaries: dict = {}
+    for turn_id, kind, payload, created_at in latency_rows:
+        slot = boundaries.setdefault(turn_id, {})
+        payload = payload if isinstance(payload, dict) else {}
+        if kind == 'turn.started':
+            observed = _observed_instant(payload.get('started_at'))
+            slot['started'] = (observed or created_at, observed is not None)
+        elif kind == 'turn.final':
+            observed = _observed_instant(payload.get('finished_at'))
+            slot['finished'] = (observed or created_at, observed is not None)
+    durations = []
+    for slot in boundaries.values():
+        started, finished = slot.get('started'), slot.get('finished')
+        if started is None or finished is None:
+            continue
+        duration = _latency_ms(started[0], finished[0])
+        if duration is None:
+            continue
+        # Historical turns without observed instants only have the identical
+        # transaction timestamp: reporting that as 0 ms would be invented.
+        if not started[1] and not finished[1] and duration == 0:
+            continue
+        durations.append(duration)
     latency = {
         'samples': len(durations),
         'p50': percentile(durations, 0.50),

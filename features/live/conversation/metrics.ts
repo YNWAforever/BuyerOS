@@ -131,6 +131,7 @@ export function formatMetricAmount(value: string): string {
 export function statusRows(metrics: TurnMetrics): { status: TurnStatusRow; count: number }[] {
   return STATUSES.map((status) => ({ status, count: metrics.turns.by_status[status] ?? 0 }));
 }
-export function hasTurnSamples(metrics: TurnMetrics): boolean {
-  return metrics.turns.total > 0 && metrics.latency_ms.samples > 0;
+/** Empty-state decision: derived from turns alone, never from latency samples. */
+export function hasTurns(metrics: TurnMetrics): boolean {
+  return metrics.turns.total > 0;
 }
