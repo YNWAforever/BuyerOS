@@ -88,13 +88,13 @@ const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
 const uuidPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 function standardApi(options={}){
- const {absent=false,failFirstSend=false,contentOnly=false}=options;
+ const {absent=false,failFirstSend=false,contentOnly=false,skills=null}=options;
  return async ({req,url,state})=>{
   const method=req.method();
   if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')
    return absent?{status:404,json:{code:'NOT_FOUND',message:'request failed'}}:{status:204};
   if(url.pathname===prefix)return {json:fixture.envelope({id:project,workspace_id:workspace,status:'active',offer_revision:1,active_icp_version_id:fixture.profileId,name:'Fixture project'})};
-  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[{id:'sales-research'},{id:'review-buyers'}]})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:skills??[{id:'sales-research'},{id:'review-buyers'}]})};
   if(url.pathname.endsWith('/sales-tasks/capability'))return {json:fixture.envelope({admission_enabled:true})};
   if(url.pathname.endsWith('/conversation-threads')&&method==='GET'){
    const searching=Boolean(url.searchParams.get('q'))||url.searchParams.get('archived')==='true';
@@ -986,6 +986,118 @@ test('a directly opened archived thread offers no attach control and issues no w
   assert.equal(await page.getByRole('progressbar').count(),0);
   assert.equal(requests.filter(row=>row.path.includes('/offer-document-uploads')).length,0,'an archived thread issues no upload request');
   assert.equal(requests.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(row.path)).length,0,'an archived thread issues no source write');
+ }finally{await harness.close();}
+});
+
+test('the slash menu lists the offered skill library and inserts without sending',async()=>{
+ // Contract-valid SkillDefinitions (the generated client's fields are present) for the
+ // 17 authored catalogue skills plus one offered-but-unauthored id.
+ const authoredIds=['sales-prospect','sales-research','sales-quick','sales-qualify','sales-contacts','sales-outreach',
+   'sales-followup','sales-prep','sales-proposal','sales-objections','sales-icp','sales-competitors','sales-report',
+   'sales-report-pdf','first-project','understand-documents','review-buyers'];
+ const skills=[...authoredIds.map(id=>({id,version:'1',inputs_schema:{},output_kind:'research_report',
+   allowed_actions:['research.read'],languages:id==='sales-report-pdf'?['en']:['en','zh-HK'],
+   budget_class:'model',upstream_hash:null})),
+  {id:'sales-customer-success',version:'1',inputs_schema:{},output_kind:'research_report',
+   allowed_actions:['research.read'],languages:['en','zh-HK'],budget_class:'model',upstream_hash:null}];
+ const harness=await fixtureHarness({handler:standardApi({skills})});
+ try{
+  const {page,requests,posts,errors}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  // The textarea's accessible name is localized; after the zh-HK switch use the
+  // stable DOM id so the same composer is addressed in either locale.
+  const messageBox=page.locator('#conversation-message');
+  const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  await composer.waitFor();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  assert.deepEqual(errors,[],'the studio renders without a page error under the catalogue fixture');
+  await page.locator('[data-skill-ids="ready"]').waitFor();
+  const beforeRequests=requests.length;
+  await composer.fill('/');
+  const listbox=page.getByRole('listbox',{name:'Skill commands'});
+  await listbox.waitFor();
+  assert.equal(requests.length,beforeRequests,'opening the library issues no request');
+  assert.equal(await listbox.getByRole('option').count(),8,'at most eight options are visible');
+  assert.equal(await page.getByText('10 more',{exact:false}).count(),1,'the more count is truthful (18 offered, 8 shown)');
+  // IME composition owns Enter/Arrows: neither commits the query nor selects.
+  const composingSelected=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  await composer.evaluate(el=>{el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',isComposing:true,bubbles:true,cancelable:true}));});
+  await page.waitForTimeout(40);
+  assert.equal(await listbox.locator('[aria-selected="true"]').getAttribute('id'),composingSelected,'IME arrows do not move the menu');
+  await composer.evaluate(el=>{el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',isComposing:true,bubbles:true,cancelable:true}));});
+  await page.waitForTimeout(40);
+  assert.equal(await listbox.count(),1,'IME Enter does not select a command');
+  assert.equal(await composer.inputValue(),'/');
+  const firstId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  await composer.press('ArrowDown');
+  await page.waitForFunction(first=>document.querySelector('#conversation-skill-menu [aria-selected="true"]')?.id!==first,firstId);
+  const secondId=await listbox.locator('[aria-selected="true"]').getAttribute('id');
+  assert.notEqual(secondId,firstId,'ArrowDown moves the active option');
+  assert.equal(await composer.getAttribute('aria-activedescendant'),secondId,'the textarea keeps focus and points at the active option');
+  // An offered-but-unauthored skill is still reachable via its derived label.
+  await composer.fill('/customer');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  assert.match(await listbox.getByRole('option').first().innerText(),/Customer success/);
+  assert.equal(requests.length,beforeRequests,'filtering issues no request');
+  // A slash query with no matches closes on Enter and never sends or disappears silently.
+  await composer.fill('/zzzz');
+  await page.getByText('No matching skills.',{exact:true}).waitFor();
+  await composer.press('Enter');
+  await listbox.waitFor({state:'detached'});
+  assert.equal(await composer.inputValue(),'/zzzz');
+  assert.equal(turnPosts().length,0,'zero matches never send');
+  // Filter to a skill that is not one of the six guided templates.
+  await composer.fill('/objections');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  await composer.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value.startsWith('Help me prepare responses to likely buyer objections.'));
+  assert.equal(turnPosts().length,0,'selecting a command never sends');
+  assert.equal(await listbox.count(),0,'selecting closes the menu');
+  // A second Enter is the only thing that sends, with the catalogued skill id.
+  await composer.press('Enter');
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  assert.equal(turnPosts().length,1,'a slash selection plus Enter sends exactly one turn');
+  assert.equal(turnPosts()[0].body.skill_id,'sales-objections');
+  assert.match(turnPosts()[0].body.text,/likely buyer objections/);
+  // Escape closes without sending and keeps the typed text.
+  const postsBefore=posts.length;
+  await composer.fill('/');
+  await listbox.waitFor();
+  await composer.press('Escape');
+  await listbox.waitFor({state:'detached'});
+  assert.equal(posts.length,postsBefore,'Escape never sends');
+  assert.equal(await composer.inputValue(),'/','the slash text is kept after Escape');
+  // Locale drift after selection: the skill must be revalidated at send time.
+  await composer.fill('/pdf');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  await composer.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value.startsWith('Help me prepare a report export'));
+  const turnsBeforeDrift=turnPosts().length;
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByText('此技能不適用於目前語言。',{exact:true}).waitFor();
+  assert.equal(await messageBox.inputValue(),'Help me prepare a report export from current results.','the staged prompt stays editable');
+  await messageBox.press('Enter');
+  for(let attempt=0;attempt<100&&turnPosts().length===turnsBeforeDrift;attempt+=1)await page.waitForTimeout(50);
+  assert.equal(turnPosts().length,turnsBeforeDrift+1,'the plain text still sends once');
+  assert.equal(turnPosts().at(-1).body.skill_id??null,null,'a locale-disabled skill id is never sent');
+  assert.notEqual(turnPosts().at(-1).body.skill_id,'sales-report-pdf','the disabled skill id is never sent');
+  // zh-HK: translated labels and a locale-incompatible skill is disabled with a reason.
+  await messageBox.fill('/');
+  const zhList=page.getByRole('listbox',{name:'技能指令'});
+  await zhList.waitFor();
+  assert.equal(await zhList.getByRole('option').count(),8);
+  await messageBox.fill('/pdf');
+  await page.waitForFunction(()=>document.querySelectorAll('#conversation-skill-menu [role="option"]').length===1);
+  const disabled=zhList.getByRole('option').first();
+  assert.equal(await disabled.getAttribute('aria-disabled'),'true','a locale-incompatible skill is disabled, not hidden');
+  assert.equal(await zhList.getByText('此技能不適用於目前語言。').count()>=1,true);
+  await messageBox.press('Enter');
+  assert.equal(await messageBox.inputValue(),'/pdf','a disabled command cannot be inserted');
+  // The open library never overflows a 320px viewport.
+  await page.setViewportSize({width:320,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=320,'the open slash menu fits 320px');
+  await page.setViewportSize({width:1280,height:800});
+  assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });
 
