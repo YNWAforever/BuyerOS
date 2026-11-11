@@ -127,7 +127,16 @@ jobs:
       - run: node scripts/run-vercel.mjs build
       - run: node --test --test-reporter=junit --test-reporter-destination=artifacts/c61/ci-neon-built.xml tests/neon-auth-built.test.mjs
       - run: python scripts/check-required-tests.py --junit artifacts/c61/ci-neon-built.xml
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - name: Verify conversation shell responsive navigation
         run: node --test --test-reporter=junit --test-reporter-destination=test-results/conversation-studio.xml tests/conversation-home-responsive.test.mjs
       - name: Verify the conversation studio gate ran every case
@@ -274,7 +283,16 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -864,7 +882,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --frozen
         working-directory: services/api
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - run: node scripts/run-vercel.mjs build
         if: matrix.runtime == 'vercel-built'
       - name: Discover all eight offer/profile cases
@@ -916,7 +943,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --frozen
         working-directory: services/api
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - name: Verify native smoke discovery before execution
         run: |
           mkdir -p test-results artifacts/c61
@@ -966,7 +1002,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --frozen
         working-directory: services/api
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - name: Verify native zoom discovery before execution
         run: |
           mkdir -p test-results
@@ -1010,7 +1055,16 @@ jobs:
         working-directory: services/api
       - run: uv sync --frozen
         working-directory: services/worker
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - run: .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py
         working-directory: services/api
       - run: python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml
@@ -1057,7 +1111,16 @@ jobs:
         working-directory: services/api
       - run: uv sync --frozen
         working-directory: services/worker
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - name: Verify native research discovery before execution
         run: |
           mkdir -p test-results artifacts/c61
@@ -1229,7 +1292,16 @@ jobs:
         working-directory: services/api
       - run: uv sync --frozen
         working-directory: services/worker
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - run: |
           mkdir -p artifacts/c61
           pnpm exec playwright test --config playwright.audit-fixes.config.ts --list --reporter=json > artifacts/c61/playwright-discovery.json
@@ -1377,7 +1449,16 @@ jobs:
       - run: uv sync --frozen
         working-directory: services/api
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium
+        run: |
+          # The runner image ships the system libraries Chromium needs. The
+          # --with-deps variant additionally drives apt-get; when the hosted
+          # runners cannot resolve the Ubuntu mirrors (observed 2026-11-11),
+          # fall back to the browser-only install instead of failing the job.
+          pnpm exec playwright install --with-deps chromium || {
+            echo "apt-backed install failed; retrying browser-only install"
+            pnpm exec playwright install chromium
+          }
       - name: Reject inherited targets before provisioning
         run: services/api/.venv/bin/python -m pytest services/api/tests/test_sales_runner.py services/api/tests/test_policy_activation_target.py -q
       - name: Generated contracts and bilingual typed selection
