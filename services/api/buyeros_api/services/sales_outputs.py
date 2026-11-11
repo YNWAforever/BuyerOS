@@ -1,6 +1,10 @@
 """Canonical authored-output owner. Reads always re-evaluate audience and sources."""
 import uuid
 import html
+from datetime import datetime
+from decimal import Decimal
+
+from pydantic import BaseModel
 from sqlalchemy import select, and_, or_, exists, func
 from ..api.errors import ApiError
 from ..api.idempotency import begin_idempotency, complete_idempotency
@@ -8,6 +12,7 @@ from ..db.sales_outputs import (SalesOutput, SalesOutputVersion, SalesOutputSect
     SalesOutputDependency, SalesOutputNativeLink)
 from ..db.sales_execution import SalesExecution, SalesStep
 from ..db.conversation_threads import ConversationThread, ConversationThreadShare
+from ..sales import contracts as sales_contracts
 from ..sales.contracts import (OutputCandidate, OutputVersion, OutputDependency, SourceRef,
     SalesSectionCandidate, OUTPUT_MODELS, OutputCollectionPage, OutputListQuery)
 from ..sales.context import resolve_context, require_scope, digest
@@ -40,15 +45,85 @@ def render_markdown(text):
     return ''.join(blocks)
 
 
+# Explicit display whitelist for the human preview. A field that is not listed
+# here is never rendered; in particular evidence/source references, native ids,
+# locators, retention classes, context digests, dependency ids and document
+# basis maps stay server-side. Registered by model type (MRO fields are merged).
+_DISPLAY_FIELDS = {
+    sales_contracts.Finding: ('statement', 'confidence', 'observed_at'),
+    sales_contracts.AuthoredContent: ('summary', 'unknowns'),
+    sales_contracts.ResearchReport: ('findings', 'opportunities', 'concerns'),
+    sales_contracts.ProfileProposal: ('criteria', 'exclusions', 'personas'),
+    sales_contracts.QualificationAssessment: ('rubric', 'dimensions', 'advisory',
+        'next_questions'),
+    sales_contracts.AssessmentDimension: ('dimension', 'score', 'rationale'),
+    sales_contracts.EnrichmentProposal: ('identity_match', 'fields'),
+    sales_contracts.FieldChoice: ('field', 'existing_value', 'proposed_value',
+        'status', 'retrieved_at', 'provider_freshness'),
+    sales_contracts.CompetitiveDocument: ('competitors', 'strengths', 'gaps',
+        'switching_costs'),
+    sales_contracts.PreparedMessage: ('subject', 'body', 'rationale', 'suggested_day'),
+    sales_contracts.OutreachPreparation: ('framework', 'messages', 'review_required'),
+    sales_contracts.FollowupPreparation: ('scenario', 'messages', 'review_required'),
+    sales_contracts.AgendaItem: ('topic', 'minutes'),
+    sales_contracts.MeetingBrief: ('cheat_sheet', 'attendees', 'talking_points',
+        'discovery_questions', 'agenda', 'next_steps'),
+    sales_contracts.SalesProposal: ('problem', 'solution', 'terms', 'assumptions',
+        'proof_points', 'followup', 'review_required'),
+    sales_contracts.CommercialTerms: ('price', 'scope', 'exclusions', 'timeline'),
+    sales_contracts.Money: ('amount', 'currency'),
+    sales_contracts.ObjectionResponse: ('objection', 'feel_felt_found',
+        'acknowledge_bridge_close', 'followup_question', 'walk_away_criteria',
+        'proof_points'),
+    sales_contracts.ObjectionPlaybook: ('responses',),
+    sales_contracts.PipelineRow: ('stage', 'advisory_score', 'value', 'next_action'),
+    sales_contracts.PipelineReport: ('as_of', 'rows', 'methodology'),
+    sales_contracts.ReportExport: ('media_type',),
+    sales_contracts.ProjectSetup: ('offer', 'missing_fields', 'next_steps'),
+    sales_contracts.DocumentUnderstanding: ('findings', 'extraction_status',
+        'extracted_passages', 'question'),
+    sales_contracts.BuyerReview: ('assessments', 'review_required'),
+}
+
+
+def _display_fields(value):
+    names = []
+    for cls in reversed(type(value).__mro__):
+        names.extend(_DISPLAY_FIELDS.get(cls, ()))
+    return tuple(dict.fromkeys(names))
+
+
+def _render_preview(value):
+    """Render only whitelisted human fields; unlisted models/values render nothing."""
+    if isinstance(value, BaseModel):
+        sections = []
+        for name in _display_fields(value):
+            rendered = _render_preview(getattr(value, name, None))
+            if rendered:
+                label = html.escape(name.replace('_', ' '))
+                sections.append('<section><h2>' + label + '</h2>' + rendered
+                    + '</section>')
+        return ''.join(sections)
+    if isinstance(value, (list, tuple)):
+        return ''.join(_render_preview(item) for item in value)
+    if isinstance(value, str):
+        return render_markdown(value)
+    if isinstance(value, bool):
+        return '<p>' + ('Yes' if value else 'No') + '</p>'
+    if isinstance(value, (int, float, Decimal)):
+        return '<p>' + html.escape(str(value)) + '</p>'
+    if isinstance(value, datetime):
+        return '<p>' + html.escape(value.isoformat()) + '</p>'
+    # Evidence/source/native ids, mappings of internal ids, None and anything
+    # unlisted are deliberately omitted from the browser-visible preview.
+    return ''
+
+
 def render_output(output):
     if output.availability!='available': return '<p>Output unavailable</p>'
-    def render(value):
-        if isinstance(value,str): return render_markdown(value)
-        if isinstance(value,list): return ''.join(render(item) for item in value)
-        if isinstance(value,dict):
-            return ''.join('<section><h2>'+html.escape(key.replace('_',' '))+'</h2>'+render(item)+'</section>' for key,item in value.items())
-        return '<p>'+html.escape(str(value))+'</p>'
-    return '<!doctype html><html><head><meta charset="utf-8"><title>Saved output</title></head><body>'+render(output.content.model_dump(mode='json'))+'</body></html>'
+    return ('<!doctype html><html><head><meta charset="utf-8">'
+        '<title>Saved output</title></head><body>'
+        + _render_preview(output.content) + '</body></html>')
 
 
 def assemble_sections(kind, candidates):

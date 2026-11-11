@@ -17,6 +17,7 @@ import {LiveUnavailable} from '../unavailable';
 import {ConversationDrafts} from './draft';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
 import {emptyTurnStream,reduceTurnEvent,streamIsLive,streamStep,type TurnStreamState} from './stream-events';
+import {fetchOutputPreview} from './output-preview';
 import {useDataMode} from '@/features/providers/data-mode';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
@@ -285,10 +286,17 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     terminalFor:proposalId=>terminal.get(proposalId),
     toolFor:capabilityName=>latestToolActivity(entries,capabilityName),
     partsForTurn:turnId=>turnId?entries.filter(entry=>entry.turnId===turnId).flatMap(entry=>entry.parts):[],
+    previewOutput:async(outputId,revision,signal)=>{
+      const scope=session.current();
+      if(!session.isCurrent(identity)||!scope.workspace||!scope.project||!session.token())
+        return {kind:'error',error:'unavailable'};
+      return fetchOutputPreview({baseUrl:apiBaseUrl,workspace:scope.workspace,project:scope.project,
+        outputId,revision,token:session.token(),signal});
+    },
     decide:(part,turnId,choice)=>{void decide(part,turnId,choice);},
     deciding,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }),[t,locale,navigate,loaded?.chat.access,turns,decisions,terminal,entries,deciding]);
+  }),[t,locale,navigate,loaded?.chat.access,turns,decisions,terminal,entries,deciding,apiBaseUrl,identity,session]);
 
   async function loadThread(updated:ServerThread,fallback:ChatThread|null){
     const chat=chatThread(updated)??(fallback?{...fallback,version:updated.version,title:updated.title,updatedAt:updated.updatedAt}:null);

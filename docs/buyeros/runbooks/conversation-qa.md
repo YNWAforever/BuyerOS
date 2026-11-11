@@ -31,10 +31,14 @@ anonymous `GET` answers **401** before the app loads. Choose one of:
   protected (the journey then needs no extra secret).
 - **Bypass token** — in the Vercel project: *Settings → Deployment Protection →
   Protection Bypass for Automation*, create a token, and store it as the
-  environment secret `BUYEROS_QA_PROTECTION_BYPASS`. The Playwright config sends it
-  as `x-vercel-protection-bypass` with `x-vercel-set-bypass-cookie: true`, so the
-  browser carries the bypass across the sign-in redirects and the token is never
-  echoed into the app.
+  environment secret `BUYEROS_QA_PROTECTION_BYPASS`. The Playwright fixture
+  (`tests/e2e/qa-protection.fixture.ts`) makes **one** candidate-origin request
+  carrying `x-vercel-protection-bypass` with `x-vercel-set-bypass-cookie: true`
+  (no redirect following); that response sets the bypass cookie in the browser
+  context's shared cookie jar. Browser requests then carry only the cookie — the
+  raw token is never a context-wide header, is not attached to cross-origin
+  redirects/assets, and is never echoed into the app. With the env var absent the
+  fixture is a no-op and the run targets an unprotected candidate as before.
 
 If a protected candidate is targeted without a bypass, the journey fails in
 seconds with
