@@ -23,7 +23,7 @@ def test_0017_preferences_rls_and_empty_rollback(isolated_migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0070_turn_rate_windows'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0071_conversation_retention'
 
 
 def _member_id(seeded, subject):

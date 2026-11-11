@@ -1,4 +1,4 @@
-﻿"""PostgreSQL: turn event store contract, RLS/grants, allocator and atomicity.
+"""PostgreSQL: turn event store contract, RLS/grants, allocator and atomicity.
 
 CI-only here (no local PostgreSQL). Fixture/deterministic data only.
 """
@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from tests.conftest import runtime_role_dsn
 from tests.test_buyer_review_db import WORKSPACE_A, PROJECT_A
 
-HEAD = '0070_turn_rate_windows'
+HEAD = '0071_conversation_retention'
 
 
 def _user(db, issuer='turn-event-fixture'):
@@ -49,9 +49,13 @@ def test_event_store_contract_rls_and_grants(isolated_migrated):
             "'conversation_turn_events' AND policyname='tenant_isolation'").fetchone()
         assert policy and all("NULLIF(current_setting('app.workspace_id'" in value
             for value in policy)
-        for verb in ('SELECT', 'INSERT', 'UPDATE', 'DELETE'):
+        # Retention (0071) lets the sweeper read a bounded id set and delete
+        # exactly those derived rows; the API stays the only event producer.
+        for verb, expected in (('SELECT', True), ('INSERT', False),
+                               ('UPDATE', False), ('DELETE', True)):
             assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
-                ('buyeros_worker', 'conversation_turn_events', verb)).fetchone()[0] is False
+                ('buyeros_worker', 'conversation_turn_events', verb)).fetchone()[0] is expected
+        for verb in ('SELECT', 'INSERT', 'UPDATE', 'DELETE'):
             assert db.execute('SELECT has_table_privilege(%s,%s,%s)',
                 ('buyeros_api', 'conversation_turn_events', verb)).fetchone()[0] == (
                     verb in {'SELECT', 'INSERT'})
