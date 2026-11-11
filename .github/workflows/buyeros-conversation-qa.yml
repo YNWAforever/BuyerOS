@@ -43,6 +43,10 @@ env:
   QA_PROJECT: ${{ inputs.project_id || vars.BUYEROS_QA_PROJECT_ID }}
   QA_SHA: ${{ inputs.expected_source_sha || github.event.pull_request.head.sha }}
 
+# Runner image is pinned to the supported LTS. On 2026-11-11 `ubuntu-latest`
+# resolved to ubuntu-26.04 ("resolute"), whose Ubuntu apt mirrors fail DNS
+# resolution and break `playwright install --with-deps` in every job.
+
 jobs:
   conversation-qa:
     # A labeled PR may only run this when it comes from this repository.
@@ -53,7 +57,7 @@ jobs:
     # Secrets for the real QA account live only on this protected environment.
     # Configure required reviewers there so no run starts without an approval.
     environment: buyeros-conversation-qa
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
