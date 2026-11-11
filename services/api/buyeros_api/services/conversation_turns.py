@@ -647,7 +647,15 @@ async def _deadline_failure(session, scope: Scope, thread, source_turn, proposal
     return continuation, created
 
 
-async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
+async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
+                      admit=None):
+    """Create one turn; ``admit`` is the optional workspace admission hook.
+
+    It runs after client-message/idempotency replay detection and before any
+    turn, event, task, budget or idempotency write. Existing callers and tests
+    pass None (no dedicated admission); the HTTP turn route supplies the
+    workspace turn-rate ceiling.
+    """
     thread = None
     buyer = None
     if payload.thread_id is not None:
@@ -674,7 +682,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str):
                     if payload.expected_thread_version is not None else None)
     outcome = await begin_idempotency(session, workspace_id=scope.workspace_id,
         actor_id=scope.actor_id, operation_id='conversationTurn', key=key,
-        body=payload.model_dump(mode='json'), target=target, precondition=precondition)
+        body=payload.model_dump(mode='json'), target=target, precondition=precondition,
+        before_insert=admit)
     if outcome.replay:
         row = await _turn_by_id(session, scope, uuid.UUID(outcome.record.resource_id))
         if row is None:

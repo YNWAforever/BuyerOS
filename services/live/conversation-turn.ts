@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Typed client for the conversation turn contract (draft v0 + Amendment A).
  *
  * Every mutation keeps one request key per exact payload, so an uncertain response
@@ -16,6 +16,7 @@ import {MAX_STREAM_RECONNECTS,reconnectDelay,readTurnStreamEvent,SseParser,type 
 export const turnNotices={
   stale:'This discussion changed. Copy any unsaved text, reload and send again.',
   unavailable:'The conversation did not respond. Your message is still here.',
+  rateLimited:'Too many turns were started just now. Wait a moment and try again.',
   absent:'Continuous replies are not available here. Your message is still saved as a note.',
   forbidden:'You do not have permission to act in this discussion.',
   budget:'The approved budget cannot cover this step. Nothing was executed.',
@@ -75,6 +76,7 @@ export function turnNotice(error:unknown):string{
     if(error.code==='NEEDS_INPUT')return turnNotices.needsInput;
     if(error.code==='INVALID_STATE')return turnNotices.noRecovery;
     if(error.code==='CONVERSATION_SOURCE_UNAVAILABLE'||error.code==='SOURCE_UNAVAILABLE')return turnNotices.source;
+    if(error.code==='TURN_RATE_LIMITED')return turnNotices.rateLimited;
     if(error.status===403)return turnNotices.forbidden;
     if(error.status===404)return turnNotices.absent;
     if(error.status===409)return turnNotices.conflict;

@@ -8,6 +8,8 @@ registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith(
 const {ConversationTurns,turnNotice,turnNotices}=await import('../services/live/conversation-turn.ts');
 const {SessionScope}=await import('../services/live/session.ts');
 const {LiveError}=await import('../services/live/client.ts');
+const {ConversationDrafts}=await import('../features/live/conversation/draft.ts');
+const {liveZh}=await import('../features/live/locale.ts');
 const threadId='11111111-1111-4111-8111-111111111111';
 const turnId='22222222-2222-4222-8222-222222222222';
 const clientId='33333333-3333-4333-8333-333333333333';
@@ -92,4 +94,42 @@ test('invalid input is rejected locally and a scope change cancels in-flight tur
   sessionScope.next({project:'other'});
   assert.equal(requests[0].signal.aborted,true);
   await assert.rejects(inflight);
+});
+
+test('a turn rate limit maps to one retryable notice and the retry keeps the draft id and key',async()=>{
+  const notice='Too many turns were started just now. Wait a moment and try again.';
+  const error=new LiveError('turn rate limit reached','TURN_RATE_LIMITED',429,'request-429',true);
+  assert.equal(turnNotices.rateLimited,notice);
+  assert.equal(turnNotice(error),notice,'the new code maps to the honest rate-limit notice');
+  assert.equal(error.retryable,true,'the rejection is marked retryable');
+  assert.equal(liveZh[notice],'剛剛開始了太多處理，請稍候片刻再試。','the zh-HK copy exists');
+  assert.equal(turnNotice(new LiveError('over budget','BUDGET_LIMIT',409,'',false)),turnNotices.budget,'other mappings are unchanged');
+  const memory=new Map();
+  const storage={getItem:key=>memory.get(key)??null,setItem:(key,value)=>{memory.set(key,value);},removeItem:key=>{memory.delete(key);}};
+  const drafts=new ConversationDrafts({actor:'a',workspace:'w',project:'p'},storage);
+  const first=drafts.write('new','Keep this through the rate limit');
+  assert.ok(first);
+  const requests=[];
+  let blocked=true;
+  const api=new ConversationTurns({async request(input){
+    requests.push(input);
+    if(blocked){blocked=false;throw error;}
+    return result();
+  }},session(),true);
+  await assert.rejects(api.submit({threadId:null,clientMessageId:first.clientMessageId,expectedVersion:null,
+    text:'Keep this through the rate limit',language:'en'}));
+  const kept=drafts.read('new');
+  assert.equal(kept?.clientMessageId,first.clientMessageId,'the exact-once client id survives the 429');
+  assert.equal(kept?.text,'Keep this through the rate limit','the composer draft survives the 429');
+  // The composer's Retry send re-submits the same text, so draft.write keeps the id.
+  const retried=drafts.write('new','Keep this through the rate limit');
+  assert.ok(retried);
+  assert.equal(retried.clientMessageId,first.clientMessageId,'the retry mints no new client id');
+  const sent=await api.submit({threadId:null,clientMessageId:retried.clientMessageId,expectedVersion:null,
+    text:'Keep this through the rate limit',language:'en'});
+  assert.equal(sent.turn.status,'completed');
+  assert.equal(requests.length,2);
+  assert.equal(requests[0].idempotencyKey,requests[1].idempotencyKey,'the same exact-once key is replayed');
+  assert.equal(requests[0].body.client_message_id,requests[1].body.client_message_id);
+  assert.equal(requests[1].body.client_message_id,first.clientMessageId);
 });

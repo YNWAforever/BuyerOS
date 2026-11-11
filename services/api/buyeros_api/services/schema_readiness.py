@@ -145,6 +145,7 @@ def sales_requirements(*, worker=False):
         'public.conversation_turn_reconciliations':['id','workspace_id','project_id','thread_id',
             'source_turn_id','actor_id','evidence_digest','evidence_seq','outcome','code','message',
             'continuation_turn_id','created_at'],
+        'public.conversation_turn_rate_windows':['workspace_id','window_start','hits'],
     }
     from ..db.sales_execution import SalesReview, SalesExecution, SalesStep
     from ..db.sales_outputs import SalesOutput, SalesOutputVersion, SalesOutputSection, SalesOutputDependency, SalesOutputNativeLink
@@ -171,6 +172,8 @@ def sales_requirements(*, worker=False):
         'columns':['status','revision','result','updated_at'],'privilege':'UPDATE'})
     privileges.append({'relation':'public.conversation_turns',
         'columns':['status','updated_at'],'privilege':'UPDATE'})
+    privileges.append({'relation':'public.conversation_turn_rate_windows',
+        'columns':['hits'],'privilege':'UPDATE'})
     if worker:
         from ..db.conversation_threads import ConversationThreadShare
         relations['public.conversation_thread_shares']=list(ConversationThreadShare.__table__.columns.keys())
@@ -179,7 +182,8 @@ def sales_requirements(*, worker=False):
         for name in ('public.conversation_thread_messages', 'public.conversation_turns',
                      'public.conversation_turn_proposals', 'public.conversation_turn_decisions',
                      'public.conversation_turn_events',
-                     'public.conversation_turn_reconciliations'):
+                     'public.conversation_turn_reconciliations',
+                     'public.conversation_turn_rate_windows'):
             relations.pop(name, None)
         selected={name:columns for name,columns in relations.items()
             if name not in {'public.conversation_thread_preferences'}}
@@ -232,7 +236,7 @@ def sales_requirements(*, worker=False):
     privileges.append({'relation':'public.sales_content_tombstones','columns':['completed_at'],'privilege':'UPDATE'})
     if not worker:
         privileges.append({'relation':'public.sales_executions','columns':['accounting_revision','accounted_bound','settled_usd'],'privilege':'UPDATE'})
-    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations'], 'compatible_heads':['0069_turn_reconciliations'],
+    return {'required_revisions':['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer','0068_conversation_turn_events','0069_turn_reconciliations','0070_turn_rate_windows'], 'compatible_heads':['0070_turn_rate_windows'],
         'required_relations':relations, 'required_rls':list(relations),
         'required_privileges':privileges,
         'required_functions':[f'public.buyeros_{service}_receipts_writable()' for service in ('search','model','contact')],
