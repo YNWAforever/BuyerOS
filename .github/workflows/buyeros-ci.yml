@@ -5,9 +5,13 @@ on:
   push:
     branches: [main]
 
+# Runner image is pinned to the supported LTS. On 2026-11-11 `ubuntu-latest`
+# resolved to ubuntu-26.04 ("resolute"), whose Ubuntu apt mirrors fail DNS
+# resolution and break `playwright install --with-deps` in every job.
+
 jobs:
   release-readiness:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,7 +49,7 @@ jobs:
           if-no-files-found: error
   frontend:
     timeout-minutes: 120
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -203,7 +207,7 @@ jobs:
       - run: node --test tests/vercel-render.test.mjs tests/deployment/cloudflare-release-config.test.mjs
 
   cloudflare-controller:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -240,7 +244,7 @@ jobs:
 
   api:
     timeout-minutes: 150
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -691,7 +695,7 @@ jobs:
           if-no-files-found: error
 
   worker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -771,7 +775,7 @@ jobs:
           if-no-files-found: error
 
   owned-worker-capacity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Includes exactly30min sustained capture, setup and retained native cases.
     timeout-minutes: 50
     env:
@@ -834,7 +838,7 @@ jobs:
           if-no-files-found: error
 
   offer-profile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -882,7 +886,7 @@ jobs:
           if-no-files-found: error
 
   browser-smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -932,7 +936,7 @@ jobs:
           if-no-files-found: error
 
   browser-zoom:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -980,7 +984,7 @@ jobs:
           if-no-files-found: error
 
   cloudflare-staff-acceptance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     # All fixtures own loopback databases; never supply a production/shared DSN.
     env:
@@ -1028,7 +1032,7 @@ jobs:
           if-no-files-found: error
 
   browser-continuity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     # The reviewed helper requires its own named, loopback-only Postgres
     # container. Do not point its destructive fixture at a shared database.
@@ -1198,7 +1202,7 @@ jobs:
           if-no-files-found: error
 
   audit-fixes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     # Owned PG16 and built fixture only; no provider/production credentials.
     env:
@@ -1289,7 +1293,7 @@ jobs:
           if-no-files-found: error
 
   c61-evidence-checker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -1353,7 +1357,7 @@ jobs:
           if-no-files-found: error
 
   guided-sales-isolated:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
       contents: read
