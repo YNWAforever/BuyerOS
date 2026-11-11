@@ -1,0 +1,1 @@
+{"case": "dispatch-timeout-after-call", "expect": "unknown", "kind": "xverum_mcp", "recorded_at": "2026-11-11T12:00:00Z", "request": {"arguments": {"page": 1, "page_size": 5, "query": "Acme GmbH"}, "observed_phase": "tools/call", "tool": "search_company_xverum"}, "response": {"output": {"anything": true}}, "schema": "provider-acceptance.v1"}

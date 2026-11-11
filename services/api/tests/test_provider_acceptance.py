@@ -58,6 +58,8 @@ def test_unknown_mcp_outcome_is_never_reported_as_rejected():
     receipt = acceptance.replay(FIXTURES / 'xverum-dispatch-unknown.json')
     assert receipt['outcome'] == 'unknown'
     assert receipt['detail']['phase'] == 'tools/call'
+    # The receipt binds the recorded transport evidence, not only the phase label.
+    assert len(receipt['detail']['recorded_response_digest']) == 64
     assert 'credits_used' not in receipt
 
 
@@ -91,6 +93,30 @@ def test_fixture_loader_rejects_malformed_or_unbounded_recordings(tmp_path):
         acceptance.load_fixture(oversized)
 
 
+def test_malformed_recording_never_passes_as_a_provider_rejection(tmp_path):
+    """A corrupt body is a harness error, not evidence that the provider refused."""
+    model = _load('conversation-model-refusal')
+    model['response'] = {'output': None}
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.replay(_write(tmp_path, 'malformed-model.json', model))
+    xverum = _load('xverum-activation-rejected')
+    xverum['response'] = {'jsonrpc': '2.0', 'id': 1}
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.replay(_write(tmp_path, 'missing-evidence.json', xverum))
+
+
+def test_phase_recording_requires_transport_evidence(tmp_path):
+    value = _load('xverum-dispatch-unknown')
+    value['response'] = {'output': {'anything': True}}
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.replay(_write(tmp_path, 'unknown-without-evidence.json', value))
+    value = _load('xverum-activation-rejected')
+    value['response'] = {'error': {'code': 'not-an-integer', 'message': 'x'}}
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.replay(_write(tmp_path, 'malformed-error.json', value))
+
+
+
 def test_expected_classification_mismatch_is_caught(tmp_path):
     value = _load('xverum-dispatch-unknown')
     value['expect'] = 'accepted'
@@ -112,14 +138,33 @@ def test_missing_fixture_directory_is_an_error(tmp_path):
 
 
 def test_live_mode_is_refused_without_explicit_opt_in_and_cap():
-    for env in ({}, {acceptance.LIVE_ENV: '0'},
+    for env in ({}, {acceptance.LIVE_ENV: '0'}, {acceptance.LIVE_ENV: 'true'},
                 {acceptance.CREDIT_CAP_ENV: '5'},
                 {acceptance.LIVE_ENV: '1'},
                 {acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: '0'},
                 {acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: 'many'},
+                {acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: ' 5 '},
+                {acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: '1_000'},
                 {acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: '1001'}):
         with pytest.raises(acceptance.LiveAcceptanceRefused):
             acceptance.live_credit_cap(env)
+
+
+def test_live_mode_refuses_unrecorded_cases_and_non_json_receipts():
+    calls = []
+
+    def fake_call(**kwargs):
+        calls.append(kwargs)
+        return {'outcome': 'accepted', 'data': {1, 2}}
+
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.run_live('case-with-no-recording', fake_call,
+            env={acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: '5'})
+    assert calls == []
+    with pytest.raises(acceptance.AcceptanceError):
+        acceptance.run_live('company-search-projection', fake_call,
+            env={acceptance.LIVE_ENV: '1', acceptance.CREDIT_CAP_ENV: '5'})
+    assert len(calls) == 1
 
 
 def test_live_mode_dispatches_exactly_one_capped_case():
