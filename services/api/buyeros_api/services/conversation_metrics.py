@@ -16,7 +16,7 @@ import math
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 
 from ..db.conversation_turn_events import ConversationTurnEvent
 from ..db.conversation_turns import (ConversationTurn, ConversationTurnDecision,
@@ -201,7 +201,10 @@ async def turn_metrics(session, scope: Scope, *, window_days: int = DEFAULT_WIND
                ConversationTurnEvent.project_id == project_id,
                ConversationTurnEvent.kind == 'tool',
                ConversationTurnEvent.created_at >= cutoff)
-        .group_by(ConversationTurnEvent.payload['state'].astext))).all()
+        # GROUP BY the select-list position: Postgres does not recognise two
+        # separately compiled JSON path expressions with their own bind
+        # parameters as the same grouping expression.
+        .group_by(text('1')))).all()
     tool_states = {str(state): int(count) for state, count in tool_rows if state is not None}
 
     notices_rows = (await session.execute(
