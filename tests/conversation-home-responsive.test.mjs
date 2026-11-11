@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {readFileSync,readdirSync} from 'node:fs';
+import {readFileSync,readdirSync,mkdirSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
 import ts from 'typescript';
 import {renderToStaticMarkup} from 'react-dom/server';
 const root=resolve('.'),rootUrl=pathToFileURL(root+'/').href;
@@ -18,7 +18,7 @@ registerHooks({resolve(specifier,context,next){
  if(url.startsWith(rootUrl)&&/\.tsx?$/.test(url))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText};
  return next(url,context);
 }});
-const {chromium,expect}=await import('@playwright/test');
+const {chromium}=await import('@playwright/test');
 
 // Device discussions and workspace notes now live behind native disclosures.
 // Use the visible control rather than forcing hidden descendants or changing UI defaults.
@@ -56,7 +56,7 @@ const aiCitation={id:`fact:profile:${aiProfile}:${aiFact}`,label:'Approved offer
 sampleThread.sources=[{id:aiCitation.id,label:aiCitation.label}];
 sampleThread.messages.push({id:'m2',kind:'ai',status:'needs_review',fixture:true,text:'A cited fixture reply '+('字'.repeat(100)),citations:[aiCitation]});
 const sampleContext=[{title:'Documents & outputs',items:[{id:'document:d1',label:'Offer document',title:'source'.repeat(40)+'.pdf',status:'parsing',path:'/app/discover/edit?document=d1'}]},{title:'Offer facts',items:[{id:'fact:f1',label:'Candidate offer fact',title:'product',detail:'內容'.repeat(250),status:'candidate',path:'/app/discover/edit'}]}];
-for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in ${locale}`,async()=>{
+for(const locale of ['en','zh-HK'])test(`thread and context fit 320??440px in ${locale}`,async()=>{
  const {liveZh}=await import('../features/live/locale.ts');const t=value=>locale==='zh-HK'?(liveZh[value]||value):value;
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
  try{
@@ -73,6 +73,504 @@ for(const locale of ['en','zh-HK'])test(`thread and context fit 320–1440px in 
   }
  }finally{await browser.close();}
 });
+
+// ---------------------------------------------------------------------------
+// Conversation-first studio browser gate. This is CI-only verification: the
+// sandbox cannot spawn a browser, so every assertion below is deterministic and
+// scoped to fixtures. Screenshots are written for review artifacts.
+// ---------------------------------------------------------------------------
+const fixture=await import('./conversation-browser-fixture.mjs');
+const {workspace,project,threadId,turnId,proposalId,outputId,newThreadId,documentId,citationId,
+ buyerId,buyerThreadId,buyerProposalId}=fixture;
+const shots='test-results/conversation-studio';
+mkdirSync(shots,{recursive:true});
+const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
+const uuidPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+
+function standardApi(options={}){
+ const {absent=false,failFirstSend=false,contentOnly=false}=options;
+ return async ({req,url,state})=>{
+  const method=req.method();
+  if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')
+   return absent?{status:404,json:{code:'NOT_FOUND',message:'request failed'}}:{status:204};
+  if(url.pathname===prefix)return {json:fixture.envelope({id:project,workspace_id:workspace,status:'active',offer_revision:1,active_icp_version_id:fixture.profileId,name:'Fixture project'})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[{id:'sales-research'},{id:'review-buyers'}]})};
+  if(url.pathname.endsWith('/sales-tasks/capability'))return {json:fixture.envelope({admission_enabled:true})};
+  if(url.pathname.endsWith('/conversation-threads')&&method==='GET'){
+   const searching=Boolean(url.searchParams.get('q'))||url.searchParams.get('archived')==='true';
+   const items=searching?[]:[fixture.studioSummary];
+   return {json:fixture.envelope({items,total:items.length,offset:0,limit:50})};
+  }
+  const threadGet=url.pathname.match(/\/conversation-threads\/([0-9a-f-]+)$/);
+  if(threadGet&&method==='GET'){
+   if(state.createdThread&&state.createdThread.id===threadGet[1]){state.thread=state.createdThread;return {json:fixture.envelope(state.createdThread)};}
+   const resolved=contentOnly?{...fixture.studioThread,sources:[],messages:[{...fixture.userMessage},
+     {...fixture.assistantMessage,parts:[{kind:'text',text:'Here is the brief.'}]}]}:fixture.studioThread;
+   state.thread=state.thread??resolved;
+   return {json:fixture.envelope(resolved)};
+  }
+  if(url.pathname.endsWith('/conversation-turns')&&method==='POST'){
+   state.turnCalls=(state.turnCalls??0)+1;
+   const body=req.postDataJSON();
+   if(failFirstSend&&state.turnCalls===2)return {status:503,json:{code:'CONVERSATION_MODEL_UNAVAILABLE',message:'private server detail'}};
+   if(!('thread_id' in body)){
+    const created=fixture.newConversation(body.text);state.createdThread=created.thread;state.thread=created.thread;return {json:fixture.envelope(created)};
+   }
+   const base=state.thread??fixture.studioThread;
+   state.thread={...base,version:base.version+1,messages:[...base.messages,
+    {id:'b6000000-0000-4000-8000-000000000001',seq:base.messages.length+1,role:'user',text:body.text,client_message_id:body.client_message_id,turn_id:turnId,created_at:'2026-10-01T00:02:00.000Z',parts:[]},
+    {id:'b7000000-0000-4000-8000-000000000001',seq:base.messages.length+2,role:'assistant',text:'Here is the follow-up.',client_message_id:null,turn_id:turnId,created_at:'2026-10-01T00:02:10.000Z',parts:[{kind:'text',text:'Here is the follow-up.'}]}]};
+   return {json:fixture.envelope({thread:state.thread,turn:{id:turnId,status:'completed',parts:[{kind:'text',text:'Here is the follow-up.'}],notices:[]}})};
+  }
+  if(/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(url.pathname)&&method==='POST')
+   return {json:fixture.envelope({thread:state.thread??fixture.studioThread,turn:fixture.decisionTurn()})};
+  if(url.pathname.endsWith('/conversation-threads')&&method==='POST'){
+   const body=req.postDataJSON();const created=fixture.newConversation(body.messages?.[0]?.text??'Note');
+   state.createdThread=created.thread;return {json:fixture.envelope(created.thread),status:201};
+  }
+  const append=url.pathname.match(/\/conversation-threads\/([0-9a-f-]+)\/messages$/);
+  if(append&&method==='POST'){
+   const body=req.postDataJSON();
+   state.thread={...(state.thread??fixture.studioThread),version:(state.thread??fixture.studioThread).version+1,
+    messages:[...(state.thread??fixture.studioThread).messages,{id:'b8000000-0000-4000-8000-000000000001',seq:9,role:'user',text:body.text,client_message_id:null,turn_id:null,created_at:'2026-10-01T00:03:00.000Z',parts:[]}]};
+   return {json:fixture.envelope(state.thread)};
+  }
+  return null;
+ };
+}
+
+async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId,handler=standardApi(),flag=true,locale='en'}={}){
+ const {createServer}=await import('vite');
+ const dir=mkdtempSync('work/conversation-studio-browser-');
+ writeFileSync(dir+'/entry.jsx',fixture.browserEntry);
+ const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},
+  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},
+  server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+ server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
+ await server.listen();
+ const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
+ const page=await browser.newPage();page.setDefaultTimeout(30000);
+ const requests=[],posts=[],errors=[],state={thread:null,createdThread:null,turnCalls:0};
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.route('**/v1/**',async route=>{
+  const request=route.request(),url=new URL(request.url());
+  requests.push({method:request.method(),path:url.pathname,search:url.search});
+  if(request.method()==='POST'){let body=null;try{body=request.postDataJSON();}catch{body=null;}posts.push({path:url.pathname,body,key:request.headers()['idempotency-key'],match:request.headers()['x-buyeros-if-match']??request.headers()['if-match']});}
+  const answer=await handler({req:request,url,state,requests,posts});
+  if(answer){if(answer.status===204)return route.fulfill({status:204});return route.fulfill({status:answer.status??200,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(answer.json)});}
+  const data=fixture.contextResponse(url);
+  return route.fulfill({status:data?200:403,headers:{'content-type':'application/json','x-request-id':'conversation-studio'},body:JSON.stringify(data?{data,data_mode:'live',request_id:'conversation-studio'}:{error:{code:'PERMISSION_DENIED',message:'denied'},request_id:'conversation-studio'})});
+ });
+ const query='fixture?route='+encodeURIComponent(initialRoute)+(flag?'':'&flag=off')+(locale==='zh-HK'?'&locale=zh-HK':'');
+ await page.goto(server.resolvedUrls.local[0]+query);
+ await page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
+ return {page,browser,server,dir,requests,posts,errors,state,origin:server.resolvedUrls.local[0],
+  close:async()=>{await browser.close();await server.close();rmSync(dir,{recursive:true,force:true});}};
+}
+async function waitForDestination(page,expected){await page.waitForFunction(value=>window.lastDestination===value,expected);}
+
+test('conversation-first transcript renders typed inline parts and inline decisions',async()=>{
+ const harness=await fixtureHarness();
+ try{
+  const {page,errors,posts,origin}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  // Inline navigation unmounts the studio; return to the canonical thread route
+  // explicitly rather than reloading the destination screen.
+  const threadUrl=origin+'fixture?route='+encodeURIComponent('/app/discussions/s/'+threadId);
+  // A new document loses the harness-injected stylesheet; re-add it with the CSS-only
+  // screenshots and use the canonical thread route after inline navigation.
+  const stylePage=()=>page.addStyleTag({content:css+readFileSync('features/live/discussion.css','utf8')});
+  const openThread=async()=>{await page.goto(threadUrl);await stylePage();await page.getByText('Here is the brief.',{exact:true}).waitFor();};
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  // Inline tool activity keeps its truthful state.
+  assert.equal(await page.getByText('Completed',{exact:true}).count(),1);
+  // Both inline entry points exist before either navigation can unmount the studio.
+  assert.equal(await transcript.getByRole('button',{name:'Open saved output',exact:true}).count(),1);
+  assert.equal(await transcript.getByRole('button',{name:'Offer document',exact:true}).count(),1);
+  await page.screenshot({path:shots+'/transcript-inline-parts-desktop.png',fullPage:true});
+  // Citations are real links to the canonical record.
+  await transcript.getByRole('button',{name:'Offer document',exact:true}).click();
+  await waitForDestination(page,`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
+  // Output links open the saved revision (return to the thread route first).
+  await openThread();
+  await transcript.getByRole('button',{name:'Open saved output',exact:true}).click();
+  await waitForDestination(page,`/app/documents/${outputId}?workspace=${workspace}&project=${project}`);
+  await openThread();
+  // The proposal is an inline approval card, not a chat instruction.
+  assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),1);
+  assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),1);
+  await transcript.getByRole('button',{name:'Approve',exact:true}).click();
+  await page.getByText('Approved. This discussion continues with the result.',{exact:true}).waitFor();
+  const decisions=posts.filter(row=>/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(row.path));
+  assert.equal(decisions.length,1,'one explicit decision request');
+  assert.deepEqual(decisions[0].body,{proposal_id:proposalId,decision:'approve',expected_thread_version:3});
+  assert.match(decisions[0].key??'',/\S/);
+  await page.screenshot({path:shots+'/proposal-approval-desktop.png',fullPage:true});
+  // Reload rebuilds the same transcript from persisted parts without replaying a turn.
+  const turnsBefore=posts.filter(row=>row.path.endsWith('/conversation-turns')).length;
+  await page.reload();
+  await stylePage();
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,turnsBefore,'reload never replays a turn');
+  // zh-HK pass: same surface, translated labels.
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByRole('button',{name:'拒絕',exact:true}).waitFor();
+  await page.getByRole('button',{name:'批准',exact:true}).waitFor();
+  await page.screenshot({path:shots+'/zh-hk-desktop.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('a new discussion sends exactly one turn for its first message and retries the same client message id',async()=>{
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler:standardApi({failFirstSend:true})});
+ try{
+  const {page,posts,requests}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await page.getByRole('heading',{name:'What would you like to achieve for this project?'}).waitFor();
+  // Home entry performs an explicit, method-checked read set; the capability probe is OPTIONS.
+  await page.waitForLoadState('networkidle');
+  const initial=requests.filter(row=>row.path.startsWith('/v1/'));
+  const allow=[prefix,prefix+'/conversation-turns',prefix+'/conversation-threads',prefix+'/sales/skills',
+   prefix+'/sales-outputs',prefix+'/sales-tasks',prefix+'/sales-tasks/native-sources',prefix+'/offer-documents',
+   prefix+'/icp-versions',prefix+'/runs',prefix+'/usage'];
+  for(const row of initial){
+   assert.ok(allow.some(allowed=>row.path===allowed||row.path.startsWith(allowed+'/')||row.path.startsWith(allowed+'?')),
+    `unexpected initial request ${row.method} ${row.path}${row.search}`);
+   if(row.path.endsWith('/conversation-turns'))assert.equal(row.method,'OPTIONS','the turn capability probe never mutates');
+   else assert.equal(row.method,'GET','home entry only reads; the turn probe is OPTIONS');
+  }
+  assert.equal(initial.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'one OPTIONS capability probe');
+  for(const required of [prefix,prefix+'/sales/skills',prefix+'/conversation-threads'])
+   assert.ok(initial.some(row=>row.path===required),'missing home read '+required);
+  await page.screenshot({path:shots+'/home-desktop.png',fullPage:true});
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.fill('Research this buyer');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('Here is the grounded brief.',{exact:true}).waitFor();
+  // Amendment A1: the first turn omits thread_id and creates the thread atomically.
+  const first=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(first.length,1,'one POST for the first message');
+  assert.equal('thread_id' in first[0].body,false);
+  assert.equal('expected_thread_version' in first[0].body,false);
+  assert.equal(first[0].body.text,'Research this buyer');
+  assert.equal(first[0].body.language,'en');
+  assert.match(first[0].body.client_message_id,uuidPattern);
+  assert.match(first[0].key??'',/\S/);
+  // Duplicate-first-message guard: the user text exists exactly once in the transcript.
+  assert.equal(await transcript.getByText('Research this buyer',{exact:true}).count(),1);
+  assert.match(await page.locator('#fixture-path').textContent(),new RegExp('/app/discussions/s/'+newThreadId));
+  // A failed send keeps the draft; retry reuses the same client_message_id and request key.
+  const followUp=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await followUp.fill('Add a contact');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',{exact:true}).first().waitFor();
+  const failed=posts.filter(row=>row.path.endsWith('/conversation-turns')).at(-1);
+  assert.match(failed.body.client_message_id,uuidPattern);
+  await page.getByRole('button',{name:'Retry send',exact:true}).click();
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  const sent=posts.filter(row=>row.path.endsWith('/conversation-turns')).at(-1);
+  assert.equal(sent.body.client_message_id,failed.body.client_message_id,'retry keeps the same message id');
+  assert.equal(sent.key,failed.key,'retry keeps the same request key');
+  assert.equal(await transcript.getByText('Add a contact',{exact:true}).count(),1);
+  // Visible UI keeps the plain "Send" label while the accessible name stays distinct.
+  assert.equal(await page.getByRole('button',{name:'Send message',exact:true}).innerText(),'Send');
+ }finally{await harness.close();}
+});
+
+test('fallback without the turn endpoint saves a truthful note and never fabricates parts',async()=>{
+ const harness=await fixtureHarness({handler:standardApi({absent:true,contentOnly:true})});
+ try{
+  const {page,posts}=harness;
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await page.getByText('Notes only',{exact:true}).waitFor();
+  await page.getByText('Continuous replies are unavailable here. Your messages are saved as notes.',{exact:true}).waitFor();
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this note');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('Saved as a note. Select sources to ask BuyerOS.',{exact:true}).first().waitFor();
+  const appends=posts.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/messages$/.test(row.path));
+  assert.equal(appends.length,1,'the note path appends once');
+  assert.equal(appends[0].body.text,'Keep this note');
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'no invented turn call');
+  assert.equal(await page.getByText('Keep this note',{exact:true}).count(),1);
+  assert.equal(await page.getByText('Completed',{exact:true}).count(),0,'no fabricated tool activity');
+ }finally{await harness.close();}
+});
+
+test('unsent composer text survives navigation, reload and remains scoped to the project',async()=>{
+ const harness=await fixtureHarness();
+ try{
+  const {page}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('Unsent draft survives');
+  // Leave to the conversation home and open the same thread from the store.
+  await page.getByRole('button',{name:'Home',exact:true}).click();
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Unsent draft survives','draft survives in-app navigation');
+  await page.reload();
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Unsent draft survives','draft survives reload');
+  await page.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'','draft is scoped to actor + workspace + project');
+  await page.getByRole('combobox',{name:'Fixture project'}).selectOption(project);
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Unsent draft survives','draft returns with the original scope');
+ }finally{await harness.close();}
+});
+
+test('the studio keeps three views separate on mobile and never overflows 320??440px',async()=>{
+ const harness=await fixtureHarness();
+ try{
+  const {page}=harness;
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  for(const width of [320,390,480,481,600,768,820,1023,1024,1440]){
+   await page.setViewportSize({width,height:1000});
+   const actual=await page.evaluate(()=>document.documentElement.scrollWidth);
+   assert.ok(actual<=width,`studio viewport ${width}px overflows to ${actual}px`);
+  }
+  await page.setViewportSize({width:390,height:844});
+  const views=page.getByRole('navigation',{name:'Views'});
+  await views.waitFor();
+  await page.screenshot({path:shots+'/mobile-390.png',fullPage:true});
+  assert.equal(await page.locator('.conversation-threads').isVisible(),false,'mobile conversation view hides the thread list');
+  await views.getByRole('button',{name:'Discussions',exact:true}).click();
+  await page.locator('.conversation-threads').waitFor();
+  assert.equal(await page.locator('.conversation-threads').isVisible(),true,'threads are their own mobile view');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('.conversation-threads')?.checkVisibility?.());
+  assert.equal(await page.locator('.conversation-main').isVisible(),true,'Escape returns to the conversation view');
+  await views.getByRole('button',{name:'Context',exact:true}).click();
+  await page.locator('.conversation-panel').waitFor();
+  assert.equal(await page.locator('.conversation-main').isVisible(),false,'context is its own mobile view, never a squeezed third column');
+  await page.keyboard.press('Escape');
+  await page.locator('.conversation-main').waitFor();
+  // The approved guided form remains reachable as a secondary surface.
+  assert.equal(await page.locator('summary',{hasText:'Guided setup'}).count()>=1,true);
+ }finally{await harness.close();}
+});
+
+test('OFF keeps the prior shell and retained device discussions stay local-only',async()=>{
+ const off=await fixtureHarness({flag:false});
+ try{
+  const {page,requests}=off;
+  await page.getByRole('button',{name:'Operations',exact:true}).waitFor();
+  assert.equal(await page.getByRole('textbox').count(),0,'flag OFF renders no conversation surface');
+  assert.equal(await page.getByText('What would you like to achieve for this project?',{exact:true}).count(),0);
+  assert.equal(requests.length,0,'flag OFF performs no conversation reads');
+ }finally{await off.close();}
+ const on=await fixtureHarness({route:'/app',handler:standardApi()});
+ try{
+  const {page,requests}=on;
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await openDiscussion(page);
+  await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
+  await page.waitForLoadState('networkidle');
+  const before=requests.length;
+  await page.locator('.live-discussion').getByRole('textbox').fill('Keep this local note');
+  await page.getByRole('button',{name:'Send',exact:true}).click();
+  await page.locator('.live-discussion').getByLabel('Discussion messages',{exact:true}).getByText('Keep this local note',{exact:true}).waitFor();
+  assert.equal(requests.length,before,'device discussions remain local and perform no fetches');
+  assert.match(await page.evaluate(()=>Object.keys(localStorage).filter(key=>key.startsWith('buyeros.discussions')).join(',')),/buyeros\.discussions/);
+ }finally{await on.close();}
+});
+
+test('workspace thread keeps decisions, revoked sources, stale sends and viewer limits explicit',async()=>{
+ let writes=[];
+ let thread={...fixture.studioThread,access:'editor',sources:[
+  {id:'drive:12345678-1234-4123-8123-123456789012:file_one',label:'Google Drive item'},
+  {id:'drive:23456789-1234-4123-8123-123456789012:file_two',label:'Google Drive item'},
+  {id:citationId,label:'Offer document'}]};
+ const handler=async({req,url})=>{
+  const method=req.method();
+  if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')return {status:204};
+  if(url.pathname===prefix)return {json:fixture.envelope({id:project,name:'Fixture project'})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[]})};
+  if(url.pathname.endsWith('/conversation-threads')&&method==='GET')return {json:fixture.envelope({items:[],total:0,offset:0,limit:50})};
+  if(/\/conversation-threads\/[0-9a-f-]+$/.test(url.pathname)&&method==='GET')return {json:fixture.envelope(thread)};
+  if(/\/conversation-threads\/[0-9a-f-]+\/sources$/.test(url.pathname)&&method==='PUT'){
+   const body=req.postDataJSON();writes.push({body,version:req.headers()['x-buyeros-if-match']});
+   if(body.sources.some(source=>source.id.startsWith('drive:')))return {status:422,json:{code:'CONVERSATION_SOURCE_UNAVAILABLE',message:'selected sources need review'}};
+   thread={...thread,sources:body.sources,version:thread.version+1};return {json:fixture.envelope(thread)};
+  }
+  if(url.pathname.endsWith('/conversation-turns')&&method==='POST')return {status:412,json:{code:'STALE_REVISION',message:'discussion changed'}};
+  if(/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(url.pathname)&&method==='POST')return {json:fixture.envelope({thread,turn:fixture.decisionTurn()})};
+  return null;
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByRole('button',{name:'Approve',exact:true}).waitFor();
+  // Approving is a real request against the owning turn.
+  await transcript.getByRole('button',{name:'Approve',exact:true}).click();
+  await page.getByText('Approved. This discussion continues with the result.',{exact:true}).waitFor();
+  const decision=posts.find(row=>row.path.endsWith('/decisions'));
+  assert.ok(decision);assert.deepEqual(decision.body,{proposal_id:proposalId,decision:'approve',expected_thread_version:3});
+  // Revoked Drive sources cannot be saved one by one; the bulk removal path succeeds.
+  const panel=page.locator('.conversation-panel');
+  await panel.getByRole('tab',{name:'Sources',exact:true}).click();
+  await panel.getByRole('button',{name:'Remove',exact:true}).first().click();
+  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).first().waitFor();
+  assert.equal(writes.length,1);assert.deepEqual(writes[0].body.sources.map(source=>source.id),[thread.sources[1].id,citationId]);
+  await panel.getByRole('button',{name:'Remove unavailable Google Drive selections',exact:true}).click();
+  await panel.getByRole('button',{name:'Remove unavailable Google Drive selections',exact:true}).waitFor({state:'detached'});
+  assert.deepEqual(writes[1].body.sources,[{id:citationId,label:'Offer document'}]);
+  assert.equal(thread.sources.length,1,'only the unavailable Drive references are dropped');
+  // A stale revision keeps the unsent text and says exactly what to do next.
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this after the conflict');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('This discussion changed. Copy any unsaved text, reload and send again.',{exact:true}).first().waitFor();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Keep this after the conflict');
+  assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),1);
+  // A viewer reads the same discussion but cannot decide, send or change sources.
+  thread={...thread,access:'viewer'};
+  await page.reload();
+  const viewerComposer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await viewerComposer.waitFor();
+  // The composer is disabled from the moment a saved thread is opened until its
+  // access resolves; poll the disabled state so the product rule is asserted, not timing.
+  await page.waitForFunction(()=>{const node=document.querySelector('.conversation-compose textarea');return node instanceof HTMLTextAreaElement&&node.disabled;});
+  assert.equal(await viewerComposer.isDisabled(),true);
+  assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0);
+  await page.locator('.conversation-panel').getByRole('tab',{name:'Sources',exact:true}).click();
+  assert.equal(await page.locator('.conversation-panel').getByRole('button',{name:'Remove',exact:true}).count(),0);
+ }finally{await harness.close();}
+});
+
+test('a preset skill chip sends its skill_id once and clears the composer',async()=>{
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler:standardApi()});
+ try{
+  const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await page.locator('[data-skill-ids="ready"]').waitFor();
+  await page.getByRole('button',{name:'Research a market',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Research a market',exact:true}).click();
+  await page.getByText('Here is the grounded brief.',{exact:true}).waitFor();
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,1,'a chip is one turn, not a form submission');
+  assert.equal(turns[0].body.skill_id,'sales-research');
+  assert.match(turns[0].body.client_message_id,uuidPattern);
+  assert.equal(turns[0].body.text,'Help me plan research for a market.');
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'','the composer clears after a chip send');
+  assert.equal(await transcript.getByText('Help me plan research for a market.',{exact:true}).count(),1,'exactly one user message is appended');
+ }finally{await harness.close();}
+});
+
+test('a permission failure keeps the message unsent and surfaces the honest notice',async()=>{
+ const handler=standardApi();
+ const harness=await fixtureHarness({handler:async input=>{
+  if(input.url.pathname.endsWith('/conversation-turns')&&input.req.method()==='POST'){
+   return {status:403,json:{code:'PERMISSION_DENIED',message:'private server detail'}};
+  }
+  return handler(input);
+ }});
+ try{
+  const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Do not lose this message');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('You do not have permission to act in this discussion.',{exact:true}).first().waitFor();
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1);
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Do not lose this message','the unsent message stays in the composer');
+  assert.equal(await transcript.getByText('Do not lose this message',{exact:true}).count(),0,'a denied send is never appended');
+ }finally{await harness.close();}
+});
+
+test('an unavailable workspace thread fails explicitly instead of showing another thread',async()=>{
+ const handler=async({req,url})=>{
+  if(url.pathname.endsWith('/conversation-turns')&&req.method()==='OPTIONS')return {status:204};
+  if(url.pathname===prefix)return {json:fixture.envelope({id:project,name:'Fixture project'})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[]})};
+  if(url.pathname.endsWith('/conversation-threads')&&req.method()==='GET')return {json:fixture.envelope({items:[],total:0,offset:0,limit:50})};
+  if(/\/conversation-threads\/[0-9a-f-]+$/.test(url.pathname)&&req.method()==='GET')return {status:404,json:{code:'NOT_FOUND',message:'request failed'}};
+  return null;
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page}=harness;
+  await page.getByText('Not found in this workspace.',{exact:true}).waitFor();
+  await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).waitFor();
+  assert.equal(await page.locator('.conversation-transcript').count(),0,'no transcript for an unavailable thread');
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).isDisabled(),true,'a failed thread read never opens a writable composer');
+  assert.equal(await page.getByRole('button',{name:'New discussion',exact:true}).count()>=1,true);
+ }finally{await harness.close();}
+});
+
+test('Discuss this company starts one linked turn and a terminal enrichment card becomes inert',async()=>{
+ const handler=async({req,url,state})=>{
+  const method=req.method();
+  if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')return {status:204};
+  if(url.pathname===prefix)return {json:fixture.envelope({id:project,name:'Fixture project'})};
+  if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:[{id:'sales-contacts'}]})};
+  if(url.pathname.endsWith('/conversation-threads')&&method==='GET')return {json:fixture.envelope({items:[],total:0,offset:0,limit:50})};
+  const threadGet=url.pathname.match(/\/conversation-threads\/([0-9a-f-]+)$/);
+  if(threadGet&&method==='GET'){
+   if(threadGet[1]===buyerThreadId){
+    const conversation=state.terminal?fixture.terminalBuyerConversation():fixture.buyerConversation();
+    state.buyerThread=conversation.thread;return {json:fixture.envelope(conversation.thread)};
+   }
+   return {json:fixture.envelope(fixture.studioThread)};
+  }
+  if(url.pathname.endsWith('/conversation-turns')&&method==='POST'){
+   const conversation=fixture.buyerConversation();state.buyerThread=conversation.thread;return {json:fixture.envelope(conversation)};
+  }
+  if(/\/conversation-turns\/[0-9a-f-]+\/decisions$/.test(url.pathname)&&method==='POST'){
+   state.terminal=true;return {json:fixture.envelope(fixture.terminalBuyerConversation())};
+  }
+  return null;
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page,posts}=harness;
+  const transcript=page.locator('.conversation-transcript');
+  await page.getByRole('button',{name:'Discuss this company',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Discuss this company',exact:true}).click();
+  await transcript.getByText('Here is what we can verify about DeltaGrid.',{exact:true}).waitFor();
+  // Exactly one thread-first turn; no thread_id, no If-Match, buyer link carried.
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,1,'one thread-first turn for the company entry');
+  assert.equal('thread_id' in turns[0].body,false);
+  assert.equal('expected_thread_version' in turns[0].body,false);
+  assert.equal(turns[0].match,undefined,'a thread-first turn never sends If-Match');
+  assert.equal(turns[0].body.buyer_id,buyerId);
+  assert.equal(turns[0].body.template_id,'check-company');
+  assert.equal(turns[0].body.skill_id,'sales-contacts');
+  assert.match(turns[0].body.client_message_id,uuidPattern);
+  assert.equal(turns[0].body.language,'en');
+  assert.match(turns[0].body.text,/Discuss this company/);
+  assert.match(await page.locator('#fixture-path').textContent(),new RegExp('/app/discussions/s/'+buyerThreadId));
+  // Company identity comes from thread.buyerId + the persisted buyer citation; no extra fetch.
+  const compose=page.locator('.conversation-compose');
+  await compose.getByLabel('Linked company').waitFor();
+  assert.match(await compose.getByLabel('Linked company').innerText(),/DeltaGrid/);
+  // Always-approval plus an honest cost review with no invented number.
+  assert.equal(await transcript.getByText('Approval required',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('Cost review required before any paid request.',{exact:true}).count(),1);
+  assert.equal(await page.locator('.conversation-proposal-cost').innerText(),'Cost review required before any paid request.');
+  // Approval returns a terminal configuration outcome; the card must become inert.
+  await transcript.getByRole('button',{name:'Approve',exact:true}).click();
+  await transcript.getByText('Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.').first().waitFor();
+  assert.equal(await transcript.getByText('Failed',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('This step cannot run in the current configuration.',{exact:true}).count(),1);
+  assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0,'terminal configuration leaves no actionable decision');
+  assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),0);
+  const decision=posts.find(row=>row.path.endsWith('/decisions'));
+  assert.deepEqual(decision.body,{proposal_id:buyerProposalId,decision:'approve',expected_thread_version:1});
+  assert.equal(decision.match,'"1"');
+ }finally{await harness.close();}
+});
+
+// Restored retained-surface scenarios: device discussions and Google Drive remain the
+
+// local-only surfaces they were before the conversation studio became the project home.
+
+// Only two statement changes are needed: scoped Discussion-messages queries (the studio
+
+// transcript uses the same aria-label) and the fixture accessible-name separations above.
 
 test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF network boundary',async()=>{
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
@@ -103,7 +601,7 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
   await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
   await page.locator('.live-discussion').getByRole('textbox').fill('Start a local discussion');
   assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);
-  await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByLabel('Discussion messages',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Send',exact:true}).click();await page.locator('.live-discussion').getByLabel('Discussion messages',{exact:true}).waitFor();
   await page.getByRole('checkbox').first().click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[0].checked);
   await page.getByRole('checkbox').nth(1).click();await page.waitForFunction(()=>document.querySelectorAll('input[type=checkbox]')[1].checked);
   await page.locator('.live-discussion').getByRole('textbox').fill('What should I review?');
@@ -137,149 +635,6 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
   assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).count(),0);assert.equal(posts.length,postCount);
   assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
-});
-
-test('hydrated Chromium continuity, scope isolation and local actions make zero requests',async t=>{
- const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
- const {contextResponse,browserEntry,project,workspace,documentId,runId}=await import('./conversation-browser-fixture.mjs');
- mkdirSync('work',{recursive:true});const fixtureDir=mkdtempSync('work/conversation-browser-');writeFileSync(fixtureDir+'/entry.jsx',browserEntry);
- // This custom HTML entry is invisible to Vite's default HTML scanner. Discovering
- // React/lucide on demand can invalidate an in-flight module with a 504 before
- // React mounts. Prebundle the complete dependency set; use a cold, private cache
- // so prior app builds or test runs cannot hide that startup regression.
- const server=await createServer({configFile:false,root,cacheDir:resolve(fixtureDir,'node_modules/.vite'),resolve:{alias:{'@':root}},
-  optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},
-  server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
- server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head></head><body><div id="root"></div><script type="module" src="/'+fixtureDir+'/entry.jsx"></script></body></html>');}else next();});
- await server.listen();const origin=server.resolvedUrls.local[0];
- let browser;
- try{
-  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
-  let holdReads=false;const heldReads=[];
-  const page=await browser.newPage();page.setDefaultTimeout(30000);const errors=[],requests=[],moduleFailures=[];
-  page.on('console',message=>{if(message.type()==='error')t.diagnostic('Browser console: '+message.text());});
-  page.on('requestfailed',request=>{const failure=request.url()+' '+request.failure()?.errorText;t.diagnostic(failure);if(request.resourceType()==='script')moduleFailures.push(failure);});
-  page.on('response',response=>{if(response.request().resourceType()==='script'&&!response.ok()){const failure=response.status()+' '+response.url();moduleFailures.push(failure);t.diagnostic(failure);}});
-  page.on('pageerror',error=>{errors.push(error.message);t.diagnostic(error.stack??error.message);});
-  await page.route('**/v1/**',async route=>{
-   if(holdReads)await new Promise(resolve=>heldReads.push(resolve));
-   const req=route.request();requests.push({method:req.method(),url:req.url()});const data=contextResponse(new URL(req.url()));
-   return route.fulfill({status:data?200:403,json:data?{data,data_mode:'live',request_id:'conversation-browser'}:{error:{code:'PERMISSION_DENIED',message:'denied'},request_id:'conversation-browser'}});
-  });
-  await page.addInitScript(()=>{window.discussionStorageEvents=[];for(const method of ['getItem','setItem']){const original=Storage.prototype[method];Storage.prototype[method]=function(key,...args){if(key.startsWith('buyeros.discussions'))window.discussionStorageEvents.push({method,key});return original.call(this,key,...args);};}});
-  await page.goto(origin+'fixture?flag=off');await page.getByRole('button',{name:'Home',exact:true}).waitFor();
-  assert.equal(await page.getByRole('textbox').count(),0);assert.equal(requests.length,0);assert.deepEqual(await page.evaluate(()=>window.discussionStorageEvents),[]);
-  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('buyeros.discussions'))),[]);
-  await page.goto(origin+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor().catch(async error=>{writeFileSync('work/conversation-browser-error.html',await page.content());writeFileSync('work/conversation-browser-requests.json',JSON.stringify(requests,null,2));throw error;});
-  const initialReads=requests.length;assert.ok(initialReads>=5);assert.ok(requests.every(req=>req.method==='GET'));
-  const templates=['Guide my first project','Understand my documents','Research a market','Review & shortlist buyers','Check a company','Prepare a follow-up'];
-  const destinations=[['Offer','/app/discover/edit'],['Offer','/app/discover/edit'],['Research runs','/app/runs'],['Buyers','/app/discover'],['Buyers','/app/discover'],['Drafts','/app/outreach']];
-  // Guided home owns fresh entry reads; device edits still own no network calls.
-  const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
-  const usage=new URL(requests.find(row=>new URL(row.url).pathname.endsWith('/usage')).url).search;
-  const entryReads=['','','/offer-documents?offset=0&limit=20','/icp-versions?offset=0&limit=20','/runs?offset=0&limit=10','/usage'+usage,'/sales-outputs?limit=50&offset=0','/sales-tasks/native-sources','/sales/skills','/conversation-threads?q=&archived=false&offset=0&limit=50'].map(path=>'GET '+prefix+path).sort();
-  let homeReads=0;
-  async function enterHome(){
-   const alreadyHome=await page.locator('#fixture-path').textContent()==='/app',before=requests.length;
-   await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
-   if(!alreadyHome){
-    await expect.poll(()=>requests.length).toBe(before+entryReads.length);
-    assert.deepEqual(requests.slice(before).map(row=>row.method+' '+new URL(row.url).pathname+new URL(row.url).search).sort(),entryReads,'home entry performs only its explicit read set');
-    homeReads+=entryReads.length;
-   }else assert.equal(requests.length,before,'staying on loaded home must not fetch');
-  }
-  for(const [index,name] of templates.entries()){
-   await enterHome();const localReads=requests.length;await page.getByRole('button',{name,exact:false}).click();
-   await page.waitForFunction(()=>document.querySelector('#fixture-path')?.textContent?.startsWith('/app/discussions/local-'));
-   await page.locator('.live-discussion').getByRole('textbox').fill('My next local step');await page.getByRole('button',{name:'Send',exact:true}).click();await page.getByText('My next local step',{exact:true}).waitFor();
-   assert.match(await page.locator('#fixture-path').textContent(),/^\/app\/discussions\/local-/);
-   assert.equal(requests.length,localReads,'template creation and local Send must not fetch');
-   const [label,path]=destinations[index];await page.locator('.live-discussion-thread').getByRole('button',{name:'Open in '+label,exact:true}).first().click();
-   assert.equal(await page.evaluate(()=>window.lastDestination),path+'?workspace='+workspace+'&project='+project);
-   await enterHome();const reopenReads=requests.length;await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();await openDiscussion(page);
-   assert.equal(requests.length,reopenReads,'reopening a device discussion must not fetch');
-  }
-  writeFileSync('work/conversation-browser-action-network.json',JSON.stringify({initialReads,requests},null,2));
-  assert.equal(requests.length,initialReads+homeReads,'only explicit guided-home entry reads are allowed; device actions must not fetch');
-  await page.getByRole('button',{name:'Change language',exact:true}).click();await page.getByText('只儲存於此裝置 · 不會共用',{exact:true}).waitFor();await page.getByRole('button',{name:'Change language',exact:true}).click();
-  // The DOM gets real values, while selections only persist generic labels and IDs.
-  await page.getByRole('checkbox').first().click();
-  await page.waitForFunction(()=>document.querySelector('input[type=checkbox]').checked);
-  const stored=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage).filter(([k])=>k.startsWith('buyeros.discussions'))));
-  const serialized=JSON.stringify(stored);assert.ok(!serialized.includes('PRIVATE_FACT_CONTENT'));assert.ok(!serialized.includes('project-evidence.pdf'));assert.ok(serialized.includes(documentId));
-  await page.reload();await openDiscussion(page);await page.getByText('My next local step',{exact:true}).waitFor();await page.getByText('project-evidence.pdf',{exact:false}).waitFor();assert.equal(await page.getByRole('checkbox').first().isChecked(),true);
-  // Scope reads may occur here; actions on the loaded scope remain entirely local.
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
-  assert.equal(await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('listitem').count(),6);
-  await page.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
-  await page.getByRole('combobox',{name:'Fixture project'}).selectOption(project);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('listitem').first().waitFor();
-  // Every source destination preserves record IDs; navigation callback supplies scope.
-  await page.getByRole('region',{name:'Recent research runs',exact:true}).getByRole('button',{name:'Open source',exact:true}).click();
-  assert.equal(await page.evaluate(()=>window.lastDestination),`/app/discover/${runId}?workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
-  await page.getByRole('region',{name:'Documents & outputs',exact:true}).last().getByRole('button',{name:'Open source',exact:true}).first().click();
-  assert.equal(await page.evaluate(()=>window.lastDestination),`/app/discover/edit?document=${documentId}&workspace=${workspace}&project=${project}`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);
-  holdReads=true;await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();
-  await page.getByText('project-evidence.pdf',{exact:false}).waitFor({state:'hidden',timeout:2000});
-  holdReads=false;heldReads.forEach(resolve=>resolve());
-  await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').first().click();await openDiscussion(page);
-  await page.getByRole('button',{name:'Second actor',exact:true}).click();await page.getByText('This discussion is not saved for this account and project on this device.',{exact:true}).waitFor();
-  assert.equal(await page.getByText('My next local step',{exact:true}).count(),0);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Second workspace',exact:true}).click();await page.getByText('No discussions in this project yet.',{exact:true}).waitFor();
-  assert.deepEqual(errors,[]);assert.deepEqual(moduleFailures,[],'fixture modules must load cleanly from a cold cache');writeFileSync('work/conversation-browser-network.json',JSON.stringify({initialReads,requests,errors},null,2));
-  // Two real tabs begin from the same snapshot. The scope lock makes one save
-  // win and the stale writer must keep its composer instead of erasing data.
-  const tabs=await browser.newContext(),tabRequests=[];
-  await tabs.route('**/v1/**',route=>{
-   const req=route.request(),data=contextResponse(new URL(req.url()));tabRequests.push(req.method());
-   return route.fulfill({status:data?200:403,json:data?{data,data_mode:'live',request_id:'multitab-fixture'}:{error:{code:'PERMISSION_DENIED'},request_id:'multitab-fixture'}});
-  });
-  const a=await tabs.newPage(),b=await tabs.newPage();
-  for(const tab of [a,b]){await tab.goto(origin+'fixture');await openDiscussion(tab);await tab.getByText('project-evidence.pdf',{exact:false}).waitFor();}
-  const tabReadCount=tabRequests.length;
-  await a.locator('.live-discussion').getByRole('textbox').fill('Question in tab A');await b.locator('.live-discussion').getByRole('textbox').fill('Question in tab B');
-  await Promise.all([a.getByRole('button',{name:'Send',exact:true}).click(),b.getByRole('button',{name:'Send',exact:true}).click()]);
-  const conflict='Saved discussions changed in another tab. Changes were not saved. Copy any unsaved work before reloading.';
-  await Promise.any([a.getByText(conflict,{exact:true}).waitFor(),b.getByText(conflict,{exact:true}).waitFor()]);
-  const winner=(await a.locator('.live-discussion').getByRole('textbox').inputValue())===''?a:b,loser=winner===a?b:a;
-  const persisted=()=>winner.evaluate(()=>JSON.parse(Object.entries(localStorage).find(([key])=>key.startsWith('buyeros.discussions'))[1]));
-  const firstSave=await persisted();assert.equal(firstSave.threads.length,1);
-  assert.match(await loser.locator('.live-discussion').getByRole('textbox').inputValue(),/^Question in tab [AB]$/);
-  assert.equal(tabRequests.length,tabReadCount,'simultaneous local saves must not fetch');
-  await loser.reload();await openDiscussion(loser);await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await loser.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(loser);
-  await winner.locator('.live-discussion').getByRole('textbox').fill('Saved in the winner');await winner.getByRole('button',{name:'Send',exact:true}).click();
-  await winner.getByText('Saved in the winner',{exact:true}).waitFor();
-  await loser.locator('.live-discussion').getByRole('textbox').fill('Keep this unsaved message');await loser.getByRole('button',{name:'Send',exact:true}).click();
-  await loser.getByText(conflict,{exact:true}).waitFor();
-  assert.equal(await loser.locator('.live-discussion').getByRole('textbox').inputValue(),'Keep this unsaved message');
-  await loser.getByRole('checkbox').first().click();
-  await loser.waitForFunction(()=>!document.querySelector('input[type=checkbox]').checked);
-  assert.deepEqual((await persisted()).threads[0].messages.map(row=>row.text),[firstSave.threads[0].messages[0].text,'Saved in the winner']);
-  assert.deepEqual((await persisted()).threads[0].sources,[]);
-  // A queued write must recheck its actor/project before running under the lock.
-  await loser.reload();await openDiscussion(loser);await loser.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await winner.evaluate(()=>{window.fixtureLockHeld=false;void navigator.locks.request(Object.keys(localStorage).find(key=>key.startsWith('buyeros.discussions')),async()=>{window.fixtureLockHeld=true;await new Promise(resolve=>window.releaseFixtureLock=resolve);});});
-  await winner.waitForFunction(()=>window.fixtureLockHeld);
-  const beforeQueued=await persisted();
-  await loser.locator('.live-discussion').getByRole('textbox').fill('Must not enter the old scope');await loser.getByRole('button',{name:'Send',exact:true}).click();
-  await winner.waitForFunction(async()=> (await navigator.locks.query()).pending.length>0);
-  await loser.getByRole('combobox',{name:'Fixture project'}).selectOption('project-b');
-  await loser.getByText('This discussion is not saved for this account and project on this device.',{exact:true}).waitFor();
-  await winner.evaluate(()=>window.releaseFixtureLock());
-  await winner.waitForFunction(async()=> (await navigator.locks.query()).pending.length===0&&(await navigator.locks.query()).held.length===0);
-  assert.deepEqual(await persisted(),beforeQueued);
-  // Unsupported lock capability must not fall back to unsafe persistent writes.
-  const unlocked=await tabs.newPage();await unlocked.addInitScript(()=>Object.defineProperty(navigator,'locks',{value:undefined}));
-  await unlocked.goto(origin+'fixture');await openDiscussion(unlocked);await unlocked.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await unlocked.locator('.live-discussion').getByRole('textbox').fill('Memory only');await unlocked.getByRole('button',{name:'Send',exact:true}).click();
-  await unlocked.getByLabel('Discussion messages',{exact:true}).getByText('Memory only',{exact:true}).waitFor();
-  await unlocked.getByText('Local storage is unavailable. Discussions are kept only in this tab.',{exact:true}).waitFor();
-  assert.deepEqual(await persisted(),beforeQueued);assert.ok(tabRequests.every(method=>method==='GET'));
-  await tabs.close();
- }finally{await browser?.close();await server.close();rmSync(fixtureDir,{recursive:true,force:true});}
 });
 
 test('Stage 2b keyboard confirmation, localized gate failures, run continuity and live reply privacy',async()=>{
@@ -358,214 +713,6 @@ test('Stage 2b keyboard confirmation, localized gate failures, run continuity an
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
 
-test('Stage 3 confirmed import retries once, shares by keyboard, restores and preserves stale text',async()=>{
- const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
- const {contextResponse,browserEntry}=await import('./conversation-browser-fixture.mjs');
- mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-server-browser-');writeFileSync(dir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
- server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+readFileSync('features/live/discussion.css','utf8')+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
- await server.listen();let browser;
- try{
-  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
-  const page=await browser.newPage(),posts=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
-  const id='12345678-1234-4123-8123-123456789012',member={member_id:'22345678-1234-4123-8123-123456789012',display_name:'Synthetic colleague'};
-  let row=null,grants=[],uncertain=true,stale=false,access='owner',forbidden=false;
-  await page.route('**/v1/**',async route=>{
-   const req=route.request(),url=new URL(req.url()),path=url.pathname,method=req.method();
-   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage3-synthetic'}});
-   if(!path.includes('/conversation-threads'))return ok(contextResponse(url));
-   if(method==='GET'){
-    if(path.endsWith('/conversation-threads'))return ok({items:row?[{...row,access}]:[],offset:0,limit:50,total:row?1:0});
-    if(forbidden)return route.fulfill({status:404,json:{code:'NOT_FOUND',message:'discussion not found'}});
-    if(path.endsWith('/share-recipients'))return ok({items:[member],offset:0,limit:25});
-    if(path.endsWith('/shares'))return ok({items:grants,version:row.version});
-    return ok({...row,access});
-   }
-   posts.push({path,method,body:req.postData()?req.postDataJSON():null,key:req.headers()['idempotency-key'],version:req.headers()['x-buyeros-if-match']});
-   if(path.endsWith('/conversation-threads')){
-    row??={id,templateId:'custom',title:'Synthetic workspace note',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Synthetic workspace note'}],sources:[],runs:[],version:1,access:'owner',shareCount:0};
-    if(uncertain){uncertain=false;return route.fulfill({status:503,json:{code:'UNAVAILABLE',message:'uncertain'}});}return ok(row);
-   }
-   if(path.endsWith('/messages')){
-    if(stale)return route.fulfill({status:409,json:{code:'STALE_REVISION',message:'changed'}});
-    row={...row,version:row.version+1,messages:[...row.messages,{id:'m2',text:req.postDataJSON().text}]};return ok(row);
-   }
-   if(path.includes('/shares/')){
-    grants=method==='DELETE'?[]:[{...member,role:req.postDataJSON().role,active:true}];row={...row,version:row.version+1,shareCount:grants.length};return ok(row);
-   }
-   throw new Error('unexpected thread write '+path);
-  });
-  await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  await page.locator('.live-discussion').getByRole('textbox').fill('Synthetic workspace note');await page.getByRole('button',{name:'Send',exact:true}).click();
-  await page.getByLabel('Discussion messages',{exact:true}).waitFor();assert.equal(posts.length,0,'local notes never auto-upload');
-  await page.getByRole('button',{name:'Save to workspace',exact:true}).click();assert.equal(posts.length,0,'opening confirmation cannot import');
-  await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();await page.getByRole('button',{name:'Open workspace discussion',exact:true}).waitFor();
-  assert.equal(posts.length,2);assert.equal(posts[0].key,posts[1].key);assert.deepEqual(posts[0].body,{confirmed:true,template_id:'custom',title:'Synthetic workspace note',messages:[{text:'Synthetic workspace note'}],sources:[],runs:[]});
-  assert.match(await page.evaluate(()=>Object.values(localStorage).join('')),/Synthetic workspace note/);
-  await page.getByRole('button',{name:'Open workspace discussion',exact:true}).click();await openDiscussion(page);await page.getByText('Saved to this workspace · visible to you and people you share with',{exact:true}).waitFor();
-  await page.reload();await openDiscussion(page);await page.getByRole('button',{name:'Share discussion',exact:true}).waitFor();
-  await page.getByRole('button',{name:'Share discussion',exact:true}).focus();await page.keyboard.press('Enter');
-  await page.getByRole('dialog',{name:'Share discussion',exact:true}).waitFor();
-  for(const width of [320,390,480,600,768,820,1023,1024,1440]){
-   await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`share dialog overflows ${width}`);
-  }
-  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Change language',exact:true}).click();
-  await page.getByRole('button',{name:'共用討論',exact:true}).focus();await page.keyboard.press('Enter');
-  await page.getByRole('dialog',{name:'共用討論',exact:true}).waitFor();
-  for(const width of [320,390,480,600,768,820,1023,1024,1440]){
-   await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth)<=width,`zh-HK share dialog overflows ${width}`);
-  }
-  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Change language',exact:true}).click();await page.getByRole('button',{name:'Share discussion',exact:true}).click();
-  await page.getByLabel('Find workspace member').fill('Synthetic');await page.getByRole('button',{name:'Search members',exact:true}).click();
-  await page.getByLabel('Share role',{exact:true}).selectOption('editor');await page.getByRole('button',{name:'Share with member',exact:true}).click();await page.getByRole('button',{name:'Make viewer',exact:true}).waitFor();
-  await page.getByRole('button',{name:'Make viewer',exact:true}).click();await page.getByRole('button',{name:'Make editor',exact:true}).waitFor();
-  await page.getByRole('button',{name:'Revoke access',exact:true}).click();await page.getByRole('button',{name:'Make editor',exact:true}).waitFor({state:'detached'});
-  await page.keyboard.press('Escape');assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).evaluate(node=>document.activeElement===node),true);
-  stale=true;await page.getByLabel('Discussion message',{exact:true}).fill('Keep this unsaved text');await page.getByRole('button',{name:'Send',exact:true}).click();
-  await page.getByText('This discussion changed. Copy any unsaved text before reloading.',{exact:true}).waitFor();assert.equal(await page.getByLabel('Discussion message',{exact:true}).inputValue(),'Keep this unsaved text');
-  access='viewer';stale=false;await page.reload();await openDiscussion(page);await page.getByText('Shared with you',{exact:false}).waitFor();
-  assert.equal(await page.getByLabel('Discussion message',{exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Propose research',exact:true}).count(),0);assert.equal(await page.getByRole('button',{name:'Share discussion',exact:true}).count(),0);
-  forbidden=true;await page.reload();await page.getByText('This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();assert.equal(await page.getByLabel('Discussion messages',{exact:true}).count(),0);
-  const before=posts.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Save to workspace',exact:true}).count(),0);assert.equal(posts.length,before);
-  assert.deepEqual(errors,[]);
- }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
-});
-
-for(const runFailure of [503,409,404])test(`Stage 3 thread save failures preserve paid work and permission context (run save ${runFailure})`,async()=>{
- const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
- const {contextResponse,browserEntry,workspace,project,profileId,factId}=await import('./conversation-browser-fixture.mjs');
- mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-server-recovery-');
- writeFileSync(dir+'/entry.jsx',browserEntry.replace('Revoke offer access</button>','Revoke offer access</button><button onClick={()=>setOfferAccess(true)}>Restore offer access</button>'));
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
- server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
- await server.listen();let browser;
- try{
-  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
-  const page=await browser.newPage(),posts=[],errors=[],heldReads=[];page.on('pageerror',error=>errors.push(error.message));
-  const id='12345678-1234-4123-8123-123456789012',runId='b4000000-0000-4000-8000-000000000001';
-  const ref={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact',locator:{surface:'profile',id:profileId}};
-  const answer='PRIVATE_ACCEPTED_AI_REPLY';let failNote=true,holdContext=false,holdNote=false,releaseNote,noteStarted,holdCheck=false,releaseCheck,checkStarted;
-  let row={id,templateId:'custom',title:'Synthetic recovery',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Synthetic note'}],sources:[{id:ref.id,label:ref.label}],runs:[],version:1,access:'owner',shareCount:0};
-  await page.route('**/v1/**',async route=>{
-   const req=route.request(),url=new URL(req.url()),path=url.pathname,method=req.method();
-   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage3-recovery'}});
-   if(method==='POST'){
-    posts.push({path,body:req.postDataJSON(),key:req.headers()['idempotency-key']});
-    if(path.endsWith('/conversation-reply'))return ok({status:'needs_review',fixture:false,text:answer,citations:[ref]});
-    if(path.includes('/conversation-threads/')){
-     if(path.endsWith('/runs'))return route.fulfill({status:runFailure,json:{code:runFailure===409?'STALE_REVISION':runFailure===404?'NOT_FOUND':'UNAVAILABLE',message:'not saved'}});
-     if(failNote)return route.fulfill({status:503,json:{code:'UNAVAILABLE',message:'not saved'}});
-     if(holdNote)await new Promise(resolve=>{releaseNote=resolve;noteStarted();});
-     row={...row,version:row.version+1,messages:[...row.messages,{id:'m'+(row.messages.length+1),text:req.postDataJSON().text}]};return ok(row);
-    }
-    return ok({id:runId,workspace_id:workspace,project_id:project,status:'queued'});
-   }
-   if(method==='PATCH'&&path.endsWith('/'+id)){row={...row,title:req.postDataJSON().title,version:row.version+1};return ok(row);}
-   if(path.includes('/conversation-threads')){
-    if(holdCheck&&path.endsWith('/'+id))await new Promise(resolve=>{releaseCheck=resolve;checkStarted();});
-    return ok(path.endsWith('/conversation-threads')?{items:[row],total:1,offset:0,limit:50}:row);
-   }
-   if(holdContext)await new Promise(resolve=>heldReads.push(resolve));
-   if(path.endsWith('/budgets'))return ok({items:[['workspace',workspace,'all'],['project',project,'all'],['category',project,'discovery']].map(([scope,scope_id,category])=>({workspace_id:workspace,scope,scope_id,category,period_start:'2026-01-01T00:00:00Z',period_end:'2099-01-01T00:00:00Z',remaining:{amount:'1.000000',currency:'USD'},effective_state:'active'})),offset:0,limit:100,total:3});
-   if(path.includes('pilot-budget'))return ok({id:null,workspace_id:workspace,project_id:project,remaining:null,currency:'USD'});
-   let data=contextResponse(url);if(path.endsWith('/icp-versions')&&url.searchParams.get('limit')==='100')data={...data,limit:100};return ok(data);
-  });
-  await page.goto(server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id));await openDiscussion(page);
-  await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-  const composer=page.getByLabel('Discussion message',{exact:true}),ask=page.getByRole('button',{name:'Ask BuyerOS',exact:true});
-  await composer.fill('Keep my accepted question');await ask.evaluate(button=>{button.click();button.click();});
-  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
-  assert.equal(await composer.inputValue(),'Keep my accepted question');
-  if(runFailure===503){
-   await page.getByRole('button',{name:'Home',exact:true}).first().click();await openDiscussion(page);
-   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Synthetic recovery/}).click();await openDiscussion(page);
-   await composer.fill('Keep my accepted question');
-  }
-  failNote=false;await ask.evaluate(button=>{button.click();button.click();});
-  await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
-  await page.getByText(answer,{exact:true}).waitFor();
-  assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,1,'retrying the note save must reuse the accepted AI answer');
-  const notes=posts.filter(post=>post.path.endsWith('/messages'));assert.equal(notes.length,2);assert.equal(notes[0].key,notes[1].key);
-  failNote=true;await composer.fill('Retain my answer across a rename');await ask.click();
-  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
-  await page.getByLabel('Discussion title',{exact:true}).fill('Renamed recovery');
-  await page.getByRole('button',{name:'Rename discussion',exact:true}).click();
-  await page.getByText('Renamed recovery',{exact:true}).waitFor();
-  failNote=false;await ask.click();
-  await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
-  assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,2,'a title save must not discard an accepted answer and charge a note retry again');
-  if(runFailure===503){
-   const questions=['First unsaved paid answer','Second unsaved paid answer'];
-   failNote=true;
-   for(const question of questions){
-    await composer.fill(question);await ask.click();
-    await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
-   }
-   failNote=false;
-   for(const question of questions){
-    await composer.fill(question);await ask.click();
-    await page.waitForFunction(()=>document.querySelector('#discussion-message').value==='');
-   }
-   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,4,'another accepted question must not replace earlier unsaved paid work');
-  }
-  await page.getByRole('button',{name:'Propose research',exact:true}).click();
-  await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();
-  await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});
-  await page.getByText('Research was accepted, but its reference could not be saved. Open Research runs.',{exact:true}).waitFor({timeout:3000});
-  assert.equal(posts.filter(post=>post.path.endsWith('/runs')&&!post.path.includes('/conversation-threads/')).length,1);
-  assert.equal(await page.getByRole('button',{name:'Confirm and start research',exact:true}).count(),0,'accepted research must require a new proposal before another paid action');
-  assert.doesNotMatch(JSON.stringify(posts.filter(post=>post.path.includes('/conversation-threads/'))),/PRIVATE_ACCEPTED_AI_REPLY|PRIVATE_FACT_CONTENT|project-evidence\.pdf/);
-  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage)),[],'server threads and live replies stay out of localStorage');
-  if(runFailure===503){
-   // The paid answer arrives before permission loss; its delayed note response
-   // must not restore it after the permission effect has aborted the request.
-   await page.getByRole('button',{name:'Rename discussion',exact:true}).click();
-   await page.getByText(answer,{exact:true}).waitFor({state:'hidden'});
-   holdNote=true;const noteReceived=new Promise(resolve=>noteStarted=resolve);
-   await composer.fill('Discard this delayed reply after permission loss');await ask.click();await noteReceived;
-   holdContext=true;await page.getByRole('button',{name:'Revoke offer access',exact:true}).click();
-   await page.getByText('project-evidence.pdf',{exact:false}).waitFor({state:'hidden'});
-   releaseNote();holdNote=false;
-   await page.waitForFunction(()=>document.querySelector('#discussion-message')&&Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='Ask BuyerOS')?.disabled);
-   assert.equal(await page.getByText('project-evidence.pdf',{exact:false}).count(),0,'permission loss hides previous context before pending reads finish');
-   assert.equal(await page.getByText('PRIVATE_FACT_CONTENT',{exact:true}).count(),0);
-   holdContext=false;heldReads.splice(0).forEach(resolve=>resolve());
-   await page.getByRole('button',{name:'Restore offer access',exact:true}).click();
-   await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-   assert.equal(await page.getByText(answer,{exact:true}).count(),0,'an aborted in-flight answer cannot reappear after permission restoration');
-   assert.equal(await composer.inputValue(),'Discard this delayed reply after permission loss');
-   await page.reload();await openDiscussion(page);await composer.waitFor();
-   const paidCount=posts.filter(post=>post.path.endsWith('/conversation-reply')).length;
-   holdCheck=true;const checkReceived=new Promise(resolve=>checkStarted=resolve);
-   await composer.fill('Leave before the paid request');await ask.click();await checkReceived;
-   await page.getByRole('button',{name:'Home',exact:true}).first().click();await openDiscussion(page);
-   await page.getByRole('region',{name:'Continue working',exact:true}).waitFor();
-   holdCheck=false;const response=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await response;
-   await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();await openDiscussion(page);
-   await composer.waitFor();
-   assert.equal(posts.filter(post=>post.path.endsWith('/conversation-reply')).length,paidCount,'unmount during the ACL recheck cannot launch a paid request');
-   assert.equal(await composer.inputValue(),'');
-   for(const exit of ['permission','thread']){
-    await page.getByRole('button',{name:'Propose research',exact:true}).click();
-    holdCheck=true;const confirmCheck=new Promise(resolve=>checkStarted=resolve);
-    await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();await confirmCheck;
-    // Simulate an external permission update or route change while the modal
-    // is waiting for its ACL response, before any paid admission has started.
-    await page.getByRole('button',{name:exit==='permission'?'Revoke offer access':'Home',exact:true}).first().evaluate(button=>button.click());
-    await page.getByRole('dialog',{name:'Confirm paid research'}).waitFor({state:'hidden'});
-    holdCheck=false;const checked=page.waitForResponse(result=>new URL(result.url()).pathname.endsWith('/'+id));releaseCheck();await (await checked).finished();
-    if(exit==='permission')await page.getByRole('button',{name:'Restore offer access',exact:true}).click();
-    else {await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button',{name:/Renamed recovery/}).click();}
-    await openDiscussion(page);
-    await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
-    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-    assert.equal(posts.filter(post=>post.path.endsWith('/runs')&&!post.path.includes('/conversation-threads/')).length,1,`${exit} unmount during the research ACL recheck must not start paid research`);
-   }
-  }else await page.getByText(runFailure===409?'This discussion changed. Copy any unsaved text before reloading.':'This workspace discussion was not found or is no longer shared with you.',{exact:true}).first().waitFor();
-  heldReads.splice(0).forEach(resolve=>resolve());assert.deepEqual(errors,[]);
- }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
-});
 
 test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts and OFF parity across sizes/locales',async()=>{
  const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
@@ -616,7 +763,7 @@ test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts a
   await drive.getByText('Google Drive item 1',{exact:false}).waitFor();
   assert.equal(await drive.getByRole('checkbox').isDisabled(),true,'start a discussion before selecting');
   await page.locator('.live-discussion').getByRole('textbox').fill('Review approved Drive evidence');await page.getByRole('button',{name:'Send',exact:true}).click();
-  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await drive.getByRole('checkbox').click();await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);await page.locator('.live-discussion').getByRole('textbox').fill('What needs review?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
+  await page.locator('.live-discussion').getByLabel('Discussion messages',{exact:true}).waitFor();await drive.getByRole('checkbox').click();await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);await page.locator('.live-discussion').getByRole('textbox').fill('What needs review?');await page.getByRole('button',{name:'Ask BuyerOS',exact:true}).click();
   await page.getByText('EPHEMERAL_DRIVE_ANSWER',{exact:true}).waitFor();
   assert.doesNotMatch(await page.evaluate(()=>Object.values(localStorage).join('')),/EPHEMERAL_DRIVE_ANSWER/);
   assert.equal(writes[0].key,writes[1].key);assert.equal(writes[0].version,'"1"');assert.deepEqual(writes[2].body,{folder_ids:['folder_one']});
@@ -630,52 +777,6 @@ test('Stage 4 Drive admin approval, member selection, ephemeral Ask, conflicts a
   await drive.getByText('Google Drive connected',{exact:true}).waitFor();assert.equal(await drive.getByRole('button',{name:'Disconnect Google Drive',exact:true}).count(),0);
   denied=true;await drive.getByRole('button',{name:'Reload Google Drive',exact:true}).click();await drive.getByText('Google Drive access is denied for this workspace.',{exact:true}).waitFor();assert.equal(await drive.getByRole('checkbox').count(),0);
   const before=reads.length;await page.goto(server.resolvedUrls.local[0]+'fixture?flag=off');await page.getByRole('button',{name:'Operations',exact:true}).waitFor();assert.equal(await page.getByRole('region',{name:'Google Drive',exact:true}).count(),0);assert.equal(reads.length,before);
-  assert.deepEqual(errors,[]);
- }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
-});
-
-test('Stage 4 workspace discussions can remove every revoked Drive selection while keeping other sources',async()=>{
- const {createServer}=await import('vite');const {mkdirSync,mkdtempSync,writeFileSync,rmSync}=await import('node:fs');
- const {contextResponse,browserEntry,profileId,factId}=await import('./conversation-browser-fixture.mjs');
- mkdirSync('work',{recursive:true});const dir=mkdtempSync('work/conversation-drive-removal-');writeFileSync(dir+'/entry.jsx',browserEntry);
- const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
- server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><head><style>'+css+'</style></head><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
- await server.listen();let browser;
- try{
-  browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
-  const page=await browser.newPage(),writes=[],errors=[];page.on('pageerror',error=>errors.push(error.message));
-  const id='12345678-1234-4123-8123-123456789012',generation='23456789-1234-4123-8123-123456789012';
-  const drive=[{id:`drive:${generation}:file_one`,label:'Google Drive item'},{id:`drive:${generation}:file_two`,label:'Google Drive item'}];
-  const fact={id:`fact:profile:${profileId}:${factId}`,label:'Approved offer fact'};
-  let row={id,templateId:'custom',title:'Review revoked Drive sources',createdAt:1,updatedAt:2,messages:[{id:'m1',text:'Keep this workspace note'}],sources:[...drive,fact],runs:[],version:1,access:'owner',shareCount:0};
-  await page.route('**/v1/**',route=>{
-   const req=route.request(),url=new URL(req.url()),path=url.pathname;
-   const ok=data=>route.fulfill({json:{data,data_mode:'live',request_id:'stage4-removal'}});
-   if(path.includes('/conversation-connections/'))return ok({version:4,connected:false,available:false,can_manage:false,folders:[],residency_preference:'HK',metadata_cache_seconds:0});
-   if(path.endsWith('/sources')){
-    const body=req.postDataJSON();writes.push({body,key:req.headers()['idempotency-key'],version:req.headers()['x-buyeros-if-match']});
-    if(body.sources.some(source=>source.id.startsWith('drive:')))return route.fulfill({status:422,json:{code:'CONVERSATION_SOURCE_UNAVAILABLE',message:'selected sources need review'}});
-    row={...row,sources:body.sources,version:row.version+1};return ok(row);
-   }
-   if(path.includes('/conversation-threads'))return ok(path.endsWith('/conversation-threads')?{items:[row],total:1,offset:0,limit:50}:row);
-   return ok(contextResponse(url));
-  });
-  const destination=server.resolvedUrls.local[0]+'fixture?route='+encodeURIComponent('/app/discussions/s/'+id);
-  await page.goto(destination);await openDiscussion(page);await page.getByText('Keep this workspace note',{exact:true}).waitFor();
-  await page.getByText('Selected for this discussion',{exact:false}).click();
-  await page.getByRole('button',{name:'Remove selection',exact:true}).first().click();
-  await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
-  assert.equal(row.sources.length,3,'individual removal is rejected when another Drive reference is revoked');
-  const clear=page.getByRole('button',{name:'Remove all Google Drive selections',exact:true});
-  assert.equal(await clear.count(),1,'revoked Drive references need a removal path that submits no Drive IDs');
-  await clear.focus();await page.keyboard.press('Enter');
-  await page.waitForFunction(()=>document.querySelector('.live-discussion details summary')?.textContent?.includes('(1)'));
-  assert.deepEqual(writes.at(-1).body,{sources:[fact]});assert.ok(writes.at(-1).key);assert.equal(writes.at(-1).version,'"1"');
-  assert.deepEqual(row.sources,[fact]);assert.equal(await clear.count(),0);assert.equal(await page.getByRole('button',{name:'Remove selection',exact:true}).count(),1);
-  row={...row,sources:[...drive,fact],version:row.version+1,access:'viewer'};await page.reload();await openDiscussion(page);await page.getByText('Selected for this discussion',{exact:false}).click();
-  assert.equal(await clear.isDisabled(),true,'workspace viewers cannot clear selections');
-  await page.getByRole('button',{name:'Change language',exact:true}).click();
-  assert.equal(await page.getByRole('button',{name:'移除所有 Google Drive 選擇',exact:true}).isDisabled(),true);
   assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
@@ -704,7 +805,7 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
   });
   await page.goto(server.resolvedUrls.local[0]+'fixture');await openDiscussion(page);await page.getByText('project-evidence.pdf',{exact:false}).waitFor();
   await page.locator('.live-discussion').getByRole('textbox').fill('Keep this local note');await page.getByRole('button',{name:'Send',exact:true}).click();
-  await page.getByLabel('Discussion messages',{exact:true}).waitFor();await page.getByRole('region',{name:'Google Drive',exact:true}).getByRole('checkbox').click();
+  await page.locator('.live-discussion').getByLabel('Discussion messages',{exact:true}).waitFor();await page.getByRole('region',{name:'Google Drive',exact:true}).getByRole('checkbox').click();
   await page.waitForFunction(()=>document.querySelector('.live-drive input[type=checkbox]')?.checked);
   await page.getByRole('button',{name:'Save to workspace',exact:true}).click();await page.getByRole('button',{name:'Confirm workspace save',exact:true}).click();
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).waitFor();
@@ -717,3 +818,6 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
   assert.deepEqual(imports[1].body.messages,[{text:'Keep this local note'}]);assert.deepEqual(errors,[]);
  }finally{await browser?.close();await server.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+
+

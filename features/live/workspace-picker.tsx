@@ -26,7 +26,7 @@ import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
 import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope,navigateLocalDiscussion} from './conversation-home';
 import {LiveConversation} from './discussion-workspace';
-import {useSalesCapability} from './sales-skills/capability';
+import {useSalesCapability,salesCapabilityShell,salesCapabilityText} from './sales-skills/capability';
 import {SalesDocuments} from './sales-skills/documents';
 import {documentsForPath} from './conversation-home';
 import {ShieldCheck} from 'lucide-react';
@@ -48,10 +48,12 @@ export function LiveWorkspace() {
   const snapshot = useSessionSnapshot();
   const router = useRouter(), pathname = usePathname() || '/app';
   const conversationEnabled=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME);
-  const salesEnabled=useSalesCapability(client,session,conversationEnabled);
-  const conversationHome=conversationEnabled&&salesEnabled;
+  const capability=useSalesCapability(client,session,conversationEnabled);
+  const shell=salesCapabilityShell(conversationEnabled,capability);
+  const conversationHome=shell==='conversation';
+  const capabilityBlocked=shell==='checking'||shell==='unavailable';
   const discussion=discussionForPath(pathname,conversationHome);
-  const overviewRoute=isLiveOverviewRoute(pathname,conversationHome);
+  const overviewRoute=isLiveOverviewRoute(pathname,conversationHome)&&!capabilityBlocked;
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
   const [projects, setProjects] = useState<LoadState<LiveProject>>({kind:'loading'});
   const [selectionError, setSelectionError] = useState('');
@@ -308,6 +310,8 @@ export function LiveWorkspace() {
       {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
     </section>}
     </div>
+    {authorized && shell==='checking' && <section className="panel" role="status" aria-live="polite"><p>{salesCapabilityText(locale,'checking')}</p></section>}
+    {authorized && shell==='unavailable' && <section className="panel" role="alert"><h2>{salesCapabilityText(locale,'unavailable')}</h2><p>{t(capability.reason)}</p><button disabled={capability.refreshing} onClick={()=>capability.retry()}>{salesCapabilityText(locale,'retry')}</button></section>}
     {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
@@ -333,6 +337,6 @@ export function LiveWorkspace() {
     {authorized && projectKnown && pathname === '/app/outreach' && <><LeadPreparationsPanel key={`preparations-${workspace}-${project}`} locale={locale} canEdit={canEdit&&projectActive} canReview={canApprove&&projectActive}/><LiveDraftEditor key={`drafts-${workspace}-${project}`} locale={locale} canGenerate={canEdit&&projectActive} canReviewSender={canApprove&&projectActive} canRequestReview={canBuyerEdit&&projectActive} canApprove={canApprove&&projectActive} canExport={canBuyerEdit&&projectActive}/></>}
     {authorized && pathname === '/app/settings' && <><LiveSettings key={`settings-${workspace}`} workspace={workspace!} locale={locale} isAdmin={canArchive} roles={roles} canViewBudget={roles.some(role=>['operator','reviewer','workspace_admin'].includes(role))} onLocale={setLocale} onVersion={setPrefVersion} currentVersion={prefVersion} t={t}/><LivePolicySettings key={`policy-${workspace}`} roles={roles} t={t}/></>}
     {authorized && pathname === '/app/operations' && <LiveOperations key={`operations-${workspace}-${project}`} workspace={workspace!} project={projectKnown?project:null} isAdmin={canArchive} onOpenBuyers={()=>navigate('/app/discover')} onOpenOverview={conversationHome?()=>navigate('/app/overview'):undefined} t={t}/>}
-    {authorized && !documentsForPath(pathname) && !discussion && !overviewRoute && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
+    {authorized && !capabilityBlocked && !documentsForPath(pathname) && !discussion && !overviewRoute && !['/app','/app/discover','/app/discover/new','/app/discover/edit','/app/results','/app/runs','/app/outreach','/app/settings','/app/operations'].includes(pathname) && !/^\/app\/discover\/[^/]+$/.test(pathname) && <LiveUnavailable state="unavailable"/>}
   </LiveFrame>;
 }

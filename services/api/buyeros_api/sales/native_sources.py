@@ -12,7 +12,7 @@ def policy_documents(context):
         for p in source.get('native_proof',[])},key=str))
 
 
-async def resolve_native_source(session,scope,ref):
+async def resolve_native_source(session,scope,ref,*,readonly=False):
     from ..services.sales_retention import require_current
     await require_current(session,scope.workspace_id,[ref.id])
     from ..services.sales_native import read_native
@@ -20,8 +20,11 @@ async def resolve_native_source(session,scope,ref):
     from ..db.buyers import Evidence, SourceDocument
     from ..db.runs import RawCandidate
     from ..services.buyer_view import current_evidence_data
-    from ..services.policy_service import evaluate_current_policy
+    from ..services.policy_service import evaluate_current_policy, evaluate_current_policy_readonly
     from ..services.research_policy_context import research_use
+    # Mutations keep the transaction-serialized gate; the read-only enumeration
+    # route passes readonly=True and uses the read-only policy snapshot instead.
+    evaluate = evaluate_current_policy_readonly if readonly else evaluate_current_policy
     row=await read_native(session,scope,NativeRef(surface=ref.kind,id=ref.id,revision=ref.version))
     project=await session.get(Project,scope.project_id)
     if ref.kind=='profile':
@@ -58,7 +61,7 @@ async def resolve_native_source(session,scope,ref):
         item=await current_evidence_data(session,workspace_id=scope.workspace_id,evidence=evidence,
             source=source,mapped_company_id=mapped,buyer_id=row.id if ref.kind=='buyer' else None)
         if item['status']!='available': raise ValueError('native source evidence unavailable')
-        gate=await evaluate_current_policy(session,{'workspace_id':scope.workspace_id,'project_id':scope.project_id,
+        gate=await evaluate(session,{'workspace_id':scope.workspace_id,'project_id':scope.project_id,
             'company_id':evidence.company_id},'account_research',datetime.now(timezone.utc),
             use_context=research_use(scope.project_id,'research.read',urls=[source.canonical_url]))
         if not gate['allowed']: raise ValueError('native evidence policy unavailable')

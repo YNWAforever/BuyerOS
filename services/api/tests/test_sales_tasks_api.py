@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from buyeros_api.api.app import create_app
-from tests.test_buyer_review_db import _h, OPERATOR, VIEWER, REVIEWER, ADMIN, WORKSPACE_A, PROJECT_A
+from tests.test_buyer_review_db import _seed_buyer, _h, OPERATOR, VIEWER, REVIEWER, ADMIN, WORKSPACE_A, PROJECT_A
 from tests.test_conversation_threads_api import create as create_thread, grant, headers, member, ROOT as THREAD_ROOT
 
 ROOT = f'/v1/workspaces/{uuid.uuid4()}/projects/{uuid.uuid4()}/sales-tasks'
@@ -77,7 +77,10 @@ def test_review_r2_offline_admission_and_recovery_routes(monkeypatch):
     for method, suffix in [('GET',''), ('GET','/events'), ('POST','/cancel')]:
         response = client.request(method,path+suffix,headers=headers())
         assert response.status_code == 200
-        assert calls[-1] == {'sales':True,'admission':False}
+        expected = {'sales':True,'admission':False}
+        if method == 'GET':
+            expected['locks'] = False  # pure reads do not serialize on workspace gates
+        assert calls[-1] == expected
         assert response.headers['cache-control'] == 'no-store'
         assert response.headers['x-request-id'] == response.json()['request_id']
 
@@ -210,8 +213,8 @@ def test_offline_task_input_rejects_oversized_and_nul_before_persistence():
 def test_offline_sales_readiness_requires_exact_head_and_new_relations():
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0065_sales_lifecycle']
-    assert required['required_revisions'] == ['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle']
+    assert required['compatible_heads'] == ['0067_conversation_buyer']
+    assert required['required_revisions'] == ['0060_sales_tasks','0061_sales_outputs','0062_xverum_credits','0063_xverum_dispatch','0064_xverum_enrichment','0065_sales_lifecycle','0066_conversation_turns','0067_conversation_buyer']
     assert set(required['required_relations']) == set(required['required_rls']) == {
         'public.sales_tasks','public.sales_task_events','public.sales_task_dependencies','public.conversation_thread_preferences',
         'public.conversation_threads','public.sales_reviews','public.sales_executions','public.sales_steps',
@@ -222,7 +225,8 @@ def test_offline_sales_readiness_requires_exact_head_and_new_relations():
         'public.xverum_credit_reservations','public.xverum_receipts','public.xverum_credit_settlements',
         'public.xverum_stages','public.xverum_tool_receipts','public.xverum_reconciliations','public.xverum_enrichments',
         'public.xverum_enrichment_dependencies',
-        'public.sales_financial_evidence','public.sales_accounting_receipts','public.sales_content_tombstones'}
+        'public.sales_financial_evidence','public.sales_accounting_receipts','public.sales_content_tombstones',
+        'public.conversation_thread_messages','public.conversation_turns','public.conversation_turn_proposals','public.conversation_turn_decisions'}
     assert len(required['required_functions']) == 3
 
 
@@ -453,3 +457,59 @@ def test_postgres_review_r2_disabled_entry_preserves_current_acl_recovery(sales_
             assert result.status_code == 503 and result.json()['code'] == 'READ_DISABLED'
     finally:
         get_settings.cache_clear()
+
+
+def test_postgres_native_sources_route_returns_200_for_candidate_rows(sales_api):
+    """CI regression: per-source validation must not run in a read-only transaction.
+
+    The route previously used a read-only tenant session around write-capable
+    retention/native-read helpers, producing PostgreSQL 25006 and a 500 on
+    GET /sales-tasks/native-sources. This asserts the real route against the real
+    database, twice, and checks both sides of the documented filtering:
+
+    * a candidate whose current authority/evidence validates (an approved profile
+      with a reviewer-approved offer document excerpt) IS returned;
+    * a bare canonical buyer with no current evidence is legitimately dropped by
+      ``resolve_native_source`` (the route filtering is correct behaviour, not a
+      bug to paper over).
+    """
+    import psycopg
+    from psycopg.types.json import Jsonb
+    from buyeros_api.db.icp import canonical_hash
+    from tests.icp_fixtures import FACT_ID, valid_icp_payload
+
+    client, dsn = sales_api
+    profile = uuid.UUID('c5000000-0000-4000-8000-000000000001')
+    document = uuid.UUID('c3000000-0000-4000-8000-000000000001')
+    content = valid_icp_payload()
+    content['offer_document_ids'] = [str(document)]
+    fact = content['offer_facts'][0]
+    fact.update(provenance='document_excerpt', source_document_id=str(document),
+                excerpt='Approved source excerpt')
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO offer_documents(id,workspace_id,project_id,kind,filename,"
+            "media_type,status,sha256,retention_until,fact_candidates) VALUES(%s,%s,%s,"
+            "'upload','route.txt','text/plain','ready',%s,now()+interval '1 day',%s)",
+            (document, WORKSPACE_A, PROJECT_A, 'a' * 64, Jsonb([fact])))
+        conn.execute("INSERT INTO icp_versions(id,workspace_id,project_id,number,"
+            "basis_offer_revision,content,content_hash,approved_by,approved_at) "
+            "VALUES(%s,%s,%s,1,1,%s,%s,%s,now())",
+            (profile, WORKSPACE_A, PROJECT_A, Jsonb(content), canonical_hash(content),
+             uuid.uuid5(uuid.NAMESPACE_URL, ADMIN)))
+        conn.execute('UPDATE projects SET active_icp_version_id=%s WHERE id=%s',
+            (profile, PROJECT_A))
+    buyer = _seed_buyer(dsn, name='Native Source Route')
+
+    first = client.get(SALES_ROOT + '/native-sources', headers=_h())
+    assert first.status_code == 200, first.text
+    assert first.headers['cache-control'] == 'no-store'
+    items = first.json()['data']['items']
+    assert isinstance(items, list)
+    # A fully authorised candidate is returned (proof the validation path ran).
+    assert any(item['ref']['kind'] == 'profile' and item['ref']['id'] == str(profile)
+        for item in items), items
+    # Evidence-less buyers are excluded by resolve_native_source, by design.
+    assert not any(item['ref']['id'] == str(buyer) for item in items), items
+    # Repeat call: each request uses bounded short transactions only.
+    second = client.get(SALES_ROOT + '/native-sources', headers=_h())
+    assert second.status_code == 200, second.text

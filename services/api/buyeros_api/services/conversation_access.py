@@ -19,7 +19,18 @@ def sales_enabled(workspace_id):
 
 
 @asynccontextmanager
-async def access(workspace_id, project_id, principal, *, lock_project=False, sales=False, admission=True):
+async def access(workspace_id, project_id, principal, *, lock_project=False, sales=False, admission=True, locks=None):
+    """Resolve current access before any workspace advisory lock.
+
+    ``locks`` is explicit serialization intent for sales surfaces. Admission,
+    mutation and dispatch paths keep the policy/budget transaction locks that
+    make spend and approval decisions atomic. Pure-read routes pass
+    ``locks=False``: they still recheck membership, role, project and live-read
+    state, but a slow read (native-source enumeration) can no longer queue on,
+    or hold, the workspace gates that capability and paid admission need.
+    ``None`` preserves the historical serialized default for every caller that
+    has not been reviewed as read-only.
+    """
     if sales:
         # Entry gating never revokes recovery of persisted, currently authorized work.
         if admission and not sales_enabled(workspace_id):
@@ -29,12 +40,14 @@ async def access(workspace_id, project_id, principal, *, lock_project=False, sal
     if not get_settings().live_read_enabled:
         raise ApiError(503, 'READ_DISABLED', 'live reads are temporarily disabled')
     async with tenant_scoped(workspace_id) as session:
-        if sales:
-            from .xverum_dispatch import gates
-            await gates(session,workspace_id)
+        # Authorisation and rate limiting finish before any workspace gate so an
+        # unauthorised or throttled caller never queues behind (or holds) one.
         member = await load_membership(session, principal=principal, workspace_id=workspace_id)
         if not permission_for_roles(member['roles'], 'getProject'):
             raise not_found()
+        if sales and locks is not False:
+            from .xverum_dispatch import gates
+            await gates(session,workspace_id)
         query = select(Project).where(Project.workspace_id == workspace_id, Project.id == project_id)
         if lock_project:
             query = query.with_for_update()
