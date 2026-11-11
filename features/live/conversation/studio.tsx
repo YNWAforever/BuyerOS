@@ -2,7 +2,8 @@
 import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {Ellipsis,Menu,PanelRight} from 'lucide-react';
 import type {LiveClient} from '@/services/live/client';
-import {LiveCancelled} from '@/services/live/client';
+import {LiveCancelled,LiveError} from '@/services/live/client';
+import type {UploadContext} from '@/services/live/document-upload';
 import type {SessionScope} from '@/services/live/session';
 import {scopedThreadApi,threadNotice,threadNotices,type ServerThread} from '@/services/live/conversation-threads';
 import {chatThread,scopedTurns,turnNotice,turnNotices} from '@/services/live/conversation-turn';
@@ -18,11 +19,12 @@ import {ConversationDrafts} from './draft';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
 import {emptyTurnStream,reduceTurnEvent,streamIsLive,streamStep,type TurnStreamState} from './stream-events';
 import {fetchOutputPreview} from './output-preview';
+import {attachmentBusy,attachmentPercent,classifyUploadFailure,createAttachmentGuard,nextAttachmentPercent,type AttachmentState,attachThreadSource} from './attachment';
 import {useDataMode} from '@/features/providers/data-mode';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
 import {ConversationTranscript} from './transcript';
-import {ConversationComposer,type ComposerChip} from './composer';
+import {ConversationComposer,type ComposerAttachment,type ComposerChip} from './composer';
 import {ConversationPanel,type PanelTab} from './context-panel';
 import type {PartActions} from './inline-parts';
 
@@ -152,7 +154,18 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [cancelling,setCancelling]=useState(false);
   const [reconciling,setReconciling]=useState(false);
   const [recoveredTurns,setRecoveredTurns]=useState<ReadonlySet<string>>(()=>new Set());
+  const [attachment,setAttachment]=useState<AttachmentState>({phase:'idle'});
+  const [contextRevision,setContextRevision]=useState(0);
   const streamAbort=useRef<AbortController|null>(null);
+  const attachmentAbort=useRef<AbortController|null>(null);
+  const attachGuard=useRef(createAttachmentGuard()).current;
+  const threadIdRef=useRef<string|null>(null);
+  const attachFileRef=useRef<File|null>(null);
+  const attachDocumentRef=useRef<string|null>(null);
+  threadIdRef.current=loaded?.chat.id??null;
+  // The uploader is loaded lazily: the OFF discussion controller must never pull
+  // ingest code (or its browser-only dependencies) into its module graph.
+  const uploaderRef=useRef<ReturnType<typeof import('@/services/live/document-upload').createDocumentUpload>|null>(null);
   const [deciding,setDeciding]=useState(false),decidingRef=useRef(false);
   const [sourcesBusy,setSourcesBusy]=useState(false);
   const [panelPreference,setPanelPreference]=useState<boolean|null>(null);
@@ -207,6 +220,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     // provisional entries so persisted data is the only source for the new view.
     streamAbort.current?.abort();streamAbort.current=null;
     setStream(null);setReconnecting(false);setRecoveredTurns(new Set());
+    attachmentAbort.current?.abort();attachmentAbort.current=null;
+    attachFileRef.current=null;attachDocumentRef.current=null;setAttachment({phase:'idle'});
     if(!targetId){setLoaded(null);setThreadState('new');setThreadNoticeText('');setTurns([]);setEphemeral([]);setDecisions({});return;}
     let active=true;
     setThreadState(previous=>previous==='ready'?'reloading':'loading');
@@ -228,7 +243,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   },[api,targetId,identity,session,reload]);
   useEffect(()=>{setTitle(loaded?.chat.title??'');},[loaded?.chat.id,loaded?.chat.title]);
   // Abort a live stream when the studio unmounts (route/scope change).
-  useEffect(()=>()=>{streamAbort.current?.abort();streamAbort.current=null;},[]);
+  useEffect(()=>()=>{
+    streamAbort.current?.abort();streamAbort.current=null;
+    attachmentAbort.current?.abort();attachmentAbort.current=null;
+  },[]);
 
   useEffect(()=>{
     let active=true;
@@ -400,6 +418,109 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   function startNewTurn():void{
     try{document.getElementById('conversation-message')?.focus();}catch{/* Focus is best-effort. */}
   }
+  /** One attach attempt: reuse the existing uploader, then persist the source ref. */
+  async function attachFile(file:File):Promise<void>{
+    if(!loaded||loaded.chat.access==='viewer')return;
+    if(!attachGuard.begin())return;
+    try{
+      if(!loaded||attachmentBusy(attachment))return;
+      const scope=session.current();
+      if(!scope.workspace||!scope.project||!scope.actor||!session.token()){
+        setAttachment({phase:'failed',failure:'upload',message:'The attachment could not be uploaded. Try again.',retryable:true});
+        return;
+      }
+      attachmentAbort.current?.abort();
+      const controller=new AbortController();
+      attachmentAbort.current=controller;
+      const expectedThreadId=loaded.chat.id;
+      attachFileRef.current=file;attachDocumentRef.current=null;
+      setAttachment({phase:'uploading',percent:0});
+      try{
+        let workflow=uploaderRef.current;
+        if(!workflow){
+          const {createDocumentUpload}=await import('@/services/live/document-upload');
+          let storage:Storage|undefined;
+          try{if(typeof window!=='undefined')storage=window.sessionStorage;}catch{/* memory fallback stays available */}
+          workflow=createDocumentUpload(client,storage);
+          uploaderRef.current=workflow;
+        }
+        const signal=AbortSignal.any([controller.signal,session.controller().signal]);
+        const uploadContext:UploadContext={actor:scope.actor,workspace:scope.workspace,project:scope.project,identity,
+          token:session.token(),signal,isCurrent:()=>current()&&session.isCurrent(identity)};
+        const document=await workflow.upload(file,uploadContext,
+          progress=>{if(current()&&!controller.signal.aborted)setAttachment(state=>
+            state.phase==='uploading'?{phase:'uploading',percent:nextAttachmentPercent(state.percent,progress.percent)}:state);});
+        if(!current()||controller.signal.aborted)return;
+        attachFileRef.current=null;attachDocumentRef.current=document.id;
+        setAttachment({phase:'attaching'});
+        await attachDocumentToThread(document.id,expectedThreadId,controller.signal);
+      }catch(error){
+        if(!current()||controller.signal.aborted||error instanceof LiveCancelled)return;
+        attachmentAbort.current=null;
+        const classification=classifyUploadFailure(error,t('The attachment could not be uploaded. Try again.'));
+        setAttachment({phase:'failed',failure:classification.failure,message:classification.message,retryable:classification.retryable});
+        attachFileRef.current=classification.retryable?file:null;
+        attachDocumentRef.current=null;
+      }
+    }finally{
+      attachGuard.end();
+    }
+  }
+  /** Persist `document:<id>` on the thread, refetching once on a stale version. */
+  async function attachDocumentToThread(documentId:string,expectedThreadId:string,signal:AbortSignal):Promise<void>{
+    if(!loaded||threadIdRef.current!==expectedThreadId||signal.aborted)return;
+    const thread=loaded.raw;
+    const stillCurrent=()=>current()&&!signal.aborted&&threadIdRef.current===expectedThreadId;
+    setAttachment({phase:'attaching'});
+    try{
+      if(!stillCurrent())throw new LiveCancelled('thread changed');
+      const outcome=await attachThreadSource<ServerThread>({
+        thread,documentId,
+        save:(currentThread,sources)=>{if(!stillCurrent())throw new LiveCancelled('thread changed');return api.sources(currentThread,sources,signal);},
+        refresh:async()=>{if(!stillCurrent())throw new LiveCancelled('thread changed');return api.get(expectedThreadId,signal);},
+        isStale:error=>error instanceof LiveError&&(error.status===412||error.code==='STALE_REVISION'),
+      });
+      if(!current()||signal.aborted)return;
+      if(threadIdRef.current!==expectedThreadId){setAttachment({phase:'idle'});return;}
+      if(outcome.kind==='failed'){
+        attachDocumentRef.current=documentId;
+        setAttachment({phase:'failed',failure:'attach',message:'The attachment could not be added to this discussion. Try again.',retryable:true});
+        return;
+      }
+      const chat=chatThread(outcome.thread);
+      if(!chat){
+        attachDocumentRef.current=documentId;
+        setAttachment({phase:'failed',failure:'attach',message:'The attachment could not be added to this discussion. Try again.',retryable:true});
+        return;
+      }
+      setLoaded({raw:outcome.thread,chat});
+      attachFileRef.current=null;attachDocumentRef.current=null;
+      setContextRevision(value=>value+1);
+      setAttachment({phase:'attached'});
+    }catch(error){
+      if(error instanceof LiveCancelled||signal.aborted||!current()){
+        if(current()&&threadIdRef.current===expectedThreadId)setAttachment({phase:'idle'});
+        return;
+      }
+      if(threadIdRef.current!==expectedThreadId){setAttachment({phase:'idle'});return;}
+      attachDocumentRef.current=documentId;
+      setAttachment({phase:'failed',failure:'attach',message:'The attachment could not be added to this discussion. Try again.',retryable:true});
+    }
+  }
+  function retryAttachment():void{
+    if(attachment.phase!=='failed'||!attachment.retryable||attachGuard.locked)return;
+    const documentId=attachDocumentRef.current;
+    if(documentId&&loaded){
+      if(!attachGuard.begin())return;
+      attachmentAbort.current?.abort();
+      const controller=new AbortController();
+      attachmentAbort.current=controller;
+      const expectedThreadId=loaded.chat.id;
+      void attachDocumentToThread(documentId,expectedThreadId,controller.signal).finally(()=>attachGuard.end());
+      return;
+    }
+    if(attachFileRef.current)void attachFile(attachFileRef.current);
+  }
   async function sendFallback(text:string,clientMessageId:string):Promise<boolean>{
     if(!loaded){
       const created=await api.create(deriveTitle(text),text);
@@ -505,6 +626,20 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const threadTitle=loaded?.chat.title??t('New discussion');
   const step=running&&stream?streamStep(stream):'working';
   const statusLine=sending?t('Preparing a reply…'):sendNotice?t(sendNotice):threadNoticeText&&threadState==='ready'?t(threadNoticeText):'';
+  // Archived comes from the loaded thread payload; the list row is a supplementary
+  // fallback for the moment before the thread read resolves. Either hides attach.
+  const archivedLoaded=loaded?.chat.archived===true||list.items.some(row=>row.id===loaded?.chat.id&&row.archived===true);
+  const attachAvailable=!fresh&&loaded!==null&&loaded.chat.access!=='viewer'&&!archivedLoaded;
+  const attachmentView:ComposerAttachment|null=attachAvailable?{
+    visible:!attachmentBusy(attachment),
+    busy:attachmentBusy(attachment),
+    percent:attachmentPercent(attachment),
+    label:attachment.phase==='attaching'?t('Adding attachment…'):t('Uploading attachment'),
+    notice:attachment.phase==='failed'?attachment.message:'',
+    retryable:attachment.phase==='failed'&&attachment.retryable,
+    onFile:(file:File)=>void attachFile(file),
+    onRetry:retryAttachment,
+  }:null;
   return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')}>
     <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>setMobileView('conversation')}/>
     <ConversationThreadList t={t} locale={locale} items={list.items.filter(row=>archived||!row.archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
@@ -552,7 +687,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           // get an enabled composer while the thread resolves, and a failed load stays inert.
           canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
           projectName={projectName} companyName={companyLabel} chips={chips} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-          sendFailed={sendFailed} notice={sendNotice||urlNotice} onSend={send}/>}
+          sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>}
       <details className="conversation-secondary" open={guidedOpen}
         onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
         {loaded
@@ -565,7 +700,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     {panelOpen&&<div className="conversation-panel-slot" id="conversation-context-panel">
       <ConversationPanel t={t} locale={locale} tab={tab} tabs={panelTabs} onTab={setActiveTab} results={panel.results} runs={loaded?.chat.runs??[]}
         citations={panel.citations} selectedSources={panel.selectedSources} proposals={panel.proposals} entries={entries} access={loaded?.chat.access??'viewer'}
-        threadId={loaded?.chat.id??null} threadVersion={loaded?.chat.version??0} canEdit={!!loaded&&loaded.chat.access!=='viewer'} canViewOffer={canViewOffer}
+        threadId={loaded?.chat.id??null} threadVersion={loaded?.chat.version??0} contextRevision={contextRevision} canEdit={!!loaded&&loaded.chat.access!=='viewer'} canViewOffer={canViewOffer}
         client={client} session={session} navigate={navigate} onToggleSource={(source,selected)=>void toggleSource(source,selected)} sourcesBusy={sourcesBusy}
         onRemoveDrive={()=>void removeDriveSources()}
         onDecide={(part,turnId,choice)=>void decide(part,turnId,choice)} deciding={deciding} decisionFor={proposalId=>decisions[proposalId]} terminalFor={proposalId=>terminal.get(proposalId)}

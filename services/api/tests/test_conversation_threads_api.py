@@ -205,3 +205,30 @@ def test_runtime_flag_and_read_kill_switch_rechecked_on_existing_app(thread_api,
     monkeypatch.setenv('NEXT_PUBLIC_CONVERSATION_HOME','true')
     monkeypatch.setenv('BUYEROS_LIVE_READ_ENABLED','false');get_settings.cache_clear()
     assert client.post(path+'/messages',headers=headers(),json={'text':'note'}).status_code==503
+
+
+def test_thread_read_model_exposes_viewer_archived(thread_api):
+    client, dsn = thread_api
+    row = create(client)
+    path = f"{ROOT}/{row['id']}"
+    # No preference row -> archived false for the owner.
+    assert client.get(path, headers=_h()).json()['data']['archived'] is False
+    row = grant(client, dsn, row, VIEWER, 'viewer')
+    row = grant(client, dsn, row, REVIEWER, 'editor')
+    set_pref = client.put(f"{ROOT}/{row['id']}/preferences", headers=_h(VIEWER),
+        json={'pinned': True, 'archived': True})
+    assert set_pref.status_code == 200, set_pref.text
+    viewer_read = client.get(path, headers=_h(VIEWER)).json()['data']
+    assert viewer_read['archived'] is True
+    assert 'pinned' not in viewer_read  # pinned stays a list-only projection
+    # A different viewer with no preference row still reads archived false.
+    assert client.get(path, headers=_h(REVIEWER)).json()['data']['archived'] is False
+    assert client.get(path, headers=_h()).json()['data']['archived'] is False
+    # List behaviour is unchanged: viewer filters by their own preference.
+    viewer_list = client.get(ROOT, headers=_h(VIEWER)).json()['data']
+    assert viewer_list['total'] == 1 and viewer_list['items'][0]['archived'] is True
+    owner_list = client.get(ROOT, headers=_h()).json()['data']
+    assert owner_list['total'] == 1 and owner_list['items'][0]['archived'] is False
+    archived_only = client.get(ROOT+'?archived=true', headers=_h(VIEWER)).json()['data']
+    assert archived_only['total'] == 1 and archived_only['items'][0]['archived'] is True
+    assert client.get(ROOT+'?archived=true', headers=_h()).json()['data']['total'] == 0

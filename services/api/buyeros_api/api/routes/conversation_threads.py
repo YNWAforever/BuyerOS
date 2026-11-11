@@ -114,9 +114,19 @@ class Preference(StrictModel):
 
 
 async def data(session, row, role, *, full=True, viewer=None):
+    # Viewer-scoped preference read; the thread payload exposes only `archived`
+    # (the viewer's own preference, default false). List items keep their own
+    # pinned/archived projection, so list behaviour is unchanged.
+    preference = None
+    if viewer is not None:
+        preference = (await session.execute(select(ThreadPreference).where(
+            ThreadPreference.workspace_id == row.workspace_id,
+            ThreadPreference.thread_id == row.id,
+            ThreadPreference.actor_id == viewer))).scalar_one_or_none()
     result = {'id': str(row.id), 'version': row.version, 'templateId': row.template_id, 'title': row.title,
         'createdAt': int(row.created_at.timestamp()*1000), 'updatedAt': int(row.updated_at.timestamp()*1000), 'access': role,
         'buyerId': str(row.buyer_id) if row.buyer_id else None,
+        'archived': bool(preference and preference.archived),
         'shareCount': (await session.execute(select(func.count()).select_from(Share).where(Share.workspace_id == row.workspace_id, Share.thread_id == row.id))).scalar_one() if role == 'owner' else 0}
     if full:
         messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.seq))).scalars().all()
@@ -179,7 +189,7 @@ async def list_threads(workspace_id: uuid.UUID, project_id: uuid.UUID, request: 
         items = []
         for row in rows:
             _, role = await load(session, workspace_id, project_id, row.id, actor)
-            item = await data(session, row, role, full=False, viewer=actor)
+            item = await data(session, row, role, full=False)
             pref = (await session.execute(select(ThreadPreference).where(ThreadPreference.workspace_id == workspace_id,
                 ThreadPreference.thread_id == row.id, ThreadPreference.actor_id == actor))).scalar_one_or_none()
             item.update(pinned=bool(pref and pref.pinned), archived=bool(pref and pref.archived))
