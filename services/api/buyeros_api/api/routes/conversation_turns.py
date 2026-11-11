@@ -21,6 +21,7 @@ from ...sales.turn_contracts import TurnDecisionRequest, TurnRequest
 from ...services.conversation_access import access
 from ...services import conversation_turns as service
 from ...services.conversation_turn_events import read_turn_events
+from ...services.conversation_proposal_read import decorate_turn_payload
 from .conversation_threads import data as thread_data
 
 # Bounded streaming window; the client reconnects with its last seq.
@@ -98,8 +99,11 @@ async def create(workspace_id: uuid.UUID, project_id: uuid.UUID, payload: TurnRe
             _body(payload, expected)
             payload = payload.model_copy(update={'expected_thread_version': expected})
         thread, role, turn = await service.create_turn(session, scope, payload, key)
-        result = {'thread': await thread_data(session, thread, role),
-                  'turn': turn.model_dump(mode='json')}
+        turn_payload = turn.model_dump(mode='json')
+        await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
+            thread.id, turn.id, turn_payload, actor)
+        result = {'thread': await thread_data(session, thread, role, viewer=actor),
+                  'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
     return envelope(result, request.state.request_id)
 
@@ -118,8 +122,11 @@ async def decide(workspace_id: uuid.UUID, project_id: uuid.UUID, turn_id: uuid.U
         scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
         thread, role, turn, _replayed = await service.decide(session, scope, turn_id,
             payload, key)
-        result = {'thread': await thread_data(session, thread, role),
-                  'turn': turn.model_dump(mode='json')}
+        turn_payload = turn.model_dump(mode='json')
+        await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
+            thread.id, turn.id, turn_payload, actor)
+        result = {'thread': await thread_data(session, thread, role, viewer=actor),
+                  'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
     return envelope(result, request.state.request_id)
 
@@ -137,8 +144,11 @@ async def cancel(workspace_id: uuid.UUID, project_id: uuid.UUID, turn_id: uuid.U
                       admission=False) as (session, actor):
         scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
         thread, role, turn = await service.cancel_turn(session, scope, turn_id, expected, key)
-        result = {'thread': await thread_data(session, thread, role),
-                  'turn': turn.model_dump(mode='json')}
+        turn_payload = turn.model_dump(mode='json')
+        await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
+            thread.id, turn.id, turn_payload, actor)
+        result = {'thread': await thread_data(session, thread, role, viewer=actor),
+                  'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
     return envelope(result, request.state.request_id)
 
@@ -169,7 +179,10 @@ async def reconcile(workspace_id: uuid.UUID, project_id: uuid.UUID,
                       admission=False) as (session, actor):
         scope = Scope(workspace_id=workspace_id, project_id=project_id, actor_id=actor)
         thread, role, turn = await service.reconcile_turn(session, scope, turn_id, key)
-        result = {'thread': await thread_data(session, thread, role),
-                  'turn': turn.model_dump(mode='json')}
+        turn_payload = turn.model_dump(mode='json')
+        await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
+            thread.id, turn.id, turn_payload, actor)
+        result = {'thread': await thread_data(session, thread, role, viewer=actor),
+                  'turn': turn_payload}
         response.headers['ETag'] = f'"{thread.version}"'
     return envelope(result, request.state.request_id)

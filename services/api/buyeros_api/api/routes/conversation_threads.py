@@ -20,6 +20,7 @@ from ...services.conversation_access import access, load, not_found, shared, thr
 from ...services.conversation_messages import next_message_seq
 from ...services.sales_tasks import ensure_thread_deletable
 from ...services.conversation_connections import approved_sources, SOURCE as DRIVE_SOURCE
+from ...services.conversation_proposal_read import decorate_thread_payload
 
 router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-threads', tags=['conversation-threads'])
 LABELS = {'drive': {'Google Drive item'}, 'document': {'Offer document'}, 'fact': {'Offer fact', 'Approved offer fact', 'Candidate offer fact'}, 'run': {'Research run'}, 'results': {'Results summary'}}
@@ -112,7 +113,7 @@ class Preference(StrictModel):
     archived: StrictBool
 
 
-async def data(session, row, role, *, full=True):
+async def data(session, row, role, *, full=True, viewer=None):
     result = {'id': str(row.id), 'version': row.version, 'templateId': row.template_id, 'title': row.title,
         'createdAt': int(row.created_at.timestamp()*1000), 'updatedAt': int(row.updated_at.timestamp()*1000), 'access': role,
         'buyerId': str(row.buyer_id) if row.buyer_id else None,
@@ -120,6 +121,9 @@ async def data(session, row, role, *, full=True):
     if full:
         messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.seq))).scalars().all()
         result.update(messages=[message_data(m) for m in messages], sources=row.sources, runs=row.runs)
+        if viewer is not None:
+            await decorate_thread_payload(session, row.workspace_id, row.project_id,
+                row.id, result, viewer)
     return result
 
 
@@ -175,7 +179,7 @@ async def list_threads(workspace_id: uuid.UUID, project_id: uuid.UUID, request: 
         items = []
         for row in rows:
             _, role = await load(session, workspace_id, project_id, row.id, actor)
-            item = await data(session, row, role, full=False)
+            item = await data(session, row, role, full=False, viewer=actor)
             pref = (await session.execute(select(ThreadPreference).where(ThreadPreference.workspace_id == workspace_id,
                 ThreadPreference.thread_id == row.id, ThreadPreference.actor_id == actor))).scalar_one_or_none()
             item.update(pinned=bool(pref and pref.pinned), archived=bool(pref and pref.archived))
@@ -210,7 +214,7 @@ async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload:
             complete_idempotency(outcome, str(row.id))  # No note/title copies in idempotency responses.
             await session.flush()
             role = 'owner'
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -218,7 +222,7 @@ async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload:
 async def get_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)):
     async with access(workspace_id, project_id, principal) as (session, actor):
         row, role = await load(session, workspace_id, project_id, thread_id, actor)
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -229,7 +233,7 @@ async def rename(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
         bump(row, request)
         row.title = payload.title
         await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -250,7 +254,7 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
                 seq=seq, role='user', parts=[]))
             complete_idempotency(outcome, str(row.id))
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -268,7 +272,7 @@ async def sources(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uui
             complete_idempotency(outcome, str(row.id))
             audit(session, row, actor, 'sources_changed')
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -285,7 +289,7 @@ async def runs(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.U
             row.runs = refs + [payload.model_dump()]
             complete_idempotency(outcome, str(row.id))
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -360,7 +364,7 @@ async def grant(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.
             await session.flush()
             audit(session, row, actor, action, share.id)
             complete_idempotency(outcome, str(row.id))
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -375,5 +379,5 @@ async def revoke(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
         audit(session, row, actor, 'revoked', share.id)
         await session.delete(share)
         await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)

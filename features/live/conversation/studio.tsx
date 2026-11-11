@@ -279,15 +279,16 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     return {key:template.id,label:t(template.title),prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null};
   }),[t,skillIds]);
   const actions=useMemo<PartActions>(()=>({
-    t,navigate,access:loaded?.chat.access??'viewer',
+    t,locale,navigate,access:loaded?.chat.access??'viewer',
     turnStatusFor:turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined,
     decisionFor:proposalId=>decisions[proposalId],
     terminalFor:proposalId=>terminal.get(proposalId),
     toolFor:capabilityName=>latestToolActivity(entries,capabilityName),
+    partsForTurn:turnId=>turnId?entries.filter(entry=>entry.turnId===turnId).flatMap(entry=>entry.parts):[],
     decide:(part,turnId,choice)=>{void decide(part,turnId,choice);},
     deciding,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }),[t,navigate,loaded?.chat.access,turns,decisions,terminal,entries,deciding]);
+  }),[t,locale,navigate,loaded?.chat.access,turns,decisions,terminal,entries,deciding]);
 
   async function loadThread(updated:ServerThread,fallback:ChatThread|null){
     const chat=chatThread(updated)??(fallback?{...fallback,version:updated.version,title:updated.title,updatedAt:updated.updatedAt}:null);

@@ -555,13 +555,17 @@ test('Discuss this company starts one linked turn and a terminal enrichment card
   assert.match(await compose.getByLabel('Linked company').innerText(),/DeltaGrid/);
   // Always-approval plus an honest cost review with no invented number.
   assert.equal(await transcript.getByText('Approval required',{exact:true}).count(),1);
-  assert.equal(await transcript.getByText('Cost review required before any paid request.',{exact:true}).count(),1);
+  // Scope to the card's own visible cost line: the collapsed explainer also holds
+  // a cost row in the DOM, so a transcript-wide count would double-count.
+  assert.equal(await transcript.locator('.conversation-proposal-cost').count(),1);
   assert.equal(await page.locator('.conversation-proposal-cost').innerText(),'Cost review required before any paid request.');
   // Approval returns a terminal configuration outcome; the card must become inert.
   await transcript.getByRole('button',{name:'Approve',exact:true}).click();
   await transcript.getByText('Company enrichment cannot run until Xverum dispatch is enabled by an administrator. Nothing was executed.').first().waitFor();
-  assert.equal(await transcript.getByText('Failed',{exact:true}).count(),1);
-  assert.equal(await transcript.getByText('This step cannot run in the current configuration.',{exact:true}).count(),1);
+  // The explainer mirrors the terminal state inside its collapsed DOM; scope both
+  // to the card's own visible elements so the counts stay strict but unambiguous.
+  assert.equal(await transcript.locator('.conversation-tool').getByText('Failed',{exact:true}).count(),1);
+  assert.equal(await transcript.locator('.conversation-proposal-state').filter({hasText:'This step cannot run in the current configuration.'}).count(),1);
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0,'terminal configuration leaves no actionable decision');
   assert.equal(await transcript.getByRole('button',{name:'Reject',exact:true}).count(),0);
   const decision=posts.find(row=>row.path.endsWith('/decisions'));
@@ -715,6 +719,81 @@ test('outcome_unknown recovery reconciles the saved result without repeating the
    assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'reconcile never repeats the turn');
    assert.equal(posts.some(row=>/\/decisions$|\/xverum\/|\/quotes?$|\/approve$|\/send$/.test(row.path)),false,'recovery stays nonbillable');
    assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('proposal explainer expands persisted data, collapses and keeps a terminal card inert',async()=>{
+ const explainerTurnId='d1000000-0000-4000-8000-000000000001',terminalTurnId='d2000000-0000-4000-8000-000000000001';
+ const awaitingProposal={kind:'proposal',proposal_id:'d3000000-0000-4000-8000-000000000001',
+   capability:'xverum.enrich_company',title:'Enrich company',rationale:'Synthetic rationale for the explainer.',
+   arguments_preview:{company:'DeltaGrid',profile_version:2,company_id:'internal-secret'},
+   cost:{kind:'provider_credits',amount:'0',unit:'credits',may_incur_provider_charges:true,known:false},
+   requires_approval:true};
+ const terminalProposal={kind:'proposal',proposal_id:'d4000000-0000-4000-8000-000000000001',
+   capability:'drive.read',title:'Read Drive source',rationale:'Terminal fixture rationale.',
+   arguments_preview:{folder:'Synthetic folder'},
+   cost:{kind:'nonbillable',may_incur_provider_charges:false,known:true},requires_approval:true,
+   decision:{choice:'reject',decided_at:'2026-11-09T10:30:00.000Z',decided_by:'a workspace member'}};
+ const thread=fixture.threadWith({version:3,messages:[
+   fixture.userRow({id:'d8000000-0000-4000-8000-000000000001',seq:1,text:'Explain these proposals',turnId:explainerTurnId}),
+   fixture.assistantRow({id:'d5000000-0000-4000-8000-000000000001',seq:2,text:'Proposal summary',turnId:explainerTurnId,parts:[
+     {kind:'text',text:'Here are two proposals.'},
+     {kind:'citations',items:[{id:`document:${documentId}`,label:'Offer document',kind:'document',href:`/app/discover/edit?document=${documentId}`}]},
+     awaitingProposal,terminalProposal]}),
+   fixture.assistantRow({id:'d6000000-0000-4000-8000-000000000001',seq:3,text:'Drive read failed',turnId:terminalTurnId,parts:[
+     {kind:'tool_activity',call_id:'d7000000-0000-4000-8000-000000000001',capability:'drive.read',title:'Read Drive source',
+      state:'failed',started_at:'2026-11-08T00:00:00.000Z',error_code:'DRIVE_READ_NOT_ENABLED'}]}),
+ ]});
+ const harness=await fixtureHarness({handler:streamingApi({thread:()=>thread})});
+ try{
+   const {page,requests}=harness;
+   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+   const cards=page.locator('.conversation-proposal');
+   await cards.first().waitFor();
+   await page.waitForLoadState('networkidle');
+   const awaiting=cards.first();
+   const rationale=awaiting.getByText('Synthetic rationale for the explainer.',{exact:true});
+   assert.equal(await rationale.count(),1);
+   assert.equal(await rationale.isVisible(),false,'the explainer is collapsed by default');
+   const before=requests.length;
+   await awaiting.getByText('Why this proposal',{exact:true}).click();
+   assert.equal(requests.length,before,'expanding the explainer performs no fetch');
+   const why=awaiting.locator('.conversation-proposal-why');
+   assert.equal(await rationale.isVisible(),true);
+   assert.equal(await why.getByRole('button',{name:'Offer document',exact:true}).count(),1,'evidence citations stay linked');
+   assert.equal(await why.getByText('Cost review required before any paid request.',{exact:true}).count(),1,'known:false keeps the shipped wording');
+   assert.equal(await why.getByText('Awaiting approval',{exact:true}).count(),1,'approval state is visible');
+   assert.equal(await why.getByText('Unknown',{exact:true}).count(),3,'an undecided proposal keeps explicit unknown decision rows');
+   // Arguments render as "<label> <value>" inside one row, so target the row
+   // precisely instead of an exact text match on the value alone.
+   const argument=why.locator('.conversation-why-arguments li').filter({hasText:'DeltaGrid'});
+   assert.equal(await argument.count(),1,'bounded arguments render');
+   assert.equal((await argument.innerText()).replace(/\s+/g,' ').trim(),'company DeltaGrid');
+   assert.equal(await awaiting.getByText('internal-secret',{exact:true}).count(),0,'internal argument values stay hidden');
+   assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1,'existing approval action unchanged');
+   await awaiting.getByText('Why this proposal',{exact:true}).click();
+   assert.equal(await rationale.isVisible(),false,'collapse works');
+   assert.equal(await awaiting.getByRole('button',{name:'Approve',exact:true}).count(),1);
+   const terminal=cards.nth(1);
+   await terminal.locator('.conversation-proposal-state').filter({hasText:'This step cannot run in the current configuration.'}).waitFor();
+   assert.equal(await terminal.getByRole('button',{name:'Approve',exact:true}).count(),0,'a terminal proposal has no actions');
+   assert.equal(await terminal.getByRole('button',{name:'Reject',exact:true}).count(),0);
+   await terminal.getByText('Why this proposal',{exact:true}).click();
+   const terminalWhy=terminal.locator('.conversation-proposal-why');
+   assert.equal(await terminalWhy.getByText('Unknown',{exact:true}).count(),0,'a decided proposal renders persisted values, not Unknown rows');
+   assert.equal(await terminalWhy.getByText('Rejected',{exact:true}).count(),1,'the Decision row shows the persisted outcome');
+   assert.equal(await terminalWhy.getByText('A workspace member',{exact:true}).count(),1,'Decided by uses the privacy-bounded label');
+   const terminalValues=await terminalWhy.locator('dd').allInnerTexts();
+   assert.equal(terminalValues.length,8);
+   assert.equal(terminalValues.includes('Unknown'),false,'no decision field falls back to Unknown when persisted');
+   assert.match(terminalValues[7],/2026/,'Decided at renders the persisted timestamp');
+   // EN + zh-HK labels for the new disclosure.
+   await page.getByRole('button',{name:'Change language',exact:true}).click();
+   await page.getByText('為何有此建議',{exact:true}).first().waitFor();
+   const zhCard=page.locator('.conversation-proposal').first();
+   await zhCard.getByText('為何有此建議',{exact:true}).click();
+   assert.equal(await zhCard.getByText('理由',{exact:true}).count(),1);
+   assert.equal(await page.getByText('工作區成員',{exact:true}).count(),1,'zh-HK label for the decision actor');
  }finally{await harness.close();}
 });
 

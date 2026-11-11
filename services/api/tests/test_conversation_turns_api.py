@@ -13,6 +13,7 @@ Contract notes encoded below (Amendment A1/A2 and the turn contract):
 """
 import json
 import uuid
+from datetime import datetime
 
 import psycopg
 import pytest
@@ -645,6 +646,12 @@ def test_reconcile_unknown_then_new_evidence_and_idempotent_replays(turn_api, mo
     assert resolved.status_code == 200, resolved.text
     resolved_turn = resolved.json()['data']['turn']
     assert resolved_turn['status'] == 'failed'
+    # Reconciliation responses still return the source proposal, so the
+    # read-time decision decoration is present there too.
+    reconciled_proposals = proposal_parts(resolved.json()['data']['thread'])
+    assert reconciled_proposals
+    assert reconciled_proposals[0]['decision']['choice'] == 'approve'
+    assert reconciled_proposals[0]['decision']['decided_by'] == 'you'
     assert 'RECONCILED_FAILED' in {notice['code'] for notice in resolved_turn['notices']}
     activity = next(part for part in resolved_turn['parts']
         if part['kind'] == 'tool_activity')
@@ -733,3 +740,134 @@ def test_reconcile_requires_an_unknown_turn(turn_api):
         headers=_h(OPERATOR, 'reconcile-invalid-state-key'))
     assert result.status_code == 409
     assert result.json()['code'] == 'INVALID_STATE'
+
+
+# --- Increment 2.7: read-time decision decoration on proposal parts ---------
+
+def proposal_parts(payload):
+    return [part for message in payload.get('messages', [])
+        for part in (message.get('parts') or ())
+        if isinstance(part, dict) and part.get('kind') == 'proposal']
+
+
+def stored_part_bodies(dsn, thread_id):
+    with psycopg.connect(dsn) as conn:
+        turns = conn.execute('SELECT parts FROM conversation_turns WHERE thread_id=%s '
+            'ORDER BY created_at,id', (thread_id,)).fetchall()
+        messages = conn.execute('SELECT parts FROM conversation_thread_messages '
+            'WHERE thread_id=%s ORDER BY seq', (thread_id,)).fetchall()
+    return [row[0] for row in turns], [row[0] for row in messages]
+
+
+def test_proposal_decision_absent_before_decision_and_stored_parts_unchanged(turn_api):
+    client, dsn = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    # Before any decision: the optional field is omitted everywhere.
+    assert proposal_parts(created['thread']) and all(
+        'decision' not in part for part in proposal_parts(created['thread']))
+    turn_proposal = next(part for part in created['turn']['parts']
+        if part['kind'] == 'proposal')
+    assert 'decision' not in turn_proposal
+    source_turn_id = created['turn']['id']
+    with psycopg.connect(dsn) as conn:
+        turn_before = conn.execute('SELECT parts FROM conversation_turns WHERE id=%s',
+            (source_turn_id,)).fetchone()[0]
+        messages_before = conn.execute('SELECT id,parts FROM conversation_thread_messages '
+            'WHERE thread_id=%s ORDER BY seq', (thread['id'],)).fetchall()
+
+    approved = decide(client, created['turn'], version=created['thread']['version'],
+        mutation_key='decision-decoration-approve')
+    assert approved.status_code == 200, approved.text
+    approved_data = approved.json()['data']
+    decorated = proposal_parts(approved_data['thread'])
+    assert decorated, 'the source proposal part is returned on the thread'
+    decision = decorated[0]['decision']
+    assert decision['choice'] == 'approve'
+    assert decision['decided_by'] == 'you'
+    assert decision['decided_at'].endswith('+00:00')
+    # Persisted decision timestamp, not request time.
+    with psycopg.connect(dsn) as conn:
+        persisted = conn.execute('SELECT created_at FROM conversation_turn_decisions '
+            'WHERE workspace_id=%s', (WORKSPACE_A,)).fetchone()[0]
+    assert datetime.fromisoformat(decision['decided_at']) == persisted
+    # Read-time derivation only: stored parts are byte-for-byte unchanged.
+    with psycopg.connect(dsn) as conn:
+        turn_after = conn.execute('SELECT parts FROM conversation_turns WHERE id=%s',
+            (source_turn_id,)).fetchone()[0]
+        messages_after = {row[0]: row[1] for row in conn.execute(
+            'SELECT id,parts FROM conversation_thread_messages WHERE thread_id=%s',
+            (thread['id'],)).fetchall()}
+    assert turn_before == turn_after, 'the source turn parts are not rewritten'
+    assert all(messages_after.get(message_id) == parts for message_id, parts in messages_before)
+    assert 'decision' not in str(turn_after) and 'decision' not in str(list(messages_after.values()))
+    # Privacy: no raw actor id or internal reference in the payload.
+    operator_id = str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR))
+    assert operator_id not in approved.text
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, REVIEWER)) not in approved.text
+    # Reload through the plain thread read model as well.
+    reloaded = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
+    assert proposal_parts(reloaded)[0]['decision'] == decision
+
+
+def test_proposal_decision_after_reject_and_coarse_label_for_other_member(turn_api):
+    client, dsn = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    rejected = decide(client, created['turn'], decision='reject',
+        version=created['thread']['version'], mutation_key='decision-decoration-reject')
+    assert rejected.status_code == 200, rejected.text
+    decision = proposal_parts(rejected.json()['data']['thread'])[0]['decision']
+    assert decision['choice'] == 'reject'
+    assert decision['decided_by'] == 'you'
+    # A teammate sees the same persisted choice/time with a coarse actor label.
+    latest = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
+    grant(client, dsn, latest, REVIEWER, 'editor')
+    as_teammate = client.get(f"{THREAD_ROOT}/{thread['id']}",
+        headers=_h(REVIEWER)).json()['data']
+    other = proposal_parts(as_teammate)[0]['decision']
+    assert other['choice'] == 'reject'
+    assert other['decided_by'] == 'a workspace member'
+    assert other['decided_at'] == decision['decided_at']
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in json.dumps(other)
+    # A read-only viewer sees the same persisted choice/time, coarse label only.
+    current = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h()).json()['data']
+    grant(client, dsn, current, VIEWER, 'viewer')
+    as_viewer = client.get(f"{THREAD_ROOT}/{thread['id']}",
+        headers=_h(VIEWER)).json()['data']
+    viewer_decision = proposal_parts(as_viewer)[0]['decision']
+    assert viewer_decision['choice'] == 'reject'
+    assert viewer_decision['decided_by'] == 'a workspace member'
+    assert viewer_decision['decided_at'] == decision['decided_at']
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in json.dumps(viewer_decision)
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, VIEWER)) not in json.dumps(viewer_decision)
+
+
+
+def test_foreign_mismatched_decision_row_never_decorates(turn_api):
+    """Direct-DB mismatch must not decorate: containment is thread/turn scoped."""
+    client, dsn = turn_api
+    thread = grounded_thread(client)
+    created = turn_on_thread(client, thread).json()['data']
+    proposal = next(part for part in created['turn']['parts']
+        if part['kind'] == 'proposal')
+    other_thread = create_thread(client)
+    operator_user = uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)
+    foreign_turn = uuid.uuid4()
+    with psycopg.connect(dsn, autocommit=True) as conn:
+        conn.execute("INSERT INTO conversation_turns(id,workspace_id,project_id,thread_id,"
+            "owner_user_id,actor_id,request_fingerprint,language,status,step_count,parts,notices) "
+            "VALUES(%s,%s,%s,%s,%s,%s,%s,'en','needs_input',1,'[]','[]')",
+            (foreign_turn, WORKSPACE_A, PROJECT_A, other_thread['id'], operator_user,
+             operator_user, 'e' * 64))
+        conn.execute("INSERT INTO conversation_turn_decisions(id,workspace_id,project_id,"
+            "thread_id,turn_id,proposal_id,actor_id,decision,request_fingerprint,"
+            "continuation_turn_id,status) VALUES(%s,%s,%s,%s,%s,%s,%s,'approve',%s,%s,'applied')",
+            (uuid.uuid4(), WORKSPACE_A, PROJECT_A, other_thread['id'], foreign_turn,
+             proposal['proposal_id'], operator_user, 'f' * 64, foreign_turn))
+    response = client.get(f"{THREAD_ROOT}/{thread['id']}", headers=_h())
+    assert response.status_code == 200, response.text
+    parts = proposal_parts(response.json()['data'])
+    assert parts
+    assert all('decision' not in part for part in parts)
+    assert str(uuid.uuid5(uuid.NAMESPACE_URL, OPERATOR)) not in response.text
