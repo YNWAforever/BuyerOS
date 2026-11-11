@@ -1031,12 +1031,14 @@ test('the slash menu lists the offered skill library and inserts without sending
   // stable DOM id so the same composer is addressed in either locale.
   const messageBox=page.locator('#conversation-message');
   // The slash menu is gated on !busy: wait for a completed send to settle before
-  // typing again, otherwise the send's clear can race the reopened menu.
+  // typing again, otherwise the send's clear can race the reopened menu. Detect
+  // idle structurally (empty enabled composer, no busy ellipsis label) so the wait
+  // stays independent of the current locale's Send translation.
   const waitComposerIdle=async()=>{await page.waitForFunction(()=>{
     const message=document.querySelector('#conversation-message');
+    if(!(message instanceof HTMLTextAreaElement)||message.disabled||message.value!=='')return false;
     const send=document.querySelector('.conversation-send');
-    return message instanceof HTMLTextAreaElement&&!message.disabled&&message.value===''&&
-      send instanceof HTMLButtonElement&&send.textContent?.trim()==='Send';
+    return !(send instanceof HTMLButtonElement)||!send.textContent.includes('…');
   });};
   const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
   await composer.waitFor();
@@ -1497,3 +1499,205 @@ test('Stage 4 a definitively rejected Drive import can save after removing the r
 
 
 
+
+test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
+ const harness=await fixtureHarness({handler:standardApi({manage:true})});
+ try{
+  const {page,posts,errors,state}=harness;
+  const composer=page.locator('#conversation-message');
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  // Opening a discussion announces it by moving focus to the thread heading.
+  const heading=page.getByRole('heading',{name:'Research buyer',exact:true});
+  assert.equal(await heading.getAttribute('tabindex'),'-1');
+  await page.waitForFunction(()=>document.activeElement?.tagName==='H2');
+  assert.equal(await heading.evaluate(node=>document.activeElement===node),true,'opening a discussion moves focus to its heading');
+  assert.equal(await page.getByRole('log',{name:'Discussion messages'}).count(),1,'the transcript is a labelled log');
+  // Tab from the top of the studio reaches the thread list, chips, composer and send.
+  const outline=async()=>page.evaluate(()=>{const node=document.activeElement,style=getComputedStyle(node);
+    return {id:node?.id??'',tag:node?.tagName??'',cls:typeof node?.className==='string'?node.className:'',
+      parentCls:typeof node?.parentElement?.className==='string'?node.parentElement.className:'',
+      inThreadList:!!node?.closest?.('.conversation-thread-items'),inChips:!!node?.closest?.('.conversation-chips'),
+      text:(node?.textContent??'').trim().slice(0,60),outlineStyle:style.outlineStyle,outlineWidth:style.outlineWidth};});
+  await page.locator('.conversation-studio').focus();
+  const walked=[];
+  for(let step=0;step<40;step+=1){
+   await page.keyboard.press('Tab');
+   const item=await outline();walked.push(item);
+   if(item.id==='conversation-message')break;
+  }
+  assert.ok(walked.some(item=>item.cls.includes('conversation-new')),'tab order reaches the thread list');
+  assert.ok(walked.some(item=>item.inThreadList),'a thread row is reachable');
+  assert.ok(walked.some(item=>item.inChips),'chips are reachable');
+  const textarea=walked.find(item=>item.id==='conversation-message');
+  assert.ok(textarea,'tab order reaches the composer');
+  assert.notEqual(textarea.outlineStyle,'none','the composer shows a visible focus indicator');
+  for(const item of walked)assert.notEqual(item.outlineStyle,'none',`${item.tag}.${item.cls} has a visible focus indicator`);
+  // Enter on the send action is the only send; the textarea keeps normal typing.
+  await page.keyboard.type('Keyboard question');
+  assert.equal(await composer.inputValue(),'Keyboard question');
+  await page.keyboard.press('Tab');
+  const attach=await outline();
+  assert.equal(attach.id,'conversation-attach','the attach control follows the composer');
+  const attachOutline=await page.locator('label[for="conversation-attach"]').evaluate(node=>getComputedStyle(node).outlineStyle);
+  assert.notEqual(attachOutline,'none','the clipped attach input exposes a visible label indicator');
+  await page.keyboard.press('Tab');
+  const send=await outline();
+  assert.equal(send.cls.includes('conversation-send'),true,'the send action follows the attach control');
+  assert.notEqual(send.outlineStyle,'none','the send action has a visible focus indicator');
+  await page.keyboard.press('Enter');
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  const turnPosts=()=>posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turnPosts().length,1,'the keyboard send posts one turn');
+  assert.equal(turnPosts()[0].body.text,'Keyboard question');
+  // APG tablist: roving tabindex, arrows/Home/End select and take focus.
+  const tablist=page.getByRole('tablist',{name:'Discussion context'});
+  assert.equal(await tablist.getByRole('tab').count(),3);
+  await tablist.getByRole('tab',{name:'Results',exact:true}).focus();
+  assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('aria-selected')),'true');
+  assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('tabindex')),'0');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-sources');
+  assert.equal(await page.locator('#conversation-tab-sources').getAttribute('aria-selected'),'true');
+  assert.equal(await page.locator('#conversation-tab-sources').getAttribute('tabindex'),'0');
+  assert.equal(await page.locator('#conversation-tab-results').getAttribute('tabindex'),'-1','only the selected tab is in the tab sequence');
+  assert.equal(await page.getByRole('tabpanel').getAttribute('aria-labelledby'),'conversation-tab-sources','the panel follows the selected tab');
+  const tabFocus=await page.locator('#conversation-tab-sources').evaluate(node=>getComputedStyle(node).outlineStyle);
+  assert.notEqual(tabFocus,'none','tabs show a visible focus indicator');
+  await page.keyboard.press('End');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-decisions');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-results','ArrowRight wraps past the last tab');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-decisions','ArrowLeft wraps before the first tab');
+  await page.keyboard.press('Home');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-results');
+  // Mouse selection stays unchanged and decisions expose accessible names.
+  await tablist.getByRole('tab',{name:'Decisions',exact:true}).click();
+  const decisionsPanel=page.getByRole('tabpanel');
+  await page.waitForFunction(()=>document.querySelector('[role="tabpanel"]')?.id==='conversation-panel-decisions');
+  assert.equal(await decisionsPanel.getByRole('button',{name:'Approve',exact:true}).count(),1);
+  assert.equal(await decisionsPanel.getByRole('button',{name:'Reject',exact:true}).count(),1);
+  await tablist.getByRole('tab',{name:'Results',exact:true}).click();
+  // Escape closes the discussion menu and returns focus to its summary trigger.
+  const summary=page.locator('summary[aria-label="Discussion menu"]');
+  await summary.focus();await page.keyboard.press('Enter');
+  const details=page.locator('details.conversation-menu');
+  assert.equal(await details.evaluate(node=>node.open),true,'Enter opens the discussion menu');
+  await page.keyboard.press('Escape');
+  assert.equal(await details.evaluate(node=>node.open),false,'Escape closes the discussion menu');
+  assert.equal(await summary.evaluate(node=>document.activeElement===node),true,'focus returns to the menu trigger');
+  // The native share dialog is modal, owns Escape, and returns focus to its trigger.
+  await page.keyboard.press('Enter');
+  const share=page.locator('.conversation-menu-panel').getByRole('button',{name:'Share discussion',exact:true});
+  await share.focus();await page.keyboard.press('Enter');
+  const dialog=page.getByRole('dialog',{name:'Share discussion',exact:true});
+  await dialog.waitFor();
+  assert.equal(await dialog.getAttribute('aria-modal'),'true','the share dialog is modal');
+  assert.equal(await dialog.evaluate(node=>node.matches('dialog[open]')),true);
+  await dialog.getByRole('heading',{name:'Share discussion',exact:true}).waitFor();
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({state:'hidden'});
+  assert.equal(await share.evaluate(node=>document.activeElement===node),true,'the share dialog returns focus to its trigger');
+  await page.keyboard.press('Escape');
+  assert.equal(await details.evaluate(node=>node.open),false);
+  assert.equal(await summary.evaluate(node=>document.activeElement===node),true);
+  // A failed preference keeps one announced copy: the visible transcript line is
+  // presentation-only while the inline notice is the single live region.
+  state.failPreferences=true;
+  await page.keyboard.press('Enter');
+  await page.getByRole('button',{name:'Pin discussion',exact:true}).click();
+  const failure='Workspace discussions are unavailable. Your unsaved text is still here.';
+  const inlineNotice=page.locator('p.conversation-inline-notice').filter({hasText:failure});
+  await inlineNotice.waitFor();
+  assert.equal(await inlineNotice.textContent(),failure);
+  const announced=page.getByRole('status').filter({hasText:failure});
+  assert.equal(await announced.count(),1,'exactly one live region announces the failure');
+  assert.equal(await page.locator('.conversation-status').getAttribute('aria-hidden'),'true');
+  assert.equal((await page.locator('.conversation-status').innerText()).trim(),failure,'the presentation copy stays visible');
+  state.failPreferences=false;
+  // Focus is never trapped: Tab/Shift+Tab leave and return to the composer.
+  await composer.focus();
+  await page.keyboard.press('Tab');
+  assert.notEqual(await page.evaluate(()=>document.activeElement?.id),'conversation-message','Tab leaves the composer');
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'conversation-message','Shift+Tab returns to the composer');
+  await page.screenshot({path:shots+'/a11y-keyboard-desktop.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('conversation studio reflows at the 200% zoom viewport and keeps zh-HK',async()=>{
+ const harness=await fixtureHarness();
+ try{
+  const {page,errors}=harness;
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  // 200% of a 1280px screen is a 640 CSS-pixel viewport.
+  await page.setViewportSize({width:640,height:900});
+  const pageMetrics=()=>page.evaluate(()=>{const box=document.querySelector('.conversation-compose-box');
+    const transcript=document.querySelector('.conversation-transcript');
+    return {page:document.documentElement.scrollWidth,body:document.body.scrollWidth,
+      composer:box?{scroll:box.scrollWidth,client:box.clientWidth}:null,
+      transcript:transcript?{scroll:transcript.scrollWidth,client:transcript.clientWidth,
+        overflowY:getComputedStyle(transcript).overflowY}:null};});
+  let metrics=await pageMetrics();
+  assert.ok(metrics.page<=640,`the document does not scroll sideways (${metrics.page}px)`);
+  assert.ok(metrics.body<=640);
+  assert.ok(metrics.transcript.scroll<=metrics.transcript.client,'the transcript does not overflow sideways');
+  assert.equal(metrics.transcript.overflowY,'auto','the transcript scrolls vertically');
+  assert.ok(metrics.composer.scroll<=metrics.composer.client,'the composer does not overflow sideways');
+  const message=page.locator('#conversation-message');
+  const send=page.locator('.conversation-send');
+  await message.waitFor();
+  assert.equal(await message.isVisible(),true);
+  await message.fill('Zoom check');
+  assert.equal(await send.isEnabled(),true,'the send action is reachable and enabled');
+  await send.click();
+  await page.getByText('Here is the follow-up.',{exact:true}).waitFor();
+  metrics=await pageMetrics();
+  assert.ok(metrics.page<=640,'the sent transcript still fits');
+  // The drawer and context panel stay reachable at the zoomed viewport.
+  const showDiscussions=page.getByRole('button',{name:'Show discussions',exact:true});
+  await showDiscussions.click();
+  await page.locator('.conversation-threads').waitFor();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Show discussions');
+  assert.equal(await showDiscussions.evaluate(node=>document.activeElement===node),true,'Escape returns focus to the drawer trigger');
+  const context=page.getByRole('button',{name:'Context',exact:true});
+  await context.click();
+  const panel=page.locator('.conversation-panel');
+  await panel.waitFor();
+  const closePanel=page.getByRole('button',{name:'Close context panel',exact:true});
+  await closePanel.waitFor();
+  const panelMetrics=await panel.evaluate(node=>({scroll:node.scrollWidth,client:node.clientWidth}));
+  assert.ok(panelMetrics.scroll<=panelMetrics.client,'the context panel does not overflow sideways');
+  await closePanel.click();
+  await panel.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Context');
+  assert.equal(await context.evaluate(node=>document.activeElement===node),true,'closing the panel returns focus to its opener');
+  // Escape is the second close path and restores the same opener.
+  await context.click();
+  await panel.waitFor();
+  await page.keyboard.press('Escape');
+  await panel.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Context');
+  assert.equal(await context.evaluate(node=>document.activeElement===node),true,'Escape returns focus to the panel opener');
+  await page.screenshot({path:shots+'/a11y-zoom-640-en.png',fullPage:true});
+  // zh-HK keeps the same reflow and translated labels.
+  await page.getByRole('button',{name:'Change language',exact:true}).click();
+  await page.getByRole('textbox',{name:'向 BuyerOS 傳送訊息',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'傳送訊息',exact:true}).count(),1,'the send action carries its zh-HK label');
+  metrics=await pageMetrics();
+  assert.ok(metrics.page<=640,'the zh-HK document does not scroll sideways');
+  assert.ok(metrics.transcript.scroll<=metrics.transcript.client);
+  assert.ok(metrics.composer.scroll<=metrics.composer.client);
+  await page.getByRole('button',{name:'內容',exact:true}).click();
+  const zhPanel=page.locator('.conversation-panel');
+  await zhPanel.waitFor();
+  const zhPanelMetrics=await zhPanel.evaluate(node=>({scroll:node.scrollWidth,client:node.clientWidth}));
+  assert.ok(zhPanelMetrics.scroll<=zhPanelMetrics.client,'the zh-HK context panel does not overflow sideways');
+  await page.getByRole('button',{name:'關閉內容面板',exact:true}).click();
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth)<=640,true);
+  await page.screenshot({path:shots+'/a11y-zoom-640-zh.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});

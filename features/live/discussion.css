@@ -327,5 +327,12 @@
   .conversation-menu[open]>.conversation-menu-panel{width:min(240px,calc(100vw - 24px))}
 }
 @media(max-width:360px){.conversation-compose-actions small{display:none}.conversation-chips{display:none}}
+/* The studio is also mounted standalone by the browser gate, outside the app
+   shell, so its controls carry their own visible keyboard indicator. */
+.conversation-studio :is(button,a,input,select,summary):focus-visible,
+.live-thread-dialog :is(button,a,input,select,textarea):focus-visible{outline:3px solid var(--buyeros-accent);outline-offset:3px}
+.conversation-studio .conversation-compose textarea:focus-visible{outline:3px solid var(--buyeros-accent)!important;outline-offset:1px}
+/* The attach input is clipped; its visible label carries the keyboard indicator. */
+.conversation-studio .conversation-compose-actions label:focus-within{outline:3px solid var(--buyeros-accent);outline-offset:3px;border-radius:2px}
 
 

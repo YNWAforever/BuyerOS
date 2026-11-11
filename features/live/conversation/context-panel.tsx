@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {useEffect,useRef,useState,type KeyboardEvent,type ReactNode} from 'react';
 import {ChartNoAxesCombined,FileText,Link2,ShieldCheck,X} from 'lucide-react';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
@@ -10,6 +10,7 @@ import type {OutputLinkPart} from './types';
 import type {PanelProposal} from './parts';
 import {latestToolActivity,type TerminalProposal} from './parts';
 import type {TranscriptEntry} from './parts';
+import {nextTabIndex,tabSequenceIndex} from './a11y';
 
 export type PanelTab='results'|'sources'|'decisions';
 type Props={
@@ -134,10 +135,20 @@ function DecisionsTab({t,proposals,entries,access,onDecide,deciding,decisionFor,
 /** Right contextual panel. It only renders when the discussion has content for it. */
 export function ConversationPanel(props:Props){
   const {t,tab,tabs,onTab,results,runs,citations,selectedSources,proposals,entries,access,threadId,contextRevision,canEdit,onDecide,deciding,decisionFor,turnStatusFor,drive,onClose}=props;
+  const activeIndex=Math.max(0,tabs.indexOf(tab));
+  function onTabKeyDown(event:KeyboardEvent<HTMLDivElement>){
+    const next=nextTabIndex(event.key,activeIndex,tabs.length);
+    if(next===null)return;
+    event.preventDefault();
+    const nextTab=tabs[next];
+    onTab(nextTab);
+    // Focus follows selection; every tab button is already mounted.
+    event.currentTarget.querySelector<HTMLButtonElement>(`#conversation-tab-${nextTab}`)?.focus();
+  }
   return <aside className="conversation-panel" aria-label={t('Discussion context')}>
     <div className="conversation-panel-head">
-      <div role="tablist" aria-label={t('Discussion context')} className="conversation-panel-tabs">
-        {tabs.map(item=><button key={item} type="button" role="tab" id={`conversation-tab-${item}`} aria-selected={tab===item} aria-controls={`conversation-panel-${item}`} onClick={()=>onTab(item)}><PanelLabel tab={item} t={t}/></button>)}
+      <div role="tablist" aria-label={t('Discussion context')} aria-orientation="horizontal" className="conversation-panel-tabs" onKeyDown={onTabKeyDown}>
+        {tabs.map((item,index)=><button key={item} type="button" role="tab" id={`conversation-tab-${item}`} aria-selected={tab===item} aria-controls={`conversation-panel-${item}`} tabIndex={tabSequenceIndex(activeIndex,index)} onClick={()=>onTab(item)}><PanelLabel tab={item} t={t}/></button>)}
       </div>
       {onClose&&<button type="button" className="conversation-icon-button" onClick={onClose} aria-label={t('Close context panel')}><X size={17} aria-hidden="true"/></button>}
     </div>

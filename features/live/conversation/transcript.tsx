@@ -77,6 +77,8 @@ export function ConversationTranscript({t,locale,entries,actions,busy,statusLine
       {busy&&<div className="conversation-typing" role="status"><span className="conversation-dots" aria-hidden="true"><i/><i/><i/></span>{t('Preparing a reply…')}</div>}
     </div>
     {showJump&&<button type="button" className="conversation-jump" onClick={()=>scrollToLatest()}><ArrowDown size={15} aria-hidden="true"/>{t('Jump to latest')}</button>}
-    <p className="conversation-status" role="status" aria-live="polite">{statusLine}</p>
+    {/* Presentation-only: the same notice is announced by the inline/composer status
+        region, so this visible line must not be a second live region. */}
+    <p className="conversation-status" aria-hidden="true">{statusLine}</p>
   </div>;
 }

@@ -176,6 +176,14 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [panelPreference,setPanelPreference]=useState<boolean|null>(null);
   const [activeTab,setActiveTab]=useState<PanelTab|null>(null);
   const [mobileView,setMobileView]=useState<'conversation'|'threads'|'panel'>('conversation');
+  const titleRef=useRef<HTMLHeadingElement>(null);
+  const threadsTriggerRef=useRef<HTMLButtonElement>(null);
+  const navThreadsRef=useRef<HTMLButtonElement>(null);
+  const panelToggleRef=useRef<HTMLButtonElement>(null);
+  const contextNavRef=useRef<HTMLButtonElement>(null);
+  const threadsOpener=useRef<'header'|'nav'>('header');
+  const panelOpener=useRef<'header'|'nav'>('header');
+  const focusedThread=useRef<string|null>(null);
   const [title,setTitle]=useState('');
   const [guidedOpen,setGuidedOpen]=useState(()=>guidedOpenFor(session));
   // A fallback conversation (turn route absent) cannot carry the company link; the
@@ -247,6 +255,15 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     // eslint-disable-next-line react-hooks/exhaustive-deps -- beginStream resumes a one-shot stashed stream for the loaded thread.
   },[api,targetId,identity,session,reload]);
   useEffect(()=>{setTitle(loaded?.chat.title??'');},[loaded?.chat.id,loaded?.chat.title]);
+  // Opening a discussion (row, deep link or linked company) moves focus to its
+  // heading so the new context is announced once the thread is readable.
+  useEffect(()=>{
+    const id=loaded?.chat.id;
+    if(!id||!targetId||id!==targetId||focusedThread.current===id)return;
+    focusedThread.current=id;
+    const frame=requestAnimationFrame(()=>titleRef.current?.focus({preventScroll:true}));
+    return()=>cancelAnimationFrame(frame);
+  },[loaded?.chat.id,targetId]);
   // Abort a live stream when the studio unmounts (route/scope change).
   useEffect(()=>()=>{
     streamAbort.current?.abort();streamAbort.current=null;
@@ -642,10 +659,38 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       if(!(error instanceof LiveCancelled)&&current())setThreadNoticeText(threadNotice(error));
     }finally{if(current())setPreferenceBusy(false);}
   }
+  function focusOpenControl(kind:'threads'|'panel'){
+    requestAnimationFrame(()=>{
+      if(kind==='threads'){
+        if(threadsOpener.current==='nav')navThreadsRef.current?.focus();
+        else threadsTriggerRef.current?.focus();
+      }else if(panelOpener.current==='nav')contextNavRef.current?.focus();
+      else panelToggleRef.current?.focus();
+    });
+  }
+  function closeMobileView(kind:'threads'|'panel'){
+    setMobileView('conversation');
+    focusOpenControl(kind);
+  }
   useEffect(()=>{
-    const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'&&mobileView!=='conversation')setMobileView('conversation');};
+    const onKey=(event:KeyboardEvent)=>{
+      if(event.key!=='Escape')return;
+      // A native modal dialog owns Escape and returns focus to its own trigger.
+      if(document.querySelector('dialog[open]'))return;
+      const menu=document.querySelector<HTMLDetailsElement>('details.conversation-menu[open]');
+      if(menu){
+        event.preventDefault();
+        menu.open=false;
+        menu.querySelector<HTMLElement>('summary')?.focus();
+        return;
+      }
+      if(mobileView!=='conversation'){
+        event.preventDefault();
+        closeMobileView(mobileView);
+      }
+    };
     window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
-  },[mobileView]);
+  });
   useEffect(()=>{if(mobileView==='panel')setPanelPreference(true);},[mobileView]);
 
   const contentTabs:PanelTab[]=[];
@@ -678,18 +723,18 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     onFile:(file:File)=>void attachFile(file),
     onRetry:retryAttachment,
   }:null;
-  return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')}>
-    <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>setMobileView('conversation')}/>
+  return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')} tabIndex={-1}>
+    <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>closeMobileView('threads')}/>
     <ConversationThreadList t={t} locale={locale} items={visibleThreadRows(list.items,archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
       notice={list.notice} loading={list.loading} query={query} archived={archived}
       onQuery={setQuery} onToggleArchived={()=>setArchived(value=>!value)} onNew={()=>navigate('/app/discussions/new')}
       onOpen={id=>navigate(`/app/discussions/s/${id}`)} onMore={list.items.length<list.total?()=>void moreThreads():undefined}
-      onClose={mobileView==='threads'?()=>setMobileView('conversation'):undefined}/>
+      onClose={mobileView==='threads'?()=>closeMobileView('threads'):undefined}/>
     <div className="conversation-main">
       <header className="conversation-head">
         <div className="conversation-head-title">
-          <button type="button" className="conversation-icon-button conversation-mobile-only" onClick={()=>setMobileView('threads')} aria-label={t('Show discussions')}><Menu size={18} aria-hidden="true"/></button>
-          <h2>{threadTitle}</h2>
+          <button type="button" ref={threadsTriggerRef} className="conversation-icon-button conversation-mobile-only" onClick={()=>{threadsOpener.current='header';setMobileView('threads');}} aria-label={t('Show discussions')}><Menu size={18} aria-hidden="true"/></button>
+          <h2 ref={titleRef} tabIndex={-1}>{threadTitle}</h2>
           {loaded&&<WorkspaceBadge thread={loaded.raw} t={t}/>}
         </div>
         <div className="conversation-head-actions">
@@ -702,7 +747,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
               <button type="button" onClick={()=>void removeThread()}>{t('Delete discussion')}</button>
             </div>
           </details>}
-          <button type="button" className="conversation-icon-button" onClick={()=>{setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>
+          <button type="button" ref={panelToggleRef} className="conversation-icon-button" onClick={()=>{panelOpener.current='header';setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>
         </div>
       </header>
       {threadNoticeText&&threadState==='ready'&&<p className="conversation-inline-notice" role="status">{t(threadNoticeText)}</p>}
@@ -748,12 +793,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         onDecide={(part,turnId,choice)=>void decide(part,turnId,choice)} deciding={deciding} decisionFor={proposalId=>decisions[proposalId]} terminalFor={proposalId=>terminal.get(proposalId)}
         turnStatusFor={turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined}
         drive={<DriveConnections key={`${identity}:${loaded?.chat.id??'none'}`} client={client} session={session} t={t} selected={loaded?.chat.sources??[]} readOnly={!loaded||loaded.chat.access==='viewer'} onSource={(source,selected)=>void toggleSource(source,selected)}/>}
-        onClose={mobileView==='panel'?()=>setMobileView('conversation'):undefined}/>
+        onClose={mobileView==='panel'?()=>closeMobileView('panel'):undefined}/>
     </div>}
     <nav className="conversation-mobile-views" aria-label={t('Views')}>
       <button type="button" aria-current={mobileView==='conversation'?'page':undefined} onClick={()=>setMobileView('conversation')}>{t('Conversation')}</button>
-      <button type="button" aria-current={mobileView==='threads'?'page':undefined} onClick={()=>setMobileView('threads')}>{t('Discussions')}</button>
-      <button type="button" aria-current={mobileView==='panel'?'page':undefined} onClick={()=>{setPanelPreference(true);setMobileView('panel');}}>{t('Context')}</button>
+      <button type="button" ref={navThreadsRef} aria-current={mobileView==='threads'?'page':undefined} onClick={()=>{threadsOpener.current='nav';setMobileView('threads');}}>{t('Discussions')}</button>
+      <button type="button" ref={contextNavRef} aria-current={mobileView==='panel'?'page':undefined} onClick={()=>{panelOpener.current='nav';setPanelPreference(true);setMobileView('panel');}}>{t('Context')}</button>
     </nav>
   </div>;
 }
