@@ -43,7 +43,7 @@ type FrameProps = {
  */
 export function LiveFrame({t, pathname, navigation, scope, footer, header, children, conversationHome=false, hideHeading=false}: FrameProps) {
   const meta = liveRouteMeta(pathname,conversationHome);
-  return <div className="live-app">
+  return <div className={'live-app'+(conversationHome?' live-app-conversation':'')}>
     <aside className="live-sidebar">
       <LiveBrand/>
       {scope}

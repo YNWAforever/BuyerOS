@@ -348,60 +348,60 @@
 /* ---------------------------------------------------------------------------
    SME clarity (Nov 2026): one project context, one account control, one front door.
    ------------------------------------------------------------------------- */
-.live-scope{display:flex;flex-direction:column;gap:8px;padding:0 4px 12px;border-bottom:1px solid var(--buyeros-border);margin-bottom:12px;min-width:0}
-.live-scope-field{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:500;color:var(--buyeros-copy);min-width:0}
-.live-scope-field>span{font-size:10px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--buyeros-muted)}
-.live-scope-field select{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;height:34px;font-size:13px;font-weight:600;padding:0 8px}
-.live-scope-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:2px 0 0}
-.live-scope-action{min-height:0!important;padding:0!important;border:0!important;background:transparent!important;color:var(--buyeros-accent-hover)!important;font-size:11px!important;font-weight:550!important;line-height:1.4!important;white-space:nowrap;text-decoration:none!important}
-.live-scope-action:hover:not(:disabled){text-decoration:underline!important}
-.live-scope-action:disabled{color:var(--buyeros-muted)!important}
-.live-scope-status,.live-scope-alert{margin:0;font-size:11px;color:var(--buyeros-muted);overflow-wrap:anywhere}
-.live-scope-alert{color:var(--buyeros-error)}
-.live-scope-empty{max-width:720px;margin-bottom:18px}
-.live-account{position:relative;border-top:1px solid var(--buyeros-border);padding-top:8px}
-.live-account>summary{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;list-style:none;border-radius:var(--buyeros-radius-control);padding:4px 6px}
-.live-account>summary::-webkit-details-marker{display:none}
-.live-account>summary:hover{background:var(--buyeros-tint)}
-.live-account-id{display:flex;flex-direction:column;min-width:0;line-height:1.25}
-.live-account-id b,.live-account-id small{max-width:152px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.live-account-id b{font-size:13px;color:var(--buyeros-ink)}
-.live-account-id small{font-size:11px;color:var(--buyeros-muted)}
-.live-account-panel{position:absolute;bottom:calc(100% + 8px);left:0;width:min(286px,calc(100vw - 32px));z-index:40;display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-panel);background:var(--buyeros-surface);box-shadow:0 12px 32px #0b1f2a24}
-.live-account-panel p{margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
-.live-account-line{color:var(--buyeros-copy)}
-.live-account-alert{color:var(--buyeros-error)}
-.live-account-panel button{display:flex!important;width:100%;min-height:34px!important;justify-content:flex-start!important;padding:4px 8px!important;border-color:transparent!important;background:transparent!important;color:var(--buyeros-copy)!important;font-size:12px!important;font-weight:550!important;white-space:normal}
-.live-account-panel button:hover:not(:disabled){background:var(--buyeros-tint)!important;color:var(--buyeros-ink)!important}
-.live-account-actions{display:flex;gap:2px;flex-wrap:wrap}
-.live-account-actions button{width:auto!important}
-.live-account-language{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--buyeros-copy)}
-.live-account-language select{height:32px;font-size:12px;max-width:100%}
-.live-account .live-access-details{font-size:12px}
-.live-account .live-access-details p{margin:4px 0}
+.live-app-conversation .live-scope{display:flex;flex-direction:column;gap:8px;padding:0 4px 12px;border-bottom:1px solid var(--buyeros-border);margin-bottom:12px;min-width:0}
+.live-app-conversation .live-scope-field{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:500;color:var(--buyeros-copy);min-width:0}
+.live-app-conversation .live-scope-field>span{font-size:10px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--buyeros-muted)}
+.live-app-conversation .live-scope-field select{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;height:34px;font-size:13px;font-weight:600;padding:0 8px}
+.live-app-conversation .live-scope-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:2px 0 0}
+.live-app-conversation .live-scope-action{min-height:0!important;padding:0!important;border:0!important;background:transparent!important;color:var(--buyeros-accent-hover)!important;font-size:11px!important;font-weight:550!important;line-height:1.4!important;white-space:nowrap;text-decoration:none!important}
+.live-app-conversation .live-scope-action:hover:not(:disabled){text-decoration:underline!important}
+.live-app-conversation .live-scope-action:disabled{color:var(--buyeros-muted)!important}
+.live-app-conversation .live-scope-status,.live-scope-alert{margin:0;font-size:11px;color:var(--buyeros-muted);overflow-wrap:anywhere}
+.live-app-conversation .live-scope-alert{color:var(--buyeros-error)}
+.live-app-conversation .live-scope-empty{max-width:720px;margin-bottom:18px}
+.live-app-conversation .live-account{position:relative;border-top:1px solid var(--buyeros-border);padding-top:8px}
+.live-app-conversation .live-account>summary{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;list-style:none;border-radius:var(--buyeros-radius-control);padding:4px 6px}
+.live-app-conversation .live-account>summary::-webkit-details-marker{display:none}
+.live-app-conversation .live-account>summary:hover{background:var(--buyeros-tint)}
+.live-app-conversation .live-account-id{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.live-app-conversation .live-account-id b,.live-account-id small{max-width:152px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.live-app-conversation .live-account-id b{font-size:13px;color:var(--buyeros-ink)}
+.live-app-conversation .live-account-id small{font-size:11px;color:var(--buyeros-muted)}
+.live-app-conversation .live-account-panel{position:absolute;bottom:calc(100% + 8px);left:0;width:min(286px,calc(100vw - 32px));z-index:40;display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid var(--buyeros-border);border-radius:var(--buyeros-radius-panel);background:var(--buyeros-surface);box-shadow:0 12px 32px #0b1f2a24}
+.live-app-conversation .live-account-panel p{margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.live-app-conversation .live-account-line{color:var(--buyeros-copy)}
+.live-app-conversation .live-account-alert{color:var(--buyeros-error)}
+.live-app-conversation .live-account-panel button{display:flex!important;width:100%;min-height:34px!important;justify-content:flex-start!important;padding:4px 8px!important;border-color:transparent!important;background:transparent!important;color:var(--buyeros-copy)!important;font-size:12px!important;font-weight:550!important;white-space:normal}
+.live-app-conversation .live-account-panel button:hover:not(:disabled){background:var(--buyeros-tint)!important;color:var(--buyeros-ink)!important}
+.live-app-conversation .live-account-actions{display:flex;gap:2px;flex-wrap:wrap}
+.live-app-conversation .live-account-actions button{width:auto!important}
+.live-app-conversation .live-account-language{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--buyeros-copy)}
+.live-app-conversation .live-account-language select{height:32px;font-size:12px;max-width:100%}
+.live-app-conversation .live-account .live-access-details{font-size:12px}
+.live-app-conversation .live-account .live-access-details p{margin:4px 0}
 @media(max-width:1023px){
-  .live-sidebar{flex-wrap:wrap;row-gap:6px}
-  .live-scope{flex-direction:row;align-items:center;gap:6px;flex:1;min-width:0;padding:0;margin:0;border-bottom:0}
-  .live-scope-field{flex-direction:row;align-items:center;gap:4px;flex:0 1 auto}
-  .live-scope-field>span{display:none}
-  .live-scope-field select{width:auto;max-width:min(168px,34vw);height:32px}
-  .live-scope-actions{flex-shrink:0}
-  .live-scope-actions .live-scope-action{display:none}
-  .live-account{border-top:0;padding-top:0;flex-shrink:0}
-  .live-account>summary{padding:2px}
-  .live-account-id{display:none}
-  .live-account-panel{position:fixed;top:60px;right:8px;bottom:auto;left:auto}
+  .live-app-conversation .live-sidebar{flex-wrap:wrap;row-gap:6px}
+  .live-app-conversation .live-scope{flex-direction:row;align-items:center;gap:6px;flex:1;min-width:0;padding:0;margin:0;border-bottom:0}
+  .live-app-conversation .live-scope-field{flex-direction:row;align-items:center;gap:4px;flex:0 1 auto}
+  .live-app-conversation .live-scope-field>span{display:none}
+  .live-app-conversation .live-scope-field select{width:auto;max-width:min(168px,34vw);height:32px}
+  .live-app-conversation .live-scope-actions{flex-shrink:0}
+  .live-app-conversation .live-scope-actions .live-scope-action{display:none}
+  .live-app-conversation .live-account{border-top:0;padding-top:0;flex-shrink:0}
+  .live-app-conversation .live-account>summary{padding:2px}
+  .live-app-conversation .live-account-id{display:none}
+  .live-app-conversation .live-account-panel{position:fixed;top:60px;right:8px;bottom:auto;left:auto}
   /* Keep sign-out, language and workspace settings reachable in the compact top strip. */
-  .live-sidebar>.live-sidebar-footer{display:flex!important;order:2;margin:0 0 0 auto;padding:0;align-items:center;flex-shrink:0}
-  .live-sidebar>.live-nav{order:3}
-  .live-sidebar-footer .live-account{border:0;padding:0;margin:0}
-  .live-topbar.live-topbar-bare{display:none}
+  .live-app-conversation .live-sidebar>.live-sidebar-footer{display:flex!important;order:2;margin:0 0 0 auto;padding:0;align-items:center;flex-shrink:0}
+  .live-app-conversation .live-sidebar>.live-nav{order:3}
+  .live-app-conversation .live-sidebar-footer .live-account{border:0;padding:0;margin:0}
+  .live-app-conversation .live-topbar.live-topbar-bare{display:none}
 }
 @media(max-width:520px){
-  .live-sidebar>.live-sidebar-footer{order:1}
-  .live-sidebar>.live-scope{order:2;flex:100%;padding-top:2px}
-  .live-scope-field{flex:1 1 0;min-width:0}
-  .live-scope-field select{width:100%;max-width:100%}
+  .live-app-conversation .live-sidebar>.live-sidebar-footer{order:1}
+  .live-app-conversation .live-sidebar>.live-scope{order:2;flex:100%;padding-top:2px}
+  .live-app-conversation .live-scope-field{flex:1 1 0;min-width:0}
+  .live-app-conversation .live-scope-field select{width:100%;max-width:100%}
 }
 /* Project home: a conversation-first dashboard, not a selector form. */
 .conversation-home-main{background:transparent;border:0;overflow:visible}
