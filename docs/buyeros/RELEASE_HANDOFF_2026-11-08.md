@@ -60,3 +60,63 @@ Reference documents: [conversation design](../superpowers/specs/2026-10-26-conve
 Both staging runs above are canceled and their receipts are stale. No waiting approval from this chat should be reused. Reconcile the current production target and reviewed rollback before the next release. Preserve the approved solo-owner manual signoff, all required CI checks and the protected promotion workflow. Do not fabricate fresh timestamps or treat this handoff as a runtime acceptance receipt.
 
 Paid research/enrichment, delivery and worker activation remain separate from interface deployment. This handoff does not activate them. The next chat owns continuation; this PR neither deploys nor rolls production back.
+
+## Continuation update — 12 November 2026
+
+This handoff was picked up. The sections above remain the historical record of
+8 November; this addendum only records what changed since, and is still not a
+runtime acceptance receipt.
+
+### Release state
+
+- [PR #57](https://github.com/YNWAforever/BuyerOS/pull/57) (conversation studio
+  and capability-state fix) merged 11 November.
+- [PR #70](https://github.com/YNWAforever/BuyerOS/pull/70) (per-turn metrics and
+  budget dashboard) and [PR #71](https://github.com/YNWAforever/BuyerOS/pull/71)
+  (recorded provider-acceptance harness) merged 12 November. Main is
+  `61a6483f1e967361cee96c0cbf8f18b74b975631`; [CI 43176420452](https://github.com/YNWAforever/BuyerOS/actions/runs/43176420452)
+  passed all 15 required jobs.
+- No candidate has been staged and nothing has been promoted from this chat. The
+  protected staging/signoff path, authenticated QA environment and explicit owner
+  approval are still required before any promotion.
+
+### "Why users may still see the old interface" — client cause addressed
+
+The source-verified mechanism described above is fixed on current main:
+
+- `features/live/sales-skills/capability.ts` now exposes explicit
+  `idle/loading/enabled/disabled/unavailable` states. Only a **server-answered**
+  `disabled` may select the legacy shell; read failures render `unavailable`
+  (with bounded retry guidance) or `checking`, never a false legacy fallback.
+  Reads are single-flight per session identity, abort on scope change, coalesce
+  focus/location refreshes and bound automatic retries.
+- `features/live/workspace-picker.tsx` routes the decision through
+  `salesCapabilityShell(...)`, so the picker and its panels share one state
+  machine.
+- This is source verification only; the original business user's failing request
+  was never captured and is not claimed as reproduced or accepted.
+
+### Read-timeout leads — client re-issue fixed, server causes still open
+
+- `features/live/sales-skills/sources.tsx` now owns one read set per session
+  identity (`useEffect` keyed on `[client,session,identity]`) with a local
+  `AbortController`, a single shared abort signal for the parallel context,
+  project, outputs and native-source reads, and abort-aware result handling.
+  An unstable translation function or parent rerender can no longer re-issue the
+  burst; `tests/core-sources-dedup.test.mjs` guards this.
+- The server-side leads from 8 November (policy/budget locks taken before
+  membership/rate checks, per-source native validation while holding locks) are
+  **not** claimed fixed here. In any performance work, preserve tenant,
+  membership, revocation and paid-admission checks.
+
+### Remaining work
+
+- Owner-gated: refresh the protected contract items for the current source,
+  verify the recorded rollback deployment, stage a candidate, create
+  `buyeros-conversation-qa` with the dedicated Neon account, run the
+  authenticated QA workflow, then approve the protected signoff/promotion.
+- Phase 1 remains open: reviewed live-model admission
+  (`CONVERSATION_MODEL_UNAVAILABLE` is still the honest result), Xverum
+  connection/OAuth/paid-admission/worker-runtime provisioning, and the Drive
+  retention decision. Current turns are deterministic with explicit proposals;
+  no paid activation has occurred.
