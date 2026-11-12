@@ -69,15 +69,20 @@ type HeaderProps = {
   conversationHome?: boolean;
   /** Conversation routes show one heading inside the studio, not a page title too. */
   hidePageTitle?: boolean;
+  /** Legacy shell keeps its language and sign-out controls in the top bar. */
+  languagePicker?: ReactNode;
+  signOut?: ReactNode;
 };
 
 /** Breadcrumb first, one deliberate account control in the sidebar. */
-export function LiveTopbar({t, pathname, projectName, conversationHome=false, hidePageTitle=false}: HeaderProps) {
+export function LiveTopbar({t, pathname, projectName, conversationHome=false, hidePageTitle=false, languagePicker, signOut}: HeaderProps) {
   const meta = liveRouteMeta(pathname,conversationHome);
-  return <header className={'topbar live-topbar'+(hidePageTitle?' live-topbar-bare':'')}>
+  const empty=hidePageTitle&&!languagePicker&&!signOut;
+  return <header className={'topbar live-topbar'+(empty?' live-topbar-bare':'')}>
     <div className="inline live-breadcrumb">
       <span className="breadcrumb">{projectName || t('This project')}</span>
       {!hidePageTitle && <><ChevronRight size={14} aria-hidden="true"/><b>{t(meta.title)}</b></>}
     </div>
+    {(languagePicker||signOut)&&<div className="inline top-right live-topbar-actions">{languagePicker}{signOut}</div>}
   </header>;
 }

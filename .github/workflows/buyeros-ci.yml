@@ -1,4 +1,4 @@
-﻿name: BuyerOS CI
+name: BuyerOS CI
 
 on:
   pull_request:
@@ -145,7 +145,7 @@ jobs:
           import xml.etree.ElementTree as ET
           cases = list(ET.parse('test-results/conversation-studio.xml').getroot().iter('testcase'))
           names = {case.get('name') for case in cases}
-          assert len(cases) == 31, (len(cases), sorted(names))
+          assert len(cases) == 32, (len(cases), sorted(names))
           assert 'turn metrics dashboard shows bounded project aggregates and fails closed' in names, names
           PY
       - uses: actions/upload-artifact@v4
