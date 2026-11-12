@@ -9,13 +9,11 @@ import type {Page} from '@playwright/test';
 // native disclosure. Every navigation re-opens that disclosure through its visible
 // summary control before a test continues with the unchanged guided assertions.
 async function openGuided(page:Page){
- // Wait for the first studio paint: on the project dashboard the guided disclosure is
- // absent, and deciding too early would send the test to the wrong surface.
- await Promise.race([
-  page.locator('.conversation-home').waitFor({state:'attached',timeout:15000}).catch(()=>{}),
-  page.locator('.conversation-studio').waitFor({state:'attached',timeout:15000}).catch(()=>{}),
- ]);
- // The project dashboard is a task-first home now, not a thread: open the fixture's
+ // Only discussion/live surfaces have a guided form. Documents and other retained
+ // pages have no studio, so return instead of waiting out the test timeout.
+ const surface=page.locator('.conversation-home, .conversation-studio').first();
+ try{await surface.waitFor({state:'attached',timeout:5000});}catch{return;}
+ // On the project dashboard the guided disclosure is absent: open the fixture's
  // saved discussion before looking for the guided form.
  if(await page.locator('.conversation-home').count()){
   const first=page.locator('.conversation-thread-items button').first();
