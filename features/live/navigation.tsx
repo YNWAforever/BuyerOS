@@ -22,7 +22,8 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
       <Icon size={18} aria-hidden="true"/><span>{t(label)}</span>
     </button>;
   // Conversation-first shell: conversation is the front door and the project tools are
-  // one group. Workspace administration lives in the account menu, not the daily path.
+  // one group. Workspace administration sits in a small Manage group so owners can still
+  // reach settings without it competing with the daily path.
   if(conversationHome){
     const discussion=discussionForPath(pathname,true);
     return <nav aria-label="BuyerOS sections" className="live-nav live-nav-conversation">
@@ -36,6 +37,11 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
         {item('Outreach',Mail,'/app/outreach',pathname==='/app/outreach',!projectKnown)}
         {item('Results',ChartNoAxesCombined,'/app/results',pathname==='/app/results',!projectKnown)}
         {item('Documents',FileText,'/app/documents',pathname.startsWith('/app/documents'),!projectKnown)}
+      </div>
+      <div className="live-nav-group" role="group" aria-label={t('Manage')}>
+        <div className="nav-label" aria-hidden="true">{t('Manage')}</div>
+        {item('Settings',Settings,'/app/settings',pathname==='/app/settings',!authorized)}
+        {item('Operations',Wrench,'/app/operations',pathname==='/app/operations',!authorized)}
       </div>
     </nav>;
   }

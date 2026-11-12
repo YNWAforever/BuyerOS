@@ -45,7 +45,7 @@ for(const conversationHome of [false,true])test(`conversation navigation fits de
     authorized:true,canCreate:true,accessChecking:false,accessError:'',notice:'',onWorkspace:()=>{},onProject:()=>{},onNewProject:()=>{},onCheckAccess:()=>{}});
   const footer=AccountMenu({t:x=>x,email:'owner@example.test',workspaceName:'FIMMICK',roles:['workspace_admin'],authorized:true,locale:'en',
     onLocale:()=>{},localeSaving:false,localeDisabled:false,accessDetails:null,accessChecking:false,accessError:'',diagnostic:null,
-    onRetryAccess:()=>{},onSettings:()=>{},onOperations:()=>{},onSignOut:()=>{}});
+    onRetryAccess:()=>{},onSignOut:()=>{}});
   const frame=LiveFrame({t:x=>x,pathname:'/app',navigation,scope,footer,header:null,children:null,conversationHome});
   const page=await browser.newPage();await page.setContent('<style>'+css+'</style>'+renderToStaticMarkup(frame));
   for(const width of [320,390,480,481,600,768,820,1023,1024,1440]){
@@ -58,8 +58,8 @@ for(const conversationHome of [false,true])test(`conversation navigation fits de
   assert.equal(await account.count(),1,'one account control in the sidebar');
   await account.click();
   const accountPanel=page.locator('.live-account-panel');
-  assert.equal(await accountPanel.getByRole('button',{name:'Operations',exact:true}).isVisible(),true,'workspace administration stays reachable from the account control');
   assert.equal(await accountPanel.getByRole('button',{name:'Sign out',exact:true}).isVisible(),true);
+  assert.equal(await page.getByRole('group',{name:'Manage',exact:true}).getByRole('button',{name:'Operations',exact:true}).count(),1,'workspace administration is a single Manage entry');
  }finally{await browser.close();}
 });
 

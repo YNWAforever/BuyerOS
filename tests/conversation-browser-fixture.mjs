@@ -140,7 +140,7 @@ function App(){
      onWorkspace={()=>{}} onProject={()=>{}} onNewProject={()=>{}} onCheckAccess={()=>{}}/>}
    footer={<AccountMenu t={t} email="owner@example.test" workspaceName="FIMMICK" roles={['workspace_admin']} authorized locale={locale}
      onLocale={value=>setLocale(value)} localeSaving={false} localeDisabled={false} accessDetails={null} accessChecking={false} accessError="" diagnostic={null}
-     onRetryAccess={()=>{}} onSettings={()=>navigate('/app/settings')} onOperations={()=>navigate('/app/operations')} onSignOut={()=>{}}/>}
+     onRetryAccess={()=>{}} onSignOut={()=>{}}/>}
    header={<LiveTopbar t={t} pathname={path} projectName="Fixture project" conversationHome={enabled} hidePageTitle={path==='/app'||path.startsWith('/app/discussions')}/>}
    hideHeading={path==='/app'||path.startsWith('/app/discussions')}>{conversation}</LiveFrame>;
  const conversation=<><LiveConversation enabled={enabled} session={session} client={client} pathname={path} locale={locale} t={t} navigate={navigate} canViewOffer={offerAccess} canViewResults={true}/></>;

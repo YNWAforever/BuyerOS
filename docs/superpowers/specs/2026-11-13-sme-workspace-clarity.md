@@ -34,8 +34,9 @@ same parts become stacked strips and the studio keeps its drawer/panel views.
 
 - `New discussion`, `Home`, then `This project` (`Offer`, `Buyers`, `Research`,
   `Outreach`, `Results`, `Documents`).
-- `Settings` and `Operations` move into the single account control; the daily
-  surface no longer carries administration beside the conversation.
+- `Settings` and `Operations` move into a compact `Manage` group at the end of
+  the sidebar instead of sitting beside the conversation. The account control keeps
+  identity, language, access details and sign-out.
 - Flag OFF navigation is unchanged.
 
 ### Shell
@@ -47,8 +48,8 @@ same parts become stacked strips and the studio keeps its drawer/panel views.
 - `ScopeSwitcher` owns the labelled Workspace/Project comboboxes, `New project`,
   `Check access` and access notices. It is omitted on first-run denial, where the
   full access card remains.
-- `AccountMenu` is one disclosure for identity, language, Settings, Operations,
-  access details, diagnostics and Sign out.
+- `AccountMenu` is one disclosure for identity, language, access details, diagnostics
+  and Sign out; workspace administration is a single `Manage` navigation entry.
 
 ## Tests
 

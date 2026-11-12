@@ -16,16 +16,15 @@ type Props = {
   accessError: string;
   diagnostic: ReactNode;
   onRetryAccess: ()=>void;
-  onSettings: ()=>void;
-  onOperations: ()=>void;
   onSignOut: ()=>void;
 };
 
 /**
- * The single account control: identity, language, workspace administration, access
- * diagnostics and sign-out live here instead of competing with the daily surface.
+ * The single account control: identity, language, access diagnostics and sign-out live
+ * here instead of competing with the daily surface. Workspace administration stays in
+ * the navigation's Manage group so the same label never appears twice.
  */
-export function AccountMenu({t,email,workspaceName,roles,authorized,locale,onLocale,localeSaving,localeDisabled,accessDetails,accessChecking,accessError,diagnostic,onRetryAccess,onSettings,onOperations,onSignOut}:Props){
+export function AccountMenu({t,email,workspaceName,roles,authorized,locale,onLocale,localeSaving,localeDisabled,accessDetails,accessChecking,accessError,diagnostic,onRetryAccess,onSignOut}:Props){
   const name=workspaceName||email||t('Account');
   return <details className="live-account">
     <summary aria-label={t('Account menu')}>
@@ -39,10 +38,6 @@ export function AccountMenu({t,email,workspaceName,roles,authorized,locale,onLoc
         <select aria-label={t('Language')} value={locale} onChange={event=>onLocale(event.target.value as 'en'|'zh-HK')} disabled={localeSaving||localeDisabled}>
           <option value="en">English</option><option value="zh-HK">繁體中文</option>
         </select></label>
-      {authorized&&<div className="live-account-actions">
-        <button type="button" onClick={onSettings}>{t('Settings')}</button>
-        <button type="button" onClick={onOperations}>{t('Operations')}</button>
-      </div>}
       {authorized&&<details className="live-access-details"><summary>{t('Access details')}</summary>{accessDetails}</details>}
       {authorized&&<button type="button" className="live-account-action" onClick={onRetryAccess} disabled={accessChecking}>{t(accessChecking?'Checking access…':'Check access again')}</button>}
       {authorized&&accessError&&<p role="alert" className="live-account-alert">{t(accessError)}</p>}

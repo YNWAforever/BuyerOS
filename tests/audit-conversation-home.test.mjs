@@ -40,8 +40,9 @@ test('Stage 0 ON exposes the conversation front door and the project destination
  assert.match(html,/New discussion/);assert.match(html,/This project/);
  assert.ok(!html.includes('Project work (retained)'),'internal retained label stays out of the SME path');
  assert.ok(!html.includes('Guided templates'),'templates are home content, not a sidebar group');
- assert.ok(!html.includes('Settings')&&!html.includes('Operations'),'workspace admin moved to the account menu');
- const expected=[['New discussion','/app/discussions/new'],['Home','/app'],['Offer','/app/discover/edit'],['Buyers','/app/discover'],['Research','/app/runs'],['Outreach','/app/outreach'],['Results','/app/results'],['Documents','/app/documents']];
+ assert.match(html,/aria-label="Manage"/,'workspace administration keeps a small Manage group');
+ assert.match(html,/Settings/);assert.match(html,/Operations/);
+ const expected=[['New discussion','/app/discussions/new'],['Home','/app'],['Offer','/app/discover/edit'],['Buyers','/app/discover'],['Research','/app/runs'],['Outreach','/app/outreach'],['Results','/app/results'],['Documents','/app/documents'],['Settings','/app/settings'],['Operations','/app/operations']];
  for(const [label,path] of expected){const b=button(tree,label);assert.equal(b.props.disabled,false);b.props.onClick();assert.equal(routes.at(-1),path,label);}
  assert.equal(button(tree,'Home').props['aria-current'],'page');
  assert.equal(button(tree,'New discussion').props['aria-current'],undefined);
@@ -49,12 +50,13 @@ test('Stage 0 ON exposes the conversation front door and the project destination
  assert.equal(button(thread,'Home').props['aria-current'],undefined,'a saved thread is not the home route');
 });
 
-test('Stage 0 account menu keeps workspace administration and diagnostics reachable',async()=>{
+test('Stage 0 account menu keeps identity and diagnostics reachable',async()=>{
  const {AccountMenu}=await import('../features/live/account-menu.tsx');
  const tree=AccountMenu({t:x=>x,email:'owner@example.test',workspaceName:'FIMMICK',roles:['workspace_admin'],authorized:true,locale:'en',onLocale:()=>{},localeSaving:false,localeDisabled:false,
-  accessDetails:'access-details',accessChecking:false,accessError:'',diagnostic:null,onRetryAccess:()=>{},onSettings:()=>{},onOperations:()=>{},onSignOut:()=>{}});
+  accessDetails:'access-details',accessChecking:false,accessError:'',diagnostic:null,onRetryAccess:()=>{},onSignOut:()=>{}});
  const html=renderToStaticMarkup(tree);
- for(const label of ['Account menu','Settings','Operations','Access details','Check access again','Sign out'])assert.ok(html.includes(label),`account menu keeps ${label}`);
+ for(const label of ['Account menu','Access details','Check access again','Sign out'])assert.ok(html.includes(label),`account menu keeps ${label}`);
+ assert.ok(!html.includes('Settings')&&!html.includes('Operations'),'workspace admin stays a single navigation entry');
  assert.ok(html.includes('owner@example.test'));
  assert.ok(html.includes('Language'));
 });
@@ -73,7 +75,7 @@ test('Stage 0 scope switcher has labelled comboboxes and no selector panels',asy
 test('Stage 0 retains project and permission gates in both flag states',()=>{
  for(const conversationHome of [false,true]){
   const tree=LiveNavigation({...props,conversationHome,authorized:false,projectKnown:false,canEdit:false,canCreate:false});
-  const labels=conversationHome?['Offer','Buyers','Research','Outreach','Results','Documents','Home']:['Offer','Research runs','Buyers','Drafts','Results','Settings','Operations'];
+  const labels=conversationHome?['Offer','Buyers','Research','Outreach','Results','Documents','Home','Settings','Operations']:['Offer','Research runs','Buyers','Drafts','Results','Settings','Operations'];
   for(const label of labels)assert.equal(button(tree,label).props.disabled,true,label);
   if(conversationHome)assert.equal(button(tree,'New discussion').props.disabled,true);
   const paths=[];const create=LiveNavigation({...props,conversationHome,projectKnown:false,navigate:p=>paths.push(p)});
