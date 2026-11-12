@@ -1,4 +1,4 @@
-"""T25 review/approval schema rollback retains evidence."""
+﻿"""T25 review/approval schema rollback retains evidence."""
 import psycopg
 import pytest
 from alembic import command
@@ -14,7 +14,7 @@ from tests.test_api_projects_db import api
 from tests.test_draft_approval_context_db import _addressed_case, _approval_payload, _approve, _review
 from tests.test_lookup_quotes_db import quote_case
 
-HEAD = "0065_sales_lifecycle"
+HEAD = "0072_turn_event_boundaries"
 
 
 def _config():

@@ -1,0 +1,325 @@
+# Conversation turns v1 ??backend contract (2026-11-08)
+
+Status: implemented in the backend increment behind
+`NEXT_PUBLIC_CONVERSATION_HOME=true`. This file is a read model for clients and
+reviewers; the authoritative prose stays in
+`docs/superpowers/specs/2026-11-08-conversation-turn-contract.md`.
+
+## Endpoints
+
+All under `/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-turns`.
+
+| Method + path | Purpose |
+| --- | --- |
+| `POST /conversation-turns` | One bounded turn. `thread_id` optional: absent ??create thread + first user message + assistant parts atomically. |
+| `POST /conversation-turns/{turn_id}/decisions` | Explicit approve/reject of one persisted inline proposal. Returns a continuation turn. |
+| `POST /conversation-turns/{turn_id}/cancel` | Stops undispatched steps; reports already-dispatched liability honestly. |
+
+Headers: `Authorization: Bearer ?圳, `Idempotency-Key: <8..200 chars>`,
+`If-Match: "<thread.version>"` (required for an existing `thread_id`, decisions
+and cancel). Responses use the existing `{data, request_id, data_mode}` envelope
+and are `no-store`.
+
+### Turn request
+
+```json
+{
+  "thread_id": "uuid | null",
+  "client_message_id": "uuid",
+  "expected_thread_version": 7,
+  "language": "en | zh-HK",
+  "text": "Research this buyer and prepare a follow-up",
+  "skill_id": "sales-research | null",
+  "template_id": "one of the seven thread templates | null",
+  "buyer_id": "uuid | null (only honoured when this request creates the thread)"
+}
+```
+
+`text` is 1..4000 non-blank characters; `skill_id` must resolve in the
+code-owned registry. A replayed `client_message_id` for the same actor returns
+the recorded turn; a different payload under the same key is
+`409 IDEMPOTENCY_CONFLICT`.
+
+### Turn response
+
+```json
+{
+  "thread": { "?吁erverThread with messages[]?? },
+  "turn": {
+    "id": "uuid",
+    "status": "completed | needs_input | needs_approval | failed | outcome_unknown | cancelled",
+    "parts": [ "MessagePart" ],
+    "notices": [ { "code": "??, "message": "??, "recovery": {"label": "??, "href": "/??} } ]
+  }
+}
+```
+
+### Bounded turn deadline (Increment 3.2)
+
+One synchronous turn is bounded by the reviewed setting
+`turn_deadline_seconds` (default **60**, integer **5?90**, env
+`BUYEROS_TURN_DEADLINE_SECONDS`, no secret). The bound is checked before each
+step start and around long reads; a crossed bound stops starting work, persists
+the parts already produced, appends the terminal `turn.final` event in the same
+transaction, and terminates the turn as `failed` with exactly one persisted
+notice:
+
+```json
+{"code": "TURN_DEADLINE_EXCEEDED", "message": "<localized en | zh-HK>"}
+```
+
+The response is **HTTP 200** with that failed turn ? never a 5xx, never an
+unexplained platform stall. The deadline message is rendered exactly once: it is
+persisted only as the notice, never duplicated as a TextPart (produced text and
+citation parts are kept; a proposal part is intentionally dropped because a
+failed deadline turn can never accept its decision). Current executors are
+nonbillable local producers, so an executor savepoint is **rolled back** when the
+bound crosses during/after it ? a deadline-failed turn leaves no canonical
+`sales_tasks`/`sales_outputs` row and reports the step `skipped`, never a guessed
+`outcome_unknown`. A future genuinely provider-dispatched step must instead keep
+`outcome_unknown` with its persisted task/receipt reference and a reconcile path
+that accepts that turn status; that path is explicitly out of scope here. The
+deadline-failed continuation is terminal `failed` and therefore deliberately not
+reconcilable (no `outcome_unknown` liability exists after rollback). The deadline
+path creates no provider stage, quote, receipt or budget reservation, and an
+idempotent replay of the same `client_message_id`/`Idempotency-Key` returns the
+recorded failed turn without re-execution. The observability bucket (`over_deadline`) is a
+constant in the persisted message; no request id, provider reference or payload
+is exposed. Decision continuations, cancel and reconcile honour the same bound.
+`TURN_BUSY_RETRY` is a **reserved taxonomy, not wired in this increment** ? a
+bounded single lock-wait retry would require safely re-taking the discussion
+row lock, so serialization is unchanged; the constant and docs name it for the
+future. Configuration/admission notice codes are unchanged.
+
+### Proposal decision decoration (Increment 2.7, read-time only)
+
+Every response that returns persisted assistant parts (turn responses and
+`ServerThread.messages[].parts`) decorates a `proposal` part with the persisted
+decision when one exists:
+
+```json
+"decision": {
+  "choice": "approve | reject",
+  "decided_at": "<persisted ISO-8601 timestamp>",
+  "decided_by": "you | a workspace member"
+}
+```
+
+Containment is enforced at read time: the lookup joins the decision to its
+persisted proposal row and requires the decision's own `thread_id`/`turn_id` to
+match the proposal's thread/turn *and* the containing message/turn that returns
+the part. A direct-DB decision row with mismatched thread/turn containment is
+ignored (the field stays absent), never applied to another thread's proposal.
+The stored `choice` is passed through a server-side `approve|reject` allowlist;
+unrecognised or malformed decision rows degrade to an absent field rather than
+an error.
+
+`decided_by` is a coarse label derived server-side by comparing the persisted
+decision actor with the requesting actor; no user id, email, membership id or
+internal reference is exposed (the query result is reduced to the label before
+serialization). `decided_at` is the persisted decision timestamp, never the
+request time. When no decision row exists the whole optional field is omitted,
+so older clients and pre-decision turns are unchanged. This is **read-time
+derivation**: the stored `parts` JSON, the turn/message rows and the schema are
+never written or extended. Because the decoration lives on the proposal part of
+the source turn, it appears wherever that thread/proposal is returned --
+including decision/cancel responses and reconcile continuations (reconcile
+continuation turns themselves carry no proposal part; the source proposal in the
+returned thread is decorated normally).
+
+### Turn events, SSE stream and reconciliation (Increment C)
+
+`conversation_turn_events` (Alembic `0068_conversation_turn_events`, boundary
+instants added by `0072_turn_event_boundaries`) stores derived, tenant-scoped,
+append-only turn events: `turn.started` (first) `{status, started_at?}`, `part`
+`{index, part}`, `tool` `{call_id, capability, state, summary?, error_code?}`,
+`proposal` `{proposal_id, capability, requires_approval}`, `notice`
+`{code, message}` and exactly one terminal `turn.final` `{status, finished_at?}`.
+`started_at`/`finished_at` are optional application-observed UTC instants
+(legacy events without them remain valid); latency dashboards read only these,
+because every event of a turn is appended in one transaction and therefore
+shares `created_at`. Events are written in the same transaction as the
+turn/part/status they describe, so the terminal event can never disagree with
+the persisted turn status. Per-turn `seq` is allocated by a shared allocator
+that flushes pending rows first; `UNIQUE(turn_id, seq)`.
+
+`GET ?/conversation-turns/{turn_id}/events?after=<seq>` returns
+`text/event-stream` (`Cache-Control: no-store`, `X-Accel-Buffering: no`),
+replays persisted events with `seq > after`, emits `: heartbeat` comments, and
+live-tails until `turn.final` or a bounded deadline. Reconnecting with the last
+seen seq never duplicates and never re-executes work. A foreign turn is `404`;
+a non-integer/negative cursor is `422`.
+
+`POST ?/conversation-turns/{turn_id}/reconcile` (Idempotency-Key required) is
+valid for an `outcome_unknown` turn (else `409 INVALID_STATE`). It performs a
+strictly read-only probe of already-persisted evidence (canonical sales task and
+output state; no provider receipts are created) and records an **effective
+resolution** in `conversation_turn_reconciliations`, keyed by a digest of the
+observed evidence:
+- an equivalent attempt (same evidence, any key or editor) returns the recorded
+  continuation with no new probe result and no extra audit row;
+- a later attempt with new authoritative evidence records the next
+  `evidence_seq` and may transition the source turn out of `outcome_unknown`
+  exactly once (to `completed` or `failed`); after that transition, changed
+  evidence yields `409 INVALID_STATE`;
+- audit adds exactly one `conversation_turn.reconciled` row per effective
+  resolution, never per attempt.
+It never dispatches, reserves or retries a provider call. Migrations:
+`0068_conversation_turn_events`, `0069_turn_reconciliations`
+(API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
+`conversation_turns` for the single source transition; no worker grants).
+
+### Turn metrics and budget dashboard (Increment 3.6)
+
+`GET ?/conversation-turns/metrics?window_days=<n>` returns project-scoped
+aggregates derived only from persisted rows: turn counts by status, per-turn
+latency, inline proposal counts by capability and decision, tool states
+including unknown outcomes, `CONVERSATION_MODEL_UNAVAILABLE` notice counts, and
+a budget summary built from `ConversationTurnProposal.cost`.
+
+Latency comes from the **application-observed boundary instants** carried by
+the terminal event payloads: `turn.started.payload.started_at` and
+`turn.final.payload.finished_at` (UTC instants, migration
+`0072_turn_event_boundaries` validates them in the event predicate function).
+Every event of one turn is appended inside that turn's transaction, so
+`conversation_turn_events.created_at` is identical for the whole turn and is
+**never** used as a latency sample; historical events without boundary
+instants contribute no sample rather than an invented `0 ms`. The dashboard
+shows an em dash when no sample exists.
+
+The budget summary splits `priced_proposals`, `unknown_price_proposals`,
+`no_cost_proposals`, `may_incur_provider_charges` and `estimated` decimal
+strings per unit. Classification follows `cost.kind`: deterministic
+`nonbillable` work is counted as no-cost (never added to `estimated`), and a
+`provider_credits` cost whose `known` is not exactly `true` (including the DB
+permitted `null`) is reported as price-unavailable instead of being summed as
+zero.
+
+`window_days` is bounded to `1..30` (default `7`); a missing/out-of-range value
+is `422 INVALID_REQUEST`, never silently widened. The window filter uses event
+creation time so retained turns without events are not double counted. The
+response is `Cache-Control: no-store` and carries aggregate counts only — no
+message text, proposal arguments or user content — and the read never
+dispatches, reserves or re-prices a provider call. The event scan is bounded by
+the time window; a composite `(workspace_id, project_id, created_at)` index is
+a recorded Phase 3 hardening follow-up, not part of this read model.
+
+### Turn admission ceiling
+
+`POST /conversation-turns` also passes a dedicated **per-workspace** ceiling
+before any turn/task/budget/idempotency write. Settings:
+`BUYEROS_TURN_PER_MINUTE` (`turn_per_minute`, default `30`, `0` disables).
+Admission is one atomic upsert into `conversation_turn_rate_windows` (migration
+`0070_turn_rate_windows`: PK `(workspace_id, window_start)` for the current UTC
+minute, forced RLS; API `SELECT,INSERT,UPDATE`; no worker grants), committed in
+an independent transaction so a later failure cannot roll the counter back. The
+check runs after authentication, project access and idempotency replay
+detection; a completed replay is returned without consuming admission. At the
+ceiling the request fails with `429 TURN_RATE_LIMITED` (retryable) and leaves no
+turn, event, task, budget or idempotency row. The counter is workspace-wide (all
+members share it), so another workspace is unaffected. Decisions, cancel and
+reconcile are not rate limited by this ceiling.
+
+### Thread company link
+
+`POST /conversation-turns` accepts `buyer_id` **only on the thread-first path**.
+The server validates that the canonical buyer exists in this workspace and
+project, that the actor has the native buyer-read permission, and rejects
+unknown/foreign ids with `404` (no existence leak). The link is immutable for
+the discussion: a later turn that supplies a different `buyer_id` fails with
+`409 BUYER_LINK_MISMATCH`. `ServerThread` gains `"buyerId": "uuid | null"`.
+
+`ServerThread` also includes `"archived": bool` in the thread read model
+(GET/PATCH/sources and turn responses). It is the **requesting viewer's own**
+`ThreadPreference` value for that thread and defaults to `false` when no
+preference row exists; it is read-only in the thread payload (setting it remains
+the existing `PUT …/preferences`). `pinned` stays out of the thread payload; list
+items keep their existing pinned/archived projection and filters, unchanged.
+
+A turn-first request has no selected source yet (Amendment A1 creates the
+thread shell); the created turn is therefore honestly `needs_input` with a
+`SOURCES_REQUIRED` notice. Citations and inline proposals require an explicit
+source selection on an existing thread (or an enrichment proposal, which only
+needs the linked buyer). At most two proposals are emitted per turn so the
+persisted step counter stays within the reviewed ceiling.
+
+Grounding includes the linked buyer as a citation item
+`{"id": "buyer:<uuid>", "label": "<display name>", "kind": "buyer"}`; only the
+minimal projection (id, company id, canonical display name, domain, review
+state) is used ??never contact data.
+
+### Thread messages
+
+```json
+{ "id": "uuid", "seq": 12, "role": "user | assistant", "text": "...",
+  "client_message_id": "uuid | null", "turn_id": "uuid | null",
+  "parts": [ "MessagePart" ] }
+```
+
+Legacy rows read as `role: "user"` with no `parts`. `seq` is monotonic per
+thread. Unknown `role`/`parts[].kind` must degrade to plain `text`.
+
+### MessageParts
+
+| kind | JSON payload |
+| --- | --- |
+| `text` | `{text, language}` |
+| `citations` | `{items: [{id, label, kind, href?}]}` |
+| `tool_activity` | `{call_id, capability, title, state, started_at, finished_at?, summary?, error_code?}`; state is `proposed ??approved ??running ??completed / failed / skipped / outcome_unknown` |
+| `proposal` | `{proposal_id, capability, title, rationale, arguments_preview, cost?, requires_approval: true}` |
+| `output_link` | `{output: {output_id, kind, revision, status}, title, href?}` |
+| `notice` | `{code, message, recovery?}` |
+
+Decision body: `{proposal_id, decision: "approve" | "reject",
+expected_thread_version}`. Approval re-runs the current membership, role,
+project/tenant, language, source-authority and policy/budget gate checks at
+execution time. Execution reuses the existing typed services
+(`create_task` + `assemble_or_core` + `save_output` from the sales-task /
+sales-output owners); no new permission surface, no provider dispatch in this
+increment.
+
+Capabilities proposed in this increment: `documents.read`
+(`understand-documents`), `research.read` (`sales-research`/`sales-quick`),
+`xverum.enrich_company` (when the thread has a linked buyer and the intent is
+company enrichment) and `drive.read` (when the thread selects an authorised
+Drive source). The last two are **proposal-only**: approving one records the
+decision and a terminal `failed` turn with an honest notice
+(`SALES_ADMISSION_DISABLED`, `PAID_ADMISSION_DISABLED`,
+`EXECUTION_RUNTIME_REQUIRED`, `XVERUM_NOT_CONFIGURED`,
+`XVERUM_DISPATCH_NOT_ENABLED`, `DRIVE_NOT_CONFIGURED`,
+`DRIVE_SOURCE_UNAVAILABLE`, `DRIVE_READ_NOT_ENABLED`); no provider transport is
+constructed and no spend is reserved. A workspace without sales admission receives a
+`SALES_ADMISSION_DISABLED` notice instead of a proposal or execution. Paid Xverum
+dispatch and `opencode-go` model admission remain behind their existing,
+separately-reviewed gates.
+
+## Persistence
+
+Alembic revisions `0066_conversation_turns` and `0067_conversation_buyer`:
+
+- `conversation_thread_messages` + `role`, `seq` (unique per thread, backfilled
+  from `created_at, id`), `client_message_id` (partial unique per thread),
+  `turn_id`, `parts`.
+- App-rollback compatibility: a `BEFORE INSERT` trigger
+  (`conversation_thread_message_seq`) allocates `seq` for the previous
+  application revision, whose inserts carry only the legacy columns. Downgrade
+  refuses when any assistant turn, typed part, client message id or turn id
+  exists; for legacy-only notes it drops the added columns and ordering falls
+  back to `created_at, id` (note text is preserved; typed turn history is not).
+- `0067_conversation_buyer`: `conversation_threads.buyer_id` (nullable
+  workspace+project composite FK to `project_buyers`, `ON DELETE SET NULL
+  (buyer_id)`); the proposal capability CHECK accepts
+  `xverum.enrich_company`/`drive.read`; the parts validator is a backward-safe
+  superset (buyer citation kind, credit-cost `known` flag). Downgrade refuses
+  while any company link or proposal-only capability decision exists.
+- `conversation_turns` ??one row per user turn or continuation; unique
+  `(workspace_id, thread_id, client_message_id)` and unique
+  `(workspace_id, actor_id, client_message_id)` so a duplicate submission cannot
+  create a second thread or a second turn.
+- `conversation_turn_proposals` ??trusted typed arguments/source refs, preview,
+  status and revision; unique per proposal id.
+- `conversation_turn_decisions` ??at most one effective decision per proposal
+  (`unique(workspace_id, proposal_id)`), with the continuation turn id.
+
+Forced RLS on every table; no `buyeros_worker` grants; thread deletion cascades
+the transcript, proposals and decisions.

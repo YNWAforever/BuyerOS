@@ -1,0 +1,20 @@
+{
+  "case": "email-not-found-nonbillable",
+  "expect": "accepted",
+  "kind": "xverum_mcp",
+  "recorded_at": "2026-11-11T12:00:00Z",
+  "request": {
+    "arguments": {
+      "id": "9000001"
+    },
+    "tool": "get_email_xverum"
+  },
+  "response": {
+    "credits_remaining": 998,
+    "credits_used": 0,
+    "emails": [],
+    "has_email": false,
+    "request_id": "req_email_001"
+  },
+  "schema": "provider-acceptance.v1"
+}

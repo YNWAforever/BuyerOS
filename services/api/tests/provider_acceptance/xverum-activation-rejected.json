@@ -1,0 +1,24 @@
+{
+  "case": "initialize-rejected-before-call",
+  "expect": "rejected",
+  "kind": "xverum_mcp",
+  "recorded_at": "2026-11-11T12:00:00Z",
+  "request": {
+    "arguments": {
+      "page": 1,
+      "page_size": 5,
+      "query": "Acme GmbH"
+    },
+    "observed_phase": "initialize",
+    "tool": "search_company_xverum"
+  },
+  "response": {
+    "error": {
+      "code": -32000,
+      "message": "unauthorized"
+    },
+    "id": 1,
+    "jsonrpc": "2.0"
+  },
+  "schema": "provider-acceptance.v1"
+}

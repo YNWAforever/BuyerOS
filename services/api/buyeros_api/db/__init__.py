@@ -53,6 +53,9 @@ __all__ = [
 ]
 
 from . import sales_execution  # noqa: F401
+from . import conversation_turns  # noqa: F401
+from . import conversation_turn_events  # noqa: F401
+from . import conversation_turn_reconciliations  # noqa: F401
 from . import sales_accounting  # noqa: F401
 from . import xverum  # noqa: F401
 from . import xverum_enrichment  # noqa: F401

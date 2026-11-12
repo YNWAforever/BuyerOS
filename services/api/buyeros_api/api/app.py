@@ -117,6 +117,8 @@ def create_app() -> FastAPI:
         app.include_router(conversation_router)
         from .routes.conversation_threads import router as conversation_threads_router
         app.include_router(conversation_threads_router)
+        from .routes.conversation_turns import router as conversation_turns_router
+        app.include_router(conversation_turns_router)
         from .routes.conversation_connections import router as conversation_connections_router
         app.include_router(conversation_connections_router)
 
@@ -135,7 +137,7 @@ def create_app() -> FastAPI:
         from ..services.api_rate_limit import classify_request, request_rate_bucket
         marker = request_correlation.set(request.state.request_id)
         bucket_marker = request_rate_bucket.set(classify_request(request.method, request.url.path))
-        sales_path = '/sales-tasks' in request.url.path or '/sales-outputs' in request.url.path or '/xverum/' in request.url.path
+        sales_path = '/sales-tasks' in request.url.path or '/sales-outputs' in request.url.path or '/xverum/' in request.url.path or '/conversation-turns' in request.url.path
         try:
             from ..services.conversation_access import sales_enabled
             parts = request.url.path.split('/')
@@ -143,7 +145,8 @@ def create_app() -> FastAPI:
             if sales_admission and (len(parts) < 4 or not sales_enabled(parts[3])):
                 response = JSONResponse(status_code=404,
                     content=error_body(request, code="NOT_FOUND", message="request failed"))
-            elif (("/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path)
+            elif (("/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path
+                   or "/conversation-turns" in request.url.path)
                     and os.environ.get("NEXT_PUBLIC_CONVERSATION_HOME") != "true"):
                 response = JSONResponse(status_code=404,
                     content=error_body(request, code="NOT_FOUND", message="request failed"))
@@ -164,7 +167,7 @@ def create_app() -> FastAPI:
         finally:
             request_rate_bucket.reset(bucket_marker)
             request_correlation.reset(marker)
-        if sales_path or "/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path:
+        if sales_path or "/conversation-threads" in request.url.path or "/conversation-connections" in request.url.path or "/conversation-turns" in request.url.path:
             response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request.state.request_id
         return response

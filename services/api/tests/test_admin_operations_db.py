@@ -1,4 +1,4 @@
-"""T12 admin, preferences and audit acceptance against disposable PostgreSQL."""
+﻿"""T12 admin, preferences and audit acceptance against disposable PostgreSQL."""
 import psycopg
 
 from tests.contract_validation import assert_contract_response
@@ -23,7 +23,7 @@ def test_0017_preferences_rls_and_empty_rollback(isolated_migrated):
         assert conn.execute("SELECT to_regclass('workspace_preferences')").fetchone()[0] is None
     command.upgrade(config,'head')
     with psycopg.connect(migrated) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0065_sales_lifecycle'
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == '0072_turn_event_boundaries'
 
 
 def _member_id(seeded, subject):

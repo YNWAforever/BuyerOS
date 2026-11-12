@@ -1,4 +1,4 @@
-"""Restricted native workers read schema versions and write only checkpoint data."""
+﻿"""Restricted native workers read schema versions and write only checkpoint data."""
 import asyncio
 from urllib.parse import urlsplit, urlunsplit
 
@@ -71,7 +71,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
     config = Config(str(ALEMBIC_INI))
     config.set_main_option('script_location', str(SERVICE_ROOT / 'alembic'))
     with psycopg.connect(migrated) as owner:
-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0065_sales_lifecycle'
+        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0072_turn_event_boundaries'
     # A compatibility downgrade retains security hardening and all checkpoint data.
     command.downgrade(config, '0035_worker_recovery_probe')
     with psycopg.connect(schema_worker) as worker:
@@ -80,7 +80,7 @@ def test_0036_round_trip_keeps_schema_version_grants_read_only(migrated, schema_
         assert worker.execute("SELECT max(v),count(*) FROM buyeros_graph.checkpoint_migrations").fetchone() == (9, 10)
     command.upgrade(config, 'head')
     with psycopg.connect(migrated) as owner:
-        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0065_sales_lifecycle'
+        assert owner.execute('SELECT version_num FROM alembic_version').fetchone()[0] == '0072_turn_event_boundaries'
         assert owner.execute('SELECT count(*) FROM buyeros_graph.checkpoints').fetchone()[0] > 0
 
 

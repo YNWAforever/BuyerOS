@@ -1,4 +1,4 @@
-"""Future derived-copy regression, seeded only in owned DB; no evidence eligibility implied."""
+﻿"""Future derived-copy regression, seeded only in owned DB; no evidence eligibility implied."""
 import hashlib,json,uuid
 from datetime import datetime,timezone
 import psycopg,pytest
@@ -133,7 +133,7 @@ def test_populated_derived_privacy_rollback_retains_eraser_and_closes_all_receip
             assert db.execute('SELECT excerpt,translation FROM evidence WHERE id=%s',(c['derived']['evidence'],)).fetchone()==('Source expired',None)
             assert db.execute('SELECT state,remaining_hold FROM budget_reservations').fetchall()==c['hold']
     finally:
-        invoke_revision(c['dsn'],cfg,'0059_conversation_connections','_fences',('0065_sales_lifecycle',))
+        invoke_revision(c['dsn'],cfg,'0059_conversation_connections','_fences',('0072_turn_event_boundaries',))
         monkeypatch.setenv('BUYEROS_DATABASE_URL',runtime_role_dsn(c['dsn']));get_settings.cache_clear()
     assert erase(c) is False
     with psycopg.connect(c['dsn']) as db:

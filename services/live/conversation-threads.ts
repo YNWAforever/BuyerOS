@@ -43,11 +43,12 @@ export class ConversationThreads{
     else if(fingerprint===undefined)this.acceptedReplies.delete(id);
     else {const replies=this.acceptedReplies.get(id);replies?.delete(fingerprint);if(!replies?.size)this.acceptedReplies.delete(id);}
   }
-  async request<T>(suffix:string,method='GET',body?:unknown,version?:number):Promise<T>{
+  async request<T>(suffix:string,method='GET',body?:unknown,version?:number,extraSignal?:AbortSignal):Promise<T>{
     const scope=this.session.current();
     if(!this.enabled||!this.session.isCurrent(this.identity)||!this.session.token()||scope.mode!=='live'||!scope.actor||!scope.workspace||!scope.project)throw new LiveCancelled('scope changed');
+    const signal=extraSignal?AbortSignal.any([extraSignal,this.session.controller().signal]):this.session.controller().signal;
     const send=(idempotencyKey?:string)=>this.client.request<T>({path:this.root+suffix,method,body,ifMatch:version===undefined?undefined:`"${version}"`,idempotencyKey,
-      scope:this.identity,token:this.session.token(),signal:this.session.controller().signal,missingIsUnavailable:true});
+      scope:this.identity,token:this.session.token(),signal,missingIsUnavailable:true});
     let result:T;
     if(method==='POST'||method==='PUT'){
       const key=JSON.stringify([method,suffix,version,body]);let intent=this.intents.get(key);
@@ -63,7 +64,7 @@ export class ConversationThreads{
     const read=this.request<{items:ServerSummary[];total:number;offset:number;limit:number}>(`?offset=${offset}&limit=50`);
     if(offset===0)this.listRead=read;return read;
   }
-  get(id:string){return this.request<ServerThread>('/'+encodeURIComponent(id));}
+  get(id:string,signal?:AbortSignal){return this.request<ServerThread>('/'+encodeURIComponent(id),'GET',undefined,undefined,signal);}
   create(title:string,initialMessage:string){return this.request<ServerThread>('','POST',{confirmed:true,template_id:'custom',title,messages:[{text:initialMessage}],sources:[],runs:[]});}
   search(q='',archived=false,offset=0){return this.request<{items:(ServerSummary&{pinned:boolean;archived:boolean})[];total:number}>(`?q=${encodeURIComponent(q)}&archived=${archived}&offset=${offset}&limit=50`);}
   preferences(id:string,pinned:boolean,archived:boolean){return this.request(`/${id}/preferences`,'PUT',{pinned,archived});}
@@ -83,7 +84,7 @@ export class ConversationThreads{
     });
   }
   append(thread:ServerThread,text:string){return this.request<ServerThread>(`/${thread.id}/messages`,'POST',{text},thread.version);}
-  sources(thread:ServerThread,sources:SelectedSource[]){return this.request<ServerThread>(`/${thread.id}/sources`,'PUT',{sources:sources.map(({id,label})=>({id,label}))},thread.version);}
+  sources(thread:ServerThread,sources:SelectedSource[],signal?:AbortSignal){return this.request<ServerThread>(`/${thread.id}/sources`,'PUT',{sources:sources.map(({id,label})=>({id,label}))},thread.version,signal);}
   run(thread:ServerThread,run:RunReference){const {id,label,status}=run;return this.request<ServerThread>(`/${thread.id}/runs`,'POST',{id,label,status},thread.version);}
 }
 

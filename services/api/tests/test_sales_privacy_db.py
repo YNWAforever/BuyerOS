@@ -1,4 +1,4 @@
-"""Task14 financial evidence stays separate from private content."""
+﻿"""Task14 financial evidence stays separate from private content."""
 import importlib
 from decimal import Decimal
 import uuid
@@ -151,7 +151,7 @@ def test_lifecycle_migration_empty_roundtrip_and_grants(isolated_migrated):
     command.downgrade(config(),'0064_xverum_enrichment')
     command.upgrade(config(),'head')
     with psycopg.connect(isolated_migrated) as db:
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0065_sales_lifecycle'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0072_turn_event_boundaries'
         for service in ('search','model','contact'):
             assert db.execute(f'SELECT public.buyeros_{service}_receipts_writable()').fetchone()[0]
         assert db.execute('SELECT public.buyeros_xverum_connections_ready()').fetchone()[0]
@@ -188,7 +188,7 @@ def test_all_unsubmitted_accounting_and_populated_downgrade_refusal(execution_pg
         assert db.execute('SELECT remaining_hold,state FROM budget_reservations WHERE operation_id=%s',(parent,)).fetchone()==(Decimal(0),'released')
         assert db.execute('SELECT count(*) FROM sales_accounting_receipts WHERE execution_id=%s',(parent,)).fetchone()[0]==1
         assert db.execute('SELECT count(*) FROM cost_events WHERE operation_id=%s',(parent,)).fetchone()[0]==0
-        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0065_sales_lifecycle'
+        assert db.execute('SELECT version_num FROM alembic_version').fetchone()[0]=='0072_turn_event_boundaries'
 
 
 @pytest.mark.parametrize('second',['queued','unknown'])

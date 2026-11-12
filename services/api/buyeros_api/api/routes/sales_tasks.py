@@ -16,7 +16,7 @@ router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/s
 async def capability(workspace_id:uuid.UUID, project_id:uuid.UUID, request:Request,
     principal:Principal=Depends(get_principal)):
     from ...services.conversation_access import sales_enabled
-    async with access(workspace_id, project_id, principal, sales=True, admission=False):
+    async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False):
         enabled = sales_enabled(workspace_id)
     from ...sales.contracts import SalesCapability
     return envelope(SalesCapability(admission_enabled=enabled).model_dump(mode='json'), request.state.request_id)
@@ -26,25 +26,41 @@ async def capability(workspace_id:uuid.UUID, project_id:uuid.UUID, request:Reque
 async def native_sources(workspace_id:uuid.UUID, project_id:uuid.UUID, request:Request,
     principal:Principal=Depends(get_principal)):
     from sqlalchemy import select
+    from ...api.deps import get_engine
+    from ...db.session import tenant_session
     from ...db.buyers import ProjectBuyer
     from ...db.icp import IcpVersion
     from ...db.runs import SearchRun
     from ...sales.contracts import SourceRef
     from ...sales.native_sources import resolve_native_source
     items=[]
-    async with access(workspace_id, project_id, principal, sales=True, admission=False) as (session, actor):
-        scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
+    # Authorization first, without workspace gates. The candidate collection and
+    # each validation batch then run in their own SHORT normal transactions, so
+    # no single transaction or workspace advisory lock spans the enumeration.
+    # (A read-only transaction is wrong here: per-source validation uses the
+    # existing write-capable retention/native-read helpers.)
+    async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False) as (session, actor):
+        pass
+    scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
+    candidates=[]
+    async with tenant_session(get_engine(), workspace_id) as session:
         for kind,model,column in [('buyer',ProjectBuyer,'version'),('profile',IcpVersion,'number'),('run',SearchRun,'version')]:
             rows=(await session.scalars(select(model).where(model.workspace_id==workspace_id,
                 model.project_id==project_id).order_by(model.id).limit(50))).all()
             for row in rows:
                 ref=SourceRef(id=row.id,kind=kind,version=getattr(row,column),locator=f'{kind}:{row.id}',retention_class='durable')
+                candidates.append((ref,f'{kind} {str(row.id)[:8]}'))
+    batch_size=10
+    for start in range(0,len(candidates),batch_size):
+        # Short transaction: current policy/revision/native authority per source,
+        # committed (and locks released) before the next batch starts.
+        async with tenant_session(get_engine(), workspace_id) as session:
+            for ref,label in candidates[start:start+batch_size]:
                 try:
-                    # The same current policy/revision/native authority as task intake.
                     await resolve_native_source(session,scope,ref)
                 except (ValueError,ApiError):
                     continue
-                items.append({'label':f'{kind} {str(row.id)[:8]}', 'ref':ref.model_dump(mode='json')})
+                items.append({'label':label,'ref':ref.model_dump(mode='json')})
     from ...sales.contracts import SalesNativeSources
     return envelope(SalesNativeSources(items=items).model_dump(mode='json'),request.state.request_id)
 
@@ -53,7 +69,7 @@ async def native_sources(workspace_id:uuid.UUID, project_id:uuid.UUID, request:R
 async def core_guidance(workspace_id:uuid.UUID,project_id:uuid.UUID,task_id:uuid.UUID,request:Request,
     principal:Principal=Depends(get_principal)):
     from ...sales.actions import CORE_SKILL_OWNER
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
         row=await service.task_row(session,scope,task_id,edit=True)
         result=await CORE_SKILL_OWNER.guidance(session,scope,row)
@@ -97,7 +113,7 @@ async def output_review(workspace_id:uuid.UUID,project_id:uuid.UUID,task_id:uuid
     principal:Principal=Depends(get_principal)):
     from ...services.sales_outputs import review_task_candidate
     from ...sales.contracts import OutputReview, SourceRef
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         scope=Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor)
         row=await service.task_row(session,scope,task_id,edit=True)
         try:
@@ -124,14 +140,14 @@ async def create(workspace_id: uuid.UUID, project_id: uuid.UUID, payload: TaskIn
 
 @router.get('/{task_id}', operation_id='getSalesTask')
 async def get(workspace_id: uuid.UUID, project_id: uuid.UUID, task_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)):
-    async with access(workspace_id, project_id, principal, sales=True, admission=False) as (session, actor):
+    async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False) as (session, actor):
         result = await service.get_task(session, Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor), task_id)
     return envelope(result.model_dump(mode='json'), request.state.request_id)
 
 
 @router.get('/{task_id}/events', operation_id='listSalesTaskEvents')
 async def events(workspace_id: uuid.UUID, project_id: uuid.UUID, task_id: uuid.UUID, request: Request, after: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=100), principal: Principal = Depends(get_principal)):
-    async with access(workspace_id, project_id, principal, sales=True, admission=False) as (session, actor):
+    async with access(workspace_id, project_id, principal, sales=True, admission=False,locks=False) as (session, actor):
         result = await service.read_events(session, Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor), task_id, after)
         result = result[:limit]
     return envelope({'events':[item.model_dump(mode='json') for item in result], 'next_sequence':result[-1].sequence if result else None}, request.state.request_id)
@@ -151,7 +167,7 @@ async def cancel(workspace_id: uuid.UUID, project_id: uuid.UUID, task_id: uuid.U
 async def listing(workspace_id: uuid.UUID, project_id: uuid.UUID, request: Request,
     thread_id: uuid.UUID = Query(...), offset: int = Query(0, ge=0, le=10000),
     limit: int = Query(50, ge=1, le=50), principal: Principal = Depends(get_principal)):
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         result = await service.list_tasks(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),thread_id,offset,limit)
     return envelope(result.model_dump(mode='json'),request.state.request_id)
 
@@ -203,7 +219,7 @@ async def admit(workspace_id: uuid.UUID, project_id: uuid.UUID, task_id: uuid.UU
 async def steps(workspace_id: uuid.UUID, project_id: uuid.UUID, task_id: uuid.UUID,
     request: Request, principal: Principal = Depends(get_principal)):
     from ...execution.sales_tasks import list_steps
-    async with access(workspace_id,project_id,principal,sales=True,admission=False) as (session,actor):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False) as (session,actor):
         result=await list_steps(session,Scope(workspace_id=workspace_id,project_id=project_id,actor_id=actor),task_id)
     return envelope({'items':[item.model_dump(mode='json') for item in result]},request.state.request_id)
 
@@ -226,6 +242,6 @@ catalogue_router=APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{proje
 async def skills(workspace_id:uuid.UUID,project_id:uuid.UUID,request:Request,principal:Principal=Depends(get_principal)):
     from ...sales.registry import catalogue
     from ...sales.contracts import SkillPage
-    async with access(workspace_id,project_id,principal,sales=True,admission=False):
+    async with access(workspace_id,project_id,principal,sales=True,admission=False,locks=False):
         value=SkillPage(skills=catalogue())
     return envelope(value.model_dump(mode='json'),request.state.request_id)

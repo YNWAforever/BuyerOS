@@ -29,6 +29,7 @@ from .external_runner import execute_external, reconcile_intent_key
 from .handlers.contact_submit import execute_contact_lookup
 from .handlers.reconcile import execute_contact_reconcile
 from .handlers.retention import execute_source_delete, expire_due_sources, expire_due_contacts
+from buyeros_api.services.conversation_retention import prune_rate_windows, prune_turn_events
 from .document_runner import DOCUMENT_EVENTS, execute_document
 from .discovery_runner import execute_discovery, execute_discovery_reconcile
 from .fetch_runner import FETCH_EVENTS, execute_offer_fetch
@@ -218,6 +219,16 @@ def sweep_sync() -> list[str]:
                 engine, now, policy_version=settings.retention_policy_version,
                 limit=settings.batch_size,
             )
+        # Derived conversation data (Phase 3.4): turn events and expired rate
+        # windows are prunable; turns, parts and decisions are not touched.
+        await prune_turn_events(
+            engine, now, retention_days=settings.conversation_event_retention_days,
+            limit=max(settings.batch_size, 100),
+        )
+        await prune_rate_windows(
+            engine, now, retention_minutes=settings.turn_rate_window_retention_minutes,
+            limit=max(settings.batch_size, 100),
+        )
         return await sweep_once(
             engine, publish_message, "buyeros-sweeper", now, settings.batch_size, settings.lease_seconds
         )

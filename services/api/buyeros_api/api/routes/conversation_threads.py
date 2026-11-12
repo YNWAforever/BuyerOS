@@ -17,8 +17,10 @@ from ...db.models import Membership, User
 from ...services.audit_service import append_audit
 from ...services.membership_directory import directory_search, member_display_name
 from ...services.conversation_access import access, load, not_found, shared, thread_scope
+from ...services.conversation_messages import next_message_seq
 from ...services.sales_tasks import ensure_thread_deletable
 from ...services.conversation_connections import approved_sources, SOURCE as DRIVE_SOURCE
+from ...services.conversation_proposal_read import decorate_thread_payload
 
 router = APIRouter(prefix='/v1/workspaces/{workspace_id}/projects/{project_id}/conversation-threads', tags=['conversation-threads'])
 LABELS = {'drive': {'Google Drive item'}, 'document': {'Offer document'}, 'fact': {'Offer fact', 'Approved offer fact', 'Candidate offer fact'}, 'run': {'Research run'}, 'results': {'Results summary'}}
@@ -111,14 +113,39 @@ class Preference(StrictModel):
     archived: StrictBool
 
 
-async def data(session, row, role, *, full=True):
+async def data(session, row, role, *, full=True, viewer=None):
+    # Viewer-scoped preference read; the thread payload exposes only `archived`
+    # (the viewer's own preference, default false). List items keep their own
+    # pinned/archived projection, so list behaviour is unchanged.
+    preference = None
+    if viewer is not None:
+        preference = (await session.execute(select(ThreadPreference).where(
+            ThreadPreference.workspace_id == row.workspace_id,
+            ThreadPreference.thread_id == row.id,
+            ThreadPreference.actor_id == viewer))).scalar_one_or_none()
     result = {'id': str(row.id), 'version': row.version, 'templateId': row.template_id, 'title': row.title,
         'createdAt': int(row.created_at.timestamp()*1000), 'updatedAt': int(row.updated_at.timestamp()*1000), 'access': role,
+        'buyerId': str(row.buyer_id) if row.buyer_id else None,
+        'archived': bool(preference and preference.archived),
         'shareCount': (await session.execute(select(func.count()).select_from(Share).where(Share.workspace_id == row.workspace_id, Share.thread_id == row.id))).scalar_one() if role == 'owner' else 0}
     if full:
-        messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.created_at, Message.id))).scalars().all()
-        result.update(messages=[{'id': str(m.id), 'text': m.text} for m in messages], sources=row.sources, runs=row.runs)
+        messages = (await session.execute(select(Message).where(Message.workspace_id == row.workspace_id, Message.thread_id == row.id).order_by(Message.seq))).scalars().all()
+        result.update(messages=[message_data(m) for m in messages], sources=row.sources, runs=row.runs)
+        if viewer is not None:
+            await decorate_thread_payload(session, row.workspace_id, row.project_id,
+                row.id, result, viewer)
     return result
+
+
+def message_data(message):
+    """Thread message read model; legacy rows read as user notes with no parts."""
+    value = {'id': str(message.id), 'seq': message.seq, 'role': message.role,
+        'text': message.text,
+        'client_message_id': str(message.client_message_id) if message.client_message_id else None,
+        'turn_id': str(message.turn_id) if message.turn_id else None}
+    if message.parts:
+        value['parts'] = message.parts
+    return value
 
 
 def audit(session, row, actor, action, entity_id=None):
@@ -190,12 +217,14 @@ async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload:
             now = datetime.now(timezone.utc)
             for index, note in enumerate(payload.messages):
                 session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id,
-                    owner_user_id=actor, author_user_id=actor, text=note.text, created_at=now+timedelta(microseconds=index)))
+                    owner_user_id=actor, author_user_id=actor, text=note.text,
+                    seq=index+1, role='user', parts=[],
+                    created_at=now+timedelta(microseconds=index)))
             audit(session, row, actor, 'imported')
             complete_idempotency(outcome, str(row.id))  # No note/title copies in idempotency responses.
             await session.flush()
             role = 'owner'
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -203,7 +232,7 @@ async def create_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, payload:
 async def get_thread(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.UUID, request: Request, principal: Principal = Depends(get_principal)):
     async with access(workspace_id, project_id, principal) as (session, actor):
         row, role = await load(session, workspace_id, project_id, thread_id, actor)
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -214,7 +243,7 @@ async def rename(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
         bump(row, request)
         row.title = payload.title
         await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -228,10 +257,14 @@ async def append(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
             count = (await session.execute(select(func.count()).select_from(Message).where(Message.workspace_id == workspace_id, Message.thread_id == row.id))).scalar_one()
             if count >= 100:
                 raise ApiError(409, 'MESSAGE_LIMIT', '100-note limit reached; start another discussion and keep your unsaved note')
-            session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id, owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text))
+            # Flushes any pending row first; the discussion row lock serializes appends.
+            seq = await next_message_seq(session, workspace_id, row.id)
+            session.add(Message(workspace_id=workspace_id, project_id=project_id, thread_id=row.id,
+                owner_user_id=row.owner_user_id, author_user_id=actor, text=payload.text,
+                seq=seq, role='user', parts=[]))
             complete_idempotency(outcome, str(row.id))
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -249,7 +282,7 @@ async def sources(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uui
             complete_idempotency(outcome, str(row.id))
             audit(session, row, actor, 'sources_changed')
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -266,7 +299,7 @@ async def runs(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.U
             row.runs = refs + [payload.model_dump()]
             complete_idempotency(outcome, str(row.id))
             await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -341,7 +374,7 @@ async def grant(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid.
             await session.flush()
             audit(session, row, actor, action, share.id)
             complete_idempotency(outcome, str(row.id))
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
 
 
@@ -356,5 +389,5 @@ async def revoke(workspace_id: uuid.UUID, project_id: uuid.UUID, thread_id: uuid
         audit(session, row, actor, 'revoked', share.id)
         await session.delete(share)
         await session.flush()
-        result = await data(session, row, role)
+        result = await data(session, row, role, viewer=actor)
     return envelope(result, request.state.request_id)
