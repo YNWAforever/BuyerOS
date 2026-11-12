@@ -1,6 +1,7 @@
 'use client';
 import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
-import {Archive,Ellipsis,Menu,Pin,PanelRight} from 'lucide-react';
+import type {ReactNode} from 'react';
+import {Archive,ClipboardList,Ellipsis,Menu,Pin,PanelRight} from 'lucide-react';
 import type {LiveClient} from '@/services/live/client';
 import {LiveCancelled,LiveError} from '@/services/live/client';
 import type {UploadContext} from '@/services/live/document-upload';
@@ -43,6 +44,8 @@ export type ConversationStudioProps={
   threadId:string|null;
   /** True when the route explicitly asks for a new discussion. */
   fresh:boolean;
+  /** Device-only notes sit beside the thread list, never under the transcript. */
+  threadListFooter?:ReactNode;
 };
 type LoadedThread={raw:ServerThread;chat:ChatThread};
 type ThreadState='new'|'loading'|'ready'|'missing'|'unavailable'|'reloading';
@@ -126,7 +129,7 @@ function useDebounced<T>(value:T,delay:number):T{
  * parts, and a composer whose text survives navigation and reload. Turn responses are
  * rendered once; reloads rebuild the same transcript from persisted parts.
  */
-export function ConversationStudio({client,session,t,locale,navigate,canViewOffer,threadId,fresh}:ConversationStudioProps){
+export function ConversationStudio({client,session,t,locale,navigate,canViewOffer,threadId,fresh,threadListFooter}:ConversationStudioProps){
   const identity=session.identity(),scope=session.current();
   const api=useMemo(()=>scopedThreadApi(client,session,identity),[client,session,identity]);
   const turnsApi=useMemo(()=>scopedTurns(client,session,true),[client,session]);
@@ -700,7 +703,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   // discussion (and therefore the project scope) is loaded.
   const panelTabs:PanelTab[]=loaded&&!baseTabs.includes('metrics')?[...baseTabs,'metrics']:baseTabs;
   const tab:PanelTab=activeTab&&panelTabs.includes(activeTab)?activeTab:panelTabs[0];
-  const panelOpen=!home&&(panelPreference??contentTabs.length>0);
+  // The context panel is a deliberate drill-down: it never opens on its own.
+  const panelOpen=!home&&panelPreference===true;
   const threadTitle=loaded?.chat.title??(home?t('Home'):t('New discussion'));
   const step=running&&stream?streamStep(stream):'working';
   const statusLine=sending?t('Preparing a reply…'):sendNotice?t(sendNotice):threadNoticeText&&threadState==='ready'?t(threadNoticeText):'';
@@ -736,7 +740,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       notice={list.notice} loading={list.loading} query={query} archived={archived}
       onQuery={setQuery} onToggleArchived={()=>setArchived(value=>!value)} onNew={()=>navigate('/app/discussions/new')}
       onOpen={id=>navigate(`/app/discussions/s/${id}`)} onMore={list.items.length<list.total?()=>void moreThreads():undefined}
-      onClose={mobileView==='threads'?()=>closeMobileView('threads'):undefined}/>
+      onClose={mobileView==='threads'?()=>closeMobileView('threads'):undefined} footer={threadListFooter}/>
     <div className={home?'conversation-main conversation-home-main':'conversation-main'}>
       <header className="conversation-head">
         <div className="conversation-head-title">
@@ -745,6 +749,17 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           {loaded&&!home&&<WorkspaceBadge thread={loaded.raw} t={t}/>}
         </div>
         <div className="conversation-head-actions">
+          {!home&&<details className="conversation-task-form" open={guidedOpen}
+            onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}>
+            <summary aria-label={t('Task form')} title={t('Task form')}><ClipboardList size={18} aria-hidden="true"/><span className="conversation-sr">{t('Task form')}</span></summary>
+            <div className="conversation-task-form-panel">
+              {loaded
+                ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
+                :threadId!==null
+                  ?<p className="conversation-secondary-loading" role="status">{t('Loading discussion…')}</p>
+                  :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
+            </div>
+          </details>}
           {loaded&&<details className="conversation-menu"><summary aria-label={t('Discussion menu')}><Ellipsis size={18} aria-hidden="true"/><span className="conversation-sr">{t('Discussion menu')}</span></summary>
             <div className="conversation-menu-panel">
               <form onSubmit={event=>{event.preventDefault();void renameThread();}}><label>{t('Discussion title')}<input maxLength={80} value={title} onChange={event=>setTitle(event.target.value)}/></label><button type="submit" disabled={!title.trim()||title.trim()===loaded.chat.title}>{t('Rename discussion')}</button></form>
@@ -778,14 +793,6 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
             <button type="button" onClick={startNewTurn}>{t('Start a new turn')}</button>
           </div>}
           {composer}
-          <details className="conversation-secondary" open={guidedOpen}
-            onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
-            {loaded
-              ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
-              :threadId!==null
-                ?<p className="conversation-secondary-loading" role="status">{t('Loading discussion…')}</p>
-                :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
-          </details>
         </>}
     </div>
     {!home&&panelOpen&&<div className="conversation-panel-slot" id="conversation-context-panel">

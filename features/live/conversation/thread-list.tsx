@@ -1,4 +1,5 @@
 'use client';
+import type {ReactNode} from 'react';
 import {Plus,Pin,Search,X} from 'lucide-react';
 import type {ServerSummary} from '@/services/live/conversation-threads';
 import {sortThreadRows} from './thread-management';
@@ -21,6 +22,8 @@ type Props={
   onOpen:(id:string)=>void;
   onMore?:()=>void;
   onClose?:()=>void;
+  /** Secondary surfaces that belong beside the thread list, never in the transcript. */
+  footer?:ReactNode;
 };
 function dateLabel(updatedAt:number,locale:'en'|'zh-HK'):string{
   const date=new Date(updatedAt),now=new Date();
@@ -28,7 +31,7 @@ function dateLabel(updatedAt:number,locale:'en'|'zh-HK'):string{
   return date.toLocaleDateString(locale==='zh-HK'?'zh-HK':'en-GB',{day:'numeric',month:'short'});
 }
 /** Recent discussions beside the transcript; selection never invents a thread. */
-export function ConversationThreadList({t,locale,items,total,currentId,fresh,notice,loading,query,archived,onQuery,onToggleArchived,onNew,onOpen,onMore,onClose}:Props){
+export function ConversationThreadList({t,locale,items,total,currentId,fresh,notice,loading,query,archived,onQuery,onToggleArchived,onNew,onOpen,onMore,onClose,footer}:Props){
   const ordered=sortThreadRows(items);
   return <aside className="conversation-threads" aria-label={t('Discussions')}>
     <div className="conversation-threads-head">
@@ -46,5 +49,6 @@ export function ConversationThreadList({t,locale,items,total,currentId,fresh,not
         </button></li>)}
       </ul>:<p className="conversation-threads-status">{t('No discussions in this project yet.')}</p>}
     {onMore&&items.length<total&&<button type="button" className="conversation-more" onClick={onMore}>{t('Load more discussions')}</button>}
+    {footer&&<div className="conversation-threads-extra">{footer}</div>}
   </aside>;
 }

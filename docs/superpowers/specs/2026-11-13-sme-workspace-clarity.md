@@ -51,13 +51,24 @@ same parts become stacked strips and the studio keeps its drawer/panel views.
 - `AccountMenu` is one disclosure for identity, language, access details, diagnostics
   and Sign out; workspace administration is a single `Manage` navigation entry.
 
+## Second pass (stacked branch `codex/sme-workspace-clarity-2`)
+
+- The context panel is closed until asked for: the thread header owns `Show context panel`
+  and the mobile `Details` view; no third column appears on first load.
+- `GuidedSales` moves from a disclosure under the composer into a header `Task form`
+  drill-down, keeping the transcript and composer as the only primary surfaces.
+- Device-only notes move from the bottom of the workspace into the thread-list footer;
+  opening one shows a full-width floating panel instead of a squeezed sidebar column.
+- Mobile header hides the repeated privacy badge and wraps its actions cleanly.
+
 ## Tests
 
 - Static audit (`tests/audit-conversation-home.test.mjs`): navigation destinations,
   permission gates, hidden page heading, scope/account semantics, home copy.
 - Browser fixture (`tests/conversation-home-responsive.test.mjs`): task-first home,
-  card prefill, draft survival, three mobile views, zh-HK, 200% zoom, shell overflow
-  at 320–1440px, account reachability.
+  card prefill, draft survival, three mobile views, closed-by-default context panel,
+  task-form drill-down, zh-HK, 200% zoom, shell overflow at 320–1440px, account
+  reachability.
 - `pnpm test:core`: 191/191.
 - TypeScript and ESLint clean for the changed files.
 
@@ -69,5 +80,3 @@ checkout — home and thread at 1440/1024/390, EN and zh-HK.
 - No deployment, alias switch or protected promotion. Production remains on the
   audited build until the owner explicitly approves.
 - No backend, schema, API or permission changes.
-- The legacy device-note disclosure stays available; relocating it behind the thread
-  list and closing the context panel by default are PR 2 scope.
