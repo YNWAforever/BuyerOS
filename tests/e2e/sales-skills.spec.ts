@@ -9,20 +9,28 @@ import type {Page} from '@playwright/test';
 // native disclosure. Every navigation re-opens that disclosure through its visible
 // summary control before a test continues with the unchanged guided assertions.
 async function openGuided(page:Page){
+ // Wait for the first studio paint: on the project dashboard the guided disclosure is
+ // absent, and deciding too early would send the test to the wrong surface.
+ await Promise.race([
+  page.locator('.conversation-home').waitFor({state:'attached',timeout:15000}).catch(()=>{}),
+  page.locator('.conversation-studio').waitFor({state:'attached',timeout:15000}).catch(()=>{}),
+ ]);
  // The project dashboard is a task-first home now, not a thread: open the fixture's
  // saved discussion before looking for the guided form.
  if(await page.locator('.conversation-home').count()){
   const first=page.locator('.conversation-thread-items button').first();
   if(await first.count()){
    if(!(await first.isVisible()))await page.getByRole('button',{name:'Show discussions',exact:true}).click();
+   await first.waitFor({state:'visible',timeout:10000});
    await first.click();
+   await page.waitForFunction(()=>/^\/app\/discussions\/s\//.test(new URL(location.href).searchParams.get('route')??''),{timeout:10000}).catch(()=>{});
    // Selecting a thread on a narrow viewport leaves the drawer open over the thread.
    if(await page.locator('.conversation-studio[data-mobile-view="threads"]').count())await page.keyboard.press('Escape');
   }
  }
  for(let attempt=0;attempt<5;attempt+=1){
   const disclosure=page.locator('details').filter({has:page.locator('summary',{hasText:/Guided setup|引導設定/})}).first();
-  try{await disclosure.waitFor({state:'attached',timeout:4000});}catch{return;}
+  try{await disclosure.waitFor({state:'attached',timeout:5000});}catch{continue;}
   if(await disclosure.evaluate(node=>(node as HTMLDetailsElement).open))return;
   try{await disclosure.locator('summary').first().click();return;}catch{/* A remount closed and replaced it; retry. */}
  }
@@ -172,7 +180,7 @@ test('actual Chromium tab zoom is 200 percent in both locales',async()=>{
  const root=resolve('dist/task13-zoom');await mkdir(root,{recursive:true});const extension=await mkdtemp(resolve(root,'extension-')),profile=await mkdtemp(resolve(root,'profile-'));
  let context:Awaited<ReturnType<typeof chromium.launchPersistentContext>>|undefined;
  try{await writeFile(resolve(extension,'manifest.json'),JSON.stringify({manifest_version:3,name:'Task13 isolated zoom',version:'1.0',permissions:['tabs'],host_permissions:['http://127.0.0.1:4397/*'],background:{service_worker:'background.js'}}));await writeFile(resolve(extension,'background.js'),'chrome.runtime.onInstalled.addListener(()=>{});');context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,viewport:{width:1440,height:1000},args:[`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});const page=context.pages()[0];await fixture(page);await gotoPage(page,'http://127.0.0.1:4397/fixture');const worker=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker');
- const zoom=await worker.evaluate(async()=>{const api=(globalThis as unknown as {chrome:{tabs:{query:(q:object)=>Promise<{id:number;url:string}[]>;setZoom:(id:number,z:number)=>Promise<void>;getZoom:(id:number)=>Promise<number>}}}).chrome;const tab=(await api.tabs.query({})).find(t=>t.url.includes('/fixture'))!;await api.tabs.setZoom(tab.id,2);return api.tabs.getZoom(tab.id);});expect(zoom).toBe(2);await expect.poll(()=>page.evaluate(()=>innerWidth)).toBe(720);for(const locale of ['en','zh-HK']){if(locale==='zh-HK')await page.getByRole('button',{name:'Change language'}).click();await expect(page.getByRole('button',{name:locale==='en'?'Prepare a meeting':'準備會議',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(720);await page.screenshot({path:`.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-13-evidence/actual-zoom-${locale}.png`,fullPage:true});}}
+ const zoom=await worker.evaluate(async()=>{const api=(globalThis as unknown as {chrome:{tabs:{query:(q:object)=>Promise<{id:number;url:string}[]>;setZoom:(id:number,z:number)=>Promise<void>;getZoom:(id:number)=>Promise<number>}}}).chrome;const tab=(await api.tabs.query({})).find(t=>t.url.includes('/fixture'))!;await api.tabs.setZoom(tab.id,2);return api.tabs.getZoom(tab.id);});expect(zoom).toBe(2);await expect.poll(()=>page.evaluate(()=>innerWidth)).toBe(720);await openGuided(page);for(const locale of ['en','zh-HK']){if(locale==='zh-HK')await page.getByRole('button',{name:'Change language'}).click();await expect(page.getByRole('button',{name:locale==='en'?'Prepare a meeting':'準備會議',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(720);await page.screenshot({path:`.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-13-evidence/actual-zoom-${locale}.png`,fullPage:true});}}
  finally{await context?.close();for(const dir of [extension,profile]){const rel=relative(root,dir);if(!rel||rel.startsWith('..'))throw Error('Unowned cleanup');await rm(dir,{recursive:true,force:true});}}
 });
 
