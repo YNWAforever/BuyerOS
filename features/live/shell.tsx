@@ -83,6 +83,7 @@ export function LiveTopbar({t, pathname, projectName, conversationHome=false, hi
       <span className="breadcrumb">{projectName || t('This project')}</span>
       {!hidePageTitle && <><ChevronRight size={14} aria-hidden="true"/><b>{t(meta.title)}</b></>}
     </div>
-    {(languagePicker||signOut)&&<div className="inline top-right live-topbar-actions">{languagePicker}{signOut}</div>}
+    {languagePicker}
+    {signOut}
   </header>;
 }
