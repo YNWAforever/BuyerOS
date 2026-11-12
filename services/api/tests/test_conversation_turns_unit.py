@@ -273,7 +273,7 @@ def test_registered_tables_match_the_readiness_contract():
     from buyeros_api.db.base import Base
     from buyeros_api.services.schema_readiness import sales_requirements
     required = sales_requirements()
-    assert required['compatible_heads'] == ['0071_conversation_retention']
+    assert required['compatible_heads'] == ['0072_turn_event_boundaries']
     for name in ('conversation_turns', 'conversation_turn_proposals',
                  'conversation_turn_decisions', 'conversation_thread_messages',
                  'conversation_turn_events', 'conversation_turn_reconciliations',
@@ -299,7 +299,7 @@ def test_turn_routes_register_only_with_conversation_home(monkeypatch):
     monkeypatch.setenv('NEXT_PUBLIC_CONVERSATION_HOME', 'true')
     enabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]
-    assert len(enabled_paths) == 5
+    assert len(enabled_paths) == 6
     monkeypatch.delenv('NEXT_PUBLIC_CONVERSATION_HOME')
     disabled_paths = [path for path in create_app().openapi()['paths']
         if 'conversation-turns' in path]

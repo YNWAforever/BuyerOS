@@ -1,6 +1,10 @@
 'use client';
 import {useEffect,useRef,useState,type KeyboardEvent,type ReactNode} from 'react';
-import {ChartNoAxesCombined,FileText,Link2,ShieldCheck,X} from 'lucide-react';
+import {ChartNoAxesCombined,FileText,Gauge,Link2,ShieldCheck,X} from 'lucide-react';
+import {LiveCancelled} from '@/services/live/client';
+import {loadTurnMetrics,MetricsLoadError} from '@/services/live/conversation-metrics';
+import {METRICS_WINDOW_DAYS,formatLatency,formatMetricAmount,hasTurns,
+  statusRows,type TurnStatusRow,type TurnMetrics} from './metrics';
 import type {LiveClient} from '@/services/live/client';
 import type {SessionScope} from '@/services/live/session';
 import {loadDiscussionContext,type ContextSection} from '@/services/live/discussion-context';
@@ -12,7 +16,7 @@ import {latestToolActivity,type TerminalProposal} from './parts';
 import type {TranscriptEntry} from './parts';
 import {nextTabIndex,tabSequenceIndex} from './a11y';
 
-export type PanelTab='results'|'sources'|'decisions';
+export type PanelTab='results'|'sources'|'decisions'|'metrics';
 type Props={
   t:(value:string)=>string;
   locale:'en'|'zh-HK';
@@ -48,10 +52,11 @@ type Props={
 function tabIcon(tab:PanelTab){
   if(tab==='results')return <ChartNoAxesCombined size={14} aria-hidden="true"/>;
   if(tab==='sources')return <FileText size={14} aria-hidden="true"/>;
+  if(tab==='metrics')return <Gauge size={14} aria-hidden="true"/>;
   return <ShieldCheck size={14} aria-hidden="true"/>;
 }
 function PanelLabel({tab,t}:{tab:PanelTab;t:(value:string)=>string}){
-  return <>{tabIcon(tab)}{t(tab==='results'?'Results':tab==='sources'?'Sources':'Decisions')}</>;
+  return <>{tabIcon(tab)}{t(tab==='results'?'Results':tab==='sources'?'Sources':tab==='metrics'?'Turn metrics':'Decisions')}</>;
 }
 function SourcePicker({t,client,session,threadId,canViewOffer,selected,onToggleSource,busy,navigate,contextRevision}:{
   t:(value:string)=>string;client:LiveClient;session:SessionScope;threadId:string|null;canViewOffer:boolean;
@@ -132,6 +137,95 @@ function DecisionsTab({t,proposals,entries,access,onDecide,deciding,decisionFor,
     </li>;
   })}</ul>;
 }
+function statusLabel(status:TurnStatusRow):string{
+  switch(status){
+    case 'completed':return 'Completed';
+    case 'needs_input':return 'Needs input';
+    case 'needs_approval':return 'Needs approval';
+    case 'failed':return 'Failed';
+    case 'outcome_unknown':return 'Outcome unknown';
+    default:return 'Cancelled';
+  }
+}
+function MetricRows({t,rows}:{t:(value:string)=>string;rows:{label:string;value:string}[]}){
+  return <dl className="conversation-metric-list">{rows.map(row=>
+    <div key={row.label} className="conversation-metric-row"><dt>{t(row.label)}</dt><dd>{row.value}</dd></div>)}
+  </dl>;
+}
+/**
+ * Bounded dashboard for the current project: aggregates only, no user content.
+ * A failed or unverified read renders an honest notice, never a guessed number.
+ */
+function MetricsTab({t,locale,client,session}:{
+  t:(value:string)=>string;locale:'en'|'zh-HK';client:LiveClient;session:SessionScope;
+}){
+  const [state,setState]=useState<{kind:'loading'}|{kind:'ready';metrics:TurnMetrics}|
+    {kind:'failed';notice:string}>({kind:'loading'});
+  useEffect(()=>{
+    let active=true;
+    void loadTurnMetrics(client,session,METRICS_WINDOW_DAYS)
+      .then(metrics=>{if(active)setState({kind:'ready',metrics});})
+      .catch((error:unknown)=>{
+        if(!active||error instanceof LiveCancelled)return;
+        setState({kind:'failed',notice:error instanceof MetricsLoadError?error.message:'Turn metrics are unavailable. Try again later.'});
+      });
+    return()=>{active=false;};
+  },[client,session]);
+  if(state.kind==='loading')return <p className="conversation-panel-empty" role="status">{t('Loading turn metrics…')}</p>;
+  if(state.kind==='failed')return <p className="conversation-panel-empty" role="status">{t(state.notice)}</p>;
+  const metrics=state.metrics;
+  if(!hasTurns(metrics))return <div className="conversation-metrics">
+    <p className="conversation-panel-note">{t('Last 7 days')}</p>
+    <p className="conversation-panel-empty">{t('No turns in the last 7 days.')}</p>
+  </div>;
+  const latency=metrics.latency_ms,budget=metrics.budget;
+  return <div className="conversation-metrics">
+    <p className="conversation-panel-note">{t('Last 7 days')}</p>
+    <section aria-label={t('Turn volume')}>
+      <h4>{t('Turn volume')}</h4>
+      <MetricRows t={t} rows={[{label:'Total turns',value:String(metrics.turns.total)},
+        ...statusRows(metrics).filter(row=>row.count>0).map(row=>({label:statusLabel(row.status),value:String(row.count)}))]}/>
+    </section>
+    <section aria-label={t('Turn latency')}>
+      <h4>{t('Turn latency')}</h4>
+      <MetricRows t={t} rows={[
+        {label:'Median',value:formatLatency(latency.p50,locale)},
+        {label:'95th percentile',value:formatLatency(latency.p95,locale)},
+        {label:'Slowest',value:formatLatency(latency.max,locale)},
+        {label:'Turns measured',value:String(latency.samples)}]}/>
+    </section>
+    <section aria-label={t('Proposals')}>
+      <h4>{t('Proposals')}</h4>
+      <MetricRows t={t} rows={[
+        {label:'Total proposals',value:String(metrics.proposals.total)},
+        {label:'Approved',value:String(metrics.proposals.by_decision.approve??0)},
+        {label:'Rejected',value:String(metrics.proposals.by_decision.reject??0)},
+        {label:'Awaiting decision',value:String(metrics.proposals.awaiting_decision)},
+        ...Object.entries(metrics.proposals.by_capability).map(([capability,count])=>
+          ({label:capability,value:String(count)}))]}/>
+    </section>
+    <section aria-label={t('Budget')}>
+      <h4>{t('Budget')}</h4>
+      <MetricRows t={t} rows={[
+        {label:'Priced proposals',value:String(budget.priced_proposals)},
+        {label:'Price unavailable',value:String(budget.unknown_price_proposals)},
+        {label:'No cost stated',value:String(budget.no_cost_proposals)},
+        {label:'May incur provider charges',value:String(budget.may_incur_provider_charges)},
+        ...budget.estimated.map(row=>({label:`${t('Estimated')} ${row.unit}`,
+          value:formatMetricAmount(row.amount)}))]}/>
+    </section>
+    <section aria-label={t('Model availability')}>
+      <h4>{t('Model availability')}</h4>
+      <MetricRows t={t} rows={[{label:'Turns without a model answer',
+        value:String(metrics.model.unavailable_turns)}]}/>
+    </section>
+    <section aria-label={t('Tool activity')}>
+      <h4>{t('Tool activity')}</h4>
+      <MetricRows t={t} rows={[{label:'Unknown outcomes',value:String(metrics.tool_activity.outcome_unknown)}]}/>
+    </section>
+  </div>;
+}
+
 /** Right contextual panel. It only renders when the discussion has content for it. */
 export function ConversationPanel(props:Props){
   const {t,tab,tabs,onTab,results,runs,citations,selectedSources,proposals,entries,access,threadId,contextRevision,canEdit,onDecide,deciding,decisionFor,turnStatusFor,drive,onClose}=props;
@@ -156,6 +250,7 @@ export function ConversationPanel(props:Props){
       {tab==='results'&&<ResultsTab t={t} results={results} runs={runs} navigate={props.navigate}/>}
       {tab==='sources'&&<SourcesTab t={t} citations={citations} selectedSources={selectedSources} canEdit={canEdit} onToggleSource={props.onToggleSource} sourcesBusy={props.sourcesBusy} onRemoveDrive={props.onRemoveDrive} drive={drive} threadId={threadId} canViewOffer={props.canViewOffer} client={props.client} session={props.session} navigate={props.navigate} contextRevision={contextRevision}/>}
       {tab==='decisions'&&<DecisionsTab t={t} proposals={proposals} entries={entries} access={access} onDecide={onDecide} deciding={deciding} decisionFor={decisionFor} terminalFor={props.terminalFor} turnStatusFor={turnStatusFor}/>}
+      {tab==='metrics'&&<MetricsTab t={t} locale={props.locale} client={props.client} session={props.session}/>}
     </div>
   </aside>;
 }

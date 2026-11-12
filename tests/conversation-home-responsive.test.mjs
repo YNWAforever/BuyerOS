@@ -86,6 +86,15 @@ const shots='test-results/conversation-studio';
 mkdirSync(shots,{recursive:true});
 const prefix=`/v1/workspaces/${workspace}/projects/${project}`;
 const uuidPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+// Bounded aggregates only: the dashboard must never need thread text to render.
+const metricsFixture={window_days:7,generated_at:'2026-11-11T12:00:00Z',
+ turns:{total:3,by_status:{completed:2,needs_input:1}},
+ latency_ms:{samples:3,p50:900,p95:1500,max:2100},
+ proposals:{total:2,by_capability:{'research-market':2},by_decision:{approve:1,reject:0},awaiting_decision:1},
+ tool_activity:{by_state:{completed:1},outcome_unknown:1},
+ model:{unavailable_turns:1},
+ budget:{priced_proposals:0,unknown_price_proposals:1,no_cost_proposals:1,
+  may_incur_provider_charges:0,estimated:[]}};
 
 function standardApi(options={}){
  const {absent=false,failFirstSend=false,contentOnly=false,skills=null,manage=false,access=null,second=false}=options;
@@ -130,6 +139,11 @@ function standardApi(options={}){
    }
    state.thread=state.thread??resolved;
    return {json:fixture.envelope(resolved)};
+  }
+  if(url.pathname.endsWith('/conversation-turns/metrics')&&method==='GET'){
+   state.metricsReads=(state.metricsReads??0)+1;
+   if(state.metricsFail)return {status:503,json:{code:'INTERNAL_ERROR',message:'private server detail'}};
+   return {json:fixture.envelope(metricsFixture)};
   }
   if(url.pathname.endsWith('/conversation-turns')&&method==='POST'){
    state.turnCalls=(state.turnCalls??0)+1;
@@ -1551,7 +1565,7 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   assert.equal(turnPosts()[0].body.text,'Keyboard question');
   // APG tablist: roving tabindex, arrows/Home/End select and take focus.
   const tablist=page.getByRole('tablist',{name:'Discussion context'});
-  assert.equal(await tablist.getByRole('tab').count(),3);
+  assert.equal(await tablist.getByRole('tab').count(),4);
   await tablist.getByRole('tab',{name:'Results',exact:true}).focus();
   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('aria-selected')),'true');
   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('tabindex')),'0');
@@ -1564,11 +1578,11 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   const tabFocus=await page.locator('#conversation-tab-sources').evaluate(node=>getComputedStyle(node).outlineStyle);
   assert.notEqual(tabFocus,'none','tabs show a visible focus indicator');
   await page.keyboard.press('End');
-  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-decisions');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-metrics');
   await page.keyboard.press('ArrowRight');
   await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-results','ArrowRight wraps past the last tab');
   await page.keyboard.press('ArrowLeft');
-  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-decisions','ArrowLeft wraps before the first tab');
+  await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-metrics','ArrowLeft wraps before the first tab');
   await page.keyboard.press('Home');
   await page.waitForFunction(()=>document.activeElement?.id==='conversation-tab-results');
   // Mouse selection stays unchanged and decisions expose accessible names.
@@ -1622,6 +1636,45 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   await page.keyboard.press('Shift+Tab');
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'conversation-message','Shift+Tab returns to the composer');
   await page.screenshot({path:shots+'/a11y-keyboard-desktop.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+ }finally{await harness.close();}
+});
+
+test('turn metrics dashboard shows bounded project aggregates and fails closed',async()=>{
+ const harness=await fixtureHarness({handler:standardApi()});
+ try{
+  const {page,state,requests,errors}=harness;
+  await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  const tablist=page.getByRole('tablist',{name:'Discussion context'});
+  await tablist.getByRole('tab',{name:'Turn metrics',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('[role="tabpanel"]')?.id==='conversation-panel-metrics');
+  const panel=page.getByRole('tabpanel');
+  const valueOf=async label=>(await page.locator('.conversation-metric-row').filter({hasText:label}).first()
+    .locator('dd').textContent()).trim();
+  await page.getByText('Total turns',{exact:true}).waitFor();
+  assert.equal(await valueOf('Total turns'),'3');
+  assert.equal(await valueOf('Completed'),'2');
+  assert.equal(await valueOf('Median'),'900 ms');
+  assert.equal(await valueOf('95th percentile'),'1.5 s');
+  assert.equal(await valueOf('Slowest'),'2.1 s');
+  assert.equal(await valueOf('Turns measured'),'3');
+  assert.equal(await valueOf('Awaiting decision'),'1');
+  assert.equal(await valueOf('Turns without a model answer'),'1');
+  assert.equal(await valueOf('Unknown outcomes'),'1');
+  assert.equal(await valueOf('Price unavailable'),'1');
+  const reads=requests.filter(row=>row.path.endsWith('/conversation-turns/metrics'));
+  assert.equal(reads.length,1,'the dashboard reads the bounded aggregate endpoint once per open');
+  assert.match(reads[0].search,/window_days=7/);
+  assert.equal(state.metricsReads,1);
+  // Since the read is not repeated on render, content never leaks into the request.
+  assert.equal(await panel.getByText('Here is the brief.',{exact:true}).count(),0);
+  // A failed aggregate read is an honest notice, never invented zeros.
+  state.metricsFail=true;
+  await tablist.getByRole('tab',{name:'Results',exact:true}).click();
+  await tablist.getByRole('tab',{name:'Turn metrics',exact:true}).click();
+  await page.getByText('Turn metrics are unavailable. Try again later.',{exact:true}).waitFor();
+  assert.equal(await page.getByText('Total turns',{exact:true}).count(),0);
+  assert.equal(await panel.getByText('0',{exact:true}).count(),0,'no zero is rendered for an unverified read');
   assert.deepEqual(errors,[]);
  }finally{await harness.close();}
 });

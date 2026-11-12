@@ -10,7 +10,7 @@ from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import api
 from tests.test_lookup_quotes_db import PROJECT, WORKSPACE_A, quote_case
 
-HEAD = "0071_conversation_retention"
+HEAD = "0072_turn_event_boundaries"
 
 
 def _config():

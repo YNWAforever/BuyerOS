@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# pytest per-run temporary trees
+pytest-of-*/
+
 # next.js
 /.next/
 /.vinext/

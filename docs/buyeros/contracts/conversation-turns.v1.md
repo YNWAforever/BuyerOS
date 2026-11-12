@@ -129,15 +129,19 @@ returned thread is decorated normally).
 
 ### Turn events, SSE stream and reconciliation (Increment C)
 
-`conversation_turn_events` (Alembic `0068_conversation_turn_events`) stores
-derived, tenant-scoped, append-only turn events: `turn.started` (first),
-`part` `{index, part}`, `tool` `{call_id, capability, state, summary?,
-error_code?}`, `proposal` `{proposal_id, capability, requires_approval}`,
-`notice` `{code, message}` and exactly one terminal `turn.final` `{status}`.
-Events are written in the same transaction as the turn/part/status they
-describe, so the terminal event can never disagree with the persisted turn
-status. Per-turn `seq` is allocated by a shared allocator that flushes pending
-rows first; `UNIQUE(turn_id, seq)`.
+`conversation_turn_events` (Alembic `0068_conversation_turn_events`, boundary
+instants added by `0072_turn_event_boundaries`) stores derived, tenant-scoped,
+append-only turn events: `turn.started` (first) `{status, started_at?}`, `part`
+`{index, part}`, `tool` `{call_id, capability, state, summary?, error_code?}`,
+`proposal` `{proposal_id, capability, requires_approval}`, `notice`
+`{code, message}` and exactly one terminal `turn.final` `{status, finished_at?}`.
+`started_at`/`finished_at` are optional application-observed UTC instants
+(legacy events without them remain valid); latency dashboards read only these,
+because every event of a turn is appended in one transaction and therefore
+shares `created_at`. Events are written in the same transaction as the
+turn/part/status they describe, so the terminal event can never disagree with
+the persisted turn status. Per-turn `seq` is allocated by a shared allocator
+that flushes pending rows first; `UNIQUE(turn_id, seq)`.
 
 `GET ?/conversation-turns/{turn_id}/events?after=<seq>` returns
 `text/event-stream` (`Cache-Control: no-store`, `X-Accel-Buffering: no`),
@@ -164,6 +168,41 @@ It never dispatches, reserves or retries a provider call. Migrations:
 `0068_conversation_turn_events`, `0069_turn_reconciliations`
 (API `SELECT,INSERT` on the new tables; API `UPDATE(status,updated_at)` on
 `conversation_turns` for the single source transition; no worker grants).
+
+### Turn metrics and budget dashboard (Increment 3.6)
+
+`GET ?/conversation-turns/metrics?window_days=<n>` returns project-scoped
+aggregates derived only from persisted rows: turn counts by status, per-turn
+latency, inline proposal counts by capability and decision, tool states
+including unknown outcomes, `CONVERSATION_MODEL_UNAVAILABLE` notice counts, and
+a budget summary built from `ConversationTurnProposal.cost`.
+
+Latency comes from the **application-observed boundary instants** carried by
+the terminal event payloads: `turn.started.payload.started_at` and
+`turn.final.payload.finished_at` (UTC instants, migration
+`0072_turn_event_boundaries` validates them in the event predicate function).
+Every event of one turn is appended inside that turn's transaction, so
+`conversation_turn_events.created_at` is identical for the whole turn and is
+**never** used as a latency sample; historical events without boundary
+instants contribute no sample rather than an invented `0 ms`. The dashboard
+shows an em dash when no sample exists.
+
+The budget summary splits `priced_proposals`, `unknown_price_proposals`,
+`no_cost_proposals`, `may_incur_provider_charges` and `estimated` decimal
+strings per unit. Classification follows `cost.kind`: deterministic
+`nonbillable` work is counted as no-cost (never added to `estimated`), and a
+`provider_credits` cost whose `known` is not exactly `true` (including the DB
+permitted `null`) is reported as price-unavailable instead of being summed as
+zero.
+
+`window_days` is bounded to `1..30` (default `7`); a missing/out-of-range value
+is `422 INVALID_REQUEST`, never silently widened. The window filter uses event
+creation time so retained turns without events are not double counted. The
+response is `Cache-Control: no-store` and carries aggregate counts only — no
+message text, proposal arguments or user content — and the read never
+dispatches, reserves or re-prices a provider call. The event scan is bounded by
+the time window; a composite `(workspace_id, project_id, created_at)` index is
+a recorded Phase 3 hardening follow-up, not part of this read model.
 
 ### Turn admission ceiling
 

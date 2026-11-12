@@ -1,4 +1,4 @@
-﻿"""CI gate controls; these do not provide database or release acceptance."""
+"""CI gate controls; these do not provide database or release acceptance."""
 import os,subprocess,sys,tempfile,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
@@ -44,9 +44,9 @@ class PytestRequiredDiscoveryTests(unittest.TestCase):
   self.assertLess(body.index(discover),body.index(pre));self.assertLess(body.index(pre),body.index(original));self.assertLess(body.index(original),body.index(post))
   self.assertIn('services/'+name+'/artifacts/c61-full-discovery.txt',body)
  def test_original_API_requires_full_native_collection_and_exact_execution(self):
-  self.assert_original_job('api',4043,'worker')
+  self.assert_original_job('api',4063,'worker')
   workflow=(ROOT/'.github/workflows/buyeros-ci.yml').read_text(encoding='utf-8');body=workflow.split('  api:\n',1)[1].split('\n  worker:',1)[0]
-  install='pnpm exec playwright install --with-deps chromium'
+  install='pnpm exec playwright install chromium'
   self.assertIn(install,body)
   self.assertLess(body.index(install),body.index('uv run --frozen pytest tests -q'))
   self.assertIn('SALES_TEST_EVIDENCE_DIR: ${{ github.workspace }}/services/api/artifacts/sales-browser',body)

@@ -9,7 +9,7 @@ from alembic.config import Config
 from tests.conftest import ALEMBIC_INI, SERVICE_ROOT
 from tests.test_api_projects_db import WORKSPACE_A
 
-HEAD = "0071_conversation_retention"
+HEAD = "0072_turn_event_boundaries"
 PROJECT_A = "a0000000-0000-4000-8000-000000000001"
 
 

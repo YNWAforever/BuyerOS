@@ -174,10 +174,14 @@ def part_payload(part) -> dict:
 
 
 TURN_EVENT_KINDS = ("turn.started", "part", "tool", "proposal", "notice", "turn.final")
+# Application-observed boundary instant (works where transaction_timestamp()
+# cannot: every event of one turn shares the same transaction timestamp).
+UTC_INSTANT = r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|[+-]\d\d:\d\d)$"
 
 
 class TurnStartedPayload(Contract):
     status: Literal["running"] = "running"
+    started_at: Annotated[str, StringConstraints(pattern=UTC_INSTANT)] | None = None
 
 
 class PartEventPayload(Contract):
@@ -206,6 +210,7 @@ class NoticeEventPayload(Contract):
 
 class TurnFinalPayload(Contract):
     status: TurnStatus
+    finished_at: Annotated[str, StringConstraints(pattern=UTC_INSTANT)] | None = None
 
 
 class TurnEventRecord(Contract):

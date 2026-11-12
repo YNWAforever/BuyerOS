@@ -11,6 +11,7 @@ sequence must not recur for events (the caller already holds the discussion row
 lock, so concurrent appends serialize).
 """
 import json
+from datetime import timezone
 
 from sqlalchemy import func, select
 
@@ -53,14 +54,28 @@ async def next_turn_event_seq(session, workspace_id, turn_id) -> int:
     return current + 1
 
 
-def build_turn_events(parts, notices, status) -> list[tuple[str, dict]]:
+def _instant(value) -> str | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+
+
+def build_turn_events(parts, notices, status, *, started_at=None,
+                      finished_at=None) -> list[tuple[str, dict]]:
     """Deterministic event sequence for one persisted turn.
 
     ``turn.started`` first, then for each persisted assistant part a ``part``
     event plus its typed ``tool``/``proposal``/``notice`` transition, turn-level
     notices, and exactly one terminal ``turn.final`` last.
+
+    ``started_at``/``finished_at`` are application-observed boundary instants:
+    every event row of one turn shares the transaction timestamp, so latency
+    must come from these payloads (they are optional for historical events).
     """
-    events: list[tuple[str, dict]] = [('turn.started', {'status': 'running'})]
+    events: list[tuple[str, dict]] = [('turn.started', {
+        'status': 'running', 'started_at': _instant(started_at)})]
     for index, part in enumerate(parts):
         data = part.model_dump(mode='json') if hasattr(part, 'model_dump') else dict(part)
         events.append(('part', {'index': index, 'part': data}))
@@ -78,14 +93,17 @@ def build_turn_events(parts, notices, status) -> list[tuple[str, dict]]:
     for notice in notices:
         data = notice.model_dump(mode='json') if hasattr(notice, 'model_dump') else dict(notice)
         events.append(('notice', {'code': data['code'], 'message': data['message']}))
-    events.append(('turn.final', {'status': status}))
+    events.append(('turn.final', {'status': status,
+                                 'finished_at': _instant(finished_at)}))
     return events
 
 
-async def append_turn_events(session, scope, turn, parts, notices, status):
+async def append_turn_events(session, scope, turn, parts, notices, status, *,
+                             started_at=None, finished_at=None):
     """Append all events for one turn inside the caller's transaction."""
     rows = []
-    for kind, payload in build_turn_events(parts, notices, status):
+    for kind, payload in build_turn_events(parts, notices, status,
+            started_at=started_at, finished_at=finished_at):
         payload = validate_event_payload(kind, payload)
         seq = await next_turn_event_seq(session, scope.workspace_id, turn.id)
         row = ConversationTurnEvent(workspace_id=scope.workspace_id,
