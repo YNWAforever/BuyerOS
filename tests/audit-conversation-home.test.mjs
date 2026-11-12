@@ -34,21 +34,47 @@ test('Stage 0 OFF retains #35 Overview and navigation groups',()=>{
  assert.equal(button(tree,'Overview').props['aria-current'],'page');
 });
 
-test('Stage 0 ON exposes discussions and every retained module destination',()=>{
+test('Stage 0 ON exposes the conversation front door and the project destinations',()=>{
  const routes=[];const tree=LiveNavigation({...props,navigate:path=>routes.push(path),conversationHome:true});
- assert.match(renderToStaticMarkup(tree),/Discussions/);assert.match(renderToStaticMarkup(tree),/Project work \(retained\)/);
- const expected=[['New discussion','/app/discussions/new'],['Prepare follow-up','/app/discussions/prepare-follow-up'],['Review buyers','/app/discussions/review-buyers'],['Overview','/app/overview'],['Offer','/app/discover/edit'],['Research runs','/app/runs'],['Buyers','/app/discover'],['Drafts','/app/outreach'],['Results','/app/results'],['Settings','/app/settings'],['Operations','/app/operations']];
- for(const [label,path] of expected){const b=button(tree,label);assert.equal(b.props.disabled,false);b.props.onClick();assert.equal(routes.at(-1),path);}
- assert.equal(button(tree,'Prepare follow-up').props['aria-current'],undefined);
- assert.equal(button(tree,'Overview').props['aria-current'],undefined);
- const overview=LiveNavigation({...props,conversationHome:true,pathname:'/app/overview'});
- assert.equal(button(overview,'Overview').props['aria-current'],'page');
+ const html=renderToStaticMarkup(tree);
+ assert.match(html,/New discussion/);assert.match(html,/This project/);
+ assert.ok(!html.includes('Project work (retained)'),'internal retained label stays out of the SME path');
+ assert.ok(!html.includes('Guided templates'),'templates are home content, not a sidebar group');
+ assert.ok(!html.includes('Settings')&&!html.includes('Operations'),'workspace admin moved to the account menu');
+ const expected=[['New discussion','/app/discussions/new'],['Home','/app'],['Offer','/app/discover/edit'],['Buyers','/app/discover'],['Research','/app/runs'],['Outreach','/app/outreach'],['Results','/app/results'],['Documents','/app/documents']];
+ for(const [label,path] of expected){const b=button(tree,label);assert.equal(b.props.disabled,false);b.props.onClick();assert.equal(routes.at(-1),path,label);}
+ assert.equal(button(tree,'Home').props['aria-current'],'page');
+ assert.equal(button(tree,'New discussion').props['aria-current'],undefined);
+ const thread=LiveNavigation({...props,conversationHome:true,pathname:'/app/discussions/s/a7000000-0000-4000-8000-000000000001'});
+ assert.equal(button(thread,'Home').props['aria-current'],undefined,'a saved thread is not the home route');
+});
+
+test('Stage 0 account menu keeps workspace administration and diagnostics reachable',async()=>{
+ const {AccountMenu}=await import('../features/live/account-menu.tsx');
+ const tree=AccountMenu({t:x=>x,email:'owner@example.test',workspaceName:'FIMMICK',roles:['workspace_admin'],authorized:true,locale:'en',onLocale:()=>{},localeSaving:false,localeDisabled:false,
+  accessDetails:'access-details',accessChecking:false,accessError:'',diagnostic:null,onRetryAccess:()=>{},onSettings:()=>{},onOperations:()=>{},onSignOut:()=>{}});
+ const html=renderToStaticMarkup(tree);
+ for(const label of ['Account menu','Settings','Operations','Access details','Check access again','Sign out'])assert.ok(html.includes(label),`account menu keeps ${label}`);
+ assert.ok(html.includes('owner@example.test'));
+ assert.ok(html.includes('Language'));
+});
+
+test('Stage 0 scope switcher has labelled comboboxes and no selector panels',async()=>{
+ const {ScopeSwitcher}=await import('../features/live/scope-switcher.tsx');
+ const tree=ScopeSwitcher({t:x=>x,workspace:'w',project:'p',workspaces:{kind:'ready',items:[{id:'w',name:'FIMMICK',roles:['workspace_admin']}]},
+  projects:{kind:'ready',items:[{id:'p',name:'Golden Resources'}]},authorized:true,canCreate:true,accessChecking:false,accessError:'',notice:'',
+  onWorkspace:()=>{},onProject:()=>{},onNewProject:()=>{},onCheckAccess:()=>{}});
+ const html=renderToStaticMarkup(tree);
+ assert.match(html,/aria-label="Workspace"/);assert.match(html,/aria-label="Project"/);
+ assert.ok(!html.includes('<h2>Workspaces</h2>'),'no repeated workspace panel heading');
+ assert.ok(!html.includes('<h2>Projects</h2>'),'no repeated project panel heading');
 });
 
 test('Stage 0 retains project and permission gates in both flag states',()=>{
  for(const conversationHome of [false,true]){
   const tree=LiveNavigation({...props,conversationHome,authorized:false,projectKnown:false,canEdit:false,canCreate:false});
-  for(const label of ['Offer','Research runs','Buyers','Drafts','Results','Settings','Operations'])assert.equal(button(tree,label).props.disabled,true,label);
+  const labels=conversationHome?['Offer','Buyers','Research','Outreach','Results','Documents','Home']:['Offer','Research runs','Buyers','Drafts','Results','Settings','Operations'];
+  for(const label of labels)assert.equal(button(tree,label).props.disabled,true,label);
   if(conversationHome)assert.equal(button(tree,'New discussion').props.disabled,true);
   const paths=[];const create=LiveNavigation({...props,conversationHome,projectKnown:false,navigate:p=>paths.push(p)});
   button(create,'Offer').props.onClick();assert.deepEqual(paths,['/app/discover/new']);
@@ -68,15 +94,18 @@ test('Stage 0 flag is opt-in and routes retain the Overview rollback',async()=>{
  assert.equal(discussionForPath('/app/discussions/prepare-follow-up',false),undefined);
 });
 
-test('Stage 0 ON headings and breadcrumb describe the selected discussion',()=>{
+test('Stage 0 ON hides the page heading on conversation routes and keeps one project breadcrumb',()=>{
  assert.equal(liveRouteMeta('/app',false).title,'Overview');
  assert.equal(liveRouteMeta('/app',true).title,'Discussions');
  assert.equal(liveRouteMeta('/app/overview',true).title,'Overview');
  assert.equal(liveRouteMeta('/app/discussions/review-buyers',true).title,'Review buyers');
- const frame=LiveFrame({t:x=>x,pathname:'/app',conversationHome:true,navigation:null,footer:null,header:null,children:null});
- assert.match(renderToStaticMarkup(frame),/<h1>Discussions<\/h1>/);
- const topbar=LiveTopbar({t:x=>x,pathname:'/app',conversationHome:true,languagePicker:null,signOut:null});
- assert.match(renderToStaticMarkup(topbar),/<b>Discussions<\/b>/);
+ const hidden=LiveFrame({t:x=>x,pathname:'/app',conversationHome:true,navigation:null,footer:null,header:null,children:null,hideHeading:true});
+ assert.doesNotMatch(renderToStaticMarkup(hidden),/<h1>/,'conversation routes own their heading');
+ const visible=LiveFrame({t:x=>x,pathname:'/app/settings',conversationHome:false,navigation:null,footer:null,header:null,children:null});
+ assert.match(renderToStaticMarkup(visible),/<h1>Settings<\/h1>/);
+ const topbar=LiveTopbar({t:x=>x,pathname:'/app',projectName:'Golden Resources',conversationHome:true,hidePageTitle:true});
+ const html=renderToStaticMarkup(topbar);
+ assert.match(html,/Golden Resources/);assert.doesNotMatch(html,/<b>/,'no duplicated page title on a conversation route');
 });
 
 test('Stage 1 rendering sends locally and source/destination actions only invoke callbacks',async t=>{

@@ -22,6 +22,9 @@ type Props={
   projectName:string|null;
   companyName:string|null;
   chips:ComposerChip[];
+  /** A reviewed home-card prompt, applied once on mount; nothing is sent until the person sends. */
+  initialText?:string|null;
+  initialSkill?:string|null;
   commands:SkillCommand[];
   capability:TurnCapability;
   capabilityNotice:string;
@@ -32,10 +35,10 @@ type Props={
   onSend:(text:string,clientMessageId:string,skillId:string|null)=>Promise<boolean>;
 };
 /** Composer owns its unsent text and the exact-once id for an uncertain retry. */
-export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending,projectName,companyName,chips,commands,capability,capabilityNotice,onRetryCapability,sendFailed,notice,attachment,onSend}:Props){
-  const [text,setText]=useState(()=>drafts.read(threadKey)?.text??'');
+export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending,projectName,companyName,chips,initialText,initialSkill,commands,capability,capabilityNotice,onRetryCapability,sendFailed,notice,attachment,onSend}:Props){
+  const [text,setText]=useState(()=>initialText??drafts.read(threadKey)?.text??'');
   const [pending,setPending]=useState(false);
-  const [currentSkill,setCurrentSkill]=useState<string|null>(null);
+  const [currentSkill,setCurrentSkill]=useState<string|null>(()=>initialSkill??null);
   const [skillNotice,setSkillNotice]=useState('');
   const [menuDismissed,setMenuDismissed]=useState(false);
   const [activeIndex,setActiveIndex]=useState(0);
@@ -61,6 +64,15 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentSkill(null);setSkillNotice(t(SKILL_UNAVAILABLE_REASON));
   },[commands,currentSkill,t]);
+  // A home task card remounts the composer with the reviewed prompt: keep the draft
+  // recoverable and move focus there, without overwriting text typed in a previous mount.
+  useEffect(()=>{
+    if(initialText===null||initialText===undefined)return;
+    drafts.write(threadKey,initialText);
+    area.current?.focus();
+    // Mounted once per reviewed prompt; deliberate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
   async function submit(raw:string,skillId:string|null,validateSkill=true){
     if(busy||!canWrite||!raw.trim())return;
     // Slash selections are revalidated against current catalogue/locale drift; guided

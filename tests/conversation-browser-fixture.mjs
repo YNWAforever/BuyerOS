@@ -116,6 +116,9 @@ import {createLiveClient} from '/services/live/client.ts';
 import {LiveConversation} from '/features/live/discussion-workspace.tsx';
 import {DiscussCompanyButton} from '/features/live/conversation/company-discussion.tsx';
 import {LiveNavigation} from '/features/live/navigation.tsx';
+import {LiveFrame,LiveTopbar} from '/features/live/shell.tsx';
+import {ScopeSwitcher} from '/features/live/scope-switcher.tsx';
+import {AccountMenu} from '/features/live/account-menu.tsx';
 import {liveZh} from '/features/live/locale.ts';
 const session=new SessionScope({mode:'live',actor:'actor-a',workspace:'${workspace}',project:'${project}'});session.setToken('browser-fixture-token');
 const client=createLiveClient();window.fixtureSession=session;
@@ -129,14 +132,27 @@ function App(){
   window.lastDestination=target.pathname+target.search;setPath(target.pathname);
   const url=new URL(location.href);url.searchParams.set('route',target.pathname);history.replaceState(null,'',url);
  });};
+ const shell=initial.searchParams.get('shell')==='1';
+ const frame=conversation=><LiveFrame t={t} pathname={path} conversationHome={enabled}
+   navigation={<LiveNavigation t={t} navigate={navigate} pathname={path} authorized={true} projectKnown={true} canEdit={true} projectActive={true} canCreate={true} conversationHome={enabled}/>}
+   scope={<ScopeSwitcher t={t} workspace="${workspace}" project="${project}" workspaces={{kind:'ready',items:[{id:'${workspace}',name:'FIMMICK',roles:['workspace_admin']}]}}
+     projects={{kind:'ready',items:[{id:'${project}',name:'Fixture project'}]}} authorized canCreate accessChecking={false} accessError="" notice=""
+     onWorkspace={()=>{}} onProject={()=>{}} onNewProject={()=>{}} onCheckAccess={()=>{}}/>}
+   footer={<AccountMenu t={t} email="owner@example.test" workspaceName="FIMMICK" roles={['workspace_admin']} authorized locale={locale}
+     onLocale={value=>setLocale(value)} localeSaving={false} localeDisabled={false} accessDetails={null} accessChecking={false} accessError="" diagnostic={null}
+     onRetryAccess={()=>{}} onSettings={()=>navigate('/app/settings')} onOperations={()=>navigate('/app/operations')} onSignOut={()=>{}}/>}
+   header={<LiveTopbar t={t} pathname={path} projectName="Fixture project" conversationHome={enabled} hidePageTitle={path==='/app'||path.startsWith('/app/discussions')}/>}
+   hideHeading={path==='/app'||path.startsWith('/app/discussions')}>{conversation}</LiveFrame>;
+ const conversation=<><LiveConversation enabled={enabled} session={session} client={client} pathname={path} locale={locale} t={t} navigate={navigate} canViewOffer={offerAccess} canViewResults={true}/></>;
+ if(shell&&enabled)return <>{frame(conversation)}</>;
  return <><label>Fixture project<select aria-label="Fixture project" value={snapshot.scope.project||''} onChange={e=>session.next({project:e.target.value})}><option value="${project}">A</option><option value="project-b">B</option></select></label>
  <button onClick={()=>{session.setToken(undefined);session.next({actor:'actor-b',workspace:'${workspace}',project:'${project}'});session.setToken('browser-second-actor');}}>Second actor</button>
  <button onClick={()=>{session.next({workspace:'workspace-b',project:'project-b'});}}>Second workspace</button>
  <button onClick={()=>setLocale(locale==='en'?'zh-HK':'en')}>Change language</button>
- <button onClick={()=>navigate('/app')}>Home</button><button onClick={()=>setOfferAccess(false)}>Revoke offer access</button><output id="fixture-path">{path}</output>
+ <button onClick={()=>navigate('/app')}>Fixture home</button><button onClick={()=>setOfferAccess(false)}>Revoke offer access</button><output id="fixture-path" style={{display:'block',maxWidth:'100%',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{path}</output>
  <DiscussCompanyButton client={client} session={session} t={t} locale={locale} buyerId="${buyerId}" buyerName="DeltaGrid" navigate={navigate}/>
  <LiveNavigation t={t} navigate={navigate} pathname={path} authorized={true} projectKnown={true} canEdit={true} projectActive={true} canCreate={true} conversationHome={enabled}/>
- <LiveConversation enabled={enabled} session={session} client={client} pathname={path} locale={locale} t={t} navigate={navigate} canViewOffer={offerAccess} canViewResults={true}/></>;
+ {conversation}</>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
 `;

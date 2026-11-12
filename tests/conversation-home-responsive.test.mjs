@@ -31,21 +31,58 @@ async function openDiscussion(page){
 
 const {LiveNavigation}=await import('../features/live/navigation.tsx');
 const {LiveFrame}=await import('../features/live/shell.tsx');
+const {ScopeSwitcher}=await import('../features/live/scope-switcher.tsx');
+const {AccountMenu}=await import('../features/live/account-menu.tsx');
 const cssDir='.vercel/output/static/_next/static/css';
 const css=readFileSync(cssDir+'/'+readdirSync(cssDir).find(name=>/^layout\..*\.css$/.test(name)),'utf8');
 for(const conversationHome of [false,true])test(`conversation navigation fits desktop, tablet and mobile (flag ${conversationHome?'ON':'OFF'})`,async()=>{
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
  try{
   const navigation=LiveNavigation({t:x=>x,navigate:()=>{},pathname:'/app',authorized:true,projectKnown:true,canEdit:true,projectActive:true,canCreate:true,conversationHome});
-  const frame=LiveFrame({t:x=>x,pathname:'/app',navigation,footer:null,header:null,children:null,conversationHome});
+  const scope=ScopeSwitcher({t:x=>x,workspace:'a1000000-0000-4000-8000-000000000001',project:'a2000000-0000-4000-8000-000000000001',
+    workspaces:{kind:'ready',items:[{id:'a1000000-0000-4000-8000-000000000001',name:'FIMMICK',roles:['workspace_admin']}]},
+    projects:{kind:'ready',items:[{id:'a2000000-0000-4000-8000-000000000001',name:'Golden Resources'}]},
+    authorized:true,canCreate:true,accessChecking:false,accessError:'',notice:'',onWorkspace:()=>{},onProject:()=>{},onNewProject:()=>{},onCheckAccess:()=>{}});
+  const footer=AccountMenu({t:x=>x,email:'owner@example.test',workspaceName:'FIMMICK',roles:['workspace_admin'],authorized:true,locale:'en',
+    onLocale:()=>{},localeSaving:false,localeDisabled:false,accessDetails:null,accessChecking:false,accessError:'',diagnostic:null,
+    onRetryAccess:()=>{},onSettings:()=>{},onOperations:()=>{},onSignOut:()=>{}});
+  const frame=LiveFrame({t:x=>x,pathname:'/app',navigation,scope,footer,header:null,children:null,conversationHome});
   const page=await browser.newPage();await page.setContent('<style>'+css+'</style>'+renderToStaticMarkup(frame));
   for(const width of [320,390,480,481,600,768,820,1023,1024,1440]){
    await page.setViewportSize({width,height:1000});
    const pageWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
    assert.ok(pageWidth<=width,`viewport ${width}px overflows to ${pageWidth}px`);
-   assert.equal(await page.getByRole('button',{name:'Operations',exact:true}).count(),1);
+   assert.equal(await page.getByRole('heading',{name:'Workspaces',exact:true}).count(),0,'no repeated selector panel heading');
   }
+  const account=page.locator('summary[aria-label="Account menu"]');
+  assert.equal(await account.count(),1,'one account control in the sidebar');
+  await account.click();
+  const accountPanel=page.locator('.live-account-panel');
+  assert.equal(await accountPanel.getByRole('button',{name:'Operations',exact:true}).isVisible(),true,'workspace administration stays reachable from the account control');
+  assert.equal(await accountPanel.getByRole('button',{name:'Sign out',exact:true}).isVisible(),true);
  }finally{await browser.close();}
+});
+
+// Project home is the SME front door: one question, one composer, six task cards,
+// recent work, and no repeated workspace/project selector panels.
+test('project home is a task-first dashboard with one heading and no selector panels',async()=>{
+ const harness=await fixtureHarness({route:'/app'});
+ try{
+  const {page,posts}=harness;
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  assert.equal(await page.getByRole('heading',{level:1}).count(),1,'exactly one h1');
+  assert.equal(await page.getByRole('heading',{name:'What do you want to get done?',exact:true}).count(),1);
+  assert.equal(await page.getByRole('heading',{name:'Start with a task',exact:true}).count(),1);
+  assert.equal(await page.locator('.conversation-home-card').count(),6,'all six guided outcomes are visible');
+  assert.equal(await page.locator('.live-scope-grid').count(),0,'no selector panels on the home route');
+  assert.match(await page.locator('.conversation-home-recent').innerText(),/Research buyer/,'continue rows link saved threads');
+  assert.match(await page.locator('.conversation-home-kicker').innerText(),/Fixture project/i);
+  await page.screenshot({path:shots+'/home-desktop.png',fullPage:true});
+  // A card prefills the reviewed prompt; it never sends on its own.
+  await page.locator('.conversation-home-card').first().click();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Help me set up my first BuyerOS project.');
+  assert.equal(posts.length,0,'selecting a task card sends nothing');
+ }finally{await harness.close();}
 });
 
 // Exercise real rendering at every width, including long in-memory record contents.
@@ -403,8 +440,10 @@ test('unsent composer text survives navigation, reload and remains scoped to the
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
   await composer.waitFor();
   await composer.fill('Unsent draft survives');
-  // Leave to the conversation home and open the same thread from the store.
-  await page.getByRole('button',{name:'Home',exact:true}).click();
+  // Leave to the conversation home, then reopen the same thread from the list:
+  // home is a dashboard now, so it must not silently restore the last thread.
+  await page.getByRole('button',{name:'Fixture home',exact:true}).click();
+  await page.locator('.conversation-thread-items').getByRole('button',{name:'Research buyer',exact:true}).click();
   await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Unsent draft survives','draft survives in-app navigation');
   await page.reload();
@@ -440,7 +479,7 @@ test('the studio keeps three views separate on mobile and never overflows 320??4
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.querySelector('.conversation-threads')?.checkVisibility?.());
   assert.equal(await page.locator('.conversation-main').isVisible(),true,'Escape returns to the conversation view');
-  await views.getByRole('button',{name:'Context',exact:true}).click();
+  await views.getByRole('button',{name:'Details',exact:true}).click();
   await page.locator('.conversation-panel').waitFor();
   assert.equal(await page.locator('.conversation-main').isVisible(),false,'context is its own mobile view, never a squeezed third column');
   await page.keyboard.press('Escape');
@@ -1308,10 +1347,10 @@ test('hydrated Stage 2 explicit ask, citations, unavailable, revocation and OFF 
   const citations=page.getByLabel('Reply citations');
   await citations.getByRole('button',{name:'Approved offer fact',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.lastDestination),`/app/overview?profile=${profileId}&workspace=a1000000-0000-4000-8000-000000000001&project=a2000000-0000-4000-8000-000000000001`);
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
+  await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
   await page.getByLabel('Reply citations').getByRole('button',{name:'Offer document',exact:true}).click();
   assert.match(await page.evaluate(()=>window.lastDestination),new RegExp(`/app/discover/edit\\?document=${documentId}`));
-  await page.getByRole('button',{name:'Home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
+  await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openDiscussion(page);await page.getByRole('region',{name:'Continue working',exact:true}).getByRole('button').click();await openDiscussion(page);
   for(const state of ['unavailable','source','invalid']){
    mode=state;await page.locator('.live-discussion').getByRole('textbox').fill('Keep this question');await ask().click();
    await page.getByText(state==='unavailable'?'BuyerOS AI is unavailable. Your question is still here; you can use the guided step or try later.':state==='source'?'Selected sources are unavailable or not approved. Refresh project context and review your selection.':'The AI reply could not be verified. Review the selected sources and try again.',{exact:true}).waitFor();
@@ -1523,7 +1562,7 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   // Opening a discussion announces it by moving focus to the thread heading.
   const heading=page.getByRole('heading',{name:'Research buyer',exact:true});
   assert.equal(await heading.getAttribute('tabindex'),'-1');
-  await page.waitForFunction(()=>document.activeElement?.tagName==='H2');
+  await page.waitForFunction(()=>document.activeElement?.tagName==='H1');
   assert.equal(await heading.evaluate(node=>document.activeElement===node),true,'opening a discussion moves focus to its heading');
   assert.equal(await page.getByRole('log',{name:'Discussion messages'}).count(),1,'the transcript is a labelled log');
   // Tab from the top of the studio reaches the thread list, chips, composer and send.
@@ -1715,7 +1754,7 @@ test('conversation studio reflows at the 200% zoom viewport and keeps zh-HK',asy
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Show discussions');
   assert.equal(await showDiscussions.evaluate(node=>document.activeElement===node),true,'Escape returns focus to the drawer trigger');
-  const context=page.getByRole('button',{name:'Context',exact:true});
+  const context=page.getByRole('button',{name:'Details',exact:true});
   await context.click();
   const panel=page.locator('.conversation-panel');
   await panel.waitFor();
@@ -1725,14 +1764,14 @@ test('conversation studio reflows at the 200% zoom viewport and keeps zh-HK',asy
   assert.ok(panelMetrics.scroll<=panelMetrics.client,'the context panel does not overflow sideways');
   await closePanel.click();
   await panel.waitFor({state:'hidden'});
-  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Context');
+  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Details');
   assert.equal(await context.evaluate(node=>document.activeElement===node),true,'closing the panel returns focus to its opener');
   // Escape is the second close path and restores the same opener.
   await context.click();
   await panel.waitFor();
   await page.keyboard.press('Escape');
   await panel.waitFor({state:'hidden'});
-  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Context');
+  await page.waitForFunction(()=>document.activeElement?.textContent?.trim()==='Details');
   assert.equal(await context.evaluate(node=>document.activeElement===node),true,'Escape returns focus to the panel opener');
   await page.screenshot({path:shots+'/a11y-zoom-640-en.png',fullPage:true});
   // zh-HK keeps the same reflow and translated labels.
@@ -1743,7 +1782,7 @@ test('conversation studio reflows at the 200% zoom viewport and keeps zh-HK',asy
   assert.ok(metrics.page<=640,'the zh-HK document does not scroll sideways');
   assert.ok(metrics.transcript.scroll<=metrics.transcript.client);
   assert.ok(metrics.composer.scroll<=metrics.composer.client);
-  await page.getByRole('button',{name:'內容',exact:true}).click();
+  await page.getByRole('button',{name:'詳情',exact:true}).click();
   const zhPanel=page.locator('.conversation-panel');
   await zhPanel.waitFor();
   const zhPanelMetrics=await zhPanel.evaluate(node=>({scroll:node.scrollWidth,client:node.clientWidth}));

@@ -1,6 +1,6 @@
 import type {LucideIcon} from 'lucide-react';
-import {Activity, ChartNoAxesCombined, FilePenLine, LayoutDashboard, Mail, MessageSquare, Plus, Search, Settings, Wrench} from 'lucide-react';
-import {discussionForPath, illustrativeDiscussions} from './conversation-home';
+import {Activity, ChartNoAxesCombined, FilePenLine, FileText, LayoutDashboard, Mail, Plus, Search, Settings, Wrench} from 'lucide-react';
+import {discussionForPath} from './conversation-home';
 
 type Props = {
   t: (value:string)=>string;
@@ -21,8 +21,26 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
     <button className="live-nav-item" aria-current={active?'page':undefined} data-active={active} onClick={()=>navigate(path)} disabled={disabled}>
       <Icon size={18} aria-hidden="true"/><span>{t(label)}</span>
     </button>;
+  // Conversation-first shell: conversation is the front door and the project tools are
+  // one group. Workspace administration lives in the account menu, not the daily path.
+  if(conversationHome){
+    const discussion=discussionForPath(pathname,true);
+    return <nav aria-label="BuyerOS sections" className="live-nav live-nav-conversation">
+      {item('New discussion',Plus,'/app/discussions/new',discussion?.id==='new',!authorized||!projectKnown)}
+      {item('Home',LayoutDashboard,'/app',discussion?.id==='home',!authorized||!projectKnown)}
+      <div className="live-nav-group" role="group" aria-label={t('This project')}>
+        <div className="nav-label" aria-hidden="true">{t('This project')}</div>
+        {item('Offer',FilePenLine,projectKnown?'/app/discover/edit':'/app/discover/new',pathname==='/app/discover/edit'||pathname==='/app/discover/new',!authorized || !(projectKnown?canEdit&&projectActive:canCreate))}
+        {item('Buyers',Search,'/app/discover',pathname==='/app/discover',!projectKnown)}
+        {item('Research',Activity,'/app/runs',runRoute,!projectKnown)}
+        {item('Outreach',Mail,'/app/outreach',pathname==='/app/outreach',!projectKnown)}
+        {item('Results',ChartNoAxesCombined,'/app/results',pathname==='/app/results',!projectKnown)}
+        {item('Documents',FileText,'/app/documents',pathname.startsWith('/app/documents'),!projectKnown)}
+      </div>
+    </nav>;
+  }
   const projectWork=<>
-    {item('Overview',LayoutDashboard,conversationHome?'/app/overview':'/app',pathname===(conversationHome?'/app/overview':'/app'),false)}
+    {item('Overview',LayoutDashboard,'/app',pathname==='/app',false)}
     <div className="live-nav-group" role="group" aria-label={t('Discover & review')}>
       <div className="nav-label" aria-hidden="true">{t('Discover & review')}</div>
       {item('Offer',FilePenLine,projectKnown?'/app/discover/edit':'/app/discover/new',pathname==='/app/discover/edit'||pathname==='/app/discover/new',!authorized || !(projectKnown?canEdit&&projectActive:canCreate))}
@@ -33,7 +51,6 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
       <div className="nav-label" aria-hidden="true">{t('Follow up')}</div>
       {item('Drafts',Mail,'/app/outreach',pathname==='/app/outreach',!projectKnown)}
       {item('Results',ChartNoAxesCombined,'/app/results',pathname==='/app/results',!projectKnown)}
-      {conversationHome&&item('Documents',FilePenLine,'/app/documents',pathname.startsWith('/app/documents'),!projectKnown)}
     </div>
     <div className="live-nav-group" role="group" aria-label={t('Manage')}>
       <div className="nav-label" aria-hidden="true">{t('Manage')}</div>
@@ -41,18 +58,7 @@ export function LiveNavigation({t,navigate,pathname,authorized,projectKnown,canE
       {item('Operations',Wrench,'/app/operations',pathname==='/app/operations',!authorized)}
     </div>
   </>;
-  const discussion=discussionForPath(pathname,conversationHome);
   return <nav aria-label="BuyerOS sections" className="live-nav">
-    {conversationHome && <>
-      {item('New discussion',Plus,'/app/discussions/new',discussion?.id==='new',!authorized||!projectKnown)}
-      <div className="live-nav-group" role="group" aria-label={t('Discussions')}>
-        <div className="nav-label" aria-hidden="true">{t('Guided templates')}</div>
-        {illustrativeDiscussions.map(entry=><div className="live-nav-discussion" key={entry.id}>{item(entry.title,MessageSquare,`/app/discussions/${entry.id}`,discussion?.id===entry.id,!authorized||!projectKnown)}</div>)}
-      </div>
-    </>}
-    {conversationHome ? <div className="live-nav-retained" role="group" aria-label={t('Project work (retained)')}>
-      <div className="nav-label live-nav-retained-label" aria-hidden="true">{t('Project work (retained)')}</div>
-      {projectWork}
-    </div> : projectWork}
+    {projectWork}
   </nav>;
 }
