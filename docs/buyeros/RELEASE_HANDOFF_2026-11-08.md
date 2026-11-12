@@ -96,7 +96,7 @@ The source-verified mechanism described above is fixed on current main:
 - This is source verification only; the original business user's failing request
   was never captured and is not claimed as reproduced or accepted.
 
-### Read-timeout leads — client re-issue fixed, server causes still open
+### Read-timeout leads — client re-issue and server lock root cause fixed
 
 - `features/live/sales-skills/sources.tsx` now owns one read set per session
   identity (`useEffect` keyed on `[client,session,identity]`) with a local
@@ -104,10 +104,16 @@ The source-verified mechanism described above is fixed on current main:
   project, outputs and native-source reads, and abort-aware result handling.
   An unstable translation function or parent rerender can no longer re-issue the
   burst; `tests/core-sources-dedup.test.mjs` guards this.
-- The server-side leads from 8 November (policy/budget locks taken before
-  membership/rate checks, per-source native validation while holding locks) are
-  **not** claimed fixed here. In any performance work, preserve tenant,
-  membership, revocation and paid-admission checks.
+- The server-side root cause identified on 8 November is repaired on current
+  main. `services/api/buyeros_api/services/conversation_access.py` now resolves
+  membership and role before any workspace advisory lock, and pure-read routes
+  pass `locks=False`, so they acquire no policy/budget transaction gates and
+  cannot queue on or hold the gates that capability and paid admission need.
+  Admission, mutation and dispatch paths keep the default serialized locks, the
+  live-read kill switch still fails before any session or lock, and
+  `services/api/tests/test_sales_lock_scope.py` pins this boundary (read routes
+  lock-free; membership/rate checks precede every gate; admission/mutation still
+  serialized) without weakening policy or budget enforcement.
 
 ### Remaining work
 
