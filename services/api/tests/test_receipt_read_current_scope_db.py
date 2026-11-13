@@ -59,6 +59,7 @@ def test_narrow_erase_function_atomically_audits_once_without_app_callback(searc
 def test_receipt_read_does_not_wait_on_its_own_parent_policy_transaction(search_case):
     case=search_case
     async def exercise():
+        from sqlalchemy import event
         from buyeros_api.services.policy_service import policy_workspace_lock
         async with stores(case) as (m,engine,first,store,ref):
             with psycopg.connect(case['dsn']) as db:db.execute("UPDATE provider_operations SET status='submitting' WHERE id=%s",(case['operation'],))
@@ -67,8 +68,27 @@ def test_receipt_read_does_not_wait_on_its_own_parent_policy_transaction(search_
             await store.finish(ref,state='received',sources=[item],digest=hashlib.sha256(m.canonical_json([item])).hexdigest())
             async with tenant_session(first.engine,case['workspace']) as parent:
                 await policy_workspace_lock(parent,case['workspace'])
-                saved=await asyncio.wait_for(store.get(ref),timeout=1.5)
-                assert saved['state']=='received'
+                loop=asyncio.get_running_loop();query_started=asyncio.Event();started_at=None
+                def observe_query(connection,cursor,statement,parameters,context,executemany):
+                    nonlocal started_at
+                    if started_at is None:
+                        started_at=loop.time();query_started.set()
+                # Observe this independent reader's first actual SQL, not merely
+                # task scheduling. Checkout/setup has its own bounded wait; every
+                # SQL statement (including any accidental lock) shares the original
+                # 1.5s read budget while the parent's transaction still holds its lock.
+                event.listen(engine.sync_engine,'before_cursor_execute',observe_query)
+                reader=asyncio.create_task(store.get(ref))
+                try:
+                    await asyncio.wait_for(query_started.wait(),timeout=1.5)
+                    async with asyncio.timeout_at(started_at+1.5):
+                        saved=await reader
+                    assert saved['state']=='received'
+                    assert parent.in_transaction()
+                finally:
+                    event.remove(engine.sync_engine,'before_cursor_execute',observe_query)
+                    if not reader.done():reader.cancel()
+                    await asyncio.gather(reader,return_exceptions=True)
     asyncio.run(exercise())
 
 def test_readonly_policy_snapshot_cannot_authorize_a_mutating_transaction(search_case):
