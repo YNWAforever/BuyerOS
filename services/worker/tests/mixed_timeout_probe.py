@@ -35,8 +35,8 @@ def check_owned_timeout():
                 stat = Path(f'/proc/{pid}/stat')
                 try:
                     state = stat.read_text().split()[2]
-                except FileNotFoundError:
-                    break  # The owned process exited before its /proc read.
+                except (FileNotFoundError, ProcessLookupError):
+                    break  # The owned process exited before or during its /proc read.
                 if state == 'Z':
                     break
                 time.sleep(.02)
