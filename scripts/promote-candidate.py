@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from promotion_transport import claim_promotion_intent,single_promote
+from promotion_transport import claim_promotion_intent,single_assign_alias
 from vercel_cli_auth import authenticated_command
 from runtime_bundle import decrypt_workspace_bundle, is_encrypted_workspace_bundle
 from runtime_bundle import build_workspace_bundle
@@ -140,7 +140,8 @@ def main(argv=None):
             intent={'schema':'buyeros.promotion-receipt.v1','status':'promotion_unknown','promoted':False,
                     'blockers':[],**{key:value for key,value in context.items() if key!='schema'},'ledger_id':ledger_id}
             write_receipt(args.output,intent)
-            single_promote(os.environ['VERCEL_PROJECT_ID'],os.environ['VERCEL_ORG_ID'],deployment,os.environ['VERCEL_TOKEN'])
+            single_assign_alias(os.environ['VERCEL_PROJECT_ID'],os.environ['VERCEL_ORG_ID'],deployment,
+                                bundle['receipts']['items']['rollback']['data']['deployment_id'],os.environ['VERCEL_TOKEN'])
         result=promote(bundle['manifest'],bundle['receipts'],args.gate,attestation_verified=True,metadata=metadata,execute=args.execute,
             promote_alias=submit_once)
         result.update(source_sha=envelope['source_sha'],deployment_id=bundle['manifest']['candidate_deployment_id'],
