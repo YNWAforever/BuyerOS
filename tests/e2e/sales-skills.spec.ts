@@ -27,7 +27,7 @@ async function openGuided(page:Page){
   }
  }
  for(let attempt=0;attempt<5;attempt+=1){
-  const disclosure=page.locator('details').filter({has:page.locator('summary',{hasText:/Guided setup|引導設定/})}).first();
+  const disclosure=page.locator('details.conversation-task-form').first();
   try{await disclosure.waitFor({state:'attached',timeout:5000});}catch{continue;}
   if(await disclosure.evaluate(node=>(node as HTMLDetailsElement).open))return;
   try{await disclosure.locator('summary').first().click();return;}catch{/* A remount closed and replaced it; retry. */}

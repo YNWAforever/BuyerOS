@@ -29,6 +29,16 @@ async function openDiscussion(page){
  await page.locator('.live-discussion').waitFor();
 }
 
+// The context panel is a deliberate drill-down on every viewport, so tests open it
+// through its visible control instead of assuming the third column is already there.
+async function openContext(page){
+ const panel=page.locator('.conversation-panel').first();
+ if(await panel.count()&&await panel.isVisible())return panel;
+ await page.getByRole('button',{name:'Show context panel',exact:true}).click();
+ await panel.waitFor();
+ return panel;
+}
+
 const {LiveNavigation}=await import('../features/live/navigation.tsx');
 const {LiveFrame}=await import('../features/live/shell.tsx');
 const {ScopeSwitcher}=await import('../features/live/scope-switcher.tsx');
@@ -484,8 +494,8 @@ test('the studio keeps three views separate on mobile and never overflows 320??4
   assert.equal(await page.locator('.conversation-main').isVisible(),false,'context is its own mobile view, never a squeezed third column');
   await page.keyboard.press('Escape');
   await page.locator('.conversation-main').waitFor();
-  // The approved guided form remains reachable as a secondary surface.
-  assert.equal(await page.locator('summary',{hasText:'Guided setup'}).count()>=1,true);
+  // The task form remains reachable as a header drill-down, not under the transcript.
+  assert.equal(await page.locator('summary[aria-label="Task form"]').count(),1);
  }finally{await harness.close();}
 });
 
@@ -547,7 +557,7 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   const decision=posts.find(row=>row.path.endsWith('/decisions'));
   assert.ok(decision);assert.deepEqual(decision.body,{proposal_id:proposalId,decision:'approve',expected_thread_version:3});
   // Revoked Drive sources cannot be saved one by one; the bulk removal path succeeds.
-  const panel=page.locator('.conversation-panel');
+  const panel=await openContext(page);
   await panel.getByRole('tab',{name:'Sources',exact:true}).click();
   await panel.getByRole('button',{name:'Remove',exact:true}).first().click();
   await page.getByText('Workspace discussions are unavailable. Your unsaved text is still here.',{exact:true}).first().waitFor();
@@ -573,8 +583,9 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   assert.equal(await viewerComposer.isDisabled(),true);
   assert.equal(await page.getByRole('button',{name:'Cancel turn',exact:true}).count(),0,'a viewer never gets a mutating cancel action');
   assert.equal(await transcript.getByRole('button',{name:'Approve',exact:true}).count(),0);
-  await page.locator('.conversation-panel').getByRole('tab',{name:'Sources',exact:true}).click();
-  assert.equal(await page.locator('.conversation-panel').getByRole('button',{name:'Remove',exact:true}).count(),0);
+  const viewerPanel=await openContext(page);
+  await viewerPanel.getByRole('tab',{name:'Sources',exact:true}).click();
+  assert.equal(await viewerPanel.getByRole('button',{name:'Remove',exact:true}).count(),0);
  }finally{await harness.close();}
 });
 
@@ -979,7 +990,7 @@ test('composer attaches a document through the existing ingest path and persists
   // Open the context Sources tab first so we can prove a post-attach refetch occurs.
   // Do not depend on a specific fixture row rendering here: assert the context read
   // was issued, then deterministically remount the picker for the uploaded row below.
-  const panel=page.locator('.conversation-panel');
+  const panel=await openContext(page);
   const offerDocumentReads=()=>requests.filter(row=>row.method==='GET'&&row.path.endsWith('/offer-documents')).length;
   await panel.getByRole('tab',{name:'Sources',exact:true}).click();
   for(let attempt=0;attempt<100&&offerDocumentReads()===0;attempt+=1)await page.waitForTimeout(100);
@@ -1603,6 +1614,7 @@ test('studio keyboard, focus and screen-reader semantics stay honest',async()=>{
   assert.equal(turnPosts().length,1,'the keyboard send posts one turn');
   assert.equal(turnPosts()[0].body.text,'Keyboard question');
   // APG tablist: roving tabindex, arrows/Home/End select and take focus.
+  await openContext(page);
   const tablist=page.getByRole('tablist',{name:'Discussion context'});
   assert.equal(await tablist.getByRole('tab').count(),4);
   await tablist.getByRole('tab',{name:'Results',exact:true}).focus();
@@ -1684,6 +1696,7 @@ test('turn metrics dashboard shows bounded project aggregates and fails closed',
  try{
   const {page,state,requests,errors}=harness;
   await page.getByText('Here is the brief.',{exact:true}).waitFor();
+  await openContext(page);
   const tablist=page.getByRole('tablist',{name:'Discussion context'});
   await tablist.getByRole('tab',{name:'Turn metrics',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('[role="tabpanel"]')?.id==='conversation-panel-metrics');

@@ -43,10 +43,8 @@ export function LiveConversation(props:Props){
   // discussion and a saved workspace thread. Device-only discussions stay reachable
   // behind their own disclosure so existing local work is never hidden.
   if(route.id.startsWith('s/'))return <ConversationStudio key={snapshot.identity+route.id} {...studio} threadId={route.id.slice(2)} fresh={false}/>;
-  if(route.id==='home'||route.id==='new')return <>
-    <ConversationStudio key={snapshot.identity+route.id} {...studio} threadId={null} fresh={route.id==='new'}/>
-    <details className="conversation-device-threads"><summary>{props.t('Device discussions')}</summary><ScopedConversation key={snapshot.identity} {...props}/></details>
-  </>;
+  if(route.id==='home'||route.id==='new')return <ConversationStudio key={snapshot.identity+route.id} {...studio} threadId={null} fresh={route.id==='new'}
+    threadListFooter={<details className="conversation-device-threads"><summary>{props.t('Device discussions')}</summary><ScopedConversation key={snapshot.identity} {...props}/></details>}/>;
   return <ScopedConversation key={snapshot.identity} {...props}/>;
 }
 function ScopedConversation({session,client,pathname,locale,t,navigate,canViewOffer,canViewResults}:Props){
