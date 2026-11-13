@@ -168,6 +168,7 @@ if __name__=='__main__':unittest.main()
 def test_promotion_cli_persists_unknown_intent_before_one_alias_attempt(tmp_path,monkeypatch):
     import os
     module=load();manifest,receipts=candidate()
+    receipts['items']['rollback']['data']['deployment_id']='dpl_rollback'
     envelope=module.encrypt_workspace_bundle(module.build_workspace_bundle(manifest,receipts,source_sha=manifest['source_sha']),'a'*64)
     bundle=tmp_path/'runtime.json';bundle.write_text(json.dumps(envelope))
     output=tmp_path/'receipt.json';effects=[]
@@ -186,11 +187,14 @@ def test_promotion_cli_persists_unknown_intent_before_one_alias_attempt(tmp_path
         raise AssertionError('only attestation is allowed through the CLI boundary')
     monkeypatch.setattr(module,'command',boundary)
     monkeypatch.setattr(module,'claim_promotion_intent',lambda context:123)
-    def lose_ack(*args):
+    def lose_ack(project,team,deployment,rollback,token):
+        assert (project,team,deployment)==('prj_owned','team_owned','dpl_candidate')
+        assert rollback==receipts['items']['rollback']['data']['deployment_id']
+        assert token=='owned-token'
         effects.append(['single-http-post'])
         assert json.loads(output.read_text())['status']=='promotion_unknown'
         raise ConnectionResetError('accepted but ack lost')
-    monkeypatch.setattr(module,'single_promote',lose_ack)
+    monkeypatch.setattr(module,'single_assign_alias',lose_ack)
     assert module.main(['--bundle',str(bundle),'--gate','workspace','--output',str(output),'--execute'])==1
     assert json.loads(output.read_text())['status']=='promotion_unknown'
     assert len([row for row in effects if row==['single-http-post']])==1
