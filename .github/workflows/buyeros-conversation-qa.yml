@@ -48,7 +48,28 @@ env:
 # resolution and break `playwright install --with-deps` in every job.
 
 jobs:
+  verify-target:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'qa:real' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    environment: buyeros-runtime-readonly
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Metadata credentials are used only by the trusted main-branch verifier.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Verify immutable Vercel candidate, project and reviewed source
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+        run: python scripts/verify-conversation-qa-target.py
   conversation-qa:
+    needs: verify-target
     # A labeled PR may only run this when it comes from this repository.
     if: >-
       github.event_name == 'workflow_dispatch' ||
@@ -72,7 +93,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - name: Verify the target is the reviewed deployment
+      - name: Validate QA account scope inputs
         env:
           QA_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
         run: |

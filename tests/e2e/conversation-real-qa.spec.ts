@@ -74,10 +74,21 @@ async function waitForStudio(page:Page,language:'en'|'zh-HK'='en'):Promise<void>
     throw new Error('BLOCKED: conversation studio is not visible at the QA origin; confirm NEXT_PUBLIC_CONVERSATION_HOME is enabled for this preview');
   }
 }
+async function expectDiscussions(page:Page,language:'en'|'zh-HK'='en'):Promise<void>{
+  const discussions=page.getByRole('complementary',{name:language==='zh-HK'?'討論':'Discussions',exact:true});
+  const openDrawer=!(await discussions.isVisible());
+  if(openDrawer)await page.getByRole('button',{name:language==='zh-HK'?'顯示討論':'Show discussions',exact:true}).click();
+  await expect(discussions).toBeVisible();
+  await expect(discussions.getByRole('button',{name:language==='zh-HK'?'新增討論':'New discussion',exact:true})).toBeVisible();
+  if(openDrawer){
+    await discussions.getByRole('button',{name:language==='zh-HK'?'關閉討論':'Close discussions',exact:true}).click();
+    await expect(discussions).toBeHidden();
+  }
+}
 async function openStudio(page:Page,qa:QaEnv):Promise<void>{
   await page.goto(scoped('/app',qa));
   await waitForStudio(page);
-  await expect(page.locator('aside.conversation-threads')).toBeVisible();
+  await expectDiscussions(page);
   await expect(page.locator('.conversation-compose-context')).toBeVisible();
 }
 function userMessages(page:Page){
@@ -86,17 +97,20 @@ function userMessages(page:Page){
 async function sendTurn(page:Page,text:string,expectedUserMessages:number):Promise<void>{
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
   await composer.fill(text);
-  await page.getByRole('button',{name:'Send message',exact:true}).click();
-  const response=await page.waitForResponse(candidate=>candidate.request().method()==='POST'&&
-    mutationPath.test(new URL(candidate.url()).pathname),{timeout:90_000});
+  const [response]=await Promise.all([
+    page.waitForResponse(candidate=>candidate.request().method()==='POST'&&
+      mutationPath.test(new URL(candidate.url()).pathname),{timeout:90_000}),
+    page.getByRole('button',{name:'Send message',exact:true}).click(),
+  ]);
   expect(response.status(),'conversation mutation status').toBeLessThan(400);
   await expect(userMessages(page)).toHaveCount(expectedUserMessages,{timeout:60_000});
   await expect(page.locator('.conversation-typing')).toHaveCount(0,{timeout:60_000});
 }
 
-test('QA conversation studio: first turn, durable transcript and unsent draft',async({browser})=>{
+test('QA conversation studio: first turn, durable transcript and unsent draft',async({context})=>{
   const qa=qaEnv();
-  const context=await browser.newContext();
+  // Reuse the extended fixture context so deployment-protection cookies and
+  // configured desktop/mobile browser options apply to this real journey.
   // Pin the journey to EN so selectors never depend on the QA account's saved locale.
   await context.addInitScript(()=>{try{localStorage.setItem('buyeros.locale','en');}catch{/* Locale storage is optional. */}});
   const page=await context.newPage();
@@ -173,9 +187,9 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
   }finally{await context.close();}
 });
 
-test('QA conversation studio renders in EN and zh-HK',async({browser})=>{
+test('QA conversation studio renders in EN and zh-HK',async({context})=>{
   const qa=qaEnv();
-  const context=await browser.newContext(),page=await context.newPage();
+  const page=await context.newPage();
   const pageErrors:string[]=[],mutations:string[]=[];
   page.on('pageerror',error=>pageErrors.push(error.message));
   page.on('request',request=>{
@@ -187,15 +201,14 @@ test('QA conversation studio renders in EN and zh-HK',async({browser})=>{
     await page.evaluate(()=>localStorage.setItem('buyeros.locale','en'));
     await openStudio(page,qa);
     await expect(page.getByRole('textbox',{name:'Message BuyerOS'})).toBeVisible();
-    await expect(page.getByRole('heading',{name:'Discussions',exact:true})).toBeVisible();
+    await expectDiscussions(page);
     await expect(page.locator('html')).toHaveAttribute('lang','en');
     await page.evaluate(()=>localStorage.setItem('buyeros.locale','zh-HK'));
     await page.reload();
     await waitForStudio(page,'zh-HK');
     await expect(page.getByRole('textbox',{name:'向 BuyerOS 傳送訊息'})).toBeVisible({timeout:60_000});
     await expect(page.getByPlaceholder('詢問此專案，或選擇快速操作')).toBeVisible();
-    await expect(page.getByRole('heading',{name:'討論',exact:true})).toBeVisible();
-    await expect(page.locator('aside.conversation-threads').getByRole('button',{name:'新增討論',exact:true})).toBeVisible();
+    await expectDiscussions(page,'zh-HK');
     await expect(page.locator('html')).toHaveAttribute('lang','zh-HK');
     await shot(page,'qa-zh-hk.png');
     expect(mutations,'locale switch performs no workspace mutation').toEqual([]);
