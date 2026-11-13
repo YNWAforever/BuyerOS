@@ -24,7 +24,8 @@ import {attachmentBusy,attachmentPercent,classifyUploadFailure,createAttachmentG
 import {useDataMode} from '@/features/providers/data-mode';
 import {type DecisionChoice,type LocalDecision} from './approval';
 import {ConversationThreadList,type ThreadListItem} from './thread-list';
-import {applyStoredListPreference,persistThreadPreference,preferenceAllowed,shareControlVisible,visibleThreadRows} from './thread-management';
+import {ProjectHome} from './home';
+import {applyStoredListPreference,persistThreadPreference,preferenceAllowed,shareControlVisible,sortThreadRows,visibleThreadRows} from './thread-management';
 import {ConversationTranscript} from './transcript';
 import {ConversationComposer,type ComposerAttachment,type ComposerChip} from './composer';
 import {ConversationPanel,type PanelTab} from './context-panel';
@@ -139,7 +140,6 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [preferenceBusy,setPreferenceBusy]=useState(false);
   const [query,setQuery]=useState(''),debouncedQuery=useDebounced(query,250);
   const [archived,setArchived]=useState(false);
-  const [autoId,setAutoId]=useState<string|null>(null),autoTried=useRef(false);
   const [reload,setReload]=useState(0);
   const [loaded,setLoaded]=useState<LoadedThread|null>(null);
   const [threadState,setThreadState]=useState<ThreadState>('new');
@@ -185,6 +185,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const panelOpener=useRef<'header'|'nav'>('header');
   const focusedThread=useRef<string|null>(null);
   const [title,setTitle]=useState('');
+  // A home task card writes the reviewed prompt into the composer; nothing is sent
+  // until the person presses Send, so a template is a suggestion rather than an action.
+  const [prefill,setPrefill]=useState<{key:string;prompt:string;skillId:string|null}|null>(null);
   const [guidedOpen,setGuidedOpen]=useState(()=>guidedOpenFor(session));
   // A fallback conversation (turn route absent) cannot carry the company link; the
   // entry point says so on the canonical discussion route.
@@ -193,7 +196,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     catch{return '';}
   });
 
-  const targetId=threadId??(fresh?null:autoId);
+  // `/app` is the project home, not a silent re-entry into the newest thread. The
+  // explicit discussion routes own their thread ids, so home never resolves one.
+  const home=!fresh&&threadId===null;
+  const targetId=threadId;
   const current=()=>session.isCurrent(identity)&&!!session.token();
 
   // Recent discussions: the list is the only thread read until one is opened.
@@ -203,7 +209,6 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     const read=archived||debouncedQuery.trim()?api.search(debouncedQuery.trim(),archived,0):api.list(0);
     void read.then(page=>{
       if(!active||!session.isCurrent(identity))return;
-      autoTried.current=false;
       setList({items:page.items as ThreadListItem[],total:page.total,loading:false,notice:''});
     }).catch(error=>{
       if(!active||error instanceof LiveCancelled)return;
@@ -211,13 +216,6 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     });
     return()=>{active=false;};
   },[api,archived,debouncedQuery,identity,session,listRevision]);
-  useEffect(()=>{autoTried.current=false;setAutoId(null);},[threadId,fresh]);
-  useEffect(()=>{
-    if(threadId||fresh||autoTried.current||list.loading)return;
-    autoTried.current=true;
-    const first=list.items.find(row=>!row.archived);
-    if(first)setAutoId(first.id);
-  },[threadId,fresh,list.loading,list.items]);
   async function moreThreads(){
     if(list.loading)return;
     try{
@@ -702,12 +700,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   // discussion (and therefore the project scope) is loaded.
   const panelTabs:PanelTab[]=loaded&&!baseTabs.includes('metrics')?[...baseTabs,'metrics']:baseTabs;
   const tab:PanelTab=activeTab&&panelTabs.includes(activeTab)?activeTab:panelTabs[0];
-  const panelOpen=panelPreference??contentTabs.length>0;
-  // On the project home the newest thread is resolved after the list read. Keep the
-  // composer unmounted until it resolves so a reload can never present an empty
-  // composer in place of the restored draft.
-  const awaitingHomeThread=!fresh&&threadId===null&&(list.loading||(autoId!==null&&threadState!=='ready'));
-  const threadTitle=loaded?.chat.title??t('New discussion');
+  const panelOpen=!home&&(panelPreference??contentTabs.length>0);
+  const threadTitle=loaded?.chat.title??(home?t('Home'):t('New discussion'));
   const step=running&&stream?streamStep(stream):'working';
   const statusLine=sending?t('Preparing a reply…'):sendNotice?t(sendNotice):threadNoticeText&&threadState==='ready'?t(threadNoticeText):'';
   // Archived comes from the loaded thread payload; the list row is a supplementary
@@ -726,19 +720,29 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     onFile:(file:File)=>void attachFile(file),
     onRetry:retryAttachment,
   }:null;
-  return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={t('Discussion')} tabIndex={-1}>
+  function startTemplate(template:typeof guidedTemplates[number]){
+    const candidate=chipSkills[template.id];
+    setPrefill({key:`${template.id}:${Date.now()}`,prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null});
+  }
+  const composer=<ConversationComposer key={prefill?.key??targetId??(home?'home':'new')} t={t} locale={locale} threadKey={targetId??(home?'home':'new')} drafts={drafts}
+    // A saved thread stays read-only until its access is known: a viewer must never
+    // get an enabled composer while the thread resolves, and a failed load stays inert.
+    canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
+    projectName={projectName} companyName={companyLabel} chips={home?[]:chips} initialText={prefill?.prompt??null} initialSkill={prefill?.skillId??null} commands={commands} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
+    sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>;
+  return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={home?t('Home'):t('Discussion')} tabIndex={-1}>
     <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>closeMobileView('threads')}/>
-    <ConversationThreadList t={t} locale={locale} items={visibleThreadRows(list.items,archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={!targetId}
+    <ConversationThreadList t={t} locale={locale} items={visibleThreadRows(list.items,archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={fresh}
       notice={list.notice} loading={list.loading} query={query} archived={archived}
       onQuery={setQuery} onToggleArchived={()=>setArchived(value=>!value)} onNew={()=>navigate('/app/discussions/new')}
       onOpen={id=>navigate(`/app/discussions/s/${id}`)} onMore={list.items.length<list.total?()=>void moreThreads():undefined}
       onClose={mobileView==='threads'?()=>closeMobileView('threads'):undefined}/>
-    <div className="conversation-main">
+    <div className={home?'conversation-main conversation-home-main':'conversation-main'}>
       <header className="conversation-head">
         <div className="conversation-head-title">
           <button type="button" ref={threadsTriggerRef} className="conversation-icon-button conversation-mobile-only" onClick={()=>{threadsOpener.current='header';setMobileView('threads');}} aria-label={t('Show discussions')}><Menu size={18} aria-hidden="true"/></button>
-          <h2 ref={titleRef} tabIndex={-1}>{threadTitle}</h2>
-          {loaded&&<WorkspaceBadge thread={loaded.raw} t={t}/>}
+          <h1 ref={titleRef} tabIndex={-1}>{threadTitle}</h1>
+          {loaded&&!home&&<WorkspaceBadge thread={loaded.raw} t={t}/>}
         </div>
         <div className="conversation-head-actions">
           {loaded&&<details className="conversation-menu"><summary aria-label={t('Discussion menu')}><Ellipsis size={18} aria-hidden="true"/><span className="conversation-sr">{t('Discussion menu')}</span></summary>
@@ -750,44 +754,41 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
               <button type="button" onClick={()=>void removeThread()}>{t('Delete discussion')}</button>
             </div>
           </details>}
-          <button type="button" ref={panelToggleRef} className="conversation-icon-button" onClick={()=>{panelOpener.current='header';setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>
+          {!home&&<button type="button" ref={panelToggleRef} className="conversation-icon-button" onClick={()=>{panelOpener.current='header';setPanelPreference(!panelOpen);if(!panelOpen)setMobileView('panel');}} aria-label={t(panelOpen?'Hide context panel':'Show context panel')} aria-expanded={panelOpen} aria-controls="conversation-context-panel"><PanelRight size={18} aria-hidden="true"/></button>}
         </div>
       </header>
-      {threadNoticeText&&threadState==='ready'&&<p className="conversation-inline-notice" role="status">{t(threadNoticeText)}</p>}
-      {threadState==='missing'
-        ?<div className="conversation-load"><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/><button type="button" onClick={()=>navigate('/app/discussions/new')}>{t('New discussion')}</button></div>
-        :threadState==='unavailable'
-          ?<div className="conversation-load"><p role="alert">{t(threadNoticeText||threadNotices.unavailable)}</p><button type="button" onClick={()=>setReload(value=>value+1)}>{t('Retry')}</button></div>
-          :<ConversationTranscript resetKey={loaded?.chat.id??'pending'} t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
-      {running&&<div className="conversation-stream" role="status" aria-live="polite">
-        <span className="conversation-stream-label">{reconnecting?t('Reconnecting…'):step==='approval'?t('Approval required'):step==='step'?t('Running a step…'):t('Working…')}</span>
-        {loaded&&loaded.chat.access!=='viewer'&&<button type="button" className="conversation-cancel" disabled={cancelling} onClick={()=>void cancelTurn()}>{t(cancelling?'Cancelling…':'Cancel turn')}</button>}
-      </div>}
-      {outcomeTurn&&loaded&&loaded.chat.access!=='viewer'&&<div className="conversation-recovery" role="status">
-        <p>{t('The outcome is unconfirmed. Check the saved result before trying again.')}</p>
-        <button type="button" disabled={reconciling} onClick={()=>void reconcileTurn()}>{t(reconciling?'Checking result…':'Check result')}</button>
-      </div>}      {failedTurn&&<div className="conversation-recovery" role="status">
-        <p>{t('The turn failed. Nothing is retried automatically.')}</p>
-        <button type="button" onClick={startNewTurn}>{t('Start a new turn')}</button>
-      </div>}
-      {awaitingHomeThread
-        ?<div className="conversation-compose conversation-compose-pending" role="status" aria-busy="true">{t('Loading discussion…')}</div>
-        :<ConversationComposer key={targetId??'new'} t={t} locale={locale} threadKey={targetId??'new'} drafts={drafts}
-          // A saved thread stays read-only until its access is known: a viewer must never
-          // get an enabled composer while the thread resolves, and a failed load stays inert.
-          canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
-          projectName={projectName} companyName={companyLabel} chips={chips} commands={commands} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-          sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>}
-      <details className="conversation-secondary" open={guidedOpen}
-        onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
-        {loaded
-          ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
-          :threadId!==null
-            ?<p className="conversation-secondary-loading" role="status">{t('Loading discussion…')}</p>
-            :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
-      </details>
+      {home
+        ?<ProjectHome t={t} projectName={projectName} threads={sortThreadRows(list.items)} client={client} session={session} composer={composer} onTemplate={startTemplate} onOpen={id=>navigate(`/app/discussions/s/${id}`)} onNavigate={navigate}/>
+        :<>
+          {threadNoticeText&&threadState==='ready'&&<p className="conversation-inline-notice" role="status">{t(threadNoticeText)}</p>}
+          {threadState==='missing'
+            ?<div className="conversation-load"><LiveUnavailable state="not_found" reason={t(threadNotices.missing)}/><button type="button" onClick={()=>navigate('/app/discussions/new')}>{t('New discussion')}</button></div>
+            :threadState==='unavailable'
+              ?<div className="conversation-load"><p role="alert">{t(threadNoticeText||threadNotices.unavailable)}</p><button type="button" onClick={()=>setReload(value=>value+1)}>{t('Retry')}</button></div>
+              :<ConversationTranscript resetKey={loaded?.chat.id??'pending'} t={t} locale={locale} entries={entries} actions={actions} busy={sending} statusLine={statusLine} emptyTitle={t('What would you like to achieve for this project?')}/>}
+          {running&&<div className="conversation-stream" role="status" aria-live="polite">
+            <span className="conversation-stream-label">{reconnecting?t('Reconnecting…'):step==='approval'?t('Approval required'):step==='step'?t('Running a step…'):t('Working…')}</span>
+            {loaded&&loaded.chat.access!=='viewer'&&<button type="button" className="conversation-cancel" disabled={cancelling} onClick={()=>void cancelTurn()}>{t(cancelling?'Cancelling…':'Cancel turn')}</button>}
+          </div>}
+          {outcomeTurn&&loaded&&loaded.chat.access!=='viewer'&&<div className="conversation-recovery" role="status">
+            <p>{t('The outcome is unconfirmed. Check the saved result before trying again.')}</p>
+            <button type="button" disabled={reconciling} onClick={()=>void reconcileTurn()}>{t(reconciling?'Checking result…':'Check result')}</button>
+          </div>}      {failedTurn&&<div className="conversation-recovery" role="status">
+            <p>{t('The turn failed. Nothing is retried automatically.')}</p>
+            <button type="button" onClick={startNewTurn}>{t('Start a new turn')}</button>
+          </div>}
+          {composer}
+          <details className="conversation-secondary" open={guidedOpen}
+            onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}><summary>{t('Guided setup')}</summary>
+            {loaded
+              ?<GuidedSales key={loaded.chat.id} client={client} session={session} t={t} locale={locale} navigate={navigate} thread={loaded.raw} onThread={updated=>{void loadThread(updated,loaded.chat);}}/>
+              :threadId!==null
+                ?<p className="conversation-secondary-loading" role="status">{t('Loading discussion…')}</p>
+                :<GuidedSales key="new" client={client} session={session} t={t} locale={locale} navigate={navigate} onThread={row=>navigate(`/app/discussions/s/${row.id}`)}/>}
+          </details>
+        </>}
     </div>
-    {panelOpen&&<div className="conversation-panel-slot" id="conversation-context-panel">
+    {!home&&panelOpen&&<div className="conversation-panel-slot" id="conversation-context-panel">
       <ConversationPanel t={t} locale={locale} tab={tab} tabs={panelTabs} onTab={setActiveTab} results={panel.results} runs={loaded?.chat.runs??[]}
         citations={panel.citations} selectedSources={panel.selectedSources} proposals={panel.proposals} entries={entries} access={loaded?.chat.access??'viewer'}
         threadId={loaded?.chat.id??null} threadVersion={loaded?.chat.version??0} contextRevision={contextRevision} canEdit={!!loaded&&loaded.chat.access!=='viewer'} canViewOffer={canViewOffer}
@@ -798,10 +799,10 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         drive={<DriveConnections key={`${identity}:${loaded?.chat.id??'none'}`} client={client} session={session} t={t} selected={loaded?.chat.sources??[]} readOnly={!loaded||loaded.chat.access==='viewer'} onSource={(source,selected)=>void toggleSource(source,selected)}/>}
         onClose={mobileView==='panel'?()=>closeMobileView('panel'):undefined}/>
     </div>}
-    <nav className="conversation-mobile-views" aria-label={t('Views')}>
+    {!home&&<nav className="conversation-mobile-views" aria-label={t('Views')}>
       <button type="button" aria-current={mobileView==='conversation'?'page':undefined} onClick={()=>setMobileView('conversation')}>{t('Conversation')}</button>
       <button type="button" ref={navThreadsRef} aria-current={mobileView==='threads'?'page':undefined} onClick={()=>{threadsOpener.current='nav';setMobileView('threads');}}>{t('Discussions')}</button>
-      <button type="button" ref={contextNavRef} aria-current={mobileView==='panel'?'page':undefined} onClick={()=>{panelOpener.current='nav';setPanelPreference(true);setMobileView('panel');}}>{t('Context')}</button>
-    </nav>
+      <button type="button" ref={contextNavRef} aria-current={mobileView==='panel'?'page':undefined} onClick={()=>{panelOpener.current='nav';setPanelPreference(true);setMobileView('panel');}}>{t('Details')}</button>
+    </nav>}
   </div>;
 }

@@ -9,9 +9,26 @@ import type {Page} from '@playwright/test';
 // native disclosure. Every navigation re-opens that disclosure through its visible
 // summary control before a test continues with the unchanged guided assertions.
 async function openGuided(page:Page){
- for(let attempt=0;attempt<3;attempt+=1){
+ // Only discussion/live surfaces have a guided form. Documents and other retained
+ // pages have no studio, so return instead of waiting out the test timeout.
+ const surface=page.locator('.conversation-home, .conversation-studio').first();
+ try{await surface.waitFor({state:'attached',timeout:5000});}catch{return;}
+ // On the project dashboard the guided disclosure is absent: open the fixture's
+ // saved discussion before looking for the guided form.
+ if(await page.locator('.conversation-home').count()){
+  const first=page.locator('.conversation-thread-items button').first();
+  if(await first.count()){
+   if(!(await first.isVisible()))await page.getByRole('button',{name:'Show discussions',exact:true}).click();
+   await first.waitFor({state:'visible',timeout:10000});
+   await first.click();
+   await page.waitForFunction(()=>/^\/app\/discussions\/s\//.test(new URL(location.href).searchParams.get('route')??''),{timeout:10000}).catch(()=>{});
+   // Selecting a thread on a narrow viewport leaves the drawer open over the thread.
+   if(await page.locator('.conversation-studio[data-mobile-view="threads"]').count())await page.keyboard.press('Escape');
+  }
+ }
+ for(let attempt=0;attempt<5;attempt+=1){
   const disclosure=page.locator('details').filter({has:page.locator('summary',{hasText:/Guided setup|引導設定/})}).first();
-  try{await disclosure.waitFor({state:'attached',timeout:2000});}catch{return;}
+  try{await disclosure.waitFor({state:'attached',timeout:5000});}catch{continue;}
   if(await disclosure.evaluate(node=>(node as HTMLDetailsElement).open))return;
   try{await disclosure.locator('summary').first().click();return;}catch{/* A remount closed and replaced it; retry. */}
  }
@@ -85,7 +102,7 @@ for(const skill of catalogue)test(`registered invocation ${skill.id}`,async({pag
 test('catalogue offers every registered skill and typed request review',async({page})=>{
  page.on('pageerror',e=>console.log('PAGE ERROR',e.message));
  await page.route('**/v1/**',route=>{const path=new URL(route.request().url()).pathname;const data=path.endsWith('/sales/skills')?{skills:catalogue.map((s:object)=>({...s,inputs_schema:{properties:{}}}))}:path.endsWith('/conversation-threads')?{items:[],total:0,offset:0,limit:50}:{};return route.fulfill({json:{data,data_mode:'live',request_id:'synthetic'}});});
- await gotoPage(page,'/fixture');
+ await gotoPage(page,'/fixture?route=/app/discussions/new');
  await expect(page.getByRole('button',{name:'Prepare a meeting',exact:true})).toBeVisible();
  await expect(page.locator('[data-skill]')).toHaveCount(17);
  await page.getByLabel('Describe your task').fill('Prepare a meeting');
@@ -129,7 +146,7 @@ test('fresh discussion thread rejection never posts a sales task',async({page})=
 });
 
 test('uncertain task send retries the same mutation key',async({page})=>{await fixture(page);const keys:string[]=[];await page.route('**/sales-tasks',async route=>{if(route.request().method()!=='POST')return route.fallback();keys.push(route.request().headers()['idempotency-key']);if(keys.length===1)return route.abort('failed');return route.fallback();});await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.locator('[data-skill="first-project"]').click();await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Outcome unknown'})).toBeVisible();await page.getByRole('button',{name:'Save task',exact:true}).click();await expect(page.getByLabel('Saved messages')).toBeVisible();expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);});
-test('dirty navigation can be cancelled and accepted without losing the scoped draft',async({page})=>{await fixture(page);page.removeAllListeners('dialog');await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('textbox',{name:'Describe your task'}).fill('Keep this draft');page.once('dialog',d=>void d.dismiss());await page.getByRole('button',{name:'Home',exact:true}).click();await expect(page.locator('#fixture-path')).toHaveText(`/app/discussions/s/${threadId}`);page.once('dialog',d=>void d.accept());await page.getByRole('button',{name:'Home',exact:true}).click();await openThread(page,'Synthetic discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('Keep this draft');});
+test('dirty navigation can be cancelled and accepted without losing the scoped draft',async({page})=>{await fixture(page);page.removeAllListeners('dialog');await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('textbox',{name:'Describe your task'}).fill('Keep this draft');page.once('dialog',d=>void d.dismiss());await page.getByRole('button',{name:'Fixture home',exact:true}).click();await expect(page.locator('#fixture-path')).toHaveText(`/app/discussions/s/${threadId}`);page.once('dialog',d=>void d.accept());await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openThread(page,'Synthetic discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('Keep this draft');});
 test('project change discards a delayed old-scope task response',async({page})=>{await fixture(page);let release!:()=>void,received!:()=>void;const held=new Promise<void>(r=>release=r),seen=new Promise<void>(r=>received=r);await page.route('**/sales-tasks',async route=>{if(route.request().method()!=='POST')return route.fallback();received();await held;await route.fulfill({json:{data:{id:'old-task',state:'completed'},data_mode:'live',request_id:'synthetic'}}).catch(()=>{});});await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.locator('[data-skill="first-project"]').click();await page.getByRole('button',{name:'Save task',exact:true}).click();await seen;await page.getByLabel('Fixture project').selectOption('project-b');await openGuided(page);release();await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');await expect(page.getByLabel('Saved messages')).toHaveCount(0);});
 test('formal recipient is explicitly chosen from current eligible native contacts',async({page})=>{
  const {requests}=await fixture(page);const output={id:'d3000000-0000-4000-8000-000000000001',revision:2,kind:'outreach_preparation',visibility:'thread',availability:'available',content:{summary:'Synthetic authored preparation',messages:[],unknowns:[]},native_refs:[],dependencies:[],citations:[{id:threadId,version:1,kind:'buyer',locator:'buyer:'+threadId,retention_class:'durable'}]};let formal:Record<string,unknown>|null=null;
@@ -154,14 +171,14 @@ test('search and detail have separate approvals; only checked fields apply',asyn
  await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.locator('[data-skill="sales-contacts"]').click();await page.getByLabel('Buyer',{exact:true}).fill(threadId);await page.getByRole('button',{name:'Save task',exact:true}).click();await page.getByRole('combobox',{name:'Connection',exact:true}).selectOption('connection');await page.getByLabel('Search',{exact:true}).fill('Synthetic');await page.getByRole('button',{name:'Review search cost'}).click();expect(calls.filter(c=>c.path.endsWith('/approve'))).toHaveLength(0);await page.getByRole('button',{name:'Approve quoted lookup'}).click();await page.getByRole('button',{name:'Check lookup'}).click();await page.getByRole('checkbox',{name:/Synthetic buyer/}).check();await page.getByRole('button',{name:'Review detail cost'}).click();expect(calls.filter(c=>c.path.endsWith('/approve'))).toHaveLength(1);await page.getByRole('button',{name:'Approve quoted lookup'}).click();await page.getByRole('button',{name:'Check lookup'}).click();await reloadPage(page);await page.getByRole('button',{name:'Resume detail',exact:true}).click();await page.getByRole('button',{name:'Check lookup'}).click();expect(calls.filter(c=>c.path.endsWith('/approve'))).toHaveLength(2);await page.getByRole('button',{name:'Review fields'}).click();await page.getByRole('checkbox',{name:/industry:/}).check();await page.getByRole('button',{name:'Save selected fields'}).click();expect(calls.find(c=>c.path.endsWith('/apply'))?.body?.selected_fields).toEqual(['industry']);
 });
 test('thread drafts remain separate, project switch clears them, unsafe authored text stays text',async({page})=>{
- await fixture(page);await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('textbox',{name:'Describe your task'}).fill('<img src=x onerror=alert(1)>');await page.getByRole('button',{name:'Home',exact:true}).click();await openThread(page,'Second discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');await page.getByRole('textbox',{name:'Describe your task'}).fill('B');await page.getByRole('button',{name:'Home',exact:true}).click();await openThread(page,'Synthetic discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('<img src=x onerror=alert(1)>');expect(await page.locator('img[src=x]').count()).toBe(0);await page.getByLabel('Fixture project').selectOption('project-b');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');
+ await fixture(page);await gotoPage(page,`/fixture?route=/app/discussions/s/${threadId}`);await page.getByRole('textbox',{name:'Describe your task'}).fill('<img src=x onerror=alert(1)>');await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openThread(page,'Second discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');await page.getByRole('textbox',{name:'Describe your task'}).fill('B');await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openThread(page,'Synthetic discussion');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('<img src=x onerror=alert(1)>');expect(await page.locator('img[src=x]').count()).toBe(0);await page.getByLabel('Fixture project').selectOption('project-b');await openGuided(page);await expect(page.getByRole('textbox',{name:'Describe your task'})).toHaveValue('');
 });
 for(const width of [390,768,1440])test(`keyboard and layout at ${width}, both locales, 200 percent CSS zoom`,async({page})=>{await fixture(page);await page.setViewportSize({width,height:1000});await gotoPage(page,'/fixture');await page.getByRole('textbox',{name:'Describe your task'}).fill('Prepare a meeting');await page.getByRole('button',{name:'Review task',exact:true}).focus();await page.keyboard.press('Enter');await expect(page.getByLabel('Chosen skill')).toHaveValue('sales-prep');for(const zoom of [1,2]){await page.evaluate(z=>{document.body.style.zoom=String(z);},zoom);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);await page.getByRole('button',{name:'Change language',exact:true}).click();}await page.screenshot({path:`.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-13-evidence/width-${width}.png`,fullPage:true});});
 test('actual Chromium tab zoom is 200 percent in both locales',async()=>{
  const root=resolve('dist/task13-zoom');await mkdir(root,{recursive:true});const extension=await mkdtemp(resolve(root,'extension-')),profile=await mkdtemp(resolve(root,'profile-'));
  let context:Awaited<ReturnType<typeof chromium.launchPersistentContext>>|undefined;
  try{await writeFile(resolve(extension,'manifest.json'),JSON.stringify({manifest_version:3,name:'Task13 isolated zoom',version:'1.0',permissions:['tabs'],host_permissions:['http://127.0.0.1:4397/*'],background:{service_worker:'background.js'}}));await writeFile(resolve(extension,'background.js'),'chrome.runtime.onInstalled.addListener(()=>{});');context=await chromium.launchPersistentContext(profile,{channel:'chromium',headless:true,viewport:{width:1440,height:1000},args:[`--disable-extensions-except=${extension}`,`--load-extension=${extension}`]});const page=context.pages()[0];await fixture(page);await gotoPage(page,'http://127.0.0.1:4397/fixture');const worker=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker');
- const zoom=await worker.evaluate(async()=>{const api=(globalThis as unknown as {chrome:{tabs:{query:(q:object)=>Promise<{id:number;url:string}[]>;setZoom:(id:number,z:number)=>Promise<void>;getZoom:(id:number)=>Promise<number>}}}).chrome;const tab=(await api.tabs.query({})).find(t=>t.url.includes('/fixture'))!;await api.tabs.setZoom(tab.id,2);return api.tabs.getZoom(tab.id);});expect(zoom).toBe(2);await expect.poll(()=>page.evaluate(()=>innerWidth)).toBe(720);for(const locale of ['en','zh-HK']){if(locale==='zh-HK')await page.getByRole('button',{name:'Change language'}).click();await expect(page.getByRole('button',{name:locale==='en'?'Prepare a meeting':'準備會議',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(720);await page.screenshot({path:`.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-13-evidence/actual-zoom-${locale}.png`,fullPage:true});}}
+ const zoom=await worker.evaluate(async()=>{const api=(globalThis as unknown as {chrome:{tabs:{query:(q:object)=>Promise<{id:number;url:string}[]>;setZoom:(id:number,z:number)=>Promise<void>;getZoom:(id:number)=>Promise<number>}}}).chrome;const tab=(await api.tabs.query({})).find(t=>t.url.includes('/fixture'))!;await api.tabs.setZoom(tab.id,2);return api.tabs.getZoom(tab.id);});expect(zoom).toBe(2);await expect.poll(()=>page.evaluate(()=>innerWidth)).toBe(720);await openGuided(page);for(const locale of ['en','zh-HK']){if(locale==='zh-HK')await page.getByRole('button',{name:'Change language'}).click();await expect(page.getByRole('button',{name:locale==='en'?'Prepare a meeting':'準備會議',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(720);await page.screenshot({path:`.superpowers/sdd/2026-11-05-guided-sales-skills-xverum/task-13-evidence/actual-zoom-${locale}.png`,fullPage:true});}}
  finally{await context?.close();for(const dir of [extension,profile]){const rel=relative(root,dir);if(!rel||rel.startsWith('..'))throw Error('Unowned cleanup');await rm(dir,{recursive:true,force:true});}}
 });
 
@@ -174,14 +191,14 @@ test('fix1 empty text preserves intake sources and chosen skill across remount',
  await page.getByText('Selected sources',{exact:false}).first().click();
  await page.getByRole('checkbox',{name:'project setup · 7'}).check();
  await expect(page.getByLabel('Describe your task')).toHaveValue('');
- await page.getByRole('button',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Fixture home',exact:true}).click();
  await openThread(page,'Synthetic discussion');await openGuided(page);
  await expect(page.getByLabel('Offer Description',{exact:true})).toHaveValue('Unsent field');
  await page.getByText('Selected sources',{exact:false}).first().click();
  await expect(page.getByRole('checkbox',{name:'project setup · 7'})).toBeChecked();
  await page.getByLabel('Chosen skill').selectOption('sales-prep');
  await page.getByLabel('Describe your task').fill('');
- await page.getByRole('button',{name:'Home',exact:true}).click();
+ await page.getByRole('button',{name:'Fixture home',exact:true}).click();
  await openThread(page,'Synthetic discussion');await openGuided(page);
  await expect(page.getByLabel('Chosen skill')).toHaveValue('sales-prep');
 });
@@ -290,7 +307,7 @@ test('fix1 owned qualification existing run and uncertain native admission',asyn
  await page.getByRole('button',{name:'Review next action'}).click();await page.getByRole('button',{name:'Review research cost'}).click();
  await page.getByRole('button',{name:'Confirm and start research',exact:true}).click();
  await expect(page.getByRole('alert').filter({hasText:'Outcome unknown'})).toBeVisible();
- await page.getByRole('button',{name:'Home',exact:true}).click();await openThread(page,'Synthetic note');await openGuided(page);
+ await page.getByRole('button',{name:'Fixture home',exact:true}).click();await openThread(page,'Synthetic note');await openGuided(page);
  await page.getByRole('button',{name:'Review next action'}).click();
  await page.getByRole('button',{name:'Retry same research request',exact:true}).click();
  await expect(page.getByRole('alert').filter({hasText:'Research run saved to discussion'})).toBeVisible();

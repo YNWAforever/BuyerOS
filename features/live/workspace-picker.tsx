@@ -24,6 +24,8 @@ import {LeadProgressPanel} from './lead-workflow/progress-panel';
 import {PilotBudgetPanel} from './lead-workflow/budget-panel';
 import {LiveNavigation} from './navigation';
 import {LiveBrand, LiveFrame, LiveTopbar} from './shell';
+import {ScopeSwitcher} from './scope-switcher';
+import {AccountMenu} from './account-menu';
 import {conversationHomeEnabled, discussionForPath, isLiveOverviewRoute,applyConversationNavigationScope,navigateLocalDiscussion} from './conversation-home';
 import {LiveConversation} from './discussion-workspace';
 import {useSalesCapability,salesCapabilityShell,salesCapabilityText} from './sales-skills/capability';
@@ -280,39 +282,59 @@ export function LiveWorkspace() {
   </main>;
   const workspaceName=workspaces.kind==='ready'?workspaces.items.find(item=>item.id===workspace)?.name:undefined;
   const projectName=projects.kind==='ready'?projects.items.find(item=>item.id===project)?.name:undefined;
+  const accountEmail=auth.accountEmail?.()??null;
   const accessDetails=<>
-    {auth.accountEmail?.() && <p className="live-account-email">{t('Signed in as')}: <b>{auth.accountEmail()}</b></p>}
-    {authorized && <p>{t('Role')}: {workspaces.items.find(item=>item.id===workspace)?.roles.map(t).join(', ')}</p>}
+    {accountEmail && <p className="live-account-email">{t('Signed in as')}: <b>{accountEmail}</b></p>}
+    {authorized && <p>{t('Role')}: {roles.map(t).join(', ')}</p>}
     {lastChecked?.identity===snapshot.identity&&<p>{t('Last checked')}: {new Date(lastChecked.time).toLocaleTimeString(locale)}</p>}
   </>;
-  return <LiveFrame t={t} pathname={pathname} conversationHome={conversationHome}
+  const diagnosticPanel=diagnostic?.identity===snapshot.identity?<>
+    <p role="status" aria-live="polite">{t(diagnostic.result==='copied'?'Diagnostics copied.':diagnostic.result==='failed'?'Could not copy. Select the diagnostics below.':'Copying diagnostics…')}</p>
+    {diagnostic.result==='failed'&&<label>{t('Diagnostic details')}<textarea aria-label={t('Diagnostic details')} readOnly rows={7} value={diagnostic.text}/></label>}
+  </>:null;
+  // Conversation routes own their heading and context: no page heading, no scope panels.
+  const hideHeading=conversationHome&&Boolean(discussion);
+  const signOut=()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{});
+  // The retained shell keeps its original scope panels, account footer and top-bar
+  // controls; only the conversation shell moves them into the compact sidebar.
+  const legacyScope=<div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+    {workspaces.kind==='loading'&&<p role="status">{t('Loading workspaces…')}</p>}
+    {workspaces.kind==='error'&&<><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+    {workspaces.kind==='ready'&&(workspaces.items.length?<label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace||''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>:<><p>{t('No workspace membership. Ask an administrator for access.')}</p><p>{t('Check that you used the account invited to this workspace. Use Sign out to change accounts.')}</p></>)}
+    {authorized?<details className="live-access-details"><summary>{t('Access details')}</summary>{accessDetails}</details>:accessDetails}
+    {workspaces.kind==='ready'&&<button disabled={accessChecking} onClick={retryAccess}>{t('Check access again')}</button>}
+    {workspaces.kind==='ready'&&accessError&&<p role="alert">{localizeError(accessError)}</p>}
+    {accessChecking&&<p role="status" aria-live="polite">{t('Checking access…')}</p>}
+    {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={()=>void copyDiagnostics()}>{t('Copy diagnostics')}</button></>}
+    {diagnosticPanel}
+  </section>
+  {authorized&&<section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
+    {projects.kind==='loading'&&<p role="status">{t('Loading projects…')}</p>}
+    {projects.kind==='error'&&<><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
+    {projects.kind==='ready'&&(projects.items.length?<label className="live-scope-select">{t('Project')} <select aria-label={t('Project')} value={project||''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>:<p>{t('No projects yet.')}</p>)}
+    {(canCreate||canEdit&&projectKnown&&projectActive)&&<div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
+  </section>}
+  </div>;
+  const legacyFooter=<div className="user-profile"><div className="avatar" aria-hidden="true">{(workspaceName||'F').slice(0,1).toUpperCase()}</div><span><b>{workspaceName||t('No workspace selected')}</b><small>{projectName||t('No project selected')}</small></span></div>;
+  // First-run only: without membership the focused access card is the page, not a sidebar.
+  const noAccess=!authorized?<div className="live-scope-grid live-scope-empty"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
+    {workspaces.kind==='loading'&&<p role="status">{t('Loading workspaces…')}</p>}
+    {workspaces.kind==='error'&&<><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
+    {workspaces.kind==='ready'&&(workspaces.items.length?<label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace||''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>:<><p>{t('No workspace membership. Ask an administrator for access.')}</p><p>{t('Check that you used the account invited to this workspace. Use Sign out to change accounts.')}</p></>)}
+    {accessDetails}
+    {accessChecking&&<p role="status" aria-live="polite">{t('Checking access…')}</p>}
+    {accessError&&<p role="alert">{localizeError(accessError)}</p>}
+    {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={()=>void copyDiagnostics()}>{t('Copy diagnostics')}</button></>}
+  </section></div>:null;
+  return <LiveFrame t={t} pathname={pathname} conversationHome={conversationHome} hideHeading={hideHeading}
+    scope={conversationHome&&authorized?<ScopeSwitcher t={t} workspace={workspace} project={project} workspaces={workspaces} projects={projects} authorized={authorized} canCreate={canCreate} accessChecking={accessChecking} accessError={accessError} notice={selectionError} onWorkspace={chooseWorkspace} onProject={chooseProject} onNewProject={()=>navigate('/app/discover/new')} onCheckAccess={retryAccess}/>:null}
     navigation={<LiveNavigation t={t} navigate={navigate} pathname={pathname} conversationHome={conversationHome} authorized={authorized} projectKnown={projectKnown} canEdit={canEdit} projectActive={projectActive} canCreate={canCreate}/>}
-    footer={<div className="user-profile"><div className="avatar" aria-hidden="true">{(workspaceName||'F').slice(0,1).toUpperCase()}</div><span><b>{workspaceName||t('No workspace selected')}</b><small>{projectName||t('No project selected')}</small></span></div>}
-    header={<LiveTopbar t={t} pathname={pathname} conversationHome={conversationHome} languagePicker={languagePicker} signOut={<button onClick={()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{})}>{t('Sign out')}</button>}/>}>
-    <div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>
-      {workspaces.kind === 'loading' && <p role="status">{t('Loading workspaces…')}</p>}
-      {workspaces.kind === 'error' && <><p role="alert">{localizeError(workspaces.message)}</p><button disabled={accessChecking} onClick={retryAccess}>{t('Retry loading workspaces')}</button></>}
-      {workspaces.kind === 'ready' && (workspaces.items.length ? <label className="live-scope-select">{t('Workspace')} <select aria-label={t('Workspace')} value={workspace || ''} onChange={event=>chooseWorkspace(event.target.value)}><option value="">{t('Choose workspace')}</option>{workspaces.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <><p>{t('No workspace membership. Ask an administrator for access.')}</p><p>{t('Check that you used the account invited to this workspace. Use Sign out to change accounts.')}</p></>)}
-      {authorized
-        ? <details className="live-access-details"><summary>{t('Access details')}</summary>{accessDetails}</details>
-        : accessDetails}
-      {workspaces.kind==='ready'&&<button disabled={accessChecking} onClick={retryAccess}>{t('Check access again')}</button>}
-      {workspaces.kind==='ready'&&accessError&&<p role="alert">{localizeError(accessError)}</p>}
-      {accessChecking&&<p role="status" aria-live="polite">{t('Checking access…')}</p>}
-      {(workspaces.kind==='error'||workspaces.kind==='ready'&&!workspaces.items.length)&&<><p>{t('Contact your workspace administrator.')}</p><button onClick={()=>void copyDiagnostics()}>{t('Copy diagnostics')}</button></>}
-      {diagnostic?.identity===snapshot.identity&&<><p role="status" aria-live="polite">{t(diagnostic.result==='copied'?'Diagnostics copied.':diagnostic.result==='failed'?'Could not copy. Select the diagnostics below.':'Copying diagnostics…')}</p>
-        {diagnostic.result==='failed'&&<label>{t('Diagnostic details')}<textarea aria-label={t('Diagnostic details')} readOnly rows={7} value={diagnostic.text}/></label>}</>}
-    </section>
-    {authorized && <section className="panel" aria-label={t('Project selection')}><h2>{t('Projects')}</h2>
-      {projects.kind === 'loading' && <p role="status">{t('Loading projects…')}</p>}
-      {projects.kind === 'error' && <><p role="alert">{localizeError(projects.message)}</p><button onClick={()=>{setProjects({kind:'loading'});setProjectRefresh(value=>value+1);}}>{t('Retry loading projects')}</button></>}
-      {projects.kind === 'ready' && (projects.items.length ? <label className="live-scope-select">{t('Project')} <select aria-label={t('Project')} value={project || ''} onChange={event=>chooseProject(event.target.value)}><option value="">{t('Choose project')}</option>{projects.items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : <p>{t('No projects yet.')}</p>)}
-      {(canCreate||canEdit&&projectKnown&&projectActive) && <div className="inline">{canCreate&&<button onClick={()=>navigate('/app/discover/new')}>{t('New project')}</button>}{canEdit&&projectKnown&&projectActive&&<button onClick={()=>navigate('/app/discover/edit')}>{t('Edit offer')}</button>}</div>}
-    </section>}
-    </div>
+    footer={conversationHome?<AccountMenu t={t} email={accountEmail} workspaceName={workspaceName??null} roles={roles} authorized={authorized} locale={locale} onLocale={value=>void updateLocale(value)} localeSaving={localeSaving} localeDisabled={!interactionReady} accessDetails={accessDetails} accessChecking={accessChecking} accessError={accessError} diagnostic={diagnosticPanel} onRetryAccess={retryAccess} onSignOut={signOut}/>:legacyFooter}
+    header={<LiveTopbar t={t} pathname={pathname} projectName={projectName??null} conversationHome={conversationHome} hidePageTitle={hideHeading} languagePicker={conversationHome?undefined:languagePicker} signOut={conversationHome?undefined:<button onClick={signOut}>{t('Sign out')}</button>}/>}>
+    {conversationHome?noAccess:legacyScope}
+    {!conversationHome&&selectionError&&<section className="panel" role="alert">{t(selectionError)}</section>}
     {authorized && shell==='checking' && <section className="panel" role="status" aria-live="polite"><p>{salesCapabilityText(locale,'checking')}</p></section>}
     {authorized && shell==='unavailable' && <section className="panel" role="alert"><h2>{salesCapabilityText(locale,'unavailable')}</h2><p>{t(capability.reason)}</p><button disabled={capability.refreshing} onClick={()=>capability.retry()}>{salesCapabilityText(locale,'retry')}</button></section>}
-    {selectionError && <section className="panel" role="alert">{t(selectionError)}</section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
     {authorized&&projectKnown&&documentsForPath(pathname)&&<SalesDocuments admissionEnabled={conversationHome} key={snapshot.identity+pathname} {...{session,client,t,navigate,pathname}}/>}

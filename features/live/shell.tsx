@@ -1,6 +1,5 @@
-'use client';
 import type {ReactNode} from 'react';
-import {ChevronRight, ShieldCheck} from 'lucide-react';
+import {ChevronRight} from 'lucide-react';
 import {discussionForPath} from './conversation-home';
 
 /** Route copy for the live page heading. Paths mirror the workspace router in workspace-picker. */
@@ -10,9 +9,9 @@ export function liveRouteMeta(pathname: string, conversationHome=false): {title:
   if (pathname === '/app/discover/new') return {title: 'New project', description: 'Describe your offer, then approve the buyer profile before research starts.'};
   if (pathname === '/app/discover/edit') return {title: 'Offer', description: 'Update offer facts and the buyer profile that research will use.'};
   if (pathname === '/app/discover') return {title: 'Buyers', description: 'Find the right companies. Know why they belong on your list.'};
-  if (pathname === '/app/runs' || pathname.startsWith('/app/discover/')) return {title: 'Research runs', description: 'Track research progress, failures and recovery.'};
+  if (pathname === '/app/runs' || pathname.startsWith('/app/discover/')) return {title: 'Research', description: 'Track research progress, failures and recovery.'};
   if (pathname === '/app/results') return {title: 'Results', description: 'Review outcomes, costs and manual follow-up records.'};
-  if (pathname === '/app/outreach') return {title: 'Drafts', description: 'Prepare grounded outreach. Every message stays under human review.'};
+  if (pathname === '/app/outreach') return {title: 'Outreach', description: 'Prepare grounded outreach. Every message stays under human review.'};
   if (pathname === '/app/settings') return {title: 'Settings', description: 'Members, roles, language, budgets and policy.'};
   if (pathname === '/app/operations') return {title: 'Operations', description: 'Readiness, jobs, retries and the audit trail.'};
   return {title: 'Overview', description: 'Your next actions across one connected buyer workspace.'};
@@ -27,10 +26,14 @@ type FrameProps = {
   t: (value: string) => string;
   pathname: string;
   navigation: ReactNode;
+  /** One-time workspace/project context, placed above the section list. */
+  scope?: ReactNode;
   footer: ReactNode;
   header: ReactNode;
   children: ReactNode;
   conversationHome?: boolean;
+  /** Conversation routes own their heading; the shell must not repeat it. */
+  hideHeading?: boolean;
 };
 
 /**
@@ -38,39 +41,49 @@ type FrameProps = {
  * sticky top strip with a horizontally scrolling section bar below 1024px. Layout is
  * CSS-only so every section button stays in the DOM and reachable at every width.
  */
-export function LiveFrame({t, pathname, navigation, footer, header, children, conversationHome=false}: FrameProps) {
+export function LiveFrame({t, pathname, navigation, scope, footer, header, children, conversationHome=false, hideHeading=false}: FrameProps) {
   const meta = liveRouteMeta(pathname,conversationHome);
-  return <div className="live-app">
+  return <div className={'live-app'+(conversationHome?' live-app-conversation':'')}>
     <aside className="live-sidebar">
       <LiveBrand/>
+      {scope}
       {navigation}
       <div className="live-sidebar-footer">{footer}</div>
     </aside>
     <main className="main-shell live-workspace">
       {header}
       <div className="content">
-        <div className="page-heading live-page-heading">
+        {!hideHeading && <div className="page-heading live-page-heading">
           <div><h1>{t(meta.title)}</h1><p>{t(meta.description)}</p></div>
-        </div>
+        </div>}
         {children}
       </div>
     </main>
   </div>;
 }
 
-type HeaderProps = {t: (value: string) => string; pathname: string; languagePicker: ReactNode; signOut: ReactNode; conversationHome?: boolean};
+type HeaderProps = {
+  t: (value: string) => string;
+  pathname: string;
+  projectName: string | null;
+  conversationHome?: boolean;
+  /** Conversation routes show one heading inside the studio, not a page title too. */
+  hidePageTitle?: boolean;
+  /** Legacy shell keeps its language and sign-out controls in the top bar. */
+  languagePicker?: ReactNode;
+  signOut?: ReactNode;
+};
 
-export function LiveTopbar({t, pathname, languagePicker, signOut, conversationHome=false}: HeaderProps) {
-  return <header className="topbar live-topbar">
+/** Breadcrumb first, one deliberate account control in the sidebar. */
+export function LiveTopbar({t, pathname, projectName, conversationHome=false, hidePageTitle=false, languagePicker, signOut}: HeaderProps) {
+  const meta = liveRouteMeta(pathname,conversationHome);
+  const empty=hidePageTitle&&!languagePicker&&!signOut;
+  return <header className={'topbar live-topbar'+(empty?' live-topbar-bare':'')}>
     <div className="inline live-breadcrumb">
-      <span className="breadcrumb">FIMMICK BuyerOS</span>
-      <ChevronRight size={14} aria-hidden="true"/>
-      <b>{t(liveRouteMeta(pathname,conversationHome).title)}</b>
+      <span className="breadcrumb">{projectName || t('This project')}</span>
+      {!hidePageTitle && <><ChevronRight size={14} aria-hidden="true"/><b>{t(meta.title)}</b></>}
     </div>
-    <div className="inline top-right">
-      <span className="live-indicator"><ShieldCheck size={14} aria-hidden="true"/>{t('Live workspace')}</span>
-      {languagePicker}
-      {signOut}
-    </div>
+    {languagePicker}
+    {signOut}
   </header>;
 }

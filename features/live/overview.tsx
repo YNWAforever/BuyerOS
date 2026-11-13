@@ -62,7 +62,7 @@ export function LiveOverview({t=(value:string)=>value}:{t?:(value:string)=>strin
 
 
 /** Navigation cards use exactly the same server filters as Results and Operations. */
-export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigate:(path:string)=>void}){
+export function LiveWorkQueue({t,onNavigate,variant='panel'}:{t:(value:string)=>string;onNavigate:(path:string)=>void;variant?:'panel'|'summary'}){
   const {client,session}=useWorkspaceSession(),snapshot=useSessionSnapshot(),scope=snapshot.scope;
   const [result,setResult]=useState<{identity:string;reload:number;value?:WorkQueue;error?:string}>(),[reload,setReload]=useState(0);
   const current=result?.identity===snapshot.identity&&result.reload===reload?result:undefined;
@@ -75,6 +75,18 @@ export function LiveWorkQueue({t,onNavigate}:{t:(value:string)=>string;onNavigat
     return()=>own.abort();
   },[client,session,scope.workspace,scope.project,snapshot.identity,reload]);
   const cards:[WorkQueueItem['kind'],string][]=[['awaiting_review','Awaiting review'],['pending_approval','Pending approvals'],['unassigned','Unassigned buyers'],['failed_job','Failed jobs'],['unknown_fit','Unknown fit'],['unknown_acceptance','Unknown provider acceptance']];
+  // Home shows only the actionable rows; the full queue keeps the complete readback.
+  if(variant==='summary'){
+    const rows=cards.map(([kind,label])=>({kind,label,item:current?.value?.items.find(row=>row.kind===kind)}))
+      .filter(row=>Boolean(row.item&&row.item.count>0)).slice(0,4);
+    return <section className="conversation-attention" aria-label={t('Needs attention')} aria-busy={Boolean(scope.project&&!current?.value&&!current?.error)}>
+      <div className="conversation-attention-head"><h3>{t('Needs attention')}</h3><button type="button" onClick={()=>onNavigate('/app/overview')}>{t('See all')}</button></div>
+      {!current?.value&&!current?.error?<p className="conversation-attention-status" role="status">{t('Loading attention items…')}</p>:
+        current.error?<p className="conversation-attention-status" role="alert">{current.error}</p>:
+        rows.length?<ul className="conversation-attention-list">{rows.map(row=><li key={row.kind}><button type="button" onClick={()=>onNavigate(workQueueLink(row.item!,{workspaceId:scope.workspace!,projectId:scope.project!}))}><span>{t(row.label)}</span><b>{row.item!.count}</b></button></li>)}</ul>:
+        <p className="conversation-attention-status">{t('Nothing needs attention right now.')}</p>}
+    </section>;
+  }
   return <section className="panel" aria-label={t('Daily work queue')} aria-busy={Boolean(scope.project&&!current?.value&&!current?.error)}><h2>{t('Daily work queue')}</h2>
     <p>{t('As of')}: {current?.value?<time dateTime={current.value.as_of}>{new Date(current.value.as_of).toLocaleString()}</time>:'—'}</p>
     <details><summary>{t('Technical details')}</summary><p>{t('Project')}: <code>{scope.project}</code></p></details>
