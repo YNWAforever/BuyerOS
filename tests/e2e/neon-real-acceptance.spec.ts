@@ -39,7 +39,12 @@ test('N11-05 N11-07 real existing Neon login, reload and two-tab logout without 
     await page.reload();await expect(page.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(packet.workspace_id);
     const second=await context.newPage();await second.goto(packet.origin+'/app');
     await expect(second.getByRole('combobox',{name:/^(Workspace|工作區)$/})).toHaveValue(packet.workspace_id);
-    await page.getByRole('button',{name:/^(Sign out|登出)$/}).click();
+    const signOut=page.getByRole('button',{name:/^(Sign out|登出)$/});
+    if(!(await signOut.isVisible())){
+      await page.getByLabel(/^(Account menu|帳戶選單)$/).click();
+    }
+    await expect(signOut).toBeVisible();
+    await signOut.click();
     await expect(second.getByRole('button',{name:/^(Sign in|登入)$/})).toBeVisible();
   } finally {await context.close();}
 });

@@ -27,8 +27,8 @@ account. Ordinary CI is fixture-based and cannot reach a real Neon account.
 Vercel preview deployments are protected by Vercel Authentication by default; an
 anonymous `GET` answers **401** before the app loads. Choose one of:
 
-- **Unprotected candidate** — target an alias or production deployment that is not
-  protected (the journey then needs no extra secret).
+- **Unprotected candidate** — target the immutable URL of an unprotected deployment
+  (the journey then needs no extra secret). Mutable aliases are refused.
 - **Bypass token** — in the Vercel project: *Settings → Deployment Protection →
   Protection Bypass for Automation*, create a token, and store it as the
   environment secret `BUYEROS_QA_PROTECTION_BYPASS`. The Playwright fixture
@@ -47,22 +47,29 @@ instead of a locator timeout.
 
 ## Run
 
-Dispatch the workflow against the branch (or, after merge, against `main`) with
-the deployment origin, the QA workspace/project ids and the full commit SHA the
-deployment was built from:
+Dispatch the reviewed workflow from `main` with the immutable deployment origin,
+the QA workspace/project ids and the full commit SHA the deployment was built from.
+The separate metadata job uses `buyeros-runtime-readonly` and checks out trusted
+`main` before it receives the server-side Vercel token. Its branch restrictions and
+review requirements still apply. Only after metadata verification succeeds can the
+QA job receive the account credentials from `buyeros-conversation-qa`:
 
 ```bash
 gh workflow run buyeros-conversation-qa.yml \
-  --ref feat/conversation-studio \
-  -f origin=https://buyer-jclj9q3y0-ynwaforevers-projects.vercel.app \
+  --ref main \
+  -f origin=https://<immutable-candidate>.vercel.app \
   -f workspace_id=<qa-workspace-uuid> \
   -f project_id=<qa-project-uuid> \
-  -f expected_source_sha=9823f3192bbb73d37d1d4c29584b378f7ee0bd82
+  -f expected_source_sha=<reviewed-full-source-sha>
 ```
 
-The workflow refuses: non-HTTPS origins, non-Vercel hosts, a non-bare origin,
-malformed UUIDs, a short SHA, a malformed bypass token, and (where `/healthz` is
-available) a deployment whose reported source does not match.
+The workflow refuses non-HTTPS origins, non-Vercel hosts, a non-bare origin,
+malformed UUIDs, a short SHA and a malformed bypass token. Before the login job,
+management API readback must prove a READY immutable deployment belonging to the
+protected project/team, with the expected repository binding and full commit SHA.
+Redirects are refused, and the management token is never sent to the candidate.
+These are deployment-metadata checks; protected runtime/database binding,
+attestation and actual candidate-bound acceptance remain separate release gates.
 
 Verify the bypass offline before dispatching (the token stays in the environment,
 never on the command line):
