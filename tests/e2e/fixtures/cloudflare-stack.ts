@@ -12,8 +12,10 @@ export async function awaitCloudflareIntent(runId:string, projectId:string, draf
     if (!response.ok) throw new Error(`Cloudflare fixture state read failed:${response.status}`);
     report=await response.json();
     expect(report.transport).toBe('actual-local-cloudflare');
-    return report.status;
-  },{timeout:180_000,intervals:[250,500,1000]}).toBe('completed');
+    // The native job can commit before the platform step receipt is recorded.
+    // Both observations must be ready before this real-transport check succeeds.
+    return {status:report.status,receipted:typeof report.platform_receipts==='number' && report.platform_receipts>0};
+  },{timeout:180_000,intervals:[250,500,1000]}).toEqual({status:'completed',receipted:true});
   expect(report.platform_receipts).toBeGreaterThan(0);
   return {stdout:JSON.stringify(report)};
 }

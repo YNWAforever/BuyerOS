@@ -1065,6 +1065,8 @@ jobs:
           timeout 150 pnpm exec playwright install-deps chromium || {
             echo "system dependency install did not complete; continuing with image-provided libraries"
           }
+      - name: Verify receipt polling waits for both native and platform completion
+        run: node --experimental-strip-types --test tests/cloudflare-intent-poll.test.mjs
       - run: .venv/bin/python ../../scripts/run-cloudflare-pg18-proof.py
         working-directory: services/api
       - run: python scripts/check-required-tests.py --junit artifacts/cloudflare/CF08-pg18.xml
