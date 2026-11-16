@@ -34,12 +34,14 @@ DIAGNOSTIC_LABELS=frozenset({'stage','sign','controls_target','controls_branch',
     'stage_candidate_aliases','stage_canonical_before','stage_canonical_after',
     'stage_aliases_before_publish','sign_aliases_before_publish','sign_canonical_before_publish',
     'stage_candidate_artifacts','stage_tree','stage_binding_probe','stage_configuration_probe',
-    'stage_api_probe','stage_encrypt','stage_write'})
+    'stage_api_probe','stage_encrypt','stage_write','stage_authorization','stage_contracts',
+    'stage_rollback_identity','stage_endpoint_binding'})
 DIAGNOSTIC_STATUSES=frozenset({'started','passed','failed','command_nonzero','command_timeout','file_unavailable',
                               'http_unauthorized','http_forbidden','http_not_found'})
 GH_METADATA_LABELS=frozenset({'controls_branch','controls_protection','controls_environment','controls_run','controls_jobs'})
 _failure_diagnostic=None
 _private_failure=None
+_phase='stage'
 
 
 def safe_summary(label,status):
@@ -77,7 +79,7 @@ def checked(label,operation,*args,**kwargs):
                 status='http_forbidden'
         elif isinstance(error,subprocess.TimeoutExpired):status='command_timeout'
         elif isinstance(error,FileNotFoundError):status='file_unavailable'
-        if _failure_diagnostic is None:_failure_diagnostic={'phase':label,'category':status}
+        if _failure_diagnostic is None:_failure_diagnostic={'phase':_phase if label=='stage' else label,'category':status}
         try:
             if _private_failure is None and isinstance(error,(subprocess.CalledProcessError,subprocess.TimeoutExpired)):
                 stderr=bounded_stderr(error.stderr)
@@ -256,13 +258,16 @@ def collect_verified(reads,packet,tokens,origin):
 
 
 def stage(ci_run_id,output):
+    global _phase
     source=os.environ['GITHUB_SHA']
+    _phase='stage_authorization'
     if (os.environ.get('GITHUB_REF')!='refs/heads/main'
             or os.environ.get('GITHUB_WORKFLOW')!='BuyerOS protected runtime bundle'
             or os.environ.get('BUYEROS_ENABLE_PROTECTED_STAGE')!='true' or output.exists()):
         raise ValueError('reviewed protected main stage authorization required')
     controls=checked('stage_controls',current_controls,source,ci_run_id)
     # Private templates bind account scope and schema policy before any deployment.
+    _phase='stage_contracts'
     api=checked('stage_api_contract',private_json,'BUYEROS_G0_TARGET_JSON');schema=checked('stage_schema_contract',lambda:SchemaContract.model_validate(private_json('BUYEROS_SCHEMA_CONTRACT_JSON')))
     if (api.get('source_sha')!=source or schema.source_sha!=source or schema.evidence_mode!='candidate_runtime'
             or schema.target_receipt is None or schema.target!=schema.target_receipt
@@ -270,16 +275,19 @@ def stage(ci_run_id,output):
             or digest(schema.model_dump(mode='json',by_alias=True))!=os.environ.get('BUYEROS_SCHEMA_CONTRACT_SHA256')
             or api.get('authorization_reference_sha256')!=os.environ.get('BUYEROS_RUNTIME_READ_SCOPE_SHA256')):
         raise ValueError('source-specific reviewed private templates required')
+    _phase='stage'
     reads=load_script('collect-workspace-observations.py')
     tokens={key:os.environ['BUYEROS_G0_'+key.upper()+'_TOKEN'] for key in reads.ACCOUNTS}
     checked('stage_account_scope',reads.validate,api,tokens,api['origin'])
     rollback_id=os.environ.get('BUYEROS_ROLLBACK_DEPLOYMENT_ID','')
     if re.fullmatch(r'dpl_[A-Za-z0-9_-]+',rollback_id) is None: raise ValueError('reviewed rollback deployment absent')
     rollback=checked('stage_rollback',vercel,'/v13/deployments/'+rollback_id+'?teamId='+controls['team_id'])
+    _phase='stage_rollback_identity'
     if (rollback.get('id')!=rollback_id or rollback.get('projectId')!=controls['project_id']
             or rollback.get('ownerId')!=controls['team_id'] or rollback.get('target')!='production'
             or rollback.get('readyState')!='READY'):
         raise ValueError('exact compatible rollback deployment required')
+    _phase='stage'
     rollback_artifacts=checked('stage_rollback_artifacts',service_artifacts,rollback)
     checked('stage_canonical_before',verify_canonical_rollback,rollback_id,controls)
     pulled=ROOT/'.vercel/.env.production.local'
@@ -288,8 +296,10 @@ def stage(ci_run_id,output):
         values=checked('stage_environment',runtime_env,pulled)
         target=database_target_sha256(values['BUYEROS_DATABASE_URL'])
         expected_endpoint=database_endpoint_sha256(values['BUYEROS_DATABASE_URL'])
+        _phase='stage_endpoint_binding'
         if schema.target.endpoint_sha256!=expected_endpoint:
             raise ValueError('schema target endpoint differs from production binding')
+        _phase='stage'
         observed_schema=checked('stage_schema_probe',lambda:asyncio.run(schema_observation(values['BUYEROS_DATABASE_URL'],schema)))
         rollback_packet={**api,'origin':'https://'+rollback['url']}
         rollback_api=checked('stage_rollback_probe',collect_verified,reads,rollback_packet,tokens,rollback_packet['origin'])
