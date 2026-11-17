@@ -176,7 +176,7 @@ def test_reconcile_intent_records_exact_read_only_status():
     reply=module.resolve_promotion_intent(42,'a'*40,'dpl_owned',
         post=lambda path,body:(posts.append((path,body)) or {'state':'success','description':body['description']}))
     assert posts==[('deployments/42/statuses',{'state':'success',
-        'description':'read-only-reconciled:'+'a'*40+':dpl_owned'})]
+        'description':'read-only-reconciled:'+'a'*40+':dpl_owned','auto_inactive':False})]
     assert reply['state']=='success'
 
 

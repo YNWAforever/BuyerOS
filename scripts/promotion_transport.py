@@ -132,7 +132,12 @@ def resolve_promotion_intent(record_id,source_sha,deployment_id,*,post=None):
     description='read-only-reconciled:'+source_sha+':'+deployment_id
     if post is None and not token: raise ValueError('release ledger token required')
     post=post or (lambda path,body:request_json(API+path,token,method='POST',body=body))
-    reply=post('deployments/'+str(record_id)+'/statuses',{'state':'success','description':description})
+    # GitHub's deployment-status endpoint defaults to adding an empty `inactive`
+    # status to every earlier successful deployment in this environment. That
+    # would erase the reconciliation evidence the next claim validates, so the
+    # automated status must opt out of it.
+    reply=post('deployments/'+str(record_id)+'/statuses',
+               {'state':'success','description':description,'auto_inactive':False})
     if type(reply) is not dict or reply.get('state')!='success' or reply.get('description')!=description:
         raise ValueError('promotion intent reconciliation unverified')
     return reply
