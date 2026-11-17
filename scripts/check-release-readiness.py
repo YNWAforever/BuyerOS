@@ -30,7 +30,7 @@ def _manifest_valid(manifest):
     for key,length in [('source_sha',40),('tree_sha',40),('configuration_sha256',64),('db_target_sha256',64),('schema_contract_sha256',64)]:
         if type(manifest[key]) is not str or not re.fullmatch('[0-9a-f]{'+str(length)+'}',manifest[key]):return False
     if type(manifest['ci_run_id']) is not int or manifest['ci_run_id']<=0:return False
-    if type(manifest['receipt_max_age_seconds']) is not int or not 1<=manifest['receipt_max_age_seconds']<=900:return False
+    if type(manifest['receipt_max_age_seconds']) is not int or not 1<=manifest['receipt_max_age_seconds']<=3600:return False
     for key in ['required_heads','required_ci_jobs']:
         values=manifest[key]
         if type(values) is not list or not values or len(values)>100 or any(type(v) is not str or not v for v in values) or len(set(values))!=len(values):return False

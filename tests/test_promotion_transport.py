@@ -169,3 +169,27 @@ def test_lost_intent_acknowledgement_still_blocks_next_dispatch():
     with pytest.raises(ConnectionResetError): module.claim_promotion_intent(context(),get=get,post=post)
     with pytest.raises(ValueError): module.claim_promotion_intent(context(89),get=get,post=post)
     assert len(records)==1
+
+
+def test_reconcile_intent_records_exact_read_only_status():
+    module=transport();posts=[]
+    reply=module.resolve_promotion_intent(42,'a'*40,'dpl_owned',
+        post=lambda path,body:(posts.append((path,body)) or {'state':'success','description':body['description']}))
+    assert posts==[('deployments/42/statuses',{'state':'success',
+        'description':'read-only-reconciled:'+'a'*40+':dpl_owned'})]
+    assert reply['state']=='success'
+
+
+def test_reconcile_intent_requires_exact_identity():
+    module=transport()
+    for record,sha,deployment in [(0,'a'*40,'dpl_owned'),('42','a'*40,'dpl_owned'),
+                                  (42,'A'*40,'dpl_owned'),(42,'a'*40,'dpl upper')]:
+        with pytest.raises(ValueError):
+            module.resolve_promotion_intent(record,sha,deployment,post=lambda *args:None)
+
+
+def test_reconcile_intent_rejects_unverified_ack():
+    module=transport()
+    with pytest.raises(ValueError):
+        module.resolve_promotion_intent(42,'a'*40,'dpl_owned',
+            post=lambda path,body:{'state':'success','description':'different'})

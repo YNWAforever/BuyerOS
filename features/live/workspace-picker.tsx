@@ -34,6 +34,7 @@ import {documentsForPath} from './conversation-home';
 import {ShieldCheck} from 'lucide-react';
 import {zh} from '@/locales';
 import {liveZh} from './locale';
+import {cachedProjects, cachedWorkspaces, clearScopeCache, rememberProjects, rememberWorkspaces} from './scope-cache';
 
 type LoadState<T> = {kind:'loading'} | {kind:'ready'; items:T[]} | {kind:'error'; message:string};
 function requested(key: string): string | null {return new URLSearchParams(window.location.search).get(key);}
@@ -64,6 +65,16 @@ export function LiveWorkspace() {
   const [accessCheck,setAccessCheck]=useState<string|null>(null);
   const [lastChecked,setLastChecked]=useState<{identity:string;time:string}|null>(null);
   const [diagnostic,setDiagnostic]=useState<{identity:string;text:string;result:'copying'|'copied'|'failed'}|null>(null);
+  const hydratedIdentity=useRef<string|null>(null);
+  useEffect(() => {
+    if (!snapshot.authenticated) {hydratedIdentity.current=null;return;}
+    const identity=session.identity();
+    if (!identity||hydratedIdentity.current===identity) return;
+    hydratedIdentity.current=identity;
+    // Paint the last observed scope immediately; the reads below still revalidate it.
+    const cachedRows=cachedWorkspaces(identity);
+    if (cachedRows?.length) queueMicrotask(()=>setWorkspaces(previous=>previous.kind==='ready'?previous:{kind:'ready',items:cachedRows}));
+  }, [session,snapshot.authenticated,snapshot.identity]);
   const accessChecking=accessCheck===snapshot.identity;
   const checkingAccess=useRef(false),allowAutoSelection=useRef(true),pendingAccessCheck=useRef<string|null>(null);
   const [projectRefresh, setProjectRefresh] = useState(0);
@@ -189,7 +200,7 @@ export function LiveWorkspace() {
     const signal = AbortSignal.any([session.controller().signal, own.signal]);
     void loadSelection(client,session,'/v1/workspaces',toWorkspaces,signal).then(items => {
       if (own.signal.aborted || !session.isCurrent(identity)) return;
-      setAccessError('');setWorkspaces({kind:'ready',items});
+      setAccessError('');setWorkspaces({kind:'ready',items});rememberWorkspaces(identity,items);
       const current=session.current().workspace;
       if(current&&!items.some(item=>item.id===current)){
         allowAutoSelection.current=false;setSelectionError('Workspace not found (404)');
@@ -219,13 +230,22 @@ export function LiveWorkspace() {
     if (!snapshot.authenticated || !workspace || !authorized) return;
     const own = new AbortController();
     const signal = AbortSignal.any([session.controller().signal, own.signal]);
-    void loadSelection(client,session,`/v1/workspaces/${encodeURIComponent(workspace)}/projects`,toProjects,signal).then(items => {
-      if (own.signal.aborted) return;
+    const identity=session.identity();
+    const apply=(items:LiveProject[]) => {
       setProjects({kind:'ready',items});
       const target = requested('project');
       if (target && !items.some(item => item.id === target)) {setSelectionError('Project not found (404)'); session.next({project:null}); return;}
       if (target && session.current().project !== target) session.next({project:target});
       else if (!target && items.length === 1) {session.next({project:items[0].id}); updateUrl(router,{project:items[0].id});}
+    };
+    // The signed-in reload usually already knows this workspace's projects; show
+    // them before the network round trip, then let the authoritative list correct it.
+    const cached=cachedProjects(identity,workspace);
+    if (cached?.length) apply(cached);
+    void loadSelection(client,session,`/v1/workspaces/${encodeURIComponent(workspace)}/projects`,toProjects,signal).then(items => {
+      if (own.signal.aborted) return;
+      rememberProjects(identity,workspace,items);
+      apply(items);
     }).catch(error => {if (own.signal.aborted || error instanceof LiveCancelled) return; if (error instanceof LiveError && error.status === 401) {session.setToken(undefined);return;} setProjects({kind:'error',message:describeLiveError(error)});});
     return () => own.abort();
   }, [authorized,client,router,session,snapshot.authenticated,workspace,projectRefresh,snapshot.identity]);
@@ -294,7 +314,7 @@ export function LiveWorkspace() {
   </>:null;
   // Conversation routes own their heading and context: no page heading, no scope panels.
   const hideHeading=conversationHome&&Boolean(discussion);
-  const signOut=()=>void session.transition(async()=>{if(!mayLeaveOffer())return;session.setToken(undefined);await auth.signOut();}).catch(()=>{});
+  const signOut=()=>void session.transition(async()=>{if(!mayLeaveOffer())return;clearScopeCache();session.setToken(undefined);await auth.signOut();}).catch(()=>{});
   // The retained shell keeps its original scope panels, account footer and top-bar
   // controls; only the conversation shell moves them into the compact sidebar.
   const legacyScope=<div className="live-scope-grid"><section className="panel" aria-label={t('Workspace selection')}><h2>{t('Workspaces')}</h2>

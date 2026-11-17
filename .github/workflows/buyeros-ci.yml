@@ -40,7 +40,7 @@ jobs:
           mkdir -p artifacts/repair
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py tests/test_conversation_qa_target.py tests/test_release_input_review.py tests/test_runtime_target_review.py --collect-only -q > artifacts/repair/promotion-discovery.txt
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py tests/test_conversation_qa_target.py tests/test_release_input_review.py tests/test_runtime_target_review.py -q --junitxml=artifacts/repair/promotion.xml
-          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 425 --junit artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 430 --junit artifacts/repair/promotion.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -65,7 +65,7 @@ jobs:
           mkdir -p test-results
           pnpm test:core --test-reporter=junit --test-reporter-destination=test-results/core-client.xml --test-reporter=spec --test-reporter-destination=stdout
           python scripts/check-required-tests.py --junit test-results/core-client.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==191, 'missing, duplicate or file-only core client execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==196, 'missing, duplicate or file-only core client execution'"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

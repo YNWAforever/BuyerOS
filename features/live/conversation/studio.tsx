@@ -15,6 +15,7 @@ import {DriveConnections} from '../conversation-connections';
 import {GuidedSales} from '../sales-skills/workspace';
 import {ShareThread,WorkspaceBadge} from '../discussion-sharing';
 import {guidedTemplates} from '../conversation-home';
+import {cachedProjectName} from '../scope-cache';
 import {LiveUnavailable} from '../unavailable';
 import {ConversationDrafts} from './draft';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
@@ -88,6 +89,10 @@ function draftsFor(session:SessionScope,scopeKey:string,scope:{actor:string;work
 /** One membership-scoped project read names the composer identity; cached per scope. */
 function readProjectName(client:LiveClient,session:SessionScope):Promise<string|null>{
   const scope=session.current(),key=JSON.stringify([scope.workspace,scope.project]);
+  // The workspace picker already read this project; keep the transcript from
+  // paying a second round trip while still refreshing once in the background.
+  const cachedName=cachedProjectName(session.identity(),scope.workspace??'',scope.project??'');
+  if(cachedName)return Promise.resolve(cachedName);
   let map=projectNames.get(session);
   if(!map){map=new Map();projectNames.set(session,map);}
   const cached=map.get(key);

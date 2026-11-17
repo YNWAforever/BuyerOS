@@ -62,7 +62,7 @@ For rollback browser evidence, verify that the live canonical alias still points
    `workspace-canary-pass:<full-source-sha>:<deployment-id>:roles-project-reload-retry`
 
    The workflow reads the actual GitHub approval history; a supplied reviewer name or an arbitrary comment is insufficient. Under `solo-owner-v1`, the approver must be the pinned owner YNWAforever and may also be the initiator. Under the default `independent-v1`, the approver must differ from the initiator. Neither policy permits automatic approval or administrator bypass. This comment is a human browser receipt, not an automated browser-test claim.
-5. Receipts older than 900 seconds are rejected. If staging or human review takes longer, preserve the failed run and start a new reviewed workflow; do not change receipt timestamps or replay approvals. Workflow reruns are rejected.
+5. Receipts older than 3600 seconds (one hour) are rejected. The window covers the human browser signoff step; it is not permission to rewrite receipt timestamps or replay approvals, and workflow reruns are rejected. If staging or human review still takes longer, preserve the failed run and start a new reviewed workflow.
 6. The complete signed artifact is named `buyeros-attested-runtime`; it contains only encrypted `runtime-bundle.json`. The intermediate artifact is encrypted under a different key and cannot be promoted.
 
 ## Promotion And Readback

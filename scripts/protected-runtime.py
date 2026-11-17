@@ -325,7 +325,7 @@ def stage(ci_run_id,output):
             'frontend_artifact':artifacts['frontend'],'api_artifact':artifacts['api'],'worker_artifact':None,
             'required_heads':observed_schema['observed_heads'],'ci_run_id':ci_run_id,
             'required_ci_jobs':sorted(release_gate().REQUIRED_CI_JOBS),'candidate_deployment_id':deployed['id'],
-            'receipt_max_age_seconds':900,'rollback_artifacts':rollback_artifacts,
+            'receipt_max_age_seconds':3600,'rollback_artifacts':rollback_artifacts,
             'activation':{'auth':values.get('BUYEROS_AUTH_MODE','neon'),'providers':'disabled','worker':'disabled','delivery':'disabled'}}
         bound=checked('stage_binding_probe',load_script('collect-runtime-binding.py').collect_binding,manifest,origin,values['BUYEROS_DATABASE_URL'],os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
         observed_configuration=checked('stage_configuration_probe',load_script('collect-runtime-binding.py').collect_configuration,manifest,origin,os.environ['BUYEROS_RELEASE_PROBE_TOKEN'])
