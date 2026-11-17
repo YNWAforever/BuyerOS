@@ -56,6 +56,20 @@ jobs:
           [[ "$RUNTIME_RUN_ID" =~ ^[0-9]+$ ]]
           gh run download "$RUNTIME_RUN_ID" --repo YNWAforever/BuyerOS --name buyeros-attested-runtime --dir "$RUNNER_TEMP/runtime"
           services/api/.venv/bin/python scripts/promote-candidate.py --bundle "$RUNNER_TEMP/runtime/runtime-bundle.json" --gate workspace --output artifacts/promotion.json --execute > "$RUNNER_TEMP/buyeros-promotion.log" 2>&1
+      - name: Advance the reviewed rollback pointer for the next release
+        if: success()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.BUYEROS_PROMOTION_METADATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          python -c "import json,sys;d=json.load(open('artifacts/promotion.json'));sys.exit(0 if d.get('promoted') is True else 1)"
+          deployment=$(python -c "import json;print(json.load(open('artifacts/promotion.json'))['deployment_id'])")
+          [[ "$deployment" =~ ^dpl_[A-Za-z0-9_-]+$ ]]
+          for environment in buyeros-runtime-readonly buyeros-production-promote; do
+            gh variable set BUYEROS_ROLLBACK_DEPLOYMENT_ID --env "$environment" --repo YNWAforever/BuyerOS --body "$deployment"
+          done
+          echo "::notice::Reviewed rollback pointer advanced to $deployment"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

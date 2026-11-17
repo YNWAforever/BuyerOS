@@ -115,3 +115,24 @@ def claim_promotion_intent(context,*,get=None,post=None):
     if type(record) is not dict or type(record.get('id')) is not int or record.get('payload')!=context:
         raise ValueError('durable intent acknowledgement unknown; do not submit promotion')
     return record['id']
+
+
+def resolve_promotion_intent(record_id,source_sha,deployment_id,*,post=None):
+    """Record the read-only reconciliation state that unblocks the next promotion.
+
+    A promotion leaves its durable intent unresolved on purpose: the alias outcome
+    is read back before anything is claimed. Once the caller has read the alias
+    back, this status is the only durable proof a later promotion accepts.
+    """
+    token=os.environ.get('BUYEROS_RELEASE_LEDGER_TOKEN','')
+    if (type(record_id) is not int or record_id<=0
+            or type(source_sha) is not str or re.fullmatch(r'[0-9a-f]{40}',source_sha) is None
+            or type(deployment_id) is not str or re.fullmatch(r'dpl_[A-Za-z0-9_-]+',deployment_id) is None):
+        raise ValueError('exact promotion intent identity required')
+    description='read-only-reconciled:'+source_sha+':'+deployment_id
+    if post is None and not token: raise ValueError('release ledger token required')
+    post=post or (lambda path,body:request_json(API+path,token,method='POST',body=body))
+    reply=post('deployments/'+str(record_id)+'/statuses',{'state':'success','description':description})
+    if type(reply) is not dict or reply.get('state')!='success' or reply.get('description')!=description:
+        raise ValueError('promotion intent reconciliation unverified')
+    return reply

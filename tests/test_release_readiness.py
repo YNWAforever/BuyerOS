@@ -94,6 +94,12 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.receipts['items']['schema']['checked_at']=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat();self.check_blocked()
     def test_future_receipt_is_blocked(self):
         self.receipts['items']['schema']['checked_at']=(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat();self.check_blocked()
+    def test_one_hour_receipt_window_is_accepted(self):
+        self.manifest['receipt_max_age_seconds']=3600
+        self.assertTrue(evaluate(self.manifest,self.receipts)['promotable'])
+    def test_receipt_window_above_one_hour_is_malformed(self):
+        self.manifest['receipt_max_age_seconds']=3601
+        self.assertEqual(evaluate(self.manifest,self.receipts)['status'],'malformed')
     def test_pending_ci_is_blocked(self):
         self.receipts['items']['ci']['data']['status']='in_progress';self.check_blocked()
     def test_failed_ci_is_blocked(self):

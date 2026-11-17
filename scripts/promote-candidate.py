@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from promotion_transport import claim_promotion_intent,single_assign_alias
+from promotion_transport import claim_promotion_intent,resolve_promotion_intent,single_assign_alias
 from vercel_cli_auth import authenticated_command
 from runtime_bundle import decrypt_workspace_bundle, is_encrypted_workspace_bundle
 from runtime_bundle import build_workspace_bundle
@@ -131,7 +131,9 @@ def main(argv=None):
             raise ValueError('exact main source and first run attempt required')
         build_workspace_bundle(bundle['manifest'],bundle['receipts'],source_sha=envelope['source_sha'])
         metadata=remote_metadata(bundle['manifest'],bundle['receipts'])
+        intent_reconciled=False
         def submit_once(deployment):
+            nonlocal intent_reconciled
             context={'schema':'buyeros.promotion-intent.v1','project_id':os.environ['VERCEL_PROJECT_ID'],
                      'source_sha':envelope['source_sha'],'deployment_id':deployment,
                      'bundle_sha256':hashlib.sha256(args.bundle.read_bytes()).hexdigest(),
@@ -142,8 +144,14 @@ def main(argv=None):
             write_receipt(args.output,intent)
             single_assign_alias(os.environ['VERCEL_PROJECT_ID'],os.environ['VERCEL_ORG_ID'],deployment,
                                 bundle['receipts']['items']['rollback']['data']['deployment_id'],os.environ['VERCEL_TOKEN'])
+            # A read-back alias move is the release; failing to persist its
+            # reconciliation must not turn it into an unknown outcome.
+            try: resolve_promotion_intent(ledger_id,envelope['source_sha'],deployment)
+            except (ValueError,OSError,subprocess.SubprocessError): intent_reconciled=False
+            else: intent_reconciled=True
         result=promote(bundle['manifest'],bundle['receipts'],args.gate,attestation_verified=True,metadata=metadata,execute=args.execute,
             promote_alias=submit_once)
+        if result.get('promoted') is True:result['intent_reconciled']=intent_reconciled
         result.update(source_sha=envelope['source_sha'],deployment_id=bundle['manifest']['candidate_deployment_id'],
                       project_id=os.environ.get('VERCEL_PROJECT_ID'),promotion_run_id=os.environ.get('GITHUB_RUN_ID'),
                       runtime_run_id=os.environ.get('RUNTIME_RUN_ID'),bundle_sha256=hashlib.sha256(args.bundle.read_bytes()).hexdigest())
