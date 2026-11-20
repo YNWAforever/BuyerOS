@@ -41,6 +41,33 @@ export function nextDraft(previous:ConversationDraft|null,text:string,now:number
   if(previous&&previous.boundText===text)return {...previous,updatedAt:now};
   return {text,clientMessageId:newId(),boundText:text,updatedAt:now};
 }
+/** A user's stored text always wins over a newly offered template prompt. */
+export function draftTextForPrefill(stored:ConversationDraft|null,initialText:string|null|undefined):string{
+  if(stored&&stored.text.trim().length>0)return stored.text;
+  return initialText??'';
+}
+/** The reviewed prompt may seed an empty composer, never overwrite typed text. */
+export function shouldSeedPrefill(stored:ConversationDraft|null):boolean{
+  return !(stored&&stored.text.trim().length>0);
+}
+/**
+ * A first turn creates the thread and the route changes to the saved id. Text typed
+ * while that request was in flight belongs to the created thread, not to the
+ * discarded new/home composer key; move it before the old key is cleared.
+ */
+export function carryDraftToThread(
+  drafts:Pick<ConversationDrafts,'read'|'write'|'clear'>,
+  fromKey:string,
+  toKey:string,
+  submittedText:string,
+):ConversationDraft|null{
+  const current=drafts.read(fromKey);
+  drafts.clear(fromKey);
+  if(!current||current.boundText===submittedText)return null;
+  // Keep intentional edits verbatim; a caller cannot infer which characters were
+  // typed after sending, so the whole current draft follows the saved thread.
+  return drafts.write(toKey,current.text);
+}
 export function draftPayload(draft:ConversationDraft):string{
   const bounded={version:draftVersion,text:draft.text,clientMessageId:draft.clientMessageId,boundText:draft.boundText,updatedAt:draft.updatedAt};
   const payload=JSON.stringify(bounded);

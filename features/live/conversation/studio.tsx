@@ -17,7 +17,11 @@ import {ShareThread,WorkspaceBadge} from '../discussion-sharing';
 import {guidedTemplates} from '../conversation-home';
 import {cachedProjectName} from '../scope-cache';
 import {LiveUnavailable} from '../unavailable';
-import {ConversationDrafts} from './draft';
+import {ConversationDrafts,carryDraftToThread} from './draft';
+import {isSavedThreadId,mergeReadback} from './readback';
+import {retryAttempt,messageHasAttempt,type TurnAttempt,type UnresolvedAttempt} from './attempt';
+import {clearUnresolvedAttempt,readUnresolvedAttempt,writeUnresolvedAttempt} from './attempt-store';
+import {sendDisposition,sendNotices,type SendIntent} from './send-policy';
 import {type ChatThread,type ConversationTurn,type ProposalPart,type SelectedSource,type TurnCapability} from './types';import {buildTranscript,collectPanelData,companyFromEntries,latestToolActivity,mergeStreamedEntry,terminalProposals,type EphemeralReply} from './parts';
 import {emptyTurnStream,reduceTurnEvent,streamIsLive,streamStep,type TurnStreamState} from './stream-events';
 import {buildSkillCommands,type CatalogueSkill} from './skill-library';
@@ -47,6 +51,8 @@ export type ConversationStudioProps={
   fresh:boolean;
   /** Device-only notes sit beside the thread list, never under the transcript. */
   threadListFooter?:ReactNode;
+  /** Sales admission gate from the scoped capability probe. Older callers default on. */
+  salesAdmissionEnabled?:boolean;
 };
 type LoadedThread={raw:ServerThread;chat:ChatThread};
 type ThreadState='new'|'loading'|'ready'|'missing'|'unavailable'|'reloading';
@@ -118,11 +124,25 @@ function deriveTitle(text:string):string{
 function knownNotice(message:string):boolean{
   return [...Object.values(turnNotices),...Object.values(replyNotices)].some(value=>value===message);
 }
+/** A definite server rejection cannot have saved the message; editing/retry is free. */
+function definiteSendRejection(error:unknown):boolean{
+  if(!(error instanceof LiveError))return false;
+  if([400,401,403,404,409,413,422,429].includes(error.status))return true;
+  return ['INVALID_REQUEST','INVALID_INPUT','POLICY_BLOCKED','SALES_ADMISSION_DISABLED','NEEDS_INPUT',
+    'BUDGET_LIMIT','IDEMPOTENCY_CONFLICT','CONVERSATION_SOURCE_UNAVAILABLE','SOURCE_UNAVAILABLE',
+    'TURN_RATE_LIMITED'].includes(error.code);
+}
+function attemptOf(value:TurnAttempt):TurnAttempt{
+  return {threadId:value.threadId,clientMessageId:value.clientMessageId,text:value.text,
+    skillId:value.skillId,language:value.language,expectedVersion:value.expectedVersion};
+}
 /** Preset skills become chips only when the workspace registry actually offers them. */
 const chipSkills:Record<string,string>={
   'first-project':'first-project','understand-documents':'understand-documents','research-market':'sales-research',
   'review-buyers':'review-buyers','check-company':'sales-qualify','prepare-follow-up':'sales-followup',
 };
+/** Paid sales skills stay out of quick actions when sales admission is disabled. */
+const paidSalesSkill=(id:string)=>id==='review-buyers'||id.startsWith('sales-');
 function useDebounced<T>(value:T,delay:number):T{
   const [debounced,setDebounced]=useState(value);
   useEffect(()=>{const timer=setTimeout(()=>setDebounced(value),delay);return()=>clearTimeout(timer);},[value,delay]);
@@ -134,7 +154,7 @@ function useDebounced<T>(value:T,delay:number):T{
  * parts, and a composer whose text survives navigation and reload. Turn responses are
  * rendered once; reloads rebuild the same transcript from persisted parts.
  */
-export function ConversationStudio({client,session,t,locale,navigate,canViewOffer,threadId,fresh,threadListFooter}:ConversationStudioProps){
+export function ConversationStudio({client,session,t,locale,navigate,canViewOffer,threadId,fresh,threadListFooter,salesAdmissionEnabled=true}:ConversationStudioProps){
   const identity=session.identity(),scope=session.current();
   const api=useMemo(()=>scopedThreadApi(client,session,identity),[client,session,identity]);
   const turnsApi=useMemo(()=>scopedTurns(client,session,true),[client,session]);
@@ -160,7 +180,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const [skillIds,setSkillIds]=useState<ReadonlySet<string>|null>(null);
   const [catalogue,setCatalogue]=useState<ReadonlyArray<CatalogueSkill>>([]);
   const [projectName,setProjectName]=useState<string|null>(null);
-  const [sending,setSending]=useState(false),sendRef=useRef(false);
+  const [sending,setSending]=useState(false),sendRef=useRef(false),attemptRef=useRef<TurnAttempt|null>(null);
+  const [unresolved,setUnresolved]=useState<UnresolvedAttempt|null>(null);
   const [sendNotice,setSendNotice]=useState(''),[sendFailed,setSendFailed]=useState(false);
   const [stream,setStream]=useState<TurnStreamState|null>(null);
   const [reconnecting,setReconnecting]=useState(false);
@@ -208,7 +229,124 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   // explicit discussion routes own their thread ids, so home never resolves one.
   const home=!fresh&&threadId===null;
   const targetId=threadId;
-  const current=()=>session.isCurrent(identity)&&!!session.token();
+  // Exact saved route identity: async responses are applied only while the route
+  // still owns the thread they were issued for.
+  const routeRef=useRef(targetId);
+  // A keyed studio unmounts on route change. No completion from the old instance
+  // may mutate state, navigate or resume a stream after that unmount.
+  const mountedRef=useRef(true);
+  useLayoutEffect(()=>{
+    mountedRef.current=true;
+    return()=>{mountedRef.current=false;routeRef.current=null;};
+  },[]);
+  const current=()=>mountedRef.current&&session.isCurrent(identity)&&!!session.token();
+  const composerKey=targetId??(home?'home':'new');
+  const attemptScope=JSON.stringify([scope.actor,scope.workspace,scope.project]);
+  // Tab recovery is independent from the editable draft: editing or reloading may
+  // not rewrite the unresolved request that still has to be replayed or verified.
+  useEffect(()=>{
+    const stored=readUnresolvedAttempt(attemptScope,composerKey);
+    setUnresolved(stored);
+    if(stored){setSendFailed(true);setSendNotice(sendNotices.unresolved);}
+  },[attemptScope,composerKey]);
+  // Read order: a read issued later owns the snapshot even if an earlier read
+  // resolves last. Only full authorized reads participate in this ordering; turn
+  // and mutation responses are additionally version-guarded below.
+  const readSeq=useRef(0),appliedReadSeq=useRef(0);
+  const nextReadSeq=()=>{readSeq.current+=1;return readSeq.current;};
+  useEffect(()=>{routeRef.current=targetId;},[targetId]);
+  const routeCurrent=(expected:string|null)=>current()&&routeRef.current===expected;
+  function acceptThread(next:ChatThread,raw?:ServerThread|null,seq=readSeq.current):void{
+    if(!current())return;
+    if(seq<appliedReadSeq.current)return;
+    appliedReadSeq.current=seq;
+    const active=routeRef.current;
+    if(active!==null&&next.id!==active)return;
+    setLoaded(previous=>{
+      const chat=previous&&previous.chat.id===next.id?mergeReadback(previous.chat,next):next;
+      if(previous&&chat===previous.chat)return previous;
+      const rawRow=raw&&raw.id===chat.id&&raw.version===chat.version?raw:rawOf(chat);
+      return {raw:rawRow,chat};
+    });
+  }
+  /** Read back one exact thread; used before a stale retry and by reconciliation. */
+  async function refreshThread(expectedId:string):Promise<ChatThread|null>{
+    if(!isSavedThreadId(expectedId))return null;
+    const seq=nextReadSeq();
+    try{
+      const raw=await api.get(expectedId);
+      if(!routeCurrent(expectedId))return null;
+      const next=chatThread(raw);
+      if(!next||next.id!==expectedId||!isSavedThreadId(next.id))return null;
+      const previous=loaded&&loaded.chat.id===expectedId?loaded.chat:null;
+      const merged=mergeReadback(previous,next);
+      acceptThread(next,raw,seq);
+      return merged;
+    }catch{return null;}
+  }
+  function carryCreatedThreadDraft(createdId:string,submittedText:string):void{
+    try{carryDraftToThread(drafts,composerKey,createdId,submittedText);}catch{/* Draft migration is best-effort. */}
+  }
+  function rememberUnresolved(attempt:TurnAttempt):void{
+    const stored=writeUnresolvedAttempt(attemptScope,composerKey,attempt);
+    // Keep the guard in memory even when sessionStorage is denied; the exact
+    // replay path must still win over edited text in this tab.
+    setUnresolved(stored??{...attempt,savedAt:Date.now(),routeKey:composerKey});
+    setSendFailed(true);
+  }
+  function forgetUnresolved():void{
+    clearUnresolvedAttempt(attemptScope,composerKey);
+    setUnresolved(null);setSendFailed(false);
+  }
+  /**
+   * Recovery for a persisted uncertain attempt: read the exact saved thread first
+   * and look for its client_message_id; only replay when the write is absent. This
+   * can never duplicate a message that was accepted before the connection dropped.
+   */
+  async function resolveUnresolvedAttempt(pending:UnresolvedAttempt):Promise<boolean>{
+    if(sendRef.current)return false;
+    sendRef.current=true;setSending(true);setSendNotice('');
+    try{
+      // A persisted first attempt only belongs to the new-conversation/home route;
+      // replaying it from a saved thread would create the wrong thread.
+      if(pending.threadId===null?targetId!==null:targetId!==pending.threadId){
+        setSendNotice(sendNotices.unresolved);
+        return false;
+      }
+      if(pending.threadId!==null){
+        const refreshed=await refreshThread(pending.threadId);
+        if(!current())return false;
+        if(refreshed&&messageHasAttempt(refreshed,pending.clientMessageId)){
+          forgetUnresolved();attemptRef.current=null;
+          setSendNotice(sendNotices.recoveredSaved);
+          return true;
+        }
+      }
+      const sent=await sendTurn({threadId:pending.threadId,clientMessageId:pending.clientMessageId,
+        text:pending.text,skillId:pending.skillId,language:pending.language,expectedVersion:pending.expectedVersion});
+      if(sent){
+        forgetUnresolved();attemptRef.current=null;
+        if(pending.threadId!==null)setSendNotice(sendNotices.recoveredSent);
+        return true;
+      }
+      rememberUnresolved(pending);
+      return false;
+    }catch(error){
+      if(error instanceof LiveCancelled||!current())return false;
+      const definite=definiteSendRejection(error);
+      if(definite){forgetUnresolved();attemptRef.current=null;}
+      let retry=attemptOf(pending);
+      const stale=error instanceof LiveError&&(error.code==='STALE_REVISION'||error.status===412);
+      if(stale&&pending.threadId!==null){
+        const refreshed=await refreshThread(pending.threadId);
+        if(!current())return false;
+        if(refreshed)retry={...retry,expectedVersion:refreshed.version};
+      }
+      if(!definite){attemptRef.current=retry;rememberUnresolved(retry);}
+      setSendNotice(stale?turnNotices.stale:turnNotice(error));
+      return false;
+    }finally{sendRef.current=false;if(current())setSending(false);}
+  }
 
   // Recent discussions: the list is the only thread read until one is opened.
   useEffect(()=>{
@@ -228,9 +366,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     if(list.loading)return;
     try{
       const page=archived||debouncedQuery.trim()?await api.search(debouncedQuery.trim(),archived,list.items.length):await api.list(list.items.length);
-      if(!session.isCurrent(identity))return;
+      if(!current())return;
       setList(state=>({...state,items:[...state.items,...page.items as ThreadListItem[]],total:page.total}));
-    }catch(error){if(!(error instanceof LiveCancelled)&&session.isCurrent(identity))setList(state=>({...state,notice:threadNotice(error)}));}
+    }catch(error){if(!(error instanceof LiveCancelled)&&current())setList(state=>({...state,notice:threadNotice(error)}));}
   }
 
   // One thread read per target; a turn response never triggers a second read.
@@ -243,12 +381,13 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     attachFileRef.current=null;attachDocumentRef.current=null;setAttachment({phase:'idle'});
     if(!targetId){setLoaded(null);setThreadState('new');setThreadNoticeText('');setTurns([]);setEphemeral([]);setDecisions({});return;}
     let active=true;
+    const seq=nextReadSeq();
     setThreadState(previous=>previous==='ready'?'reloading':'loading');
     void api.get(targetId).then(row=>{
       if(!active||!session.isCurrent(identity))return;
       const chat=chatThread(row);
-      if(!chat){setThreadState('unavailable');setThreadNoticeText(turnNotices.invalid);return;}
-      setLoaded({raw:row,chat});setThreadState('ready');setThreadNoticeText('');
+      if(!chat||!isSavedThreadId(chat.id)||chat.id!==targetId){setThreadState('unavailable');setThreadNoticeText(turnNotices.invalid);return;}
+      acceptThread(chat,row,seq);setThreadState('ready');setThreadNoticeText('');
       setTurns([]);setEphemeral([]);setDecisions({});
       const pendingTurn=takePendingStream(session,row.id);
       if(pendingTurn)void beginStream({id:pendingTurn,status:'needs_input',parts:[],notices:[]},row.id);
@@ -257,7 +396,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       const message=threadNotice(error);
       setThreadNoticeText(message);setThreadState(message===threadNotices.missing?'missing':'unavailable');
     });
-    return()=>{active=false;};
+    return()=>{
+      active=false;
+      // An unmounted keyed studio must not keep a stream or upload alive.
+      streamAbort.current?.abort();streamAbort.current=null;
+      attachmentAbort.current?.abort();attachmentAbort.current=null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- beginStream resumes a one-shot stashed stream for the loaded thread.
   },[api,targetId,identity,session,reload]);
   useEffect(()=>{setTitle(loaded?.chat.title??'');},[loaded?.chat.id,loaded?.chat.title]);
@@ -294,9 +438,9 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const probeCapability=useCallback(async()=>{
     setCapability('checking');setCapabilityNotice('');
     const state=await turnsApi.capability(true);
-    if(!session.isCurrent(identity))return;
+    if(!mountedRef.current||!session.isCurrent(identity)||!session.token())return;
     setCapability(state);
-    if(state==='unavailable')setCapabilityNotice('Conversation replies are unavailable right now. Your text is kept and can be saved as a note.');
+    if(state==='unavailable')setCapabilityNotice(sendNotices.outage);
   },[turnsApi,identity,session]);
   useEffect(()=>{void probeCapability();},[probeCapability]);
 
@@ -327,13 +471,13 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   const chips=useMemo<ComposerChip[]>(()=>guidedTemplates.map(template=>{
     const candidate=chipSkills[template.id];
     return {key:template.id,label:t(template.title),prompt:t(template.prompt),skillId:candidate&&skillIds?.has(candidate)?candidate:null};
-  }),[t,skillIds]);
+  }).filter(chip=>salesAdmissionEnabled||!chip.skillId||!paidSalesSkill(chip.skillId)),[t,skillIds,salesAdmissionEnabled]);
   // Translation identity changes on every render; keep the command memo stable and
   // rebuild only when the catalogue, offered set or locale actually changes.
   const translateRef=useRef(t);
   translateRef.current=t;
-  const commands=useMemo(()=>buildSkillCommands({skills:catalogue,offered:skillIds??new Set(),locale,
-    translate:value=>translateRef.current(value)}),[catalogue,skillIds,locale]);
+  const commands=useMemo(()=>buildSkillCommands({skills:salesAdmissionEnabled?catalogue:catalogue.filter(skill=>!paidSalesSkill(skill.id)),
+    offered:skillIds??new Set(),locale,translate:value=>translateRef.current(value)}),[catalogue,skillIds,locale,salesAdmissionEnabled]);
   const actions=useMemo<PartActions>(()=>({
     t,locale,navigate,access:loaded?.chat.access??'viewer',
     turnStatusFor:turnId=>turnId?turns.find(turn=>turn.id===turnId)?.status:undefined,
@@ -355,38 +499,109 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
 
   async function loadThread(updated:ServerThread,fallback:ChatThread|null){
     const chat=chatThread(updated)??(fallback?{...fallback,version:updated.version,title:updated.title,updatedAt:updated.updatedAt}:null);
-    if(chat&&current())setLoaded({raw:updated,chat});
+    if(!chat||!current())return;
+    // Exact identity: a response about another thread never replaces the routed one.
+    if(updated.id!==chat.id||(fallback&&fallback.id!==chat.id))return;
+    acceptThread(chat,updated);
   }
-  async function send(text:string,clientMessageId:string,skillId:string|null):Promise<boolean>{
+  async function send(text:string,clientMessageId:string,skillId:string|null,intent:SendIntent='send'):Promise<boolean>{
     if(sendRef.current)return false;
+    const pending=unresolved;
+    if(pending){
+      const same=pending.clientMessageId===clientMessageId&&pending.threadId===targetId;
+      // New text (or an explicit note) never overtakes an unresolved attempt: verify
+      // or replay that exact request first, then leave the new draft untouched.
+      if(intent==='note'||!same){
+        await resolveUnresolvedAttempt(pending);
+        return false;
+      }
+    }
     sendRef.current=true;setSending(true);setSendNotice('');setSendFailed(false);
+    let mode:TurnCapability=capability;
+    const expectedVersion=targetId!==null?(loaded&&loaded.chat.id===targetId?loaded.chat.version:null):null;
+    if(targetId!==null&&expectedVersion===null){
+      setSending(false);sendRef.current=false;
+      setSendNotice(turnNotices.invalid);setSendFailed(true);
+      return false;
+    }
+    let attempt:TurnAttempt|null=null;
     try{
       const state=capability==='checking'?await turnsApi.capability():capability;
       if(current()&&state!==capability)setCapability(state);
-      if(state==='available')return await sendTurn(text,clientMessageId,skillId);
-      return await sendFallback(text,clientMessageId);
+      mode=state;
+      const disposition=sendDisposition(state,intent);
+      if(disposition.kind==='turn'){
+        const prior=attemptRef.current??(pending&&pending.clientMessageId===clientMessageId&&pending.threadId===targetId?pending:null);
+        // Retry freezes the unresolved attempt's text/language/skill/version; only a
+        // new client message id starts a fresh attempt.
+        attempt=retryAttempt(prior,{threadId:targetId,clientMessageId,text,skillId,language:locale,expectedVersion});
+        attemptRef.current=attempt;
+        // Persist before the POST: a reload or closed tab during the in-flight
+        // request must keep the same message id, text, language, skill and version.
+        rememberUnresolved(attempt);
+        const sent=await sendTurn(attempt);
+        if(sent){forgetUnresolved();attemptRef.current=null;}
+        return sent;
+      }
+      attemptRef.current=null;
+      if(disposition.kind==='note')return await sendFallback(text,clientMessageId);
+      // Click intent wins: a late notes-only probe never converts a normal Send.
+      if(state==='unavailable')setCapabilityNotice(sendNotices.outage);
+      else setSendNotice(disposition.notice||sendNotices.outage);
+      return false;
     }catch(error){
       if(error instanceof LiveCancelled||!current())return false;
+      const definite=definiteSendRejection(error);
+      const stale=error instanceof LiveError&&(error.code==='STALE_REVISION'||error.status===412);
+      if(stale){
+        // Refresh before retry; the attempt keeps its id/text/language/skill while
+        // expected_version moves to the read-back version so the retry can reach
+        // reconciliation instead of failing the same conflict again.
+        const expectedThreadId=attempt?.threadId??loaded?.chat.id??null;
+        if(expectedThreadId!==null){
+          const refreshed=await refreshThread(expectedThreadId);
+          if(!current())return false;
+          const currentAttempt=attemptRef.current;
+          if(refreshed&&currentAttempt&&currentAttempt.clientMessageId===attempt?.clientMessageId)
+            attemptRef.current={...currentAttempt,expectedVersion:refreshed.version};
+        }
+      }
+      const finalAttempt=attemptRef.current??attempt;
+      if(definite){forgetUnresolved();attemptRef.current=null;}
+      else if(finalAttempt)rememberUnresolved(finalAttempt);
       const message=error instanceof Error&&knownNotice(error.message)?error.message:
-        capability==='available'?turnNotice(error):threadNotice(error);
-      setSendNotice(message);setSendFailed(capability==='available');
+        mode==='available'?turnNotice(error):threadNotice(error);
+      setSendNotice(message);setSendFailed(!definite&&(mode==='available'||mode==='absent'));
       return false;
     }finally{sendRef.current=false;if(current())setSending(false);}
   }
-  async function sendTurn(text:string,clientMessageId:string,skillId:string|null):Promise<boolean>{
-    const response=await turnsApi.submit({threadId:loaded?.chat.id??null,clientMessageId,
-      expectedVersion:loaded?.chat.version??null,text,skillId,language:locale});
+  /** Only a validated first turn may move the route to a saved discussion. */
+  async function sendTurn(attempt:TurnAttempt):Promise<boolean>{
+    const expectedThreadId=attempt.threadId;
+    if(expectedThreadId!==null&&(!isSavedThreadId(expectedThreadId)||!loaded||loaded.chat.id!==expectedThreadId)){
+      setSendNotice(turnNotices.invalid);setSendFailed(true);
+      return false;
+    }
+    const response=await turnsApi.submit({threadId:expectedThreadId,clientMessageId:attempt.clientMessageId,
+      expectedVersion:attempt.expectedVersion,text:attempt.text,skillId:attempt.skillId,language:attempt.language});
     if(!current())return false;
-    const previousThreadId=loaded?.chat.id??null;
-    if(response.thread.id!==previousThreadId){
-      // Thread-first: canonicalise the route immediately so the persisted user row
-      // is rendered from the saved thread; the canonical studio resumes the stream
-      // for this turn after its thread read (see the thread-load effect).
+    if(expectedThreadId===null){
+      // Thread-first: the target route must still be the new-conversation route and
+      // the server response must carry an exact saved UUID before navigating.
+      if(targetId!==null||!routeCurrent(null)||!isSavedThreadId(response.thread.id)){
+        setSendNotice(turnNotices.invalid);setSendFailed(true);
+        return false;
+      }
       stashPendingStream(session,response.thread.id,response.turn.id);
+      carryCreatedThreadDraft(response.thread.id,attempt.text);
       navigate(`/app/discussions/s/${response.thread.id}`);
       return true;
     }
-    setLoaded({raw:rawOf(response.thread),chat:response.thread});
+    if(response.thread.id!==expectedThreadId||!routeCurrent(expectedThreadId)){
+      setSendNotice(turnNotices.invalid);setSendFailed(true);
+      return false;
+    }
+    acceptThread(response.thread);
     setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
     void beginStream(response.turn,response.thread.id);
     return true;
@@ -403,34 +618,36 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     if(!current()||streamAbort.current!==controller)return;
     if(capabilityState!=='available'){setStream(null);return;}
     const outcome=await turnsApi.stream(turn.id,{signal:controller.signal,baseUrl:apiBaseUrl,
-      onEvent:event=>{if(session.isCurrent(identity))setStream(prev=>prev?reduceTurnEvent(prev,event):prev);},
-      onReconnect:()=>{if(session.isCurrent(identity))setReconnecting(true);},
+      onEvent:event=>{if(current()&&streamAbort.current===controller)setStream(prev=>prev?reduceTurnEvent(prev,event):prev);},
+      onReconnect:()=>{if(current()&&streamAbort.current===controller)setReconnecting(true);},
     });
     if(!current()||streamAbort.current!==controller)return;
     streamAbort.current=null;setReconnecting(false);
     let persisted=false;
+    const readSeqAtRefetch=nextReadSeq();
     try{
       const raw=await api.get(threadId);const chat=chatThread(raw);
-      if(chat&&current()){
-        setLoaded({raw,chat});
+      if(chat&&isSavedThreadId(chat.id)&&routeCurrent(threadId)&&chat.id===threadId){
+        acceptThread(chat,raw,readSeqAtRefetch);
         persisted=chat.messages.some(message=>message.turnId===turn.id&&message.role==='assistant');
       }
     }catch{/* Keep streamed parts visible when the refetch also fails. */}
-    if(!current()||streamAbort.current!==null)return;
+    if(!current()||!routeCurrent(threadId)||streamAbort.current!==null)return;
     setStream(prev=>persisted?null:(prev?{...prev,final:true}:prev));
     if(outcome==='overflow')setSendNotice('The live update was too large and was stopped. The saved result is still shown.');
     else if(outcome==='unavailable'&&!persisted)setSendNotice('The live update was interrupted. Showing what was received.');
   }
   async function cancelTurn():Promise<void>{
     if(!loaded||!stream||stream.final||cancelling||loaded.chat.access==='viewer')return;
+    const expectedId=loaded.chat.id;
     setCancelling(true);setSendNotice('');
     try{
-      const response=await turnsApi.cancel({threadId:loaded.chat.id,turnId:stream.turnId,expectedVersion:loaded.chat.version});
-      if(!current())return;
+      const response=await turnsApi.cancel({threadId:expectedId,turnId:stream.turnId,expectedVersion:loaded.chat.version});
+      if(!current()||!routeCurrent(expectedId))return;
       // The cancel response carries the terminal turn, so stop the live stream here.
       streamAbort.current?.abort();streamAbort.current=null;
       setReconnecting(false);
-      setLoaded({raw:rawOf(response.thread),chat:response.thread});
+      acceptThread(response.thread);
       setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
       setStream(prev=>prev?{...prev,status:response.turn.status,final:true}:prev);
     }catch(error){
@@ -439,15 +656,30 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   }
   async function reconcileTurn():Promise<void>{
     if(!loaded||!outcomeTurn||reconciling||loaded.chat.access==='viewer')return;
+    const expectedId=loaded.chat.id,outcomeId=outcomeTurn.id;
     setReconciling(true);setSendNotice('');
     try{
-      const response=await turnsApi.reconcile({threadId:loaded.chat.id,turnId:outcomeTurn.id,expectedVersion:loaded.chat.version});
-      if(!current())return;
-      setLoaded({raw:rawOf(response.thread),chat:response.thread});
-      setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
-      setRecoveredTurns(state=>{const next=new Set(state);next.add(outcomeTurn.id);next.add(response.turn.id);return next;});
-      setStream(null);setReconnecting(false);
-      setSendNotice('The saved result was checked.');
+      let version=loaded.chat.version;
+      for(let attempt=0;attempt<2;attempt+=1){
+        try{
+          const response=await turnsApi.reconcile({threadId:expectedId,turnId:outcomeId,expectedVersion:version});
+          if(!current()||!routeCurrent(expectedId))return;
+          acceptThread(response.thread);
+          setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
+          setRecoveredTurns(state=>{const next=new Set(state);next.add(outcomeId);next.add(response.turn.id);return next;});
+          setStream(null);setReconnecting(false);
+          setSendNotice('The saved result was checked.');
+          return;
+        }catch(error){
+          const stale=error instanceof LiveError&&(error.code==='STALE_REVISION'||error.status===412);
+          if(attempt>0||!stale)throw error;
+          // Another write won the version. Read it back once, then reconcile against
+          // the exact saved thread; reconciliation is read-only and safe to repeat.
+          const refreshed=await refreshThread(expectedId);
+          if(!refreshed)throw error;
+          version=refreshed.version;
+        }
+      }
     }catch(error){
       if(!(error instanceof LiveCancelled)&&current())setSendNotice(turnNotice(error));
     }finally{if(current())setReconciling(false);}
@@ -525,12 +757,12 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
         return;
       }
       const chat=chatThread(outcome.thread);
-      if(!chat){
+      if(!chat||chat.id!==expectedThreadId){
         attachDocumentRef.current=documentId;
         setAttachment({phase:'failed',failure:'attach',message:'The attachment could not be added to this discussion. Try again.',retryable:true});
         return;
       }
-      setLoaded({raw:outcome.thread,chat});
+      acceptThread(chat,outcome.thread);
       attachFileRef.current=null;attachDocumentRef.current=null;
       setContextRevision(value=>value+1);
       setAttachment({phase:'attached'});
@@ -560,20 +792,30 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
   }
   async function sendFallback(text:string,clientMessageId:string):Promise<boolean>{
     if(!loaded){
+      if(targetId!==null)return false;
       const created=await api.create(deriveTitle(text),text);
-      if(!current())return false;
+      if(!current()||targetId!==null||!routeCurrent(null)||!isSavedThreadId(created.id)){
+        setSendNotice(turnNotices.invalid);setSendFailed(true);
+        return false;
+      }
+      carryCreatedThreadDraft(created.id,text);
       navigate(`/app/discussions/s/${created.id}`);
       return true;
     }
     const {chat,raw}=loaded;
+    const expectedId=chat.id;
+    if(targetId!==null&&expectedId!==targetId||!isSavedThreadId(expectedId)){
+      setSendNotice(turnNotices.invalid);setSendFailed(true);
+      return false;
+    }
     if(canViewOffer&&chat.sources.length>=1&&chat.sources.length<=20){
       const reply=await askBuyerOS(client,session,{enabled:true,question:text,sources:chat.sources,locale,signal:session.controller().signal});
-      if(!current())return false;
+      if(!current()||!routeCurrent(expectedId))return false;
       setEphemeral(state=>[...state,{id:clientMessageId,text:reply.text,
         citations:reply.citations.map(ref=>({id:ref.id,label:ref.label,kind:'citation',href:citationPath(ref)}))}]);
       try{
         const updated=await api.append(raw,text);
-        if(current())await loadThread(updated,chat);
+        if(routeCurrent(expectedId))await loadThread(updated,chat);
       }catch(error){
         if(error instanceof LiveCancelled||!current())return false;
         setSendNotice('The live reply is shown here, but the note was not saved. Copy your text and retry.');
@@ -583,20 +825,21 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
       return true;
     }
     const updated=await api.append(raw,text);
-    if(!current())return false;
+    if(!current()||!routeCurrent(expectedId))return false;
     await loadThread(updated,chat);
     setSendNotice('Saved as a note. Select sources to ask BuyerOS.');
     return true;
   }
   async function decide(part:ProposalPart,turnId:string|null,choice:DecisionChoice){
     if(decidingRef.current||!loaded||!turnId)return;
+    const expectedId=loaded.chat.id;
     decidingRef.current=true;setDeciding(true);
     setDecisions(state=>({...state,[part.proposal_id]:{choice,state:'submitting'}}));
     try{
-      const response=await turnsApi.decide({threadId:loaded.chat.id,turnId,proposalId:part.proposal_id,
+      const response=await turnsApi.decide({threadId:expectedId,turnId,proposalId:part.proposal_id,
         decision:choice,expectedVersion:loaded.chat.version});
-      if(!current())return;
-      setLoaded({raw:rawOf(response.thread),chat:response.thread});
+      if(!current()||!routeCurrent(expectedId))return;
+      acceptThread(response.thread);
       setTurns(state=>state.some(turn=>turn.id===response.turn.id)?state:[...state,response.turn]);
       setDecisions(state=>({...state,[part.proposal_id]:{choice,state:'accepted'}}));
     }catch(error){
@@ -738,7 +981,8 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
     // get an enabled composer while the thread resolves, and a failed load stays inert.
     canWrite={threadId!==null?(loaded!==null&&loaded.chat.access!=='viewer'&&!running):(!loaded||loaded.chat.access!=='viewer')&&!running} sending={sending}
     projectName={projectName} companyName={companyLabel} chips={home?[]:chips} initialText={prefill?.prompt??null} initialSkill={prefill?.skillId??null} commands={commands} capability={capability} capabilityNotice={capabilityNotice} onRetryCapability={()=>void probeCapability()}
-    sendFailed={sendFailed} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}/>;
+    sendFailed={sendFailed||unresolved!==null} notice={sendNotice||urlNotice} attachment={attachmentView} onSend={send}
+    onRetry={unresolved?()=>{void resolveUnresolvedAttempt(unresolved);}:undefined}/>;
   return <div className="conversation-studio" data-mobile-view={mobileView} data-panel={panelOpen?'open':'closed'} aria-label={home?t('Home'):t('Discussion')} tabIndex={-1}>
     <button type="button" className="conversation-drawer-backdrop" aria-label={t('Close discussions')} tabIndex={mobileView==='threads'?0:-1} onClick={()=>closeMobileView('threads')}/>
     <ConversationThreadList t={t} locale={locale} items={visibleThreadRows(list.items,archived)} total={list.total} currentId={loaded?.chat.id??null} fresh={fresh}
@@ -754,7 +998,7 @@ export function ConversationStudio({client,session,t,locale,navigate,canViewOffe
           {loaded&&!home&&<WorkspaceBadge thread={loaded.raw} t={t}/>}
         </div>
         <div className="conversation-head-actions">
-          {!home&&<details className="conversation-task-form" open={guidedOpen}
+          {!home&&salesAdmissionEnabled&&<details className="conversation-task-form" open={guidedOpen}
             onToggle={event=>{const open=event.currentTarget.open;setGuidedOpen(open);rememberGuidedOpen(session,open);}}>
             <summary aria-label={t('Task form')} title={t('Task form')}><ClipboardList size={18} aria-hidden="true"/><span className="conversation-sr">{t('Task form')}</span></summary>
             <div className="conversation-task-form-panel">

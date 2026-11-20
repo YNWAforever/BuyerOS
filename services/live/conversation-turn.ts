@@ -17,7 +17,8 @@ export const turnNotices={
   stale:'This discussion changed. Copy any unsaved text, reload and send again.',
   unavailable:'The conversation did not respond. Your message is still here.',
   rateLimited:'Too many turns were started just now. Wait a moment and try again.',
-  absent:'Continuous replies are not available here. Your message is still saved as a note.',
+  absent:'Continuous replies are not available here. Nothing was sent; your text is kept here.',
+  interrupted:'The connection was interrupted before the discussion confirmed the save. Your message is kept here; retry the same message to check the saved result.',
   forbidden:'You do not have permission to act in this discussion.',
   budget:'The approved budget cannot cover this step. Nothing was executed.',
   policy:'This step needs current policy approval. Nothing was executed.',
@@ -69,6 +70,7 @@ export function turnNotice(error:unknown):string{
   if(error instanceof Error&&Object.values(turnNotices).includes(error.message as typeof turnNotices[keyof typeof turnNotices]))return error.message;
   if(error instanceof LiveError){
     if(error.code==='STALE_REVISION'||error.status===412)return turnNotices.stale;
+    if(error.status===0||error.code==='NETWORK_ERROR'||error.code==='REQUEST_TIMEOUT')return turnNotices.interrupted;
     if(error.code==='IDEMPOTENCY_CONFLICT')return turnNotices.conflict;
     if(error.code==='BUDGET_LIMIT')return turnNotices.budget;
     if(error.code==='POLICY_BLOCKED')return turnNotices.policy;

@@ -9,6 +9,7 @@ const {ConversationTurns,turnNotice,turnNotices}=await import('../services/live/
 const {SessionScope}=await import('../services/live/session.ts');
 const {LiveError}=await import('../services/live/client.ts');
 const {ConversationDrafts}=await import('../features/live/conversation/draft.ts');
+const {sendDisposition,sendNotices}=await import('../features/live/conversation/send-policy.ts');
 const {liveZh}=await import('../features/live/locale.ts');
 const threadId='11111111-1111-4111-8111-111111111111';
 const turnId='22222222-2222-4222-8222-222222222222';
@@ -132,4 +133,32 @@ test('a turn rate limit maps to one retryable notice and the retry keeps the dra
   assert.equal(requests[0].idempotencyKey,requests[1].idempotencyKey,'the same exact-once key is replayed');
   assert.equal(requests[0].body.client_message_id,requests[1].body.client_message_id);
   assert.equal(requests[1].body.client_message_id,first.clientMessageId);
+});
+
+test('an interrupted send keeps the draft and points at the same-message retry',()=>{
+  const interrupted=turnNotice(new LiveError('network','NETWORK_ERROR',0,'',true));
+  assert.equal(interrupted,turnNotices.interrupted);
+  assert.equal(turnNotice(new LiveError('deadline','REQUEST_TIMEOUT',0,'',true)),turnNotices.interrupted);
+  // A server rejection is not an interrupted transport; it keeps its own honest copy.
+  assert.notEqual(turnNotice(new LiveError('model down','CONVERSATION_MODEL_UNAVAILABLE',503,'',true)),turnNotices.interrupted);
+  assert.match(turnNotices.interrupted,/retry the same message/i);
+  assert.equal(liveZh[turnNotices.interrupted],'連線在討論確認儲存前中斷。訊息已保留；請重試同一訊息以查閱已儲存的結果。');
+});
+
+test('notes are explicit: unavailable never falls back, absent is the notes-only path',()=>{
+  assert.deepEqual(sendDisposition('available','send'),{kind:'turn'});
+  assert.deepEqual(sendDisposition('absent','send'),{kind:'blocked',notice:sendNotices.absentSend});
+  assert.deepEqual(sendDisposition('absent','note'),{kind:'note'});
+  assert.deepEqual(sendDisposition('unavailable','send'),{kind:'blocked',notice:sendNotices.outage});
+  assert.deepEqual(sendDisposition('checking','send'),{kind:'blocked',notice:sendNotices.checking});
+  assert.doesNotMatch(sendNotices.outage,/note/i,'an outage neither saves nor promises a note');
+  assert.match(sendNotices.absentSend,/not sent/i,'a normal Send is never converted into a note');
+  assert.doesNotMatch(turnNotices.absent,/saved as a note/i,'a missing turn route must not claim a note was saved');
+  assert.equal(liveZh[sendNotices.outage],'對話回覆暫時不可用；文字已保留，未傳送任何內容。');
+  assert.equal(liveZh[sendNotices.checking],'仍在檢查回覆功能，文字已保留。');
+  assert.equal(liveZh[sendNotices.absentSend],'此處暫不提供連續回覆，未傳送訊息；請選擇「儲存為筆記」以保留內容。');
+  assert.equal(liveZh[sendNotices.unresolved],'先前的訊息可能尚未儲存。請先重試該訊息以查閱已儲存的結果，再傳送新文字。');
+  assert.equal(liveZh[turnNotices.absent],'此處暫不提供連續回覆，未傳送任何內容，文字仍保留。');
+  assert.equal(liveZh['Your message was saved. Model replies are unavailable in this project.'],'你的訊息已儲存。此專案暫時無法提供模型回覆。');
+  assert.equal(liveZh['Save as note'],'儲存為筆記');
 });

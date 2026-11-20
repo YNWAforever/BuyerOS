@@ -3,6 +3,8 @@ import {useEffect,useLayoutEffect,useRef,useState,type KeyboardEvent} from 'reac
 import {ArrowUp,Building2,Paperclip,Sparkles} from 'lucide-react';
 import {UPLOAD_ACCEPT} from '@/services/live/document-upload';
 import type {ConversationDrafts} from './draft';
+import {draftTextForPrefill,shouldSeedPrefill} from './draft';
+import type {SendIntent} from './send-policy';
 import type {TurnCapability} from './types';
 import {SKILL_MENU_EMPTY,SKILL_MENU_LABEL,SKILL_UNAVAILABLE_REASON,commandInsertion,filterSkillCommands,
   groupSkillCommands,menuKeyIgnoredDuringComposition,resolveSendSkill,skillMenuKey,skillMoreLabel,visibleSkillCommands,type SkillCommand} from './skill-library';
@@ -32,18 +34,23 @@ type Props={
   sendFailed:boolean;
   notice:string;
   attachment:ComposerAttachment|null;
-  onSend:(text:string,clientMessageId:string,skillId:string|null)=>Promise<boolean>;
+  onSend:(text:string,clientMessageId:string,skillId:string|null,intent:SendIntent)=>Promise<boolean>;
+  /** Exact replay of a tab-persisted uncertain attempt; independent of the draft. */
+  onRetry?:()=>void;
 };
 /** Composer owns its unsent text and the exact-once id for an uncertain retry. */
-export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending,projectName,companyName,chips,initialText,initialSkill,commands,capability,capabilityNotice,onRetryCapability,sendFailed,notice,attachment,onSend}:Props){
-  const [text,setText]=useState(()=>initialText??drafts.read(threadKey)?.text??'');
+export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending,projectName,companyName,chips,initialText,initialSkill,commands,capability,capabilityNotice,onRetryCapability,sendFailed,notice,attachment,onSend,onRetry}:Props){
+  const [text,setText]=useState(()=>draftTextForPrefill(drafts.read(threadKey),initialText));
   const [pending,setPending]=useState(false);
   const [currentSkill,setCurrentSkill]=useState<string|null>(()=>initialSkill??null);
   const [skillNotice,setSkillNotice]=useState('');
   const [menuDismissed,setMenuDismissed]=useState(false);
   const [activeIndex,setActiveIndex]=useState(0);
   const area=useRef<HTMLTextAreaElement>(null);
+  const lastIntent=useRef<SendIntent|null>(null);
   const busy=sending||pending;
+  // Notes are an explicit action, never a hidden fallback for a turn attempt.
+  const noteMode=capability==='absent';
   useLayoutEffect(()=>{
     const node=area.current;if(!node)return;
     node.style.height='auto';node.style.height=`${Math.min(node.scrollHeight,192)}px`;
@@ -65,16 +72,20 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     setCurrentSkill(null);setSkillNotice(t(SKILL_UNAVAILABLE_REASON));
   },[commands,currentSkill,t]);
   // A home task card remounts the composer with the reviewed prompt: keep the draft
-  // recoverable and move focus there, without overwriting text typed in a previous mount.
+  // recoverable and move focus there, without overwriting text the person typed.
   useEffect(()=>{
     if(initialText===null||initialText===undefined)return;
-    drafts.write(threadKey,initialText);
+    if(shouldSeedPrefill(drafts.read(threadKey)))drafts.write(threadKey,initialText);
     area.current?.focus();
     // Mounted once per reviewed prompt; deliberate.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
-  async function submit(raw:string,skillId:string|null,validateSkill=true){
+  async function submit(raw:string,skillId:string|null,validateSkill=true,intentOverride?:SendIntent){
     if(busy||!canWrite||!raw.trim())return;
+    // Capture the person's intent from what they clicked, before any pending
+    // capability probe can resolve and relabel the surface.
+    const intent:SendIntent=intentOverride??(noteMode?'note':'send');
+    lastIntent.current=intent;
     // Slash selections are revalidated against current catalogue/locale drift; guided
     // template chips keep their existing registry-gated mapping.
     const resolved=validateSkill?resolveSendSkill(commands,skillId):{skillId,unavailable:false};
@@ -84,7 +95,16 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     if(!draft)return;
     setPending(true);
     try{
-      if(await onSend(raw,draft.clientMessageId,resolved.skillId)){drafts.clear(threadKey);setText('');setCurrentSkill(null);setSkillNotice('');}
+      if(await onSend(raw,draft.clientMessageId,resolved.skillId,intent)){
+        // A successful send clears the submitted text only. Text typed while the
+        // request was in flight is a new draft and must survive the response.
+        const latest=drafts.read(threadKey);
+        drafts.clear(threadKey);
+        if(latest&&latest.boundText!==raw)drafts.write(threadKey,latest.text);
+        setText(current=>current===raw?'':current);
+        setCurrentSkill(current=>current===resolved.skillId?null:current);
+        setSkillNotice('');
+      }
     }finally{setPending(false);}
   }
   function choose(command:SkillCommand|undefined){
@@ -107,7 +127,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
       if(action.type==='select'){event.preventDefault();choose(visible[action.index]);return;}
       if(event.key==='Enter'){event.preventDefault();return;}
     }
-    if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void submit(text,currentSkill);}
+    if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void submit(text,currentSkill,true,'send');}
   }
   const slashMatch=/^\/(\S*)$/.exec(text),slashOpen=slashMatch!==null;
   const menuCandidate=slashOpen&&commands.length>0&&!menuDismissed&&canWrite&&!busy;
@@ -132,7 +152,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
     {capability==='absent'&&<p className="conversation-compose-note">{t('Continuous replies are unavailable here. Your messages are saved as notes.')}</p>}
     {!drafts.available&&<p className="conversation-compose-note">{t('This browser will not keep unsent text after reload.')}</p>}
     {text.trim()===''&&!slashOpen&&chips.length>0&&<div className="conversation-chips" role="group" aria-label={t('Quick actions')} data-skill-ids={chips.some(chip=>chip.skillId)?'ready':'pending'}>
-      {chips.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId,false)}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
+      {chips.slice(0,8).map(chip=><button type="button" key={chip.key} disabled={busy||!canWrite} onClick={()=>void submit(chip.prompt,chip.skillId,false,'send')}><Sparkles size={13} aria-hidden="true"/>{t(chip.label)}</button>)}
     </div>}
     <div className="conversation-compose-box" style={{minWidth:0,maxWidth:'100%',boxSizing:'border-box'}}>
       <div className="conversation-compose-context"><span className="conversation-project">{projectName??t('This project')}</span>{companyName&&<span className="conversation-company" aria-label={t('Linked company')}><Building2 size={12} aria-hidden="true"/>{companyName}</span>}{capability==='absent'&&<span className="pill gray">{t('Notes only')}</span>}</div>
@@ -175,9 +195,9 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
               onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)attachment.onFile(file);}}/>
           </span>
         </label>}
-        {sendFailed&&<button type="button" className="conversation-retry" disabled={busy||!canWrite} onClick={()=>void submit(text,currentSkill)}>{t('Retry send')}</button>}
-        <button type="button" className="live-primary conversation-send" disabled={busy||!canWrite||!text.trim()} aria-label={t(busy?'Sending…':'Send message')} onClick={()=>void submit(text,currentSkill)}>
-          <ArrowUp size={16} aria-hidden="true"/>{t(busy?'Sending…':'Send')}
+        {sendFailed&&<button type="button" className="conversation-retry" disabled={busy||!canWrite} onClick={()=>onRetry?onRetry():void submit(text,currentSkill,true,lastIntent.current??undefined)}>{t('Retry send')}</button>}
+        <button type="button" className="live-primary conversation-send" disabled={busy||!canWrite||!text.trim()} aria-label={t(noteMode?'Save as note':busy?'Sending…':'Send message')} onClick={()=>void submit(text,currentSkill)}>
+          <ArrowUp size={16} aria-hidden="true"/>{t(noteMode?'Save as note':busy?'Sending…':'Send')}
         </button>
       </div>
     </div>
