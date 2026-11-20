@@ -209,6 +209,7 @@ test('authorized model recalls the correct buyer independently in two saved disc
   await context.addInitScript(()=>localStorage.setItem('buyeros.locale','en'));
   const page=await context.newPage();
   await signIn(page,qa);
+  const sourceName=required('BUYEROS_QA_MODEL_SOURCE_LABEL');
   const pairs=[['Alder','Birch'],['Cedar','Willow']];
   const threads:string[]=[];
   for(const [first,second] of pairs){
@@ -219,6 +220,12 @@ test('authorized model recalls the correct buyer independently in two saved disc
     threads.push(threadId);
     const url=scoped(`/app/discussions/s/${threadId}`,qa);
     await expect(page).toHaveURL(url);
+    const sourcesTab=page.getByRole('tab',{name:'Sources',exact:true});
+    if(!await sourcesTab.isVisible())await page.getByRole('button',{name:'Show context panel',exact:true}).click();
+    await sourcesTab.click();
+    const saveSelection=page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname.endsWith(`/conversation-threads/${threadId}/sources`));
+    await page.getByRole('checkbox',{name:sourceName,exact:true}).check();
+    expect((await saveSelection).status()).toBe(200);
     await page.reload();
     const question='Which buyer was second? Reply with only the name.';
     expect((await sendTurn(page,question,2)).threadId).toBe(threadId);
