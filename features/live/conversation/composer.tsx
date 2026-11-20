@@ -195,7 +195,7 @@ export function ConversationComposer({t,locale,threadKey,drafts,canWrite,sending
               onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)attachment.onFile(file);}}/>
           </span>
         </label>}
-        {sendFailed&&<button type="button" className="conversation-retry" disabled={busy||!canWrite} onClick={()=>onRetry?onRetry():void submit(text,currentSkill,true,lastIntent.current??undefined)}>{t('Retry send')}</button>}
+        {sendFailed&&!sending&&<button type="button" className="conversation-retry" disabled={busy||!canWrite} onClick={()=>onRetry?onRetry():void submit(text,currentSkill,true,lastIntent.current??undefined)}>{t('Retry send')}</button>}
         <button type="button" className="live-primary conversation-send" disabled={busy||!canWrite||!text.trim()} aria-label={t(noteMode?'Save as note':busy?'Sending…':'Send message')} onClick={()=>void submit(text,currentSkill)}>
           <ArrowUp size={16} aria-hidden="true"/>{t(noteMode?'Save as note':busy?'Sending…':'Send')}
         </button>

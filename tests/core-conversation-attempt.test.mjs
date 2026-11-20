@@ -55,7 +55,11 @@ test('an unresolved attempt survives in one tab without adopting draft edits',()
   // Corrupt or oversized values are ignored rather than replayed.
   port.setItem(attemptStorageKey(scope,'new'),'{nope');
   assert.equal(readUnresolvedAttempt(scope,'new',port),null);
-  port.setItem(attemptStorageKey(scope,'new'),'x'.repeat(6001));
+  const escaped={...original,threadId:null,text:'"\n'.repeat(2000)};
+  const escapedRecord=writeUnresolvedAttempt(scope,'new',escaped,port,1001);
+  assert.ok(escapedRecord);
+  assert.deepEqual(readUnresolvedAttempt(scope,'new',port),escapedRecord);
+  port.setItem(attemptStorageKey(scope,'new'),'x'.repeat(32769));
   assert.equal(readUnresolvedAttempt(scope,'new',port),null);
   assert.equal(writeUnresolvedAttempt(scope,'new',original,{getItem:()=>null,setItem(){throw new Error('denied');},removeItem(){}}),null);
 });

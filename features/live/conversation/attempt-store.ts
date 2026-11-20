@@ -10,6 +10,8 @@
 import {readAttempt,type TurnAttempt,type UnresolvedAttempt} from './attempt';
 
 const prefix='buyeros.conversation.attempt.v1';
+// JSON may expand a single control character into six code units.
+const maxSerializedLength=32*1024;
 export type AttemptStorage={getItem(key:string):string|null;setItem(key:string,value:string):void;removeItem(key:string):void};
 function defaultStorage():AttemptStorage|null{
   try{return typeof window==='undefined'?null:window.sessionStorage;}catch{return null;}
@@ -21,7 +23,7 @@ export function readUnresolvedAttempt(scopeKey:string,routeKey:string,storage:At
   if(!storage)return null;
   try{
     const raw=storage.getItem(attemptStorageKey(scopeKey,routeKey));
-    if(!raw||raw.length>6000)return null;
+    if(!raw||raw.length>maxSerializedLength)return null;
     return readAttempt(JSON.parse(raw),routeKey);
   }catch{return null;}
 }
@@ -29,7 +31,9 @@ export function writeUnresolvedAttempt(scopeKey:string,routeKey:string,attempt:T
   if(!storage)return null;
   const stored={...attempt,savedAt:now,routeKey};
   try{
-    storage.setItem(attemptStorageKey(scopeKey,routeKey),JSON.stringify(stored));
+    const serialized=JSON.stringify(stored);
+    if(serialized.length>maxSerializedLength)return null;
+    storage.setItem(attemptStorageKey(scopeKey,routeKey),serialized);
     return stored;
   }catch{return null;}
 }
