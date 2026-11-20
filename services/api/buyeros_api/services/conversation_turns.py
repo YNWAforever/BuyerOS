@@ -11,7 +11,7 @@ budget, and paid admission is never enabled by this module.
 import hashlib
 import json
 import uuid
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import logging
 import re
@@ -20,7 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from ..api.errors import ApiError
-from ..api.idempotency import begin_idempotency, complete_idempotency
+from ..api.idempotency import begin_idempotency, complete_idempotency, precheck_idempotency
 from ..db.conversation_threads import ConversationThread, ConversationThreadMessage
 from ..db.conversation_turns import (ConversationTurn, ConversationTurnDecision,
     ConversationTurnProposal)
@@ -32,6 +32,7 @@ from ..sales.turn_contracts import (CitationsPart, CitationItem, ExecutionOutcom
     ProposalPart, Recovery, TextPart, ToolActivityPart, TurnDecisionRequest, TurnNotice,
     TurnPayload, TurnPlan, TurnRequest, validate_notices, validate_part_list)
 from .conversation_access import load, not_found, sales_enabled
+from .conversation_context import readable_history
 from .conversation_turn_events import append_turn_events, read_turn_events
 from .turn_deadline import TURN_DEADLINE_EXCEEDED, deadline_notice, turn_deadline
 from .conversation_reply import Grounding, reply_from_grounding, resolve_sources
@@ -143,13 +144,64 @@ def citations_part(grounding) -> CitationsPart | None:
     return CitationsPart(items=items) if items else None
 
 
-def answer_parts(grounding, language):
-    """Return ``(parts, notices)`` for the advisory/grounded answer step."""
+_MODEL_UNAVAILABLE_EN = 'Your message was saved. Model replies are unavailable in this project.'
+_MODEL_UNAVAILABLE_ZH = '你的訊息已儲存。此專案目前無法提供模型回覆。'
+
+
+def model_unavailable_notice(language='en') -> TurnNotice:
+    return TurnNotice(code='CONVERSATION_MODEL_UNAVAILABLE',
+        message=_MODEL_UNAVAILABLE_ZH if language == 'zh-HK' else _MODEL_UNAVAILABLE_EN,
+        recovery=Recovery(label='Review model settings'))
+
+
+def sources_required_notice() -> TurnNotice:
+    return TurnNotice(code='SOURCES_REQUIRED',
+        message='No approved source is selected in this discussion.',
+        recovery=Recovery(label='Select sources'))
+
+
+@dataclass(frozen=True)
+class TurnAnswer:
+    """Precomputed answer for one saved turn; never carries authority or citations beyond grounding."""
+    parts: tuple = ()
+    notices: tuple = ()
+    skip_plan: bool = False
+    snapshot_digest: str | None = None
+
+
+def answer_snapshot_digest(grounding, question, thread_version):
+    """Cheap current-evidence snapshot for the gap between model finalize and lock."""
+    return digest({'question': question, 'thread_version': thread_version,
+        'citations': [item['id'] for item in grounding.citations
+                      if not item['id'].startswith('buyer:')],
+        'sources': grounding.sources, 'offer_revision': grounding.offer_revision,
+        'profile_hash': grounding.profile_hash})
+
+
+def answer_parts_from_candidate(grounding, language, candidate):
+    """Validate a model/fixture candidate against current grounding and build typed parts."""
+    text = candidate['text']
+    cited = [source for source in grounding.citations if source in candidate['citations']]
+    parts = [TextPart(text=text, language=language)]
+    if cited:
+        parts.append(CitationsPart(items=tuple(
+            _citation_item(item['id'], item['label']) for item in cited)))
+    return parts, []
+
+
+def answer_parts(grounding, language, *, model_available=True):
+    """Return ``(parts, notices)`` for the advisory/grounded answer step.
+
+    ``model_available`` is a capability fact resolved server-side from the frozen
+    registration. When it is false and no source is selected there is no model to
+    be unavailable for a source-grounded question: the saved turn gets the one
+    truthful model-unavailable notice and no fake source requirement.
+    """
     if not grounding.citations:
+        if not model_available:
+            return [], [model_unavailable_notice(language)]
         return ([TextPart(text=missing_source_text(language), language=language)],
-            [TurnNotice(code='SOURCES_REQUIRED',
-                message='No approved source is selected in this discussion.',
-                recovery=Recovery(label='Select sources'))])
+            [sources_required_notice()])
     try:
         candidate = model_answer(grounding)
     except ApiError as exc:
@@ -163,13 +215,7 @@ def answer_parts(grounding, language):
             message='Conversation model admission is not configured.',
             recovery=Recovery(label='Open the saved sources'))]
     # Strict citation/tool/refusal boundary is applied by the adapter itself.
-    text = candidate['text']
-    cited = [source for source in grounding.citations if source in candidate['citations']]
-    parts = [TextPart(text=text, language=language)]
-    if cited:
-        parts.append(CitationsPart(items=tuple(
-            _citation_item(item['id'], item['label']) for item in cited)))
-    return parts, []
+    return answer_parts_from_candidate(grounding, language, candidate)
 
 
 # ---------------------------------------------------------------------------
@@ -459,7 +505,21 @@ async def _turn_by_id(session, scope: Scope, turn_id, thread_id=None):
     return (await session.execute(select(ConversationTurn).where(*filters))).scalar_one_or_none()
 
 
+def _assert_replay_thread(payload: TurnRequest, row: ConversationTurn):
+    """A replay may only be served to the exact saved discussion it belongs to.
+
+    A null ``thread_id`` is the legitimate first-send retry shape: the idempotency
+    key, not the caller's later thread choice, identifies that original turn. A
+    non-null incoming thread that differs from the saved row would otherwise leak
+    another discussion's result through replay.
+    """
+    if payload.thread_id is not None and str(payload.thread_id) != str(row.thread_id):
+        raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
+            'this client message key belongs to a different discussion')
+
+
 async def _replay(session, scope: Scope, row: ConversationTurn, payload: TurnRequest):
+    _assert_replay_thread(payload, row)
     thread, role = await load(session, scope.workspace_id, scope.project_id, row.thread_id,
         scope.actor_id, edit=True, lock=True)
     if row.request_fingerprint != request_fingerprint(scope, payload, row.thread_id):
@@ -514,6 +574,91 @@ def _dedupe_notices(notices):
         seen.add(notice.code)
         values.append(notice)
     return tuple(values[:8])
+
+
+MODEL_FAILURE_NOTICES = {
+    'POLICY_BLOCKED': ('CONVERSATION_MODEL_POLICY_BLOCKED',
+        'Current model policy does not allow a grounded answer. Your message was saved.'),
+    'STALE_REVISION': ('CONVERSATION_MODEL_STALE_SOURCES',
+        'The selected sources changed before the model could answer. Your message was saved.'),
+    'PERMISSION_DENIED': ('CONVERSATION_MODEL_PERMISSION_DENIED',
+        'Current permission does not allow a model answer. Your message was saved.'),
+    'BUDGET_EXHAUSTED': ('CONVERSATION_MODEL_BUDGET_BLOCKED',
+        'The model budget prevents an answer right now. Your message was saved.'),
+    'SALES_ADMISSION_DISABLED': ('CONVERSATION_MODEL_BUDGET_BLOCKED',
+        'Paid model admission is disabled. Your message was saved.'),
+    'CONVERSATION_CONTEXT_TOO_LARGE': ('CONVERSATION_MODEL_CONTEXT_TOO_LARGE',
+        'The selected sources and question exceed the model input limit; no model call was made. Your message was saved.'),
+}
+
+
+def model_failure_answer(exc: ApiError, language='en') -> TurnAnswer:
+    code, message = MODEL_FAILURE_NOTICES.get(exc.code,
+        ('CONVERSATION_MODEL_UNAVAILABLE',
+         'Your message was saved. Model replies are unavailable in this project.'))
+    if code == 'CONVERSATION_MODEL_UNAVAILABLE':
+        return TurnAnswer(notices=(model_unavailable_notice(language),), skip_plan=True)
+    return TurnAnswer(notices=(TurnNotice(code=code, message=message,
+        recovery=Recovery(label='Review model settings')),), skip_plan=True)
+
+
+async def prepare_context_answer(engine, session, scope: Scope, payload: TurnRequest,
+                                 thread, *, deadline=None):
+    """Prepare an optional model answer before the caller takes any thread lock.
+
+    Admission commits in its own short tenant transaction, then the provider call
+    runs with no discussion row lock held. The intent is anchored to the stable
+    ``client_message_id`` so a different idempotency key cannot spend twice for
+    one client message. A retry with the same client message reuses a received
+    receipt instead of submitting again. This function never invents a source
+    requirement or answer when the code-owned route is absent.
+    """
+    from . import conversation_admission
+    from ..db.session import tenant_session
+    if deadline is not None and not deadline.should_start():
+        return None
+    project = await _project(session, scope)
+    if not conversation_admission.configured_for(project, payload.language):
+        return None
+    # Buyer identity is contextual, not an approved paid source; keep it out of
+    # the model basis so every model citation is selected approved offer data.
+    grounding, source_notices = await _grounding(session, scope, thread, buyer=None)
+    snapshot = answer_snapshot_digest(grounding, payload.text, thread.version)
+    if not grounding.citations:
+        # Buyer-only discussions keep their deterministic proposal path; the paid
+        # model basis never receives the buyer projection (see final notes).
+        return TurnAnswer(parts=(), notices=(*source_notices, sources_required_notice()),
+            skip_plan=thread.buyer_id is None, snapshot_digest=snapshot)
+    history = await readable_history(session, scope.workspace_id, scope.project_id, thread.id)
+    model_key = 'turn:' + digest({'workspace_id': str(scope.workspace_id),
+        'project_id': str(scope.project_id), 'actor_id': str(scope.actor_id),
+        'client_message_id': str(payload.client_message_id)})
+    try:
+        async with tenant_session(engine, scope.workspace_id) as admission_session:
+            prepared = await conversation_admission.prepare_conversation(
+                admission_session, workspace_id=scope.workspace_id,
+                project_id=scope.project_id, actor_id=scope.actor_id,
+                question=payload.text, language=payload.language, key=model_key,
+                grounding=grounding, history=history,
+                thread_id=thread.id, thread_version=thread.version)
+    except ApiError as exc:
+        return model_failure_answer(exc, payload.language)
+    if prepared is None:
+        return TurnAnswer(notices=(model_unavailable_notice(payload.language),),
+            skip_plan=True, snapshot_digest=snapshot)
+    if deadline is not None and not deadline.should_start():
+        return TurnAnswer(notices=(model_unavailable_notice(payload.language),),
+            skip_plan=True, snapshot_digest=snapshot)
+    try:
+        candidate = await conversation_admission.complete_conversation(
+            engine, scope.workspace_id, prepared)
+        answer_values, answer_notices = answer_parts_from_candidate(
+            grounding, payload.language, candidate)
+    except ApiError as exc:
+        return model_failure_answer(exc, payload.language)
+    return TurnAnswer(parts=tuple(answer_values),
+        notices=tuple(_dedupe_notices([*source_notices, *answer_notices])),
+        snapshot_digest=snapshot)
 
 
 def _assistant_text(parts, notices) -> str:
@@ -649,28 +794,76 @@ async def _deadline_failure(session, scope: Scope, thread, source_turn, proposal
 
 
 async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
-                      admit=None):
+                      admit=None, model_engine=None):
     """Create one turn; ``admit`` is the optional workspace admission hook.
 
     It runs after client-message/idempotency replay detection and before any
     turn, event, task, budget or idempotency write. Existing callers and tests
     pass None (no dedicated admission); the HTTP turn route supplies the
-    workspace turn-rate ceiling.
+    workspace turn-rate ceiling. ``model_engine`` opts into the reviewed
+    conversation-model path: admission commits and the external call finishes
+    before this function takes the discussion row lock.
     """
     thread = None
     buyer = None
+    answer_override = None
+    deadline = turn_deadline()
+    project = None
+    model_available = False
     if payload.thread_id is not None:
         thread, role = await load(session, scope.workspace_id, scope.project_id,
-            payload.thread_id, scope.actor_id, edit=True, lock=True)
+            payload.thread_id, scope.actor_id, edit=True, lock=False)
         if payload.expected_thread_version is None:
             raise ApiError(400, 'INVALID_REQUEST', 'If-Match thread version is required')
+        # A lost-response retry must replay before any version/budget/limit work:
+        # the same body may arrive after the thread version already advanced.
+        existing = await _existing_turn(session, scope, payload.client_message_id)
+        if existing is not None:
+            return await _replay(session, scope, existing, payload)
+        _check_version(thread.version, payload.expected_thread_version)
         if payload.buyer_id is not None:
             if thread.buyer_id is None or thread.buyer_id != payload.buyer_id:
                 raise ApiError(409, 'BUYER_LINK_MISMATCH',
                     'a discussion company link can only be set when the discussion is created')
+        if await _message_count(session, thread) + 2 > MAX_THREAD_MESSAGES:
+            raise ApiError(409, 'MESSAGE_LIMIT',
+                'discussion note limit reached; start another discussion and keep unsent text')
+        project = await _project(session, scope)
+        from . import conversation_admission
+        model_available = conversation_admission.configured_for(project, payload.language)
+        if model_engine is not None and model_available and deadline.should_start():
+            # Same-key/different-body and in-flight conflicts must be decided
+            # before admission or any provider spend.
+            record = await precheck_idempotency(session,
+                workspace_id=scope.workspace_id, actor_id=scope.actor_id,
+                operation_id='conversationTurn', key=key,
+                body=payload.model_dump(mode='json'),
+                target={'project_id': str(scope.project_id), 'thread_id': str(thread.id)},
+                precondition=f'"{payload.expected_thread_version}"')
+            if record is not None:
+                try:
+                    row = await _turn_by_id(session, scope, uuid.UUID(record.resource_id))
+                except (AttributeError, TypeError, ValueError):
+                    row = None
+                if row is None:
+                    raise not_found()
+                return await _replay(session, scope, row, payload)
+            # Admit before any spend, then pass the already-admitted hook so the
+            # idempotency reservation never invokes it a second time.
+            if admit is not None:
+                await admit()
+                admit = None
+            answer_override = await prepare_context_answer(
+                model_engine, session, scope, payload, thread, deadline=deadline)
+        # Take the write lock only after every external model call has finished.
+        thread, role = await load(session, scope.workspace_id, scope.project_id,
+            payload.thread_id, scope.actor_id, edit=True, lock=True)
     else:
         role = 'owner'
-    project = await _project(session, scope)
+    if project is None:
+        project = await _project(session, scope)
+        from . import conversation_admission
+        model_available = conversation_admission.configured_for(project, payload.language)
     if payload.buyer_id is not None:
         # New thread link: the buyer must be current, same-project and readable now.
         buyer = await _buyer_projection(session, scope, payload.buyer_id)
@@ -692,7 +885,6 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
         return await _replay(session, scope, row, payload)
     if thread is not None:
         _check_version(thread.version, payload.expected_thread_version)
-    deadline = turn_deadline()
     # Application-observed boundary: every event row of a turn shares the
     # database transaction timestamp, so latency comes from these payload
     # instants rather than from event.created_at.
@@ -726,10 +918,34 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                 turn = await _stage_deadline_create(session, scope, thread, payload,
                     saved_fp, notices=tuple(source_notices), started_at=started_at)
             else:
+                # Evidence may have changed while the provider ran outside this
+                # lock. Refresh the selected-project row so current offer revision
+                # and document state is what the final grounding sees.
+                await session.refresh(project)
                 grounding, grounding_notices = await _grounding(session, scope, thread, buyer)
                 skill = skill_for(thread, payload)
                 drive_ids = await _drive_sources(session, scope, thread)
-                answer_values, answer_notices = answer_parts(grounding, payload.language)
+                if (answer_override is not None
+                        and answer_override.snapshot_digest is not None
+                        and answer_override.snapshot_digest != answer_snapshot_digest(
+                            grounding, payload.text, thread.version)):
+                    # Selected evidence changed between adapter finalize and this
+                    # lock. Never persist a model answer/citation against a source
+                    # snapshot that is no longer current.
+                    answer_override = TurnAnswer(notices=(TurnNotice(
+                        code='CONVERSATION_MODEL_STALE_SOURCES',
+                        message='Selected sources changed before the answer could be saved. '
+                                'Your message was saved.',
+                        recovery=Recovery(label='Reload selected sources')),))
+                skip_plan = False
+                if answer_override is not None:
+                    answer_values = list(answer_override.parts)
+                    answer_notices = list(answer_override.notices)
+                    skip_plan = answer_override.skip_plan
+                else:
+                    answer_values, answer_notices = answer_parts(grounding, payload.language,
+                        model_available=model_available)
+                    skip_plan = not model_available and not grounding.citations
                 if not deadline.should_start():
                     # Keep the faithful answer/citation parts produced so far;
                     # only proposal parts are intentionally dropped (a failed
@@ -740,10 +956,13 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                         saved_fp, parts=tuple(answer_values), notices=produced,
                         started_at=started_at)
                 else:
-                    plan, staged = build_plan(thread, payload, skill, project, grounding,
-                        buyer=buyer, drive_ids=tuple(drive_ids),
-                        sales_ok=sales_enabled(scope.workspace_id),
-                        language_ok=payload.language in (project.language_preferences or []))
+                    if skip_plan:
+                        plan, staged = TurnPlan(steps=('answer',), proposals=()), []
+                    else:
+                        plan, staged = build_plan(thread, payload, skill, project, grounding,
+                            buyer=buyer, drive_ids=tuple(drive_ids),
+                            sales_ok=sales_enabled(scope.workspace_id),
+                            language_ok=payload.language in (project.language_preferences or []))
                     parts = list(answer_values)
                     parts.extend(plan.proposals)
                     notices = _dedupe_notices([*source_notices, *grounding_notices,
@@ -779,6 +998,7 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
         if existing is None:
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
                 'a concurrent request with this client message key is in progress') from exc
+        _assert_replay_thread(payload, existing)
         if existing.request_fingerprint != saved_fp:
             raise ApiError(409, 'IDEMPOTENCY_CONFLICT',
                 'this client message key belongs to a different turn request') from exc

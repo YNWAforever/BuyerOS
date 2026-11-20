@@ -33,6 +33,39 @@ def request_fingerprint(operation_id: str, target: dict, precondition: str | Non
     })
 
 
+async def precheck_idempotency(session, *, workspace_id, actor_id, operation_id: str,
+                               key: str, body: dict, target: dict | None = None,
+                               precondition: str | None = None):
+    """Read-only replay/conflict check before any provider spend.
+
+    Returns the completed record for an exact replay, ``None`` for a new key, and
+    raises the same 409s ``begin_idempotency`` would for a conflicting or in-flight
+    key. It never writes admission or idempotency state.
+    """
+    from ..db.contact import IdempotencyRecord
+    from ..services.confirm_service import IdempotencyConflict, request_fingerprint as body_fingerprint, same_request
+    from .errors import ApiError
+
+    if not (8 <= len(key) <= 200):
+        raise ApiError(400, "INVALID_REQUEST", "Idempotency-Key must be 8..200 characters")
+    fingerprint = (request_fingerprint(operation_id, target, precondition, body)
+                   if target is not None else body_fingerprint(body))
+    existing = (await session.execute(select(IdempotencyRecord).where(
+        IdempotencyRecord.workspace_id == workspace_id,
+        IdempotencyRecord.actor_id == actor_id,
+        IdempotencyRecord.operation_id == operation_id,
+        IdempotencyRecord.key == key))).scalar_one_or_none()
+    if existing is None:
+        return None
+    try:
+        same_request(existing.key, existing.request_hash, key, fingerprint, raise_on_conflict=True)
+    except IdempotencyConflict as exc:
+        raise ApiError(409, "IDEMPOTENCY_CONFLICT", str(exc)) from exc
+    if existing.status != "completed":
+        raise ApiError(409, "IDEMPOTENCY_CONFLICT", "request with this key is still in progress")
+    return existing
+
+
 async def begin_idempotency(
     session, *, workspace_id, actor_id, operation_id: str, key: str, body: dict,
     target: dict | None = None, precondition: str | None = None,
