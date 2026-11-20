@@ -376,7 +376,7 @@ for(const language of ['en','zh-HK'])test(`fix1 owned capability recovery ${lang
 });
 
 
-test('owned continuous discussion supports three durable turns across reload and a second tab',async({page,context,request})=>{
+test('fix1 owned continuous discussion supports three durable turns across reload and a second tab',async({page,context,request})=>{
  test.skip(!process.env.TASK13_OWNED_CONFIG||process.env.TASK13_FULL_SHELL!=='1','Owned full shell only');
  test.setTimeout(120_000);
  const cfg=JSON.parse(readFileSync(process.env.TASK13_OWNED_CONFIG!,'utf8'));
@@ -406,6 +406,10 @@ test('owned continuous discussion supports three durable turns across reload and
    if(index===0)threadId=data.thread.id;
    expect(data.thread.id).toBe(threadId);
    expect(data.thread.messages).toHaveLength(2*(index+1));
+   expect(data.turn.status).toBe('needs_input');
+   const notices=data.turn.notices.map((notice:{code:string})=>notice.code);
+   expect(notices).toContain('CONVERSATION_MODEL_UNAVAILABLE');
+   expect(notices).not.toContain('SOURCES_REQUIRED');
    turnIds.add(data.turn.id);
    await expect(page).toHaveURL(url=>url.pathname==='/app/discussions/s/'+threadId&&url.search==='?'+query);
    await expect(users).toHaveText(prompts.slice(0,index+1));

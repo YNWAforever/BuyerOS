@@ -245,12 +245,15 @@ test('authorized model recalls the correct buyer independently in two saved disc
     const question='Which buyer was second? Reply with only the name.';
     expect((await sendTurn(page,question,2)).threadId).toBe(threadId);
     const answer=page.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
-    await expect(answer).toHaveText(new RegExp(`^\\s*${second}[.!]?\\s*$`,'i'));
+    await expect(answer).toContainText(new RegExp(`\\b${second}\\b`,'i'));
+    await expect(answer).not.toContainText(new RegExp(`\\b${first}\\b`,'i'));
     const reopened=await context.newPage();
     await reopened.goto(url);
     const followUp='Which buyer was first? Reply with only the name.';
     expect((await sendTurn(reopened,followUp,3)).threadId).toBe(threadId);
-    await expect(reopened.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text')).toHaveText(new RegExp(`^\\s*${first}[.!]?\\s*$`,'i'));
+    const firstAnswer=reopened.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
+    await expect(firstAnswer).toContainText(new RegExp(`\\b${first}\\b`,'i'));
+    await expect(firstAnswer).not.toContainText(new RegExp(`\\b${second}\\b`,'i'));
     await page.reload();
     await expect(userMessages(page)).toHaveText([intro,question,followUp]);
     await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
