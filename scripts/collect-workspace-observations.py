@@ -16,6 +16,7 @@ import urllib.request
 import uuid
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
+from runtime_failure_diagnostic import MAX_STDERR_BYTES, RuntimeProbeError
 from vercel_cli_auth import authenticated_command
 
 ACCOUNTS = ('owned', 'foreign', 'empty', 'revoked')
@@ -23,6 +24,14 @@ MAX_BODY = 1024 * 1024
 IMMUTABLE_VERCEL_HOST = r'[a-z0-9][a-z0-9-]*-[a-z0-9]{9}-[a-z0-9][a-z0-9-]*\.vercel\.app'
 PACKET_KEYS = {'schema', 'source_sha', 'origin', 'api_prefix', 'authorization_reference_sha256', 'accounts', 'token_sha256'}
 ROLES = {'viewer', 'operator', 'reviewer', 'workspace_admin'}
+CURL_TRANSPORT_FAILURES = {
+    6: 'runtime_dns_failed',
+    7: 'runtime_connection_failed',
+    28: 'runtime_timeout',
+    52: 'runtime_connection_failed',
+    55: 'runtime_connection_failed',
+    56: 'runtime_connection_failed',
+}
 
 
 def digest(value):
@@ -91,7 +100,11 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def protected_get_json(url, token):
+def reject_nonfinite_json(_value):
+    raise ValueError('non-finite JSON number')
+
+
+def protected_get_json(url, token, *, protection_bypass=None):
     """Use Vercel's authenticated transport without exposing the API credential."""
     parsed = urllib.parse.urlsplit(url)
     if not re.fullmatch(IMMUTABLE_VERCEL_HOST, parsed.hostname or ''):
@@ -114,7 +127,7 @@ def protected_get_json(url, token):
     config = ('header = "Authorization: Bearer ' + escaped + '"\n'
               'header = "Accept: application/json"\n')
     command = ['vercel', 'curl', path, '--deployment', origin, '--scope', scope, '--',
-               '--disable', '--config', '-', '--silent', '--request', 'GET',
+               '--disable', '--config', '-', '--silent', '--show-error', '--request', 'GET',
                '--proto', '=https', '--proto-redir', '=https', '--no-insecure',
                '--no-location', '--max-redirs', '0', '--retry', '0',
                '--connect-timeout', '5', '--max-time', '15', '--noproxy', '*',
@@ -122,10 +135,14 @@ def protected_get_json(url, token):
                '--write-out', '\n%{http_code}\n%{content_type}\n%{url_effective}']
     # Vercel prepends its own options, so --disable alone cannot suppress curlrc.
     # Curl checks CURL_HOME first. CLI credentials use a separate private config.
-    with tempfile.TemporaryDirectory() as home, tempfile.TemporaryFile() as output:
+    with tempfile.TemporaryDirectory() as home, tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as stderr:
         Path(home, '.curlrc').write_text('', encoding='ascii')
         Path(home, '_curlrc').write_text('', encoding='ascii')
         env = dict(os.environ, CURL_HOME=home, VERCEL_TELEMETRY_DISABLED='1')
+        if protection_bypass is not None:
+            if not re.fullmatch(r'[A-Za-z0-9_-]{16,512}', protection_bypass):
+                raise ValueError('existing Vercel automation credential required')
+            env['VERCEL_AUTOMATION_BYPASS_SECRET'] = protection_bypass
         # CLI treats ORG_ID alone as incomplete project linkage, even with --scope.
         # Scope is already explicit; absent PROJECT_ID, retain the on-disk link.
         if not env.get('VERCEL_PROJECT_ID'):
@@ -133,31 +150,37 @@ def protected_get_json(url, token):
         try:
             with authenticated_command(command) as authenticated:
                 result = subprocess.run(authenticated, input=config.encode('ascii'), stdout=output,
-                                        stderr=subprocess.DEVNULL, timeout=30, check=False, env=env)
+                                        stderr=stderr, timeout=30, check=False, env=env)
+        except subprocess.TimeoutExpired:
+            stderr.seek(0)
+            raise RuntimeProbeError('runtime_timeout', stderr=stderr.read(MAX_STDERR_BYTES)) from None
         except (OSError, subprocess.SubprocessError):
-            raise ValueError('protected runtime read unavailable') from None
+            raise RuntimeProbeError('runtime_transport_failed') from None
         if result.returncode != 0:
-            raise ValueError('protected runtime read unavailable')
+            stderr.seek(0)
+            category = CURL_TRANSPORT_FAILURES.get(result.returncode, 'runtime_transport_failed')
+            raise RuntimeProbeError(category, exit_code=result.returncode, stderr=stderr.read(MAX_STDERR_BYTES))
         output.seek(0)
         raw = output.read(MAX_BODY + 2049)
-    if len(raw) > MAX_BODY + 2048:
-        raise ValueError('response too large')
+    status = None
     try:
-        body, status, content_type, effective_url = raw.rsplit(b'\n', 3)
-        if len(body) > MAX_BODY:
+        if len(raw) > MAX_BODY + 2048:
             raise ValueError('response too large')
-        if not re.fullmatch(rb'[1-5][0-9]{2}', status):
-            raise ValueError('invalid HTTP status')
-        status = int(status)
+        body, raw_status, content_type, effective_url = raw.rsplit(b'\n', 3)
+        if len(body) > MAX_BODY or not re.fullmatch(rb'[1-5][0-9]{2}', raw_status):
+            raise ValueError('invalid response metadata')
+        status = int(raw_status)
         if 300 <= status < 400:
-            raise ValueError('runtime redirects are refused')
+            raise RuntimeProbeError.for_http_status(status)
         if effective_url.decode('ascii') != url:
-            raise ValueError('runtime origin or path changed')
+            raise RuntimeProbeError('runtime_response_target_mismatch', http_status=status)
         if content_type.split(b';', 1)[0].strip().lower() != b'application/json':
             raise ValueError('JSON envelope required')
-        return status, json.loads(body.decode('utf-8'), object_pairs_hook=unique_keys)
-    except (ValueError, UnicodeError):
-        raise ValueError('invalid protected runtime response') from None
+        return status, json.loads(body.decode('utf-8'), object_pairs_hook=unique_keys, parse_constant=reject_nonfinite_json)
+    except RuntimeProbeError:
+        raise
+    except (ValueError, RecursionError):
+        raise RuntimeProbeError('runtime_malformed_response', http_status=status) from None
 
 
 def get_json(url, token):

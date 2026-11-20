@@ -386,7 +386,7 @@ class ProtectedVercelHttpTests(PinnedCurlFixture, unittest.TestCase):
     origin = 'https://buyeros-a1b2c3d4e-owner-projects.vercel.app'
     path = '/v1/internal/release-binding'
 
-    def invoke(self, raw=None, *, url=None, code=0, error=None, token='private-bearer'):
+    def invoke(self, raw=None, *, url=None, code=0, error=None, token='private-bearer', stderr=b'', protection_bypass=None):
         module = load()
         url = url or self.origin + self.path
         if raw is None:
@@ -403,11 +403,14 @@ class ProtectedVercelHttpTests(PinnedCurlFixture, unittest.TestCase):
             if error:
                 raise error
             kwargs['stdout'].write(raw)
+            kwargs['stderr'].write(stderr)
             return module.subprocess.CompletedProcess(command, code)
         with patch.dict(module.os.environ, {'VERCEL_TOKEN': 'private-vercel', 'VERCEL_ORG_ID': 'team_test'}), \
                 patch.object(module.subprocess, 'run', side_effect=run) as execute, \
                 patch.object(module.urllib.request, 'build_opener') as native:
             try:
+                if protection_bypass is not None:
+                    return module.protected_get_json(url, token, protection_bypass=protection_bypass)
                 return module.get_json(url, token)
             finally:
                 self.assertLessEqual(execute.call_count, 1)
@@ -476,10 +479,26 @@ class ProtectedVercelHttpTests(PinnedCurlFixture, unittest.TestCase):
 
     def test_protected_read_sanitizes_cli_failure_and_timeout_without_retry(self):
         module = load()
-        for code, error in [(1, None), (0, OSError('private-secret')),
-                            (0, module.subprocess.TimeoutExpired(['private-secret'], 30))]:
-            with self.subTest(code=code, error=type(error)), self.assertRaisesRegex(ValueError, '^protected runtime read unavailable$'):
-                self.invoke(code=code, error=error)
+        for code, error, category in [
+            (1, None, 'runtime_transport_failed'), (6, None, 'runtime_dns_failed'),
+            (7, None, 'runtime_connection_failed'), (28, None, 'runtime_timeout'),
+            (60, None, 'runtime_transport_failed'), (0, OSError('private-secret'), 'runtime_transport_failed'),
+            (0, module.subprocess.TimeoutExpired(['private-secret'], 30), 'runtime_timeout'),
+        ]:
+            with self.subTest(code=code, error=type(error)):
+                with self.assertRaisesRegex(module.RuntimeProbeError, '^'+category+'$') as failure:
+                    self.invoke(code=code, error=error, stderr=b'private-secret' * 6000)
+                if error is None:
+                    self.assertEqual(failure.exception.exit_code, code)
+                    self.assertEqual(len(failure.exception.stderr), module.MAX_STDERR_BYTES)
+                self.assertNotIn('private-secret', str(failure.exception))
+
+    def test_protected_read_uses_existing_automation_credential_without_argv(self):
+        bypass = 'synthetic-automation-token'
+        self.assertEqual(self.invoke(protection_bypass=bypass), (200, {'data': {}}))
+        self.assertEqual(self.options['env']['VERCEL_AUTOMATION_BYPASS_SECRET'], bypass)
+        self.assertNotIn(bypass, repr(self.command))
+        self.assertNotIn(bypass.encode(), self.options['input'])
 
     def test_missing_scope_fails_closed(self):
         module = load()

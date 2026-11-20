@@ -1,5 +1,6 @@
 """Owner/main-only read-only diagnostics; encrypted output is never release evidence."""
 import base64
+from functools import partial
 import importlib.util
 import json
 import math
@@ -19,14 +20,22 @@ from buyeros_api.services.release_binding import database_target_sha256, databas
 SPEC = importlib.util.spec_from_file_location('input_review', ROOT / 'scripts/prepare-release-input-review.py')
 INPUT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(INPUT)
+from runtime_failure_diagnostic import RuntimeProbeError
+
+BINDING_SPEC = importlib.util.spec_from_file_location('review_binding', ROOT / 'scripts/collect-runtime-binding.py')
+BINDING = importlib.util.module_from_spec(BINDING_SPEC)
+BINDING_SPEC.loader.exec_module(BINDING)
 TEAM = 'team_qvzlsFmfCsLkgItSypqHjw3z'
 PROJECT = 'prj_qLOzTdqNiKvoS5rBjy5zZ2GeZgMw'
 ALIAS_PATH = '/v4/aliases/buyer-os-nu.vercel.app?teamId=' + TEAM
+PROJECT_PATH = '/v9/projects/' + PROJECT + '?teamId=' + TEAM
+DEPLOYMENT_ID = r'dpl_[A-Za-z0-9_-]+'
 FAILURE = 'BLOCKED: encrypted runtime-target review could not be prepared'
 
 
 def management(path, token):
-    if (path != ALIAS_PATH and re.fullmatch(r'/v13/deployments/dpl_[A-Za-z0-9_-]+\?teamId=' + TEAM, path) is None):
+    deployment_route = rf'/(?:v13/deployments/{DEPLOYMENT_ID}|v2/deployments/{DEPLOYMENT_ID}/aliases)\?teamId={TEAM}'
+    if path not in (ALIAS_PATH, PROJECT_PATH) and re.fullmatch(deployment_route, path) is None:
         raise ValueError('fixed management route required')
     if not isinstance(token, str) or not 20 <= len(token) <= 512 or not token.isascii() or any(c.isspace() for c in token):
         raise ValueError('bounded management credential required')
@@ -42,13 +51,7 @@ def management(path, token):
     return INPUT.private_json(raw.decode()) if len(raw) <= INPUT.MAX_JSON_BYTES else json.loads(raw, object_pairs_hook=INPUT.COLLECTOR.unique_keys, parse_constant=INPUT.reject_constant)
 
 
-def canonical_target(environment, api):
-    alias = api(ALIAS_PATH, environment['VERCEL_TOKEN'])
-    deployment_id = alias.get('deploymentId') if type(alias) is dict else None
-    if (type(alias) is not dict or alias.get('alias') != 'buyer-os-nu.vercel.app' or alias.get('redirect') is not None
-            or not isinstance(deployment_id, str) or re.fullmatch(r'dpl_[A-Za-z0-9_-]+', deployment_id) is None):
-        raise ValueError('canonical assignment required')
-    deployment = api('/v13/deployments/' + deployment_id + '?teamId=' + TEAM, environment['VERCEL_TOKEN'])
+def owned_deployment(deployment_id, deployment):
     if type(deployment) is not dict or type(deployment.get('meta')) is not dict:
         raise ValueError('closed deployment metadata required')
     metadata = deployment['meta']
@@ -60,10 +63,56 @@ def canonical_target(environment, api):
             or str(metadata.get('githubCommitRepo', '')).casefold() != 'buyeros'
             or not isinstance(source, str) or re.fullmatch(r'[0-9a-f]{40}', source) is None
             or not isinstance(host, str) or re.fullmatch(INPUT.COLLECTOR.IMMUTABLE_VERCEL_HOST, host) is None):
-        raise ValueError('exact owned immutable canonical deployment required')
+        raise ValueError('exact owned immutable deployment required')
     names = deployment.get('env')
     return {'deployment_id': deployment_id, 'source_sha': source, 'origin': 'https://' + host,
             'runtime_source_setting_listed': 'BUYEROS_RUNTIME_SOURCE_SHA' in names if type(names) in (list, dict) else None}
+
+
+def canonical_target(environment, api):
+    token = environment['VERCEL_TOKEN']
+    alias = api(ALIAS_PATH, token)
+    deployment_id = alias.get('deploymentId') if type(alias) is dict else None
+    if (type(alias) is not dict or alias.get('alias') != 'buyer-os-nu.vercel.app' or alias.get('redirect') is not None
+            or not isinstance(deployment_id, str) or re.fullmatch(DEPLOYMENT_ID, deployment_id) is None):
+        raise ValueError('canonical assignment required')
+    return owned_deployment(deployment_id, api('/v13/deployments/' + deployment_id + '?teamId=' + TEAM, token))
+
+
+def require_empty_aliases(deployment_id, api, token):
+    current = api('/v2/deployments/' + deployment_id + '/aliases?teamId=' + TEAM, token)
+    if (type(current) is not dict or current.get('aliases') != []
+            or ('pagination' in current and (type(current['pagination']) is not dict
+                or 'next' not in current['pagination'] or current['pagination']['next'] is not None))):
+        raise ValueError('candidate aliases must be verified empty')
+
+
+def candidate_target(deployment_id, source, api, token):
+    project = api(PROJECT_PATH, token)
+    link = project.get('link') if type(project) is dict else None
+    if (type(link) is not dict or project.get('id') != PROJECT or project.get('accountId') != TEAM
+            or project.get('autoAssignCustomDomains') is not False or link.get('type') != 'github'
+            or link.get('org') != 'YNWAforever' or link.get('repo') != 'BuyerOS'
+            or link.get('productionBranch') != 'main' or type(link.get('repoId')) is not int):
+        raise ValueError('exact staged Vercel project required')
+    deployment = api('/v13/deployments/' + deployment_id + '?teamId=' + TEAM, token)
+    target = owned_deployment(deployment_id, deployment)
+    metadata = deployment['meta']
+    if (target['source_sha'] != source or metadata.get('githubCommitRef') != 'main'
+            or str(metadata.get('githubCommitRepoId')) != str(link['repoId'])
+            or deployment.get('alias') != [] or deployment.get('aliasError') is not None
+            or ('autoAssignCustomDomains' in deployment and deployment['autoAssignCustomDomains'] is not False)):
+        raise ValueError('exact unaliased main candidate required')
+    require_empty_aliases(deployment_id, api, token)
+    existing = project.get('protectionBypass')
+    # Pin an existing credential for this diagnostic so the CLI cannot create one.
+    if type(existing) is not dict:
+        raise ValueError('existing Vercel automation credential required')
+    bypass = next((key for key, value in existing.items() if type(value) is dict
+                   and value.get('scope') == 'automation-bypass' and re.fullmatch(r'[A-Za-z0-9_-]{16,512}', key)), None)
+    if bypass is None:
+        raise ValueError('existing Vercel automation credential required')
+    return target, bypass
 
 
 def database_read(dsn):
@@ -102,11 +151,38 @@ def expiration_claim(token, now):
         return 'unknown'
 
 
-def prepare(environment, *, api=management, db_read=database_read, get=INPUT.COLLECTOR.get_json, now=None):
+def review_binding(target, database_target, heads, read, probe):
+    report = {'http_status': None, 'failure_category': None,
+              **dict.fromkeys(BINDING.BINDING_FAILURES)}
+    try:
+        body = BINDING.probe_document(read, target['origin'] + '/v1/internal/release-binding', probe)
+        matches = BINDING.binding_matches(body, target['source_sha'], target['deployment_id'], database_target, heads)
+        category = next((code for check, code in BINDING.BINDING_FAILURES.items() if matches[check] is False), None)
+        report.update(http_status=200, failure_category=category or ('database_metadata_unavailable' if heads is None else None), **matches)
+    except RuntimeProbeError as error:
+        report.update(http_status=error.http_status, failure_category=error.category)
+    except Exception:
+        report['failure_category'] = 'runtime_transport_failed'
+    return report
+
+
+def prepare(environment, *, api=management, db_read=database_read, get=None, now=None):
     source = INPUT.require_context(environment)
     INPUT.recipient_key(environment['BUYEROS_REVIEW_RECIPIENT_PUBLIC_KEY'])
+    candidate_id = environment.get('BUYEROS_DIAGNOSTIC_CANDIDATE_ID', '')
+    candidate_source = environment.get('BUYEROS_DIAGNOSTIC_CANDIDATE_SOURCE_SHA', '')
+    if (candidate_id or candidate_source) and (not re.fullmatch(DEPLOYMENT_ID, candidate_id)
+            or not re.fullmatch(r'[0-9a-f]{40}', candidate_source)):
+        raise ValueError('candidate deployment ID and expected source required together')
     seed = INPUT.prepare_review(environment)  # Existing strict schemas/hash binding; retain source values.
     target = canonical_target(environment, api)
+    candidate = bypass = None
+    if candidate_id:
+        if candidate_id == target['deployment_id']:
+            raise ValueError('candidate must differ from canonical deployment')
+        candidate, bypass = candidate_target(candidate_id, candidate_source, api, environment['VERCEL_TOKEN'])
+    read = get or (partial(INPUT.COLLECTOR.protected_get_json, protection_bypass=bypass)
+                   if candidate else INPUT.COLLECTOR.get_json)
     dsn = environment['BUYEROS_SCHEMA_CHECK_DATABASE_URL']
     probe = environment['BUYEROS_RELEASE_PROBE_TOKEN']
     if not isinstance(probe, str) or not 32 <= len(probe) <= 512 or not probe.isascii() or any(c.isspace() for c in probe):
@@ -116,17 +192,14 @@ def prepare(environment, *, api=management, db_read=database_read, get=INPUT.COL
     except Exception as error:
         category = 'metadata_privilege_denied' if getattr(error, 'sqlstate', None) == '42501' else 'connection_or_metadata_read_unavailable'
         database = {'status': 'unavailable', 'failure_category': category}
-    binding = {'http_status': None, 'matched_legacy_deployment': False}
-    try:
-        status, body = get(target['origin'] + '/v1/internal/release-binding', probe)
-        binding['http_status'] = status if type(status) is int and 100 <= status <= 599 else None
-        keys = {'schema', 'source_sha', 'deployment_id', 'schema_head', 'db_target_sha256'}
-        binding['matched_legacy_deployment'] = bool(type(status) is int and status == 200 and type(body) is dict and set(body) == keys
-            and body['schema'] == 'buyeros.runtime-db-binding.v1' and body['source_sha'] == target['source_sha']
-            and body['deployment_id'] == target['deployment_id'] and body['db_target_sha256'] == database_target_sha256(dsn)
-            and database.get('status') == 'read' and body['schema_head'] == database['schema_head'])
-    except Exception:
-        pass
+    database_target = database_target_sha256(dsn)
+    heads = [database['schema_head']] if database.get('status') == 'read' else None
+    baseline = review_binding(target, database_target, heads, read, probe)
+    binding = {'http_status': baseline['http_status'],
+               'matched_legacy_deployment': baseline['failure_category'] is None}
+    if candidate:
+        candidate_binding = review_binding(candidate, database_target, heads, read, probe)
+        require_empty_aliases(candidate_id, api, environment['VERCEL_TOKEN'])
     tokens = {name: environment['BUYEROS_G0_' + name.upper() + '_TOKEN'] for name in INPUT.COLLECTOR.ACCOUNTS}
     api_seed = seed['api_seed']
     accounts = {'claim_metadata_is_unverified': True,
@@ -134,7 +207,7 @@ def prepare(environment, *, api=management, db_read=database_read, get=INPUT.COL
                 'reads': {'status': 'not_attempted_seed_target_differs'}}
     # A stale seed is never rebound to a new source or origin for these diagnostics.
     if api_seed['source_sha'] == target['source_sha'] and api_seed['origin'] == target['origin']:
-        observed = INPUT.COLLECTOR.collect(api_seed, tokens, target['origin'], get=get)
+        observed = INPUT.COLLECTOR.collect(api_seed, tokens, target['origin'], get=read)
         accounts['reads'] = {'status': 'collected', 'all_checks_passed': observed['all_checks_passed'],
                              'checks': [{key: check[key] for key in ('code', 'passed', 'observed_status')} for check in observed['checks']]}
     after = api(ALIAS_PATH, environment['VERCEL_TOKEN'])
@@ -143,8 +216,10 @@ def prepare(environment, *, api=management, db_read=database_read, get=INPUT.COL
     review = {'schema': 'buyeros.private-runtime-target-review.v1', 'source_sha': source,
               'canonical': target, 'protected_database': database, 'legacy_binding': binding, 'account_diagnostics': accounts,
               'seed_sources': seed['seed_sources'], 'promotable': False, 'acceptance': False, 'deployment_binding_verified': False}
+    if candidate:
+        review.update(candidate=candidate, candidate_binding=candidate_binding)
     db_credential = getattr(make_url(dsn), 'pass' + 'word')
-    forbidden = [dsn, probe, environment['VERCEL_TOKEN'], *tokens.values(), *([db_credential] if db_credential else [])]
+    forbidden = [secret for secret in (dsn, probe, environment['VERCEL_TOKEN'], *tokens.values(), db_credential, bypass) if secret]
     if any(secret in item for item in INPUT.strings(review) for secret in forbidden):
         raise ValueError('credential material in diagnostic metadata')
     return review

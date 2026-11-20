@@ -476,6 +476,57 @@ def test_stage_does_not_deploy_when_remote_controls_fail(tmp_path,monkeypatch):
     assert not output.exists() and effects==[]
 
 
+@pytest.mark.parametrize('recovers', [True,False])
+def test_stage_binding_retry_keeps_single_deployment_and_safe_evidence(tmp_path,monkeypatch,capsys,recovers):
+    import json
+    from unittest.mock import Mock
+    runtime,deployed,calls,output=owned_stage(tmp_path,monkeypatch)
+    original=runtime.load_script
+    binding=runtime_module().load_script('collect-runtime-binding.py')
+    marker=b'fixture-private-cli-diagnostic'
+    transient=binding.RuntimeProbeError('runtime_timeout',exit_code=28,stderr=marker)
+    reads=[]
+    def collect_binding(manifest,origin,dsn,token):
+        def read(url,bearer):
+            assert url==origin+'/v1/internal/release-binding' and bearer==token
+            reads.append(origin)
+            if len(reads)==1 or not recovers: raise transient
+            return 200,{'schema':'buyeros.runtime-db-binding.v1','source_sha':manifest['source_sha'],
+                        'deployment_id':manifest['candidate_deployment_id'],'schema_head':manifest['required_heads'][0],
+                        'db_target_sha256':manifest['db_target_sha256']}
+        return binding.collect_binding(manifest,origin,dsn,token,get=read)
+    monkeypatch.setenv('BUYEROS_RELEASE_PROBE_TOKEN','fixture-only-token-'+'x'*32)
+    original_command=runtime.command
+    def command(argv,**kwargs):
+        result=original_command(argv,**kwargs)
+        if argv[:2]==['vercel','pull']:
+            path=tmp_path/'.vercel/.env.production.local'
+            path.write_text(path.read_text().replace('owned-probe-token',os.environ['BUYEROS_RELEASE_PROBE_TOKEN']))
+        return result
+    monkeypatch.setattr(runtime,'command',command)
+    collector=original('collect-runtime-binding.py');collector.collect_binding=collect_binding
+    monkeypatch.setattr(runtime,'load_script',lambda name: original(name) if name!='collect-runtime-binding.py' else collector)
+    monkeypatch.setattr(binding.time,'sleep',Mock())
+    monkeypatch.setenv('BUYEROS_RUNTIME_DIAGNOSTIC_ENCRYPTION_KEY','3'*64)
+    safe=tmp_path/'safe.json';private=tmp_path/'private.json'
+    result=runtime.main(['stage','--ci-run-id','123','--output',str(output),'--diagnostics-output',str(safe),
+                         '--private-diagnostics-output',str(private)])
+    assert len(reads)==2 and len(set(reads))==1
+    assert len([call for call in calls if call[0:2]==['vercel','deploy']])==1
+    assert marker.decode() not in capsys.readouterr().out
+    assert output.is_file() is recovers
+    if recovers:
+        assert result==0 and not safe.exists() and not private.exists()
+    else:
+        assert result==2 and not (tmp_path/'github-output').exists()
+        assert json.loads(safe.read_text())=={'phase':'stage_binding_probe','category':'runtime_timeout'}
+        import base64
+        encrypted=private.read_text()
+        assert marker.decode() not in encrypted
+        diagnostic=decrypt_failure_fixture(json.loads(encrypted))
+        assert diagnostic['exit_code']==28 and base64.b64decode(diagnostic['stderr_base64'])==marker
+
+
 def test_stage_is_default_off_before_remote_reads(tmp_path,monkeypatch):
     runtime=runtime_module()
     monkeypatch.setenv('GITHUB_SHA','a'*40)
@@ -496,13 +547,68 @@ def test_runtime_binding_collector_refuses_a_response_from_other_database():
     good={'schema':'buyeros.runtime-db-binding.v1','source_sha':m['source_sha'],
           'deployment_id':m['candidate_deployment_id'],'schema_head':m['required_heads'][0],
           'db_target_sha256':m['db_target_sha256']}
-    for key,value in [('source_sha','0'*40),('deployment_id','dpl_other'),('db_target_sha256','0'*64),('schema_head','wrong')]:
+    for key,value,category in [
+        ('source_sha','0'*40,'binding_source_mismatch'), ('deployment_id','dpl_other','binding_deployment_mismatch'),
+        ('db_target_sha256','0'*64,'binding_database_mismatch'), ('schema_head','wrong','binding_schema_head_mismatch'),
+    ]:
         response={**good,key:value}
-        with pytest.raises(ValueError):
+        with pytest.raises(binding.RuntimeProbeError, match='^'+category+'$'):
             binding.collect_binding(m,'https://owned.vercel.app',dsn,'owned-token-'+'x'*32,get=lambda u,t:(200,response))
     result=binding.collect_binding(m,'https://owned.vercel.app',dsn,'owned-token-'+'x'*32,get=lambda u,t:(200,good))
     assert result['data']['verified'] is True
     assert result['data']['db_target_sha256']==m['db_target_sha256']
+
+
+@pytest.mark.parametrize('transient', ['runtime_dns_failed','runtime_connection_failed','runtime_timeout',502,503,504])
+@pytest.mark.parametrize('recovers', [True,False])
+def test_candidate_binding_repeats_only_one_transient_get(monkeypatch,transient,recovers):
+    from unittest.mock import Mock
+    from test_release_readiness import candidate
+    runtime=runtime_module();binding=runtime.load_script('collect-runtime-binding.py')
+    manifest,_=candidate()
+    dsn='postgresql://buyeros_api:fixture@ep-owned.neon.tech/buyer'
+    manifest['db_target_sha256']=runtime.database_target_sha256(dsn)
+    success=(200,{'schema':'buyeros.runtime-db-binding.v1','source_sha':manifest['source_sha'],
+                  'deployment_id':manifest['candidate_deployment_id'],'schema_head':manifest['required_heads'][0],
+                  'db_target_sha256':manifest['db_target_sha256']})
+    error=binding.RuntimeProbeError(transient) if isinstance(transient,str) else (transient,{})
+    read=Mock(side_effect=[error,success if recovers else error]);sleep=Mock()
+    monkeypatch.setattr(binding.time,'sleep',sleep)
+    origin='https://owned.vercel.app';token='fixture-only-probe-'+'x'*32
+    if recovers:
+        assert binding.collect_binding(manifest,origin,dsn,token,get=read)['data']['verified'] is True
+    else:
+        category=transient if isinstance(transient,str) else 'http_unavailable'
+        with pytest.raises(binding.RuntimeProbeError,match='^'+category+'$'):
+            binding.collect_binding(manifest,origin,dsn,token,get=read)
+    sleep.assert_called_once_with(3)
+    assert [call.args for call in read.call_args_list]==[(origin+'/v1/internal/release-binding',token)]*2
+
+
+def test_binding_refuses_nontransient_response_or_invalid_scope_without_retry(monkeypatch):
+    from unittest.mock import Mock
+    from test_release_readiness import candidate
+    runtime=runtime_module(); binding=runtime.load_script('collect-runtime-binding.py')
+    manifest,_=candidate()
+    dsn='postgresql://buyeros_api:fixture@ep-owned.neon.tech/buyer'
+    manifest['db_target_sha256']=runtime.database_target_sha256(dsn)
+    sleep=Mock();monkeypatch.setattr(binding.time,'sleep',sleep)
+    good={'schema':'buyeros.runtime-db-binding.v1','source_sha':manifest['source_sha'],
+          'deployment_id':manifest['candidate_deployment_id'],'schema_head':manifest['required_heads'][0],
+          'db_target_sha256':manifest['db_target_sha256']}
+    for status,body,category in [(401,{},'http_unauthorized'),(403,{},'http_forbidden'),(404,{},'http_not_found'),
+                                  (302,{},'runtime_redirect_refused'),(500,{},'http_unexpected_status'),
+                                  (503,[],'runtime_malformed_response'),(200,{},'runtime_malformed_response'),
+                                  (200,{**good,'source_sha':'0'*40},'binding_source_mismatch')]:
+        read=Mock(return_value=(status,body))
+        with pytest.raises(binding.RuntimeProbeError,match='^'+category+'$'):
+            binding.collect_binding(manifest,'https://owned.vercel.app',dsn,'fixture-only-token-'+'x'*32,get=read)
+        read.assert_called_once()
+    read=Mock()
+    with pytest.raises(binding.RuntimeProbeError,match='^binding_independent_target_mismatch$'):
+        binding.collect_binding({**manifest,'db_target_sha256':'b'*64},'https://owned.vercel.app',dsn,'fixture-only-token-'+'x'*32,get=read)
+    read.assert_not_called()
+    sleep.assert_not_called()
 
 
 def test_runtime_environment_rejects_libpq_target_overrides_and_paid_activation(tmp_path,monkeypatch):

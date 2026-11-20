@@ -50,7 +50,7 @@ The protected stage command sets `BUYEROS_NEON_STAGED_ORIGIN_ENABLED=1` and `BUY
 
 After the candidate exists and its exact deployment identity has been verified, add only its exact HTTPS origin to the intended Neon Auth branch's trusted domains and read back that setting. Do this before candidate browser acceptance and before approving `bundle-signoff`. The application flag does not configure Neon trust, and successful staging does not prove it exists. Do not use a wildcard, a sibling deployment, or disable Vercel deployment protection. Keep canonical-origin trust in place.
 
-For rollback browser evidence, verify that the live canonical alias still points to the recorded rollback deployment before checking login, the exact QA workspace/project, secure session cookies, reload, and logout across two tabs. Keep these browser observations separate from the immutable rollback API checks. Historical rollback success cannot replace fresh candidate acceptance or relax the 900-second receipt limit.
+For rollback browser evidence, verify that the live canonical alias still points to the recorded rollback deployment before checking login, the exact QA workspace/project, secure session cookies, reload, and logout across two tabs. Keep these browser observations separate from the immutable rollback API checks. Collect fresh candidate and rollback evidence within the 3,600-second receipt window. Use the oldest required receipt timestamp to calculate the signoff deadline.
 
 ## Candidate And Human Signoff
 
@@ -79,7 +79,7 @@ Only after the exact production alias and all release controls are verified may 
 
 ## Verification Boundaries
 
-If protected staging fails, use its allowlisted diagnostic phase and failure category to locate the failing check. Raw command output, arguments, exception messages, credentials, and private contracts remain in the runner's private log and are not published. A diagnostic does not satisfy any release check. Verify whether a deployment was created before starting another staging run; never retry an uncertain deployment or promotion result.
+If protected staging fails, read its phase and failure category. The candidate binding GET makes one additional attempt on the same deployment after three seconds for a DNS, connection, or timeout failure or a JSON 502, 503, or 504 response. Rejected credentials, redirects, malformed responses, and identity mismatches stop the stage. Check whether Vercel created a deployment before dispatching again. Use the [private runtime-target review](runbooks/runtime-target-review.md) to compare the existing candidate’s binding with the canonical deployment and the reviewed database.
 
 When the separate diagnostic key is configured, a failed stage also preserves up to 64 KiB of subprocess stderr in `buyeros-private-stage-failure-encrypted`, retained for one day. Only AES-GCM ciphertext is uploaded; source and workflow-run identity are authenticated with it. Decrypt privately, verify the expected source and run, and report only the relevant nonsecret error. This distinct diagnostic format is never accepted as release evidence. Missing diagnostic keys or failed diagnostic writes preserve the original failure and do not permit progress.
 
