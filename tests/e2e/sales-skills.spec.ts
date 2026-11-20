@@ -364,6 +364,12 @@ for(const language of ['en','zh-HK'])test(`fix1 owned capability recovery ${lang
   await expect(page).toHaveURL(new RegExp('/app/documents/'+cfg.output+'/versions/1'));
   await expect(page.getByRole('button',{name:language==='en'?'New discussion with this output':'以此成果開始新討論',exact:true})).toHaveCount(0);
   expect(new URL(page.url()).searchParams.get('project')).toBe(cfg.project);
+  const saved=`/app/discussions/s/${cfg.thread}?${base}`;
+  const read=page.waitForResponse(response=>response.request().method()==='GET'&&new URL(response.url()).pathname.endsWith(`/conversation-threads/${cfg.thread}`));
+  await gotoPage(page,saved);
+  expect((await read).status()).toBe(200);
+  await expect(page.locator('#conversation-message')).toBeVisible();
+  await expect(page).toHaveURL(url=>url.pathname===`/app/discussions/s/${cfg.thread}`&&url.search.slice(1)===base);
  }
  await request.post(cfg.url+'/fixture-control',{data:{enabled:true,opted:true}});
 });

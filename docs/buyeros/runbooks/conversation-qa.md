@@ -17,10 +17,7 @@ account. Ordinary CI is fixture-based and cannot reach a real Neon account.
    | `BUYEROS_QA_PROTECTION_BYPASS` | Optional: only if the candidate is a protected preview |
 
    Never commit or paste these values anywhere in the repository or a chat.
-3. Confirm the QA account is a member of the dedicated QA workspace and that the
-   workspace is opted into sales/conversation features for the candidate under
-   test (`BUYEROS_SALES_WORKSPACE_IDS` / `BUYEROS_SALES_SKILLS_ENABLED` on the
-   deployment, and `NEXT_PUBLIC_CONVERSATION_HOME=true`).
+3. Confirm membership in the dedicated QA workspace and project. Build and run the candidate with `NEXT_PUBLIC_CONVERSATION_HOME=true`. Direct discussion links use the discussion API's membership and sharing rules. The workspace home uses the sales admission setting.
 
 ## Deployment protection on previews
 
@@ -85,10 +82,9 @@ curl -sS -o /dev/null -w '%{http_code}\n' \
 Only non-billable, read-only behaviour plus the QA workspace's own discussions:
 
 - real sign-in and scope landing on the QA workspace/project
-- conversation-first home (composer, thread list, project identity)
-- first turn creates exactly one discussion and one user message
-- a second turn keeps both messages ordered with no duplicate
-- reload restores the same thread and messages (durable conversation)
+- direct discussion entry with the QA project selected
+- three durable turn responses with distinct turn IDs and the same thread ID
+- sending after reload and opening the saved URL in a second tab, with all three user messages and assistant responses present in order
 - unsent composer text survives reload (protection of unsent messages)
 - an unconfigured model/action is shown honestly and never faked; any proposal
   card is **not** approved (no provider spend, no paid admission)
@@ -97,7 +93,11 @@ Only non-billable, read-only behaviour plus the QA workspace's own discussions:
 
 Screenshots and JUnit are uploaded as the `buyeros-conversation-qa` artifact.
 
-## What this does not prove
+## Model recall acceptance
+
+When the candidate already has an authorized model route and QA budget, set `BUYEROS_QA_MODEL_RECALL=true` for the Playwright run. The model test creates two discussions with different ordered pairs of synthetic buyers. In each, it reloads the saved discussion, asks for the second buyer, then asks for the first buyer in another tab. Each answer must name the requested buyer. The default run skips this test and reports durable messaging separately.
+
+## Other release gates
 
 - Real provider dispatch (model/Xverum) remains a separate authorised acceptance
   with paid admission enabled; this journey explicitly does not approve it.

@@ -86,7 +86,7 @@ async function expectDiscussions(page:Page,language:'en'|'zh-HK'='en'):Promise<v
   }
 }
 async function openStudio(page:Page,qa:QaEnv):Promise<void>{
-  await page.goto(scoped('/app',qa));
+  await page.goto(scoped('/app/discussions/new',qa));
   await waitForStudio(page);
   await expectDiscussions(page);
   await expect(page.locator('.conversation-compose-context')).toBeVisible();
@@ -94,7 +94,7 @@ async function openStudio(page:Page,qa:QaEnv):Promise<void>{
 function userMessages(page:Page){
   return page.locator('.conversation-transcript .conversation-user .conversation-part-text');
 }
-async function sendTurn(page:Page,text:string,expectedUserMessages:number):Promise<void>{
+async function sendTurn(page:Page,text:string,expectedUserMessages:number){
   const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
   await composer.fill(text);
   const [response]=await Promise.all([
@@ -102,9 +102,15 @@ async function sendTurn(page:Page,text:string,expectedUserMessages:number):Promi
       mutationPath.test(new URL(candidate.url()).pathname),{timeout:90_000}),
     page.getByRole('button',{name:'Send message',exact:true}).click(),
   ]);
-  expect(response.status(),'conversation mutation status').toBeLessThan(400);
+  expect(new URL(response.url()).pathname,'Send must use the durable turn endpoint').toMatch(/\/conversation-turns$/);
+  expect(response.status(),'conversation mutation status').toBe(200);
+  const {data}=await response.json();
+  expect(data.thread.id,'saved discussion ID').toMatch(uuidPattern);
+  expect(data.turn.id,'saved turn ID').toMatch(uuidPattern);
   await expect(userMessages(page)).toHaveCount(expectedUserMessages,{timeout:60_000});
+  await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(expectedUserMessages);
   await expect(page.locator('.conversation-typing')).toHaveCount(0,{timeout:60_000});
+  return {threadId:String(data.thread.id),turnId:String(data.turn.id)};
 }
 
 test('QA conversation studio: first turn, durable transcript and unsent draft',async({context})=>{
@@ -122,28 +128,18 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
   });
   try{
     await signIn(page,qa);
-    // b. Conversation-first home: composer, thread list and project identity.
-    await openStudio(page,qa);
-    await expect(page.getByPlaceholder(/Ask about this project|詢問此專案/)).toBeVisible();
-    await expect(page.locator('.conversation-project')).toHaveText(/\S+/);
-    await shot(page,'qa-home-desktop.png');
-    // c. Start a discussion with a benign read-only prompt.
+    // Direct discussion links work even when the workspace home uses the legacy sales shell.
     await page.goto(scoped('/app/discussions/new',qa));
     await waitForStudio(page);
     const firstPrompt=`QA read-only project summary ${Date.now()}`;
-    await sendTurn(page,firstPrompt,1);
-    await expect(page).toHaveURL(/\/app\/discussions\/s\/[0-9a-f-]{36}/,{timeout:60_000});
+    const first=await sendTurn(page,firstPrompt,1);
+    const discussionURL=scoped(`/app/discussions/s/${first.threadId}`,qa);
+    await expect(page).toHaveURL(discussionURL,{timeout:60_000});
     await expect(userMessages(page)).toHaveCount(1);
     await expect(userMessages(page).first()).toHaveText(firstPrompt);
     await shot(page,'qa-thread-first-turn.png');
     // g. Honest configuration surface, and never an auto-approved proposal.
-    const notesOnly=await page.getByText('Notes only',{exact:true}).count()>0;
-    const notices=page.locator('.conversation-transcript .conversation-notice, .conversation-compose-notice');
-    if(await notices.count()>0)await expect(notices.first()).toBeVisible();
-    if(notesOnly){
-      await expect(page.getByText('Notes only',{exact:true})).toBeVisible();
-      expect(await page.locator('.conversation-assistant').count(),'no fabricated AI reply without the turn engine').toBe(0);
-    }
+    await expect(page.getByText('Notes only',{exact:true})).toHaveCount(0);
     if(await page.locator('.conversation-proposal').count()>0){
       await expect(page.locator('.conversation-proposal').first()).toContainText('Approval required');
       expect(await page.locator('.conversation-proposal').first().getByRole('button',{name:'Approve',exact:true}).count(),'proposal approval is explicit and never clicked').toBe(1);
@@ -151,7 +147,10 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
     }
     // d. A second turn in the same thread: both messages remain, in order, once each.
     const secondPrompt=`QA read-only follow-up ${Date.now()}`;
-    await sendTurn(page,secondPrompt,2);
+    const second=await sendTurn(page,secondPrompt,2);
+    expect(second.threadId).toBe(first.threadId);
+    expect(second.turnId).not.toBe(first.turnId);
+    await expect(page).toHaveURL(discussionURL);
     let texts=await userMessages(page).allTextContents();
     expect(texts).toHaveLength(2);
     expect(texts[0]).toBe(firstPrompt);expect(texts[1]).toBe(secondPrompt);
@@ -170,6 +169,22 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
     await expect(page.locator('.conversation-typing')).toHaveCount(0);
     await expect(page.getByText('Preparing a reply…',{exact:true})).toHaveCount(0);
     await shot(page,'qa-reload-resumed.png');
+    // A deep link must accept a follow-up after reload and preserve both sides in another tab.
+    const thirdPrompt='Please continue the discussion after this reload.';
+    const third=await sendTurn(page,thirdPrompt,3);
+    expect(third.threadId).toBe(first.threadId);
+    expect(new Set([first.turnId,second.turnId,third.turnId]).size).toBe(3);
+    const turns=page.getByRole('article',{name:'BuyerOS reply'});
+    const answerParts='.conversation-part-text, .conversation-notice';
+    const savedAnswers=await turns.locator(answerParts).allTextContents();
+    expect(savedAnswers.length).toBeGreaterThanOrEqual(3);
+    const reopened=await context.newPage();
+    await reopened.goto(discussionURL);
+    await expect(userMessages(reopened)).toHaveText([firstPrompt,secondPrompt,thirdPrompt]);
+    await expect(reopened.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+    await expect(reopened.getByRole('article',{name:'BuyerOS reply'}).locator(answerParts)).toHaveText(savedAnswers);
+    await expect(reopened).toHaveURL(discussionURL);
+    await reopened.close();
     // f. Unsent text survives navigation/reload and is never sent.
     const draft=`QA unsent draft ${Date.now()}`;
     await page.getByRole('textbox',{name:'Message BuyerOS'}).fill(draft);
@@ -185,6 +200,41 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
     // The workflow supplies the expected source SHA; it is validated above as env readiness.
     expect(qa.expectedSourceSha).toMatch(shaPattern);
   }finally{await context.close();}
+});
+
+test('authorized model recalls the correct buyer independently in two saved discussions',async({context})=>{
+  test.skip(process.env.BUYEROS_QA_MODEL_RECALL!=='true','Requires separately authorized model QA');
+  test.setTimeout(360_000);
+  const qa=qaEnv();
+  await context.addInitScript(()=>localStorage.setItem('buyeros.locale','en'));
+  const page=await context.newPage();
+  await signIn(page,qa);
+  const pairs=[['Alder','Birch'],['Cedar','Willow']];
+  const threads:string[]=[];
+  for(const [first,second] of pairs){
+    await page.goto(scoped('/app/discussions/new',qa));
+    const intro=`For this exercise the first buyer is ${first} and the second buyer is ${second}.`;
+    const {threadId}=await sendTurn(page,intro,1);
+    expect(threads).not.toContain(threadId);
+    threads.push(threadId);
+    const url=scoped(`/app/discussions/s/${threadId}`,qa);
+    await expect(page).toHaveURL(url);
+    await page.reload();
+    const question='Which buyer was second? Reply with only the name.';
+    expect((await sendTurn(page,question,2)).threadId).toBe(threadId);
+    const answer=page.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
+    await expect(answer).toHaveText(new RegExp(`^\\s*${second}[.!]?\\s*$`,'i'));
+    const reopened=await context.newPage();
+    await reopened.goto(url);
+    const followUp='Which buyer was first? Reply with only the name.';
+    expect((await sendTurn(reopened,followUp,3)).threadId).toBe(threadId);
+    await expect(reopened.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text')).toHaveText(new RegExp(`^\\s*${first}[.!]?\\s*$`,'i'));
+    await page.reload();
+    await expect(userMessages(page)).toHaveText([intro,question,followUp]);
+    await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+    await expect(page).toHaveURL(url);
+    await reopened.close();
+  }
 });
 
 test('QA conversation studio renders in EN and zh-HK',async({context})=>{

@@ -144,7 +144,9 @@ test('workspace-picker derives the shell from the explicit state and suppresses 
  const source=readFileSync('features/live/workspace-picker.tsx','utf8');
  assert.match(source,/const shell=salesCapabilityShell\(conversationEnabled,capability\)/);
  assert.match(source,/const conversationHome=shell==='conversation'/);
- assert.match(source,/const capabilityBlocked=shell==='checking'\|\|shell==='unavailable'/);
+ assert.match(source,/const linkedDiscussion=pathname\.startsWith\('\/app\/discussions\/'\)&&!!discussionForPath\(pathname,conversationEnabled\)/);
+ assert.match(source,/const conversationHome=shell==='conversation'\|\|linkedDiscussion/);
+ assert.match(source,/const capabilityBlocked=!linkedDiscussion&&\(shell==='checking'\|\|shell==='unavailable'\)/);
  assert.match(source,/isLiveOverviewRoute\(pathname,conversationHome\)&&!capabilityBlocked/);
  assert.match(source,/shell==='checking' && <section className="panel" role="status"/);
  assert.match(source,/shell==='unavailable' && <section className="panel" role="alert"/);

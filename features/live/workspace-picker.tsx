@@ -53,8 +53,11 @@ export function LiveWorkspace() {
   const conversationEnabled=conversationHomeEnabled(process.env.NEXT_PUBLIC_CONVERSATION_HOME);
   const capability=useSalesCapability(client,session,conversationEnabled);
   const shell=salesCapabilityShell(conversationEnabled,capability);
-  const conversationHome=shell==='conversation';
-  const capabilityBlocked=shell==='checking'||shell==='unavailable';
+  // Explicit discussion links use the conversation API's own membership and thread checks.
+  // Workspace home still follows the separate sales admission decision.
+  const linkedDiscussion=pathname.startsWith('/app/discussions/')&&!!discussionForPath(pathname,conversationEnabled);
+  const conversationHome=shell==='conversation'||linkedDiscussion;
+  const capabilityBlocked=!linkedDiscussion&&(shell==='checking'||shell==='unavailable');
   const discussion=discussionForPath(pathname,conversationHome);
   const overviewRoute=isLiveOverviewRoute(pathname,conversationHome)&&!capabilityBlocked;
   const [workspaces, setWorkspaces] = useState<LoadState<LiveWorkspace>>({kind:'loading'});
@@ -353,8 +356,8 @@ export function LiveWorkspace() {
     header={<LiveTopbar t={t} pathname={pathname} projectName={projectName??null} conversationHome={conversationHome} hidePageTitle={hideHeading} languagePicker={conversationHome?undefined:languagePicker} signOut={conversationHome?undefined:<button onClick={signOut}>{t('Sign out')}</button>}/>}>
     {conversationHome?noAccess:legacyScope}
     {!conversationHome&&selectionError&&<section className="panel" role="alert">{t(selectionError)}</section>}
-    {authorized && shell==='checking' && <section className="panel" role="status" aria-live="polite"><p>{salesCapabilityText(locale,'checking')}</p></section>}
-    {authorized && shell==='unavailable' && <section className="panel" role="alert"><h2>{salesCapabilityText(locale,'unavailable')}</h2><p>{t(capability.reason)}</p><button disabled={capability.refreshing} onClick={()=>capability.retry()}>{salesCapabilityText(locale,'retry')}</button></section>}
+    {authorized && capabilityBlocked && shell==='checking' && <section className="panel" role="status" aria-live="polite"><p>{salesCapabilityText(locale,'checking')}</p></section>}
+    {authorized && capabilityBlocked && shell==='unavailable' && <section className="panel" role="alert"><h2>{salesCapabilityText(locale,'unavailable')}</h2><p>{t(capability.reason)}</p><button disabled={capability.refreshing} onClick={()=>capability.retry()}>{salesCapabilityText(locale,'retry')}</button></section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
     {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
     {authorized&&projectKnown&&documentsForPath(pathname)&&<SalesDocuments admissionEnabled={conversationHome} key={snapshot.identity+pathname} {...{session,client,t,navigate,pathname}}/>}
