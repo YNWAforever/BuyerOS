@@ -219,6 +219,94 @@ def test_management_rejects_routes_before_creating_transport(monkeypatch, path):
     transport.assert_not_called()
 
 
+@pytest.fixture
+def staged_target(state):
+    env, rollback, alias, api, _, _ = state
+    staged = {**copy.deepcopy(rollback), 'id': 'dpl_unitstage', 'url': 'buyer-bbbbbbbbb-owned-project.vercel.app', 'alias': []}
+    staged['meta'].update(githubCommitSha='c' * 40, githubCommitRef='main', githubCommitRepoId='123')
+    project = {'id': module.PROJECT, 'accountId': module.TEAM, 'autoAssignCustomDomains': False,
+               'link': {'type': 'github', 'org': 'YNWAforever', 'repo': 'BuyerOS', 'repoId': 123, 'productionBranch': 'main'},
+               'protectionBypass': {'fixture-automation-value': {'scope': 'automation-bypass'}}}
+    aliases = {'aliases': [], 'pagination': {'next': None}}
+    routes = {module.ALIAS_PATH: alias, module.PROJECT_PATH: project,
+              '/v13/deployments/' + rollback['id'] + '?teamId=' + module.TEAM: rollback,
+              '/v13/deployments/' + staged['id'] + '?teamId=' + module.TEAM: staged,
+              '/v2/deployments/' + staged['id'] + '/aliases?teamId=' + module.TEAM: aliases}
+    def management(path, token):
+        assert token == env['VERCEL_TOKEN']
+        return copy.deepcopy(routes[path])
+    api.side_effect = management
+    env.update(BUYEROS_DIAGNOSTIC_CANDIDATE_ID=staged['id'], BUYEROS_DIAGNOSTIC_CANDIDATE_SOURCE_SHA='c' * 40)
+    return staged, project, aliases
+
+
+@pytest.mark.parametrize('missing', ['BUYEROS_DIAGNOSTIC_CANDIDATE_ID', 'BUYEROS_DIAGNOSTIC_CANDIDATE_SOURCE_SHA'])
+def test_candidate_selector_requires_both_values_before_any_reads(state, staged_target, missing):
+    state[0].pop(missing)
+    with pytest.raises(ValueError, match='required together'):
+        prepare(state)
+    for call in state[3:]: call.assert_not_called()
+
+
+def test_candidate_diagnostic_reports_exact_comparisons_only_encrypted(state, staged_target, recipient):
+    env, rollback, _, _, database, get = state
+    staged, _, _ = staged_target
+    def reply(url, token):
+        assert token == env['BUYEROS_RELEASE_PROBE_TOKEN']
+        target = staged if url.startswith('https://' + staged['url'] + '/') else rollback
+        assert url == 'https://' + target['url'] + '/v1/internal/release-binding'
+        result = database.return_value
+        return 200, {'schema': 'buyeros.runtime-db-binding.v1', 'source_sha': target['meta']['githubCommitSha'],
+                     'deployment_id': target['id'], 'schema_head': result['schema_head'],
+                     'db_target_sha256': ('0' * 64 if target is staged else result['target_sha256'])}
+    get.side_effect = reply
+    review = prepare(state)
+    assert get.call_count == 2
+    assert review['legacy_binding'] == {'http_status': 200, 'matched_legacy_deployment': True}
+    assert review['candidate']['deployment_id'] == staged['id']
+    assert review['candidate_binding'] == {'http_status': 200, 'failure_category': 'binding_database_mismatch',
+                                          'source_matches': True, 'deployment_matches': True,
+                                          'database_target_matches': False, 'schema_head_matches': True}
+    assert all(review[key] is False for key in ('promotable', 'acceptance', 'deployment_binding_verified'))
+    envelope = module.INPUT.encrypt_review(review, recipient[1])
+    assert decrypt(envelope, recipient[0]) == review
+    assert 'binding_database_mismatch' not in json.dumps(envelope)
+    assert 'fixture-automation-value' not in json.dumps(review)
+
+
+def test_candidate_diagnostic_reports_rejection_without_retry_or_response_body(state, staged_target):
+    get = state[5]
+    get.side_effect = [(503, {}), (401, {'message': state[0]['BUYEROS_RELEASE_PROBE_TOKEN']})]
+    review = prepare(state)
+    assert get.call_count == 2
+    assert review['candidate_binding']['http_status'] == 401
+    assert review['candidate_binding']['failure_category'] == 'http_unauthorized'
+    assert review['candidate_binding']['database_target_matches'] is None
+    assert state[0]['BUYEROS_RELEASE_PROBE_TOKEN'] not in json.dumps(review)
+
+
+@pytest.mark.parametrize('fault', ['wrong_source','canonical','host','team','project','repo','ref','not_ready',
+                                   'alias','alias_inventory','alias_pagination','project_assignment','missing_automation'])
+def test_candidate_diagnostic_refuses_wrong_target_before_probe(state, staged_target, fault):
+    staged, project, aliases = staged_target
+    if fault == 'wrong_source': staged['meta']['githubCommitSha'] = 'd' * 40
+    if fault == 'canonical': state[0]['BUYEROS_DIAGNOSTIC_CANDIDATE_ID'] = state[1]['id']
+    if fault == 'host': staged['url'] = 'buyer-bbbbbbbbb-owned-project.vercel.app.foreign.test'
+    if fault == 'team': staged['ownerId'] = 'team_foreign'
+    if fault == 'project': staged['projectId'] = 'prj_foreign'
+    if fault == 'repo': staged['meta']['githubCommitRepoId'] = '324'
+    if fault == 'ref': staged['meta']['githubCommitRef'] = 'preview'
+    if fault == 'not_ready': staged['readyState'] = 'DEPLOYING'
+    if fault == 'alias': staged['alias'] = ['some-other-domain.test']
+    if fault == 'alias_inventory': aliases['aliases'] = ['some-other-domain.test']
+    if fault == 'alias_pagination': aliases['pagination']['next'] = 1
+    if fault == 'project_assignment': project['autoAssignCustomDomains'] = True
+    if fault == 'missing_automation': project['protectionBypass'] = {}
+    with pytest.raises(ValueError): prepare(state)
+    state[4].assert_not_called()
+    state[5].assert_not_called()
+
+
 def test_workflow_has_owner_main_context_and_ciphertext_only_upload():
     filename = Path(__file__).parents[1] / '.github/workflows/buyeros-runtime-target-review.yml'
     workflow = yaml.safe_load(filename.read_text())

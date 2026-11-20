@@ -5,8 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       recipient_public_key:
-        description: Backend-held RSA public PEM; keep private material off Actions
+        description: Backend-held RSA public PEM
         required: true
+        type: string
+      candidate_deployment_id:
+        description: Optional exact Vercel candidate deployment ID
+        required: false
+        type: string
+      candidate_source_sha:
+        description: Full source SHA required when giving a candidate deployment ID
+        required: false
         type: string
 
 permissions:
@@ -46,9 +54,11 @@ jobs:
           npm install --global vercel@54.17.2
           npm install --prefix "$RUNNER_TEMP/buyeros-curl-cli" --no-audit --no-fund --package-lock=false vercel@50.28.0
           echo "BUYEROS_VERCEL_CURL_PACKAGE=$RUNNER_TEMP/buyeros-curl-cli/node_modules/vercel" >> "$GITHUB_ENV"
-      - name: Encrypt credential-safe canonical diagnostics
+      - name: Encrypt credential-safe runtime diagnostics
         env:
           BUYEROS_REVIEW_RECIPIENT_PUBLIC_KEY: ${{ inputs.recipient_public_key }}
+          BUYEROS_DIAGNOSTIC_CANDIDATE_ID: ${{ inputs.candidate_deployment_id }}
+          BUYEROS_DIAGNOSTIC_CANDIDATE_SOURCE_SHA: ${{ inputs.candidate_source_sha }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}

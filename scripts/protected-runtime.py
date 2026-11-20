@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 from protected_release import ENVIRONMENT,REPOSITORY,release_gate,verify_controls,verify_approval
 from vercel_cli_auth import authenticated_command
 from vercel_env import parse_pulled_environment
-from runtime_failure_diagnostic import bounded_stderr,write_private_failure
+from runtime_failure_diagnostic import PROBE_FAILURES,RuntimeProbeError,bounded_stderr,write_private_failure
 from runtime_bundle import (canonical_json,unique_keys,encrypt_observation_packet,decrypt_observation_packet,
                             build_workspace_bundle,compose_workspace_receipts,encrypt_workspace_bundle)
 
@@ -37,7 +37,7 @@ DIAGNOSTIC_LABELS=frozenset({'stage','sign','controls_target','controls_branch',
     'stage_api_probe','stage_encrypt','stage_write','stage_authorization','stage_contracts',
     'stage_rollback_identity','stage_endpoint_binding'})
 DIAGNOSTIC_STATUSES=frozenset({'started','passed','failed','command_nonzero','command_timeout','file_unavailable',
-                              'http_unauthorized','http_forbidden','http_not_found'})
+                              'http_unauthorized','http_forbidden','http_not_found'}) | PROBE_FAILURES
 GH_METADATA_LABELS=frozenset({'controls_branch','controls_protection','controls_environment','controls_run','controls_jobs'})
 _failure_diagnostic=None
 _private_failure=None
@@ -65,7 +65,9 @@ def checked(label,operation,*args,**kwargs):
         result=operation(*args,**kwargs)
     except Exception as error:
         status='failed'
-        if isinstance(error,subprocess.CalledProcessError):
+        if isinstance(error,RuntimeProbeError):
+            status=error.category
+        elif isinstance(error,subprocess.CalledProcessError):
             status='command_nonzero'
             # Inspect only the CLI's exact trailing HTTP marker. No command,
             # stderr text, captured digits, or exception names are published.
@@ -81,10 +83,10 @@ def checked(label,operation,*args,**kwargs):
         elif isinstance(error,FileNotFoundError):status='file_unavailable'
         if _failure_diagnostic is None:_failure_diagnostic={'phase':_phase if label=='stage' else label,'category':status}
         try:
-            if _private_failure is None and isinstance(error,(subprocess.CalledProcessError,subprocess.TimeoutExpired)):
+            if _private_failure is None and isinstance(error,(RuntimeProbeError,subprocess.CalledProcessError,subprocess.TimeoutExpired)):
                 stderr=bounded_stderr(error.stderr)
                 if stderr:
-                    code=error.returncode if isinstance(error,subprocess.CalledProcessError) else None
+                    code=error.exit_code if isinstance(error,RuntimeProbeError) else getattr(error,'returncode',None)
                     _private_failure={'phase':label,'category':status,'stderr':stderr,
                                       'exit_code':code if type(code) is int else None}
         except Exception:
