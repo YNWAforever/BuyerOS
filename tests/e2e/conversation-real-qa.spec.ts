@@ -107,6 +107,8 @@ async function sendTurn(page:Page,text:string,expectedUserMessages:number){
   const {data}=await response.json();
   expect(data.thread.id,'saved discussion ID').toMatch(uuidPattern);
   expect(data.turn.id,'saved turn ID').toMatch(uuidPattern);
+  expect(['completed','needs_input','needs_approval']).toContain(data.turn.status);
+  if(data.turn.status==='needs_input')expect(data.turn.notices?.length).toBeGreaterThan(0);
   await expect(userMessages(page)).toHaveCount(expectedUserMessages,{timeout:60_000});
   await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(expectedUserMessages);
   await expect(page.locator('.conversation-typing')).toHaveCount(0,{timeout:60_000});
@@ -127,8 +129,21 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
     if(path.startsWith('/v1/')&&!['GET','HEAD','OPTIONS'].includes(request.method()))mutations.push(`${request.method()} ${path}`);
   });
   try{
+    const capabilityRead=page.waitForResponse(r=>r.request().method()==='GET'&&new URL(r.url()).pathname===`/v1/workspaces/${qa.workspace}/projects/${qa.project}/sales-tasks/capability`);
     await signIn(page,qa);
-    // Direct discussion links work even when the workspace home uses the legacy sales shell.
+    const capability=await capabilityRead;
+    expect(capability.status()).toBe(200);
+    const {data}=await capability.json();
+    expect(typeof data.admission_enabled).toBe('boolean');
+    if(data.admission_enabled){
+      await waitForStudio(page);
+      await expectDiscussions(page);
+      await expect(page.locator('.conversation-compose-context')).toBeVisible();
+    }else{
+      await expect(page.locator('.live-scope-grid')).toBeVisible();
+      await expect(page.locator('#conversation-message')).toHaveCount(0);
+    }
+    // Both workspace home configurations lead to the same direct discussion contract.
     await page.goto(scoped('/app/discussions/new',qa));
     await waitForStudio(page);
     const firstPrompt=`QA read-only project summary ${Date.now()}`;

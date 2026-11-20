@@ -53,7 +53,7 @@ def test_ui_candidates_are_authorized_projection_not_raw_response(journey):
 
 # Full browser -> actual HTTP owner -> strict owned PostgreSQL. Provider transport
 # stays synthetic; this bridge never accepts a DSN or credential from the browser.
-@pytest.mark.parametrize("phase", ["sources", "retry", "capability"])
+@pytest.mark.parametrize("phase", ["sources", "retry", "capability", "continuous-discussion"])
 def test_fix1_browser_native_owner(review_case,monkeypatch,phase):
     import json,os,subprocess,threading
     from pathlib import Path
@@ -87,6 +87,7 @@ def test_fix1_browser_native_owner(review_case,monkeypatch,phase):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*args):pass
         def do_GET(self):self.forward()
+        def do_OPTIONS(self):self.forward()
         def do_POST(self):self.forward()
         def do_PUT(self):self.forward()
         def forward(self):
@@ -135,8 +136,9 @@ def test_fix1_browser_native_owner(review_case,monkeypatch,phase):
         assert prepared.status_code==200,prepared.text
         config['output']=prepared.json()['data']['id'];config['outputKind']=prepared.json()['data']['kind']
         path.write_text(json.dumps(config),encoding='utf-8');env['TASK13_FULL_SHELL']='1'
+        title_filter='owned continuous discussion' if phase=='continuous-discussion' else 'fix1 owned capability'
         with (e/'owned-capability-browser.log').open('w',encoding='utf-8') as log:
-            result=subprocess.run([*pnpm,'exec','playwright','test','--config','playwright.sales-skills.config.ts','--grep','fix1 owned capability'],cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=180)
+            result=subprocess.run([*pnpm,'exec','playwright','test','--config','playwright.sales-skills.config.ts','--grep',title_filter],cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=180)
         assert result.returncode==0,(e/'owned-capability-browser.log').read_text(encoding='utf-8')
 
     finally:

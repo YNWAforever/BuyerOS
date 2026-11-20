@@ -17,7 +17,7 @@ account. Ordinary CI is fixture-based and cannot reach a real Neon account.
    | `BUYEROS_QA_PROTECTION_BYPASS` | Optional: only if the candidate is a protected preview |
 
    Never commit or paste these values anywhere in the repository or a chat.
-3. Confirm membership in the dedicated QA workspace and project. Build and run the candidate with `NEXT_PUBLIC_CONVERSATION_HOME=true`. Direct discussion links use the discussion API's membership and sharing rules. The workspace home uses the sales admission setting.
+3. Confirm membership in the dedicated QA workspace and project. Set `NEXT_PUBLIC_CONVERSATION_HOME=true` for both the frontend build and the API runtime. The journey reads the QA project's sales capability, verifies the corresponding workspace home, and then opens the discussion directly. A disabled QA workspace exercises the same path as the reported issue. The database-backed browser suite also tests direct entry with sales disabled.
 
 ## Deployment protection on previews
 

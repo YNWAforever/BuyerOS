@@ -359,7 +359,7 @@ export function LiveWorkspace() {
     {authorized && capabilityBlocked && shell==='checking' && <section className="panel" role="status" aria-live="polite"><p>{salesCapabilityText(locale,'checking')}</p></section>}
     {authorized && capabilityBlocked && shell==='unavailable' && <section className="panel" role="alert"><h2>{salesCapabilityText(locale,'unavailable')}</h2><p>{t(capability.reason)}</p><button disabled={capability.refreshing} onClick={()=>capability.retry()}>{salesCapabilityText(locale,'retry')}</button></section>}
     {localeError && <section className="panel" role="alert">{localizeError(localeError)}</section>}
-    {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
+    {authorized && projectKnown && discussion && <LiveConversation enabled={conversationHome} salesAdmissionEnabled={shell==='conversation'} session={session} client={client} pathname={pathname} locale={locale} t={t} navigate={navigate} canViewOffer={canEdit&&projectActive} canViewResults={true}/>}
     {authorized&&projectKnown&&documentsForPath(pathname)&&<SalesDocuments admissionEnabled={conversationHome} key={snapshot.identity+pathname} {...{session,client,t,navigate,pathname}}/>}
     {authorized && projectKnown && overviewRoute && <>
       <LiveWorkQueue key={`queue-${workspace}-${project}`} t={t} onNavigate={navigate}/>

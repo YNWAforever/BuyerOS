@@ -32,13 +32,13 @@ function discussionStoreFor(stores:Map<string,DiscussionStore>,key:string,scope:
   let storage:Storage|undefined;try{storage=window.localStorage;}catch{/* Notice comes from the store. */}
   const created=new DiscussionStore(true,scope,storage);stores.set(key,created);return created;
 }
-type Props={enabled:boolean;session:SessionScope;client:LiveClient;pathname:string;locale:'en'|'zh-HK';t:(value:string)=>string;navigate:(path:string)=>void;canViewOffer:boolean;canViewResults:boolean};
+type Props={enabled:boolean;salesAdmissionEnabled?:boolean;session:SessionScope;client:LiveClient;pathname:string;locale:'en'|'zh-HK';t:(value:string)=>string;navigate:(path:string)=>void;canViewOffer:boolean;canViewResults:boolean};
 export function LiveConversation(props:Props){
   if(!conversationHomeEnabled(props.enabled?'true':undefined)||!discussionForPath(props.pathname,true))return null;
   const snapshot=props.session.getSnapshot();
   if(!snapshot.authenticated||!snapshot.scope.workspace||!snapshot.scope.project)return null;
   const route=discussionForPath(props.pathname,true)!;
-  const studio={client:props.client,session:props.session,t:props.t,locale:props.locale,navigate:props.navigate,canViewOffer:props.canViewOffer,canViewResults:props.canViewResults};
+  const studio={salesAdmissionEnabled:props.salesAdmissionEnabled,client:props.client,session:props.session,t:props.t,locale:props.locale,navigate:props.navigate,canViewOffer:props.canViewOffer,canViewResults:props.canViewResults};
   // Conversation-first routes: one continuous surface for the project home, a new
   // discussion and a saved workspace thread. Device-only discussions stay reachable
   // behind their own disclosure so existing local work is never hidden.
