@@ -145,8 +145,16 @@ jobs:
           import xml.etree.ElementTree as ET
           cases = list(ET.parse('test-results/conversation-studio.xml').getroot().iter('testcase'))
           names = {case.get('name') for case in cases}
-          assert len(cases) == 32, (len(cases), sorted(names))
-          assert 'turn metrics dashboard shows bounded project aggregates and fails closed' in names, names
+          assert len(cases) == len(names) == 40, (len(cases), sorted(names))
+          assert not [c.get('name') for c in cases if any(c.find(tag) is not None for tag in ('skipped', 'failure', 'error'))]
+          required = {
+              'turn metrics dashboard shows bounded project aggregates and fails closed',
+              'an uncertain first send recovers after reload without resending the edited draft',
+              'a first send is persisted before its response and cleared on success',
+              'a definite rejection can be corrected and sent again instead of replayed forever',
+              'a late absent probe never turns a normal quick action into a note',
+          }
+          assert required <= names, sorted(required - names)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -684,13 +692,13 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 4079 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 4093 --discovery-only
       - name: Prepare owned marketing intake fixture
         working-directory: services/api
         run: uv run --frozen python tools/run_marketing_intake.py --github-env --receipt artifacts/marketing-api.target.json
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 4079 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 4093 --junit services/api/artifacts/tests.xml
       - name: Clean owned marketing intake fixture
         if: ${{ always() && hashFiles('services/api/artifacts/marketing-api.target.json') != '' }}
         working-directory: services/api

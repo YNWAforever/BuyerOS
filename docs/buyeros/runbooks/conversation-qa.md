@@ -95,6 +95,8 @@ Screenshots and JUnit are uploaded as the `buyeros-conversation-qa` artifact.
 
 ## Model recall acceptance
 
+The PostgreSQL integration test `services/api/tests/test_discussion_context_recall.py` submits identical follow-ups to two saved discussions. An offline adapter derives its answer from the history it receives. This covers thread isolation and durable model-reply handling. Live model quality is verified separately on a candidate.
+
 When the candidate already has an authorized model route and QA budget, set `BUYEROS_QA_MODEL_RECALL=true` for the Playwright run and `BUYEROS_QA_MODEL_SOURCE_LABEL` to the exact checkbox label of an approved QA source. Use a source independent of the synthetic buyer names. The model test creates two discussions with different ordered pairs of synthetic buyers. In each, it reloads the saved discussion, asks for the second buyer, then asks for the first buyer in another tab. Each answer must name the requested buyer. The default run skips this test and reports durable messaging separately.
 
 ## Other release gates
