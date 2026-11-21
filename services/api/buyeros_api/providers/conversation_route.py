@@ -63,8 +63,9 @@ DEFAULT_SOURCE_URLS = (
 DEFAULT_RETENTION = ('zero retention and no training per Console model privacy; '
     'no listed exception for deepseek-v4.1-flash')
 ACCOUNT_KIND = 'service-account'
-# 6000 input tokens * $0.30/M + 1000 output tokens * $1.20/M = $0.0030.
-DEFAULT_MAX_LIABILITY = Money(Decimal('0.010000'))
+# The receipt transition in migration 0057 claims an exact US$0.10 hold.
+# Published token cost at the request caps is US$0.0030.
+DEFAULT_MAX_LIABILITY = Money(Decimal('0.100000'))
 CONVERSATION_ROUTE = ModelRoute(prompt_version=PROMPT_VERSION,
     permitted_tools=frozenset(), max_input_tokens=6000, max_output_tokens=1000,
     deadline_seconds=30, repair_limit=0, route_id=ROUTE_ID)
@@ -161,7 +162,7 @@ REVIEWED_ROUTES: tuple[ReviewedConversationRoute, ...] = (
     ReviewedConversationRoute(
         workspace_id='064d5168-709b-57e7-a7c3-871c2f16c814',
         project_id='bd632836-3298-58de-aa85-59213cb28ab2',
-        contract_sha256='e514ac4ae1ef86a3d835d4a342a33918ddf12784a4353b6e903ea049c1fade73',
+        contract_sha256='c3ed9af2029ce3364c297218e70bc141f3667406d9d53c210f47a2ee19688c65',
         account_verified=True,
         markets=frozenset({'SG'}),
         evidence_expires_at=datetime(2026, 11, 25, tzinfo=timezone.utc),

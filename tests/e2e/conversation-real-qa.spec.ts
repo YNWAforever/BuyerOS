@@ -267,9 +267,14 @@ test('authorized model recalls the correct buyer independently in two saved disc
       const sourcesTab=page.getByRole('tab',{name:'Sources',exact:true});
       if(!await sourcesTab.isVisible())await page.getByRole('button',{name:'Show context panel',exact:true}).click();
       await sourcesTab.click();
-      const saveSelection=page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname.endsWith(`/conversation-threads/${threadId}/sources`));
-      await page.getByRole('checkbox',{name:sourceName,exact:true}).check();
-      expect((await saveSelection).status()).toBe(200);
+      const source=page.getByRole('checkbox',{name:sourceName,exact:true});
+      await expect(source).not.toBeChecked();
+      const [savedSelection]=await Promise.all([
+        page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname.endsWith(`/conversation-threads/${threadId}/sources`)),
+        source.click(),
+      ]);
+      expect(savedSelection.status()).toBe(200);
+      await expect(source).toBeChecked();
       await page.reload();
       await waitForStudio(page);
       const question='Which buyer was second? Reply with only the name.';

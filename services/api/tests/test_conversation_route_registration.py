@@ -82,7 +82,8 @@ def test_exact_reviewed_scope_builds_the_registration_and_matching_policy_hash(r
     assert item.capability.auth_model == conversation_route.DEFAULT_AUTH_MODEL
     assert item.capability.adapter_version == conversation_route.ADAPTER_VERSION
     assert item.snapshot()['endpoint'] == CONVERSATION_ENDPOINT
-    assert item.capability.max_liability == facts.max_liability
+    # Migration 0057 claims only the exact US$0.10 conversation hold.
+    assert item.capability.max_liability == facts.max_liability == Money(Decimal('0.100000'))
     assert item.capability.verified_at == facts.verified_at
     assert item.contract_hash == facts.contract_sha256
     snapshot = item.snapshot()
