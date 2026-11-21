@@ -14,11 +14,10 @@ from .live_model import (PROMPT,PROPOSAL_SCHEMA,MAX_INPUT_BYTES,MAX_RESPONSE_BYT
                          _basis,_current_source,canonical_json,validate_live_proposal)
 
 ENDPOINT='https://opencode.ai/zen/go/v1/chat/completions'
-# Public Go catalog (2026-11-21) documents this OpenAI-compatible base for
-# chat-completions: https://opencode.ai/inference/go/openai/v1. Keep the legacy
-# sales/fit endpoint above unchanged for existing callers; conversation schema
-# is pinned to the current documented endpoint.
-CONVERSATION_ENDPOINT='https://opencode.ai/inference/go/openai/v1/chat/completions'
+# Paid Console service-account catalog (2026-11-21) documents this endpoint:
+# https://opencode.ai/inference/openai/v1/chat/completions. The legacy endpoint
+# above remains unchanged for existing fit/sales callers.
+CONVERSATION_ENDPOINT='https://opencode.ai/inference/openai/v1/chat/completions'
 ENDPOINTS=frozenset({ENDPOINT,CONVERSATION_ENDPOINT})
 DEFAULT_MODEL_ID='kimi-k3'
 # No token-count endpoint: bound input conservatively at one token per 3 bytes, then recheck reported usage.

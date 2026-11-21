@@ -1,14 +1,16 @@
 """Reviewed code-owned conversation model route and disabled-by-default opt-in.
 
-A conversation call is possible only when all of these hold:
+The default discussion binding is the paid Console model ``deepseek-v4.1-flash``
+called with the BuyerOS Console service-account credential. A conversation call
+is possible only when all of these hold:
 
 * an operator explicitly enables this exact workspace/project pair through
   ``BUYEROS_CONVERSATION_MODEL_ENABLED=true`` plus the two id variables, and
   deploys the dedicated ``BUYEROS_CONVERSATION_MODEL_API_KEY`` (never the global
   research provider selector or key);
 * one ``ReviewedConversationRoute`` below is pinned to that exact pair and was
-  independently reviewed with the vendor model, tariff upper bound, supported
-  markets/languages, dated source URLs, conversation policy account reference,
+  independently reviewed with the code-owned default model/version, tariff upper
+  bound, markets/languages, dated Console source URLs, service-account identity,
   retained/expiry terms and expected provider-contract hash;
 * the account/model verification is marked complete and any reviewed evidence
   expiry has not passed;
@@ -16,9 +18,8 @@ A conversation call is possible only when all of these hold:
 * every pre-existing paid-admission, dispatch, policy, source, budget and receipt
   guard still passes.
 
-``REVIEWED_ROUTES`` is empty in this repository. It is intentionally populated
-only by a reviewed owner change with real vendor facts; an arbitrary environment
-model id, pricing string or liability value is never trusted or marked verified.
+``REVIEWED_ROUTES`` binds approval to the exact workspace and project. Model,
+pricing and liability come from the reviewed provider contract.
 """
 from __future__ import annotations
 
@@ -40,10 +41,30 @@ PROJECT_ENV = 'BUYEROS_CONVERSATION_MODEL_PROJECT_ID'
 # credential must not select or run any unrelated research/model operation.
 CREDENTIAL_ENV = 'BUYEROS_CONVERSATION_MODEL_API_KEY'
 
-PROVIDER = 'opencode-go'
-ADAPTER_VERSION = 'opencode-go-conversation.v1'
-ROUTE_ID = 'opencode-go-conversation.v1'
+PROVIDER = 'opencode-console'
+ADAPTER_VERSION = 'opencode-console-conversation.v1'
+ROUTE_ID = 'opencode-console-conversation.v1'
 PROMPT_VERSION = 'conversation-grounded.v1'
+DEFAULT_MODEL_ID = 'deepseek-v4.1-flash'
+DEFAULT_MODEL_VERSION = 'deepseek-v4.1-flash-1017'
+DEFAULT_PRICING_VERSION = 'opencode-console-2026-11-21:deepseek-v4.1-flash-1017'
+DEFAULT_AUTH_MODEL = 'service-account bearer key'
+DEFAULT_POLICY_ACCOUNT_REFERENCE = 'buyeros-conversation-service-account'
+DEFAULT_MARKETS = frozenset({'US'})
+REVIEWED_MARKETS = frozenset({'US', 'SG'})
+DEFAULT_LANGUAGES = frozenset({'en'})
+DEFAULT_VERIFIED_AT = datetime(2026, 11, 21, tzinfo=timezone.utc)
+DEFAULT_SOURCE_URLS = (
+    'https://opencode.ai/docs/console/api/#service-accounts',
+    'https://opencode.ai/docs/console/api/inference/',
+    'https://opencode.ai/docs/console/models/#pricing',
+    'https://opencode.ai/docs/console/models/#privacy',
+)
+DEFAULT_RETENTION = ('zero retention and no training per Console model privacy; '
+    'no listed exception for deepseek-v4.1-flash')
+ACCOUNT_KIND = 'service-account'
+# 6000 input tokens * $0.30/M + 1000 output tokens * $1.20/M = $0.0030.
+DEFAULT_MAX_LIABILITY = Money(Decimal('0.010000'))
 CONVERSATION_ROUTE = ModelRoute(prompt_version=PROMPT_VERSION,
     permitted_tools=frozenset(), max_input_tokens=6000, max_output_tokens=1000,
     deadline_seconds=30, repair_limit=0, route_id=ROUTE_ID)
@@ -53,6 +74,7 @@ CONVERSATION_TEST_EVIDENCE = (
     'services/api/tests/test_conversation_admission_db.py',
     'services/api/tests/test_discussion_context_recall.py',
     'services/api/tests/test_conversation_route_registration.py',
+    'services/api/tests/test_conversation_model.py',
 )
 MAX_QA_CALL_LIABILITY = Money(Decimal('1.000000'))
 _ACCOUNT = re.compile(r'[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}\Z')
@@ -74,17 +96,17 @@ class ReviewedConversationRoute:
     """
     workspace_id: str
     project_id: str
-    model_id: str
-    pricing_version: str
-    policy_account_reference: str
-    max_liability: Money
-    markets: frozenset[str]
-    languages: frozenset[str]
-    verified_at: datetime
-    source_urls: tuple[str, ...]
     contract_sha256: str
-    retention: str
     account_verified: bool = False
+    model_id: str = DEFAULT_MODEL_ID
+    pricing_version: str = DEFAULT_PRICING_VERSION
+    policy_account_reference: str = DEFAULT_POLICY_ACCOUNT_REFERENCE
+    max_liability: Money = DEFAULT_MAX_LIABILITY
+    markets: frozenset[str] = DEFAULT_MARKETS
+    languages: frozenset[str] = DEFAULT_LANGUAGES
+    verified_at: datetime = DEFAULT_VERIFIED_AT
+    source_urls: tuple[str, ...] = DEFAULT_SOURCE_URLS
+    retention: str = DEFAULT_RETENTION
     evidence_expires_at: datetime | None = None
     evidence: tuple[str, ...] = CONVERSATION_TEST_EVIDENCE
 
@@ -97,28 +119,29 @@ class ReviewedConversationRoute:
         if str(workspace) != self.workspace_id or str(project) != self.project_id:
             raise ValueError('canonical reviewed conversation scope required')
         if (not isinstance(self.model_id, str) or _MODEL_ID.fullmatch(self.model_id) is None
+                or self.model_id != DEFAULT_MODEL_ID
                 or not isinstance(self.pricing_version, str)
                 or _PRICING_VERSION.fullmatch(self.pricing_version) is None
+                or self.pricing_version != DEFAULT_PRICING_VERSION
                 or not isinstance(self.policy_account_reference, str)
-                or _ACCOUNT.fullmatch(self.policy_account_reference) is None):
-            raise ValueError('reviewed conversation model/pricing/account facts required')
+                or _ACCOUNT.fullmatch(self.policy_account_reference) is None
+                or self.policy_account_reference != DEFAULT_POLICY_ACCOUNT_REFERENCE):
+            raise ValueError('code-owned default conversation model/pricing/account facts required')
         if (not isinstance(self.max_liability, Money)
-                or not Decimal(0) < self.max_liability.amount <= MAX_QA_CALL_LIABILITY.amount):
+                or self.max_liability != DEFAULT_MAX_LIABILITY):
             raise ValueError('reviewed bounded conversation liability required')
-        if (not isinstance(self.markets, frozenset) or not 1 <= len(self.markets) <= 64
-                or any(not isinstance(item, str) or _MARKET.fullmatch(item) is None for item in self.markets)
-                or not isinstance(self.languages, frozenset) or not 1 <= len(self.languages) <= 64
-                or any(not isinstance(item, str) or _LANGUAGE.fullmatch(item) is None for item in self.languages)):
-            raise ValueError('reviewed provider market/language facts required')
+        if (not isinstance(self.markets, frozenset) or not self.markets
+                or not self.markets <= REVIEWED_MARKETS
+                or not isinstance(self.languages, frozenset) or self.languages != DEFAULT_LANGUAGES):
+            raise ValueError('reviewed exact market/language subset required')
         if (not isinstance(self.verified_at, datetime) or self.verified_at.tzinfo is None
-                or not isinstance(self.source_urls, tuple) or not 1 <= len(self.source_urls) <= 20
-                or any(not isinstance(url, str) or not url.startswith('https://') or len(url) > 500
-                       for url in self.source_urls)):
+                or self.verified_at != DEFAULT_VERIFIED_AT
+                or not isinstance(self.source_urls, tuple)
+                or self.source_urls != DEFAULT_SOURCE_URLS):
             raise ValueError('dated vendor source URLs required')
         if not isinstance(self.contract_sha256, str) or _SHA256.fullmatch(self.contract_sha256) is None:
             raise ValueError('independently reviewed contract hash required')
-        if (not isinstance(self.retention, str) or not 1 <= len(self.retention) <= 500
-                or any(ord(character) < 32 for character in self.retention)):
+        if not isinstance(self.retention, str) or self.retention != DEFAULT_RETENTION:
             raise ValueError('reviewed provider retention terms required')
         if self.evidence_expires_at is not None and (
                 not isinstance(self.evidence_expires_at, datetime)
@@ -132,10 +155,18 @@ class ReviewedConversationRoute:
             raise ValueError('actual conversation contract tests required')
 
 
-# Deliberately empty until an owner records real vendor facts and their exact
-# independently reviewed contract hash. Do not infer an entry from deployment
-# environment or credentials.
-REVIEWED_ROUTES: tuple[ReviewedConversationRoute, ...] = ()
+# Isolated synthetic QA workspace and project for the owner-authorized recall test.
+# Vendor pricing and privacy evidence are reviewed through the QA window.
+REVIEWED_ROUTES: tuple[ReviewedConversationRoute, ...] = (
+    ReviewedConversationRoute(
+        workspace_id='064d5168-709b-57e7-a7c3-871c2f16c814',
+        project_id='bd632836-3298-58de-aa85-59213cb28ab2',
+        contract_sha256='e514ac4ae1ef86a3d835d4a342a33918ddf12784a4353b6e903ea049c1fade73',
+        account_verified=True,
+        markets=frozenset({'SG'}),
+        evidence_expires_at=datetime(2026, 11, 25, tzinfo=timezone.utc),
+    ),
+)
 
 
 def _canonical_uuid(value) -> str | None:
@@ -186,14 +217,16 @@ def registration_for_facts(facts: ReviewedConversationRoute) -> ProviderRegistra
     Used by preflight and tests; callers must compare ``contract_hash`` to
     ``facts.contract_sha256`` and never treat this object as verified by itself.
     """
+    from .opencode_model import CONVERSATION_ENDPOINT
     capability = ProviderCapability(
         provider=PROVIDER, adapter_version=ADAPTER_VERSION, service='model',
         markets=facts.markets, languages=facts.languages, roles=frozenset({'company'}),
-        auth_model='server-only bearer key', pricing_version=facts.pricing_version,
+        auth_model=DEFAULT_AUTH_MODEL, pricing_version=facts.pricing_version,
         max_liability=facts.max_liability, idempotency='verified', status='verified',
         callback='unsupported', cancel='unsupported',
         retention=facts.retention,
-        verified_at=facts.verified_at, source_urls=facts.source_urls)
+        verified_at=facts.verified_at, source_urls=facts.source_urls,
+        endpoint=CONVERSATION_ENDPOINT)
 
     def factory():
         # Admission owns the receipt-bound OpenCode client; a registry-resolved

@@ -14,7 +14,7 @@ StatusState = Literal["accepted", "pending", "unknown", "succeeded", "not_found"
 _QUANTUM = Decimal("0.000001")
 # Live adapters that share the durable search/model receipt ports.
 LIVE_SEARCH_PROVIDERS: frozenset[str] = frozenset({"brave-search", "exa-search"})
-LIVE_MODEL_PROVIDERS: frozenset[str] = frozenset({"openai-responses", "opencode-go"})
+LIVE_MODEL_PROVIDERS: frozenset[str] = frozenset({"openai-responses", "opencode-go", "opencode-console"})
 
 
 def _selected_from_environment() -> frozenset[str]:
@@ -67,6 +67,7 @@ class ProviderCapability:
     retention: str
     verified_at: datetime | None
     source_urls: tuple[str, ...]
+    endpoint: str | None = None
 
     def __post_init__(self) -> None:
         if self.service not in {"search", "model", "contact"}:
@@ -74,6 +75,9 @@ class ProviderCapability:
         if any(value not in {"verified", "unsupported", "unknown"} for value in
                (self.idempotency, self.status, self.callback, self.cancel)):
             raise ValueError("unsupported capability evidence state")
+        if self.endpoint is not None and (not isinstance(self.endpoint, str)
+                or not self.endpoint.startswith("https://") or len(self.endpoint) > 500):
+            raise ValueError("exact HTTPS provider endpoint required")
 
 
 @dataclass(frozen=True)

@@ -102,7 +102,7 @@ def selected_configuration(market, language, *, workspace_id=None, project_id=No
         or item.model_route != conversation_route.CONVERSATION_ROUTE
         or ROUTE != conversation_route.CONVERSATION_ROUTE
         or item.policy_binding is None or not item.sandbox_evidence
-        or item.capability.provider != 'opencode-go'
+        or item.capability.provider != conversation_route.PROVIDER
         or item.capability.service != 'model' or item.capability.max_liability is None
         or item.capability.max_liability.amount <= 0
         or item.capability.max_liability.amount > conversation_route.MAX_QA_CALL_LIABILITY.amount
@@ -283,7 +283,7 @@ async def complete_conversation(engine, workspace_id, prepared):
     async with httpx.AsyncClient() as http:
         from ..providers.opencode_model import CONVERSATION_ENDPOINT, OpenCodeGoModelClient
         credential = os.environ.get(conversation_route.CREDENTIAL_ENV)
-        if item.capability.provider != 'opencode-go' or not credential:
+        if item.capability.provider != conversation_route.PROVIDER or not credential:
             raise unavailable()
         client = OpenCodeGoModelClient(api_key=credential, http=http, model_id=item.model_id,
             endpoint=CONVERSATION_ENDPOINT)

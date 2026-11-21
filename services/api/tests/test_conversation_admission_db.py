@@ -17,6 +17,10 @@ from buyeros_api.api.errors import ApiError
 from buyeros_api.db.session import tenant_session
 from buyeros_api.providers.base import Money, ProviderCapability
 from buyeros_api.providers.registry import ProviderRegistration
+from buyeros_api.providers.conversation_route import (
+    ADAPTER_VERSION, CONVERSATION_ROUTE, DEFAULT_AUTH_MODEL, DEFAULT_MODEL_ID,
+    DEFAULT_PRICING_VERSION, PROVIDER)
+from buyeros_api.providers.opencode_model import CONVERSATION_ENDPOINT
 from buyeros_api.providers.live_model import canonical_json
 from buyeros_api.providers.model_receipts import PostgresModelReceipts
 from buyeros_api.services import conversation_admission as service
@@ -44,14 +48,14 @@ def paid_case(conversation_api, monkeypatch):
     # Dedicated conversation credential alone selects this route; the global
     # research provider set must stay empty for this fixture.
     monkeypatch.setattr(base, 'SELECTED_LIVE_PROVIDERS', frozenset())
-    from buyeros_api.providers.conversation_route import CONVERSATION_ROUTE
     route = CONVERSATION_ROUTE
-    cap = ProviderCapability('opencode-go', 'conversation-test.v1', 'model', frozenset({'US'}),
-        frozenset({'en','zh-HK'}), frozenset({'company'}), 'server-only', 'conversation-test-price-v1',
+    cap = ProviderCapability(PROVIDER, ADAPTER_VERSION, 'model', frozenset({'US'}),
+        frozenset({'en','zh-HK'}), frozenset({'company'}), DEFAULT_AUTH_MODEL, DEFAULT_PRICING_VERSION,
         Money(Decimal('0.100000')), 'verified', 'verified', 'unsupported', 'unsupported', 'one-day',
-        datetime.now(timezone.utc), ('https://opencode.ai/go',))
+        datetime.now(timezone.utc), ('https://opencode.ai/docs/console/models/',),
+        endpoint=CONVERSATION_ENDPOINT)
     item = ProviderRegistration(cap, lambda: None, ('synthetic:conversation-only',), model_route=route,
-        model_id='synthetic-model', policy_account_reference='synthetic-conversation-account')
+        model_id=DEFAULT_MODEL_ID, policy_account_reference='synthetic-conversation-account')
     monkeypatch.setattr(service, 'ROUTE', route); monkeypatch.setattr(service, 'REGISTRATION', item)
     from tests.policy_activation_fixtures import approve_research_fixture
     approve_research_fixture(dsn, WORKSPACE_A, PROJECT_A, domains=(), model=item.policy_binding,

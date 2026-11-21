@@ -29,7 +29,7 @@ def test_conversation_basis_has_no_run_buyer_company_or_tools_authority():
     data=basis();request=ModelRequest('conversation:synthetic',data,replace(ROUTE,route_id='conversation-grounded.v1'),'synthetic-model','US','en','company')
     assert request.basis['schema']=='conversation-basis.v1'
     assert not {'run_id','buyer_id','company_id'} & data.keys()
-    assert ROUTE.route_id=='opencode-go-conversation.v1' and not ROUTE.permitted_tools and ROUTE.deadline_seconds==30
+    assert ROUTE.route_id=='opencode-console-conversation.v1' and not ROUTE.permitted_tools and ROUTE.deadline_seconds==30
     with pytest.raises(ValueError):validate_basis({**data,'run_id':str(uuid.uuid4())})
 
 

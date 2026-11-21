@@ -11,6 +11,7 @@ from buyeros_api.providers.base import Money
 from buyeros_api.providers import conversation_route
 from buyeros_api.providers.conversation_route import (
     MAX_QA_CALL_LIABILITY, ReviewedConversationRoute, registration_for_facts)
+from buyeros_api.providers.opencode_model import CONVERSATION_ENDPOINT
 from buyeros_api.services import conversation_admission
 from buyeros_api.settings import get_settings
 from buyeros_api.execution.config import get_settings as dispatch_settings
@@ -23,15 +24,7 @@ OTHER_PROJECT = '20000000-0000-4000-8000-000000000002'
 
 def reviewed_facts(**overrides):
     """Synthetic reviewed facts; the hash is computed only in this test fixture."""
-    fields = dict(workspace_id=WS, project_id=PROJECT,
-        model_id='synthetic-conversation-model',
-        pricing_version='synthetic-conversation-price-v1',
-        policy_account_reference='synthetic-conversation-account',
-        max_liability=Money(Decimal('0.100000')), markets=frozenset({'US'}),
-        languages=frozenset({'en'}), verified_at=datetime(2026, 11, 21, tzinfo=timezone.utc),
-        source_urls=('https://opencode.ai/',), contract_sha256='0' * 64,
-        retention='0 days; reviewed ZDR terms expire 2026-11-30',
-        evidence_expires_at=datetime(2099, 1, 1, tzinfo=timezone.utc),
+    fields = dict(workspace_id=WS, project_id=PROJECT, contract_sha256='0' * 64,
         account_verified=True)
     fields.update(overrides)
     unhashed = ReviewedConversationRoute(**fields)
@@ -58,16 +51,18 @@ def route_env(monkeypatch):
 
 def test_registration_absent_and_selection_disabled_by_default(monkeypatch):
     for name in (conversation_route.ENABLED_ENV, conversation_route.WORKSPACE_ENV,
-                 conversation_route.PROJECT_ENV):
+                 conversation_route.PROJECT_ENV, conversation_route.CREDENTIAL_ENV):
         monkeypatch.delenv(name, raising=False)
-    monkeypatch.setattr(conversation_route, 'REVIEWED_ROUTES', ())
-    assert conversation_route.REVIEWED_ROUTES == ()
-    assert conversation_route.CONVERSATION_ROUTE.route_id == 'opencode-go-conversation.v1'
+    # A reviewed QA row may exist, but selection stays disabled until the exact
+    # operator env opt-in is present; this test must not require an empty registry.
+    monkeypatch.setattr(conversation_route, 'REVIEWED_ROUTES', (reviewed_facts(),))
+    assert conversation_route.CONVERSATION_ROUTE.route_id == 'opencode-console-conversation.v1'
     assert not conversation_route.CONVERSATION_ROUTE.permitted_tools
     assert conversation_route.CONVERSATION_TEST_EVIDENCE == (
         'services/api/tests/test_conversation_admission_db.py',
         'services/api/tests/test_discussion_context_recall.py',
-        'services/api/tests/test_conversation_route_registration.py')
+        'services/api/tests/test_conversation_route_registration.py',
+        'services/api/tests/test_conversation_model.py')
     assert all('test_exa_opencode_providers.py' not in path
                for path in conversation_route.CONVERSATION_TEST_EVIDENCE)
     assert conversation_route.preflight() is None
@@ -81,9 +76,12 @@ def test_exact_reviewed_scope_builds_the_registration_and_matching_policy_hash(r
     monkeypatch.setattr(conversation_route, 'REVIEWED_ROUTES', (facts,))
     item = conversation_route.preflight()
     assert item is not None
-    assert item.model_id == 'synthetic-conversation-model'
+    assert item.model_id == conversation_route.DEFAULT_MODEL_ID
     assert item.model_route == conversation_route.CONVERSATION_ROUTE
-    assert item.capability.provider == 'opencode-go'
+    assert item.capability.provider == conversation_route.PROVIDER
+    assert item.capability.auth_model == conversation_route.DEFAULT_AUTH_MODEL
+    assert item.capability.adapter_version == conversation_route.ADAPTER_VERSION
+    assert item.snapshot()['endpoint'] == CONVERSATION_ENDPOINT
     assert item.capability.max_liability == facts.max_liability
     assert item.capability.verified_at == facts.verified_at
     assert item.contract_hash == facts.contract_sha256
@@ -91,13 +89,25 @@ def test_exact_reviewed_scope_builds_the_registration_and_matching_policy_hash(r
     assert snapshot['retention'] == facts.retention
     assert snapshot['verified_at'] == facts.verified_at.isoformat()
     assert snapshot['source_urls'] == list(facts.source_urls)
-    assert conversation_route.registration_for_facts(
-        replace(facts, retention='changed retention review')).contract_hash != facts.contract_sha256
+    assert conversation_route.DEFAULT_MODEL_VERSION in facts.pricing_version
+    with pytest.raises(ValueError):
+        replace(facts, retention='changed retention review')
     assert item.policy_binding.account_reference == facts.policy_account_reference
     assert item.policy_binding.contract_sha256 == facts.contract_sha256
     selected = conversation_admission.selected_configuration('US', 'en',
         workspace_id=WS, project_id=PROJECT)
     assert selected is not None and selected.model_id == item.model_id
+    sg_facts = reviewed_facts(markets=frozenset({'SG'}))
+    assert sg_facts.markets == frozenset({'SG'})
+    with pytest.raises(ValueError):
+        ReviewedConversationRoute(workspace_id=WS, project_id=PROJECT,
+            contract_sha256='0' * 64, markets=frozenset({'FR'}))
+    monkeypatch.setattr(conversation_route, 'REVIEWED_ROUTES', (sg_facts,))
+    assert conversation_route.preflight() is not None
+    assert conversation_admission.selected_configuration('SG', 'en',
+        workspace_id=WS, project_id=PROJECT) is not None
+    assert conversation_admission.selected_configuration('US', 'en',
+        workspace_id=WS, project_id=PROJECT) is None
     with pytest.raises(RuntimeError):
         item.factory()
 

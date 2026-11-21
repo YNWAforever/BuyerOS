@@ -263,7 +263,9 @@ the deliberate PNG screenshots are retained.
 
 ## Enabling generated replies for the isolated QA project
 
-The browser login identifies the QA user. The backend uses a separate provider credential. Store `BUYEROS_CONVERSATION_MODEL_API_KEY` as a sensitive Vercel preview variable restricted to the candidate branch. Obtain the account reference and confirmation that its terms cover BuyerOS end-user discussions from the provider account owner.
+The browser login identifies the QA user. The backend uses the BuyerOS service account through OpenCode Console. DeepSeek V4.1 Flash (`deepseek-v4.1-flash`) is the default model for generated discussion replies in approved projects. Store the service-account key as the sensitive `BUYEROS_CONVERSATION_MODEL_API_KEY` variable on the candidate branch. The key needs Models Request permission. [OpenCode service-account documentation](https://opencode.ai/docs/console/api/#service-accounts)
+
+The published token rates are US$0.30 per million input tokens and US$1.20 per million output tokens. The route caps each call at 6,000 input and 1,000 output tokens, which costs at most US$0.003 at those rates. The QA policy authorizes only the synthetic offer source. [OpenCode Console pricing and privacy](https://opencode.ai/docs/console/models/#pricing)
 
 Add the reviewed model, tariff ceiling, retention terms, evidence dates and account reference to `REVIEWED_ROUTES` in the conversation provider registration. Bind its contract hash to the approved policy for the exact QA workspace and project. Set `BUYEROS_CONVERSATION_MODEL_WORKSPACE_ID`, `BUYEROS_CONVERSATION_MODEL_PROJECT_ID` and `BUYEROS_CONVERSATION_MODEL_ENABLED=true` for that preview. The existing `NEXT_PUBLIC_CONVERSATION_HOME`, `BUYEROS_PAID_ADMISSION_ENABLED` and `BUYEROS_PAID_DISPATCH_ENABLED` flags must also be `true`. Check the remaining workspace, project and conversation allowances before dispatch. All three apply to each call.
 
