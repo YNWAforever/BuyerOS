@@ -92,6 +92,10 @@ test('project home is a task-first dashboard with one heading and no selector pa
   await page.locator('.conversation-home-card').first().click();
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Help me set up my first BuyerOS project.');
   assert.equal(posts.length,0,'selecting a task card sends nothing');
+  // A typed draft is never overwritten by another reviewed prompt.
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('My own typed draft');
+  await page.locator('.conversation-home-card').nth(1).click();
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'My own typed draft');
  }finally{await harness.close();}
 });
 
@@ -144,11 +148,12 @@ const metricsFixture={window_days:7,generated_at:'2026-11-11T12:00:00Z',
   may_incur_provider_charges:0,estimated:[]}};
 
 function standardApi(options={}){
- const {absent=false,failFirstSend=false,contentOnly=false,skills=null,manage=false,access=null,second=false}=options;
+ const {absent=false,failFirstSend=false,contentOnly=false,skills=null,manage=false,access=null,second=false,capabilityUnavailable=false}=options;
  return async ({req,url,state})=>{
   const method=req.method();
   if(url.pathname.endsWith('/conversation-turns')&&method==='OPTIONS')
-   return absent?{status:404,json:{code:'NOT_FOUND',message:'request failed'}}:{status:204};
+   return capabilityUnavailable?{status:503,json:{code:'CONVERSATION_UNAVAILABLE',message:'private server detail'}}:
+    absent?{status:404,json:{code:'NOT_FOUND',message:'request failed'}}:{status:204};
   if(url.pathname===prefix)return {json:fixture.envelope({id:project,workspace_id:workspace,status:'active',offer_revision:1,active_icp_version_id:fixture.profileId,name:'Fixture project'})};
   if(url.pathname.endsWith('/sales/skills'))return {json:fixture.envelope({skills:skills??[{id:'sales-research'},{id:'review-buyers'}]})};
   if(url.pathname.endsWith('/sales-tasks/capability'))return {json:fixture.envelope({admission_enabled:true})};
@@ -224,11 +229,12 @@ function standardApi(options={}){
 
 async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId,handler=standardApi(),flag=true,locale='en'}={}){
  const {createServer}=await import('vite');
+ mkdirSync('work',{recursive:true});
  const dir=mkdtempSync('work/conversation-studio-browser-');
  writeFileSync(dir+'/entry.jsx',fixture.browserEntry);
  const server=await createServer({configFile:false,root,cacheDir:resolve(dir,'node_modules/.vite'),resolve:{alias:{'@':root}},
   optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},
-  server:{host:'127.0.0.1',port:0,watch:{ignored:['**/.sites-runtime/**','**/.venv/**','**/.vercel/**','**/dist/**']}},appType:'custom'});
+  server:{host:'127.0.0.1',port:0,watch:null},appType:'custom'});
  server.middlewares.use((req,res,next)=>{if(req.url?.startsWith('/fixture')){res.setHeader('content-type','text/html');res.end('<html><body><div id="root"></div><script type="module" src="/'+dir+'/entry.jsx"></script></body></html>');}else next();});
  await server.listen();
  const browser=await chromium.launch({...(process.env.BUYEROS_CORE_CHROMIUM?{executablePath:process.env.BUYEROS_CORE_CHROMIUM}:{}),headless:true});
@@ -257,6 +263,8 @@ async function fixtureHarness({route:initialRoute='/app/discussions/s/'+threadId
   close:async()=>{await browser.close();await server.close();rmSync(dir,{recursive:true,force:true});}};
 }
 async function waitForDestination(page,expected){await page.waitForFunction(value=>window.lastDestination===value,expected);}
+const composeRegion=page=>page.getByRole('region',{name:'Message composer'});
+const composeStatus=page=>composeRegion(page).getByRole('status');
 
 test('conversation-first transcript renders typed inline parts and inline decisions',async()=>{
  const previewRequests=[];
@@ -432,7 +440,7 @@ test('fallback without the turn endpoint saves a truthful note and never fabrica
   await page.getByText('Notes only',{exact:true}).waitFor();
   await page.getByText('Continuous replies are unavailable here. Your messages are saved as notes.',{exact:true}).waitFor();
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this note');
-  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByRole('button',{name:'Save as note',exact:true}).click();
   await page.getByText('Saved as a note. Select sources to ask BuyerOS.',{exact:true}).first().waitFor();
   const appends=posts.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/messages$/.test(row.path));
   assert.equal(appends.length,1,'the note path appends once');
@@ -440,6 +448,228 @@ test('fallback without the turn endpoint saves a truthful note and never fabrica
   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'no invented turn call');
   assert.equal(await page.getByText('Keep this note',{exact:true}).count(),1);
   assert.equal(await page.getByText('Completed',{exact:true}).count(),0,'no fabricated tool activity');
+ }finally{await harness.close();}
+});
+
+test('an outage keeps the draft and never turns it into a note',async()=>{
+ const harness=await fixtureHarness({handler:standardApi({capabilityUnavailable:true})});
+ try{
+  const {page,posts}=harness;
+  const outage='Conversation replies are unavailable right now. Your text is kept here; nothing was sent.';
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composeStatus(page).filter({hasText:outage}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Save as note',exact:true}).count(),0,'an outage is not a notes-only surface');
+  await composer.fill('Draft during an outage');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await composeStatus(page).filter({hasText:outage}).waitFor();
+  assert.equal(await composer.inputValue(),'Draft during an outage','the outage keeps the draft');
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'no turn is attempted while unavailable');
+  assert.equal(posts.filter(row=>/\/conversation-threads\/([0-9a-f-]+)\/messages$/.test(row.path)).length,0,'no note is saved implicitly');
+ }finally{await harness.close();}
+});
+
+test('text typed while the first turn is in flight follows the saved thread',async()=>{
+ const base=standardApi();let release=()=>{};const hold=new Promise(done=>{release=done;});let held=false;
+ const handler=async input=>{
+  if(!held&&input.req.method()==='POST'&&input.url.pathname.endsWith('/conversation-turns')){
+   held=true;
+   const answer=await base(input);
+   return {...answer,hold};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('First question');
+  const response=page.waitForResponse(row=>row.request().method()==='POST'&&row.url().endsWith('/conversation-turns'));
+  await page.locator('.conversation-send').click();
+  // The first POST is held open; this text is typed before the saved route exists.
+  await composer.fill('Typed while sending');
+  release();
+  await response;
+  await waitForDestination(page,'/app/discussions/s/'+newThreadId+'?workspace='+workspace+'&project='+project);
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByText('First question',{exact:true}).waitFor();
+  await page.waitForFunction(()=>document.querySelector('#conversation-message')?.value==='Typed while sending');
+  assert.equal(await composer.inputValue(),'Typed while sending','the in-flight draft follows the created thread');
+  assert.equal(await transcript.getByText('First question',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('Typed while sending',{exact:true}).count(),0,'the in-flight draft is never sent automatically');
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'only the submitted first message is sent');
+ }finally{await harness.close();}
+});
+
+test('a first turn without an exact saved thread never navigates',async()=>{
+ const base=standardApi();let malformed=true;
+ const handler=async input=>{
+  if(malformed&&input.req.method()==='POST'&&input.url.pathname.endsWith('/conversation-turns')){
+   malformed=false;
+   const answer=await base(input);
+   const data=answer.json.data;
+   return {json:{...answer.json,data:{...data,thread:{...data.thread,id:'not-a-saved-thread'}}}};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('First question');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await page.getByText('The conversation response could not be verified. Reload the discussion before retrying.',{exact:true}).first().waitFor();
+  assert.equal(await page.locator('#fixture-path').textContent(),'/app/discussions/new','an invalid saved id is never navigated to');
+  assert.equal(await composer.inputValue(),'First question','the unsent attempt stays in the composer');
+  assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),1);
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'one attempted send only');
+ }finally{await harness.close();}
+});
+
+test('a late absent probe never turns a normal quick action into a note',async()=>{
+ const base=standardApi({absent:true});
+ let held=false,release=()=>{};const gate=new Promise(done=>{release=done;});
+ const handler=async input=>{
+  if(!held&&input.req.method()==='OPTIONS'&&input.url.pathname.endsWith('/conversation-turns')){
+   held=true;
+   const answer=await base(input);
+   return {...answer,hold:gate};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page,posts}=harness;
+  const chip=page.locator('.conversation-chips button').first();
+  await chip.waitFor();
+  // The click happens while the capability probe is still checking (Send intent).
+  await chip.click();
+  release();
+  await composeRegion(page).getByText('Continuous replies are not available here. Your message was not sent; choose Save as note to keep it.',{exact:true}).waitFor();
+  assert.equal(posts.filter(row=>/\/conversation-threads\/[0-9a-f-]+\/messages$/.test(row.path)).length,0,'a deferred absent probe never saves a note');
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,0,'no turn call is invented');
+  assert.equal(await page.getByRole('button',{name:'Save as note',exact:true}).count(),1,'the explicit note action appears after the probe');
+ }finally{await harness.close();}
+});
+
+test('an uncertain first send recovers after reload without resending the edited draft',async()=>{
+ const base=standardApi();let failed=false;
+ const handler=async input=>{
+  if(!failed&&input.req.method()==='POST'&&input.url.pathname.endsWith('/conversation-turns')){
+   failed=true;
+   return {status:503,json:{code:'CONVERSATION_MODEL_UNAVAILABLE',message:'private server detail'}};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('Original first message');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await composeRegion(page).getByText('The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',{exact:true}).waitFor();
+  // Editing the draft after the uncertain send must not rewrite the stored attempt.
+  await composer.fill('Edited while unresolved');
+  await page.reload();
+  await composeRegion(page).getByText('A previous message may not have been saved. Retry it to check the saved result before sending new text.',{exact:true}).waitFor();
+  assert.equal(await composer.inputValue(),'Edited while unresolved','the draft edit survives reload');
+  await page.getByRole('button',{name:'Retry send',exact:true}).click();
+  await waitForDestination(page,'/app/discussions/s/'+newThreadId+'?workspace='+workspace+'&project='+project);
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,2,'the uncertain attempt is replayed once after reload');
+  assert.equal(turns[1].body.text,'Original first message','the stored attempt text is replayed, not the edited draft');
+  assert.equal(turns[1].body.client_message_id,turns[0].body.client_message_id,'the same client message id is replayed');
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByText('Original first message',{exact:true}).waitFor();
+  assert.equal(await transcript.getByText('Original first message',{exact:true}).count(),1);
+  assert.equal(await transcript.getByText('Edited while unresolved',{exact:true}).count(),0,'the edited draft is not sent automatically');
+  assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Edited while unresolved','the edited draft follows the created thread');
+ }finally{await harness.close();}
+});
+
+test('a first send is persisted before its response and cleared on success',async()=>{
+ const base=standardApi();
+ let release=()=>{};const gate=new Promise(done=>{release=done;});let held=false;
+ let start=()=>{};const started=new Promise(done=>{start=done;});
+ const handler=async input=>{
+  if(!held&&input.req.method()==='POST'&&input.url.pathname.endsWith('/conversation-turns')){
+   held=true;start();
+   const answer=await base(input);
+   return {...answer,hold:gate};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('In flight attempt');
+  const request=page.waitForRequest(row=>row.method()==='POST'&&row.url().endsWith('/conversation-turns'));
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await request;await started;
+  // The response is still held open; the attempt is already tab-persisted with
+  // its original id, text and version.
+  const stored=await page.evaluate(()=>Object.keys(sessionStorage)
+   .filter(key=>key.startsWith('buyeros.conversation.attempt.v1.'))
+   .map(key=>JSON.parse(sessionStorage.getItem(key))));
+  assert.equal(stored.length,1);
+  assert.equal(stored[0].text,'In flight attempt');
+  assert.equal(stored[0].threadId,null);
+  release();
+  await waitForDestination(page,'/app/discussions/s/'+newThreadId+'?workspace='+workspace+'&project='+project);
+  await page.getByRole('textbox',{name:'Message BuyerOS'}).waitFor();
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByText('In flight attempt',{exact:true}).waitFor();
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'one confirmed first turn only');
+  const remaining=await page.evaluate(()=>Object.keys(sessionStorage)
+   .filter(key=>key.startsWith('buyeros.conversation.attempt.v1.')).length);
+  assert.equal(remaining,0,'a confirmed save clears the recovery record');
+  assert.equal(await transcript.getByText('In flight attempt',{exact:true}).count(),1);
+ }finally{release();await harness.close();}
+});
+
+test('editing after an uncertain send verifies the saved message before any new send',async()=>{
+ const base=standardApi();
+ let committed=false;
+ const handler=async input=>{
+  const {req,url,state}=input;
+  if(committed&&req.method()==='GET'&&/\/conversation-threads\/[0-9a-f-]+$/.test(url.pathname))
+   return {json:fixture.envelope(state.thread)};
+  if(!committed&&req.method()==='POST'&&url.pathname.endsWith('/conversation-turns')){
+   const body=req.postDataJSON();
+   if('thread_id' in body){
+    committed=true;
+    const chat=state.thread??fixture.studioThread;
+    state.thread={...chat,version:chat.version+1,messages:[...chat.messages,
+     {id:'b9000000-0000-4000-8000-000000000001',seq:chat.messages.length+1,role:'user',text:body.text,
+      client_message_id:body.client_message_id,turn_id:null,created_at:'2026-10-01T00:04:00.000Z',parts:[]}]};
+    return {status:503,json:{code:'CONVERSATION_MODEL_UNAVAILABLE',message:'private server detail'}};
+   }
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('Original uncertain message');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await composeRegion(page).getByText('The result is unconfirmed. Retry the same message to check the saved result instead of running it twice.',{exact:true}).waitFor();
+  await composer.fill('Edited after uncertain send');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await composeRegion(page).getByText('The earlier message was already saved. Nothing was sent twice; your current draft is still here.',{exact:true}).waitFor();
+  assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1,'the saved attempt is verified instead of posting again');
+  assert.equal(await composer.inputValue(),'Edited after uncertain send','the edited draft is preserved');
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByText('Original uncertain message',{exact:true}).waitFor();
+  assert.equal(await transcript.getByText('Original uncertain message',{exact:true}).count(),1,'the saved message is visible once');
+  assert.equal(await transcript.getByText('Edited after uncertain send',{exact:true}).count(),0,'the new draft is not sent automatically');
  }finally{await harness.close();}
 });
 
@@ -566,12 +796,33 @@ test('workspace thread keeps decisions, revoked sources, stale sends and viewer 
   await panel.getByRole('button',{name:'Remove unavailable Google Drive selections',exact:true}).waitFor({state:'detached'});
   assert.deepEqual(writes[1].body.sources,[{id:citationId,label:'Offer document'}]);
   assert.equal(thread.sources.length,1,'only the unavailable Drive references are dropped');
-  // A stale revision keeps the unsent text and says exactly what to do next.
+  // A stale revision keeps the unsent text, reads the thread back and says exactly
+  // what to do next; the retry is the frozen same attempt against the fresh version.
   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill('Keep this after the conflict');
+  const staleResponse=page.waitForResponse(row=>row.request().method()==='POST'&&row.url().endsWith('/conversation-turns'));
   await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await staleResponse;
   await page.getByText('This discussion changed. Copy any unsaved text, reload and send again.',{exact:true}).first().waitFor();
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Keep this after the conflict');
   assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),1);
+  const staleTry=posts.filter(row=>row.path.endsWith('/conversation-turns')).at(-1);
+  assert.equal(staleTry.body.language,'en');
+  assert.equal(staleTry.body.skill_id,null);
+  const readsBefore=harness.requests.filter(row=>row.method==='GET'&&row.path===prefix+'/conversation-threads/'+threadId).length;
+  const [retryResponse]=await Promise.all([
+   page.waitForResponse(row=>row.request().method()==='POST'&&row.url().endsWith('/conversation-turns')),
+   page.getByRole('button',{name:'Retry send',exact:true}).click(),
+  ]);
+  await retryResponse;
+  await page.getByText('This discussion changed. Copy any unsaved text, reload and send again.',{exact:true}).first().waitFor();
+  const retryTry=posts.filter(row=>row.path.endsWith('/conversation-turns')).at(-1);
+  assert.equal(retryTry.body.client_message_id,staleTry.body.client_message_id,'the retry keeps its client message id');
+  assert.equal(retryTry.key,staleTry.key,'the retry keeps its exact-once key');
+  assert.equal(retryTry.body.language,staleTry.body.language,'the retry freezes the original language');
+  assert.equal(retryTry.body.skill_id,staleTry.body.skill_id,'the retry freezes the original skill');
+  assert.equal(retryTry.body.text,staleTry.body.text,'the retry freezes the original text');
+  assert.ok(harness.requests.filter(row=>row.method==='GET'&&row.path===prefix+'/conversation-threads/'+threadId).length>readsBefore,
+   'a stale send reads the exact saved thread back before retrying');
   // A viewer reads the same discussion but cannot decide, send or change sources.
   thread={...thread,access:'viewer'};
   await page.reload();
@@ -626,6 +877,42 @@ test('a permission failure keeps the message unsent and surfaces the honest noti
   assert.equal(posts.filter(row=>row.path.endsWith('/conversation-turns')).length,1);
   assert.equal(await page.getByRole('textbox',{name:'Message BuyerOS'}).inputValue(),'Do not lose this message','the unsent message stays in the composer');
   assert.equal(await transcript.getByText('Do not lose this message',{exact:true}).count(),0,'a denied send is never appended');
+ }finally{await harness.close();}
+});
+
+test('a definite rejection can be corrected and sent again instead of replayed forever',async()=>{
+ const base=standardApi();let rejected=false;
+ const handler=async input=>{
+  if(!rejected&&input.req.method()==='POST'&&input.url.pathname.endsWith('/conversation-turns')){
+   rejected=true;
+   return {status:422,json:{code:'INVALID_REQUEST',message:'private validation detail'}};
+  }
+  return base(input);
+ };
+ const harness=await fixtureHarness({route:'/app/discussions/new',handler});
+ try{
+  const {page,posts}=harness;
+  const composer=page.getByRole('textbox',{name:'Message BuyerOS'});
+  await composer.waitFor();
+  await composer.fill('First invalid message');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await composeRegion(page).getByText('The request was rejected. Review the message and try again.',{exact:true}).waitFor();
+  assert.equal(await composer.inputValue(),'First invalid message','the rejected text stays editable');
+  assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),0,'a definite rejection does not force a replay');
+  await page.reload();
+  await composer.waitFor();
+  assert.equal(await composeRegion(page).getByText('A previous message may not have been saved. Retry it to check the saved result before sending new text.',{exact:true}).count(),0,'a definite rejection is not kept as an uncertain attempt');
+  assert.equal(await page.getByRole('button',{name:'Retry send',exact:true}).count(),0);
+  await composer.fill('Corrected message');
+  await page.getByRole('button',{name:'Send message',exact:true}).click();
+  await waitForDestination(page,'/app/discussions/s/'+newThreadId+'?workspace='+workspace+'&project='+project);
+  const turns=posts.filter(row=>row.path.endsWith('/conversation-turns'));
+  assert.equal(turns.length,2);
+  assert.notEqual(turns[1].body.client_message_id,turns[0].body.client_message_id,'corrected text is a fresh client message id');
+  assert.equal(turns[1].body.text,'Corrected message');
+  const transcript=page.locator('.conversation-transcript');
+  await transcript.getByText('Corrected message',{exact:true}).waitFor();
+  assert.equal(await transcript.getByText('Corrected message',{exact:true}).count(),1);
  }finally{await harness.close();}
 });
 

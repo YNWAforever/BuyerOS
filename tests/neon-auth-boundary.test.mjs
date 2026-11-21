@@ -49,6 +49,49 @@ for(const [fault,change] of Object.entries({
  const result=await route.GET(new Request(stagedOrigin+'/api/auth/get-session'),context);
  assert.equal(result.status,['missing_flag','disabled'].includes(fault)?403:503);assert.equal(initialized,0);
 });
+const qaPreviewHost='buyeros-qa-abc123-team.vercel.app',qaPreviewOrigin='https://'+qaPreviewHost,qaPreviewSource='a'.repeat(40);
+const qaPreviewEnv=()=>({...env(),BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED:'1',VERCEL_URL:qaPreviewHost,
+ BUYEROS_QA_PREVIEW_PROJECT_ID:'prj_qa',BUYEROS_QA_PREVIEW_REPO:'YNWAforever/BuyerOS',
+ BUYEROS_QA_PREVIEW_REPO_ID:'123456789',BUYEROS_QA_PREVIEW_BRANCH:'codex/qa-preview',
+ BUYEROS_RUNTIME_SOURCE_SHA:qaPreviewSource,VERCEL_PROJECT_ID:'prj_qa',VERCEL_GIT_PROVIDER:'github',
+ VERCEL_GIT_REPO_OWNER:'YNWAforever',VERCEL_GIT_REPO_SLUG:'BuyerOS',VERCEL_GIT_REPO_ID:'123456789',
+ VERCEL_GIT_COMMIT_REF:'codex/qa-preview',VERCEL_GIT_COMMIT_SHA:qaPreviewSource});
+test('QA preview auth accepts only the exact platform-bound immutable deployment origin',async()=>{
+ let calls=0;const handler=async()=>{calls++;return new Response('owned synthetic SDK');};
+ const route=(await load())(qaPreviewEnv,()=>({GET:handler,POST:handler}));
+ for(const target of [origin,qaPreviewOrigin]){
+  assert.equal((await route.GET(new Request(target+'/api/auth/get-session'),context)).status,200);
+  assert.equal((await route.POST(new Request(target+'/api/auth/sign-in/email',{method:'POST',headers:{origin:target}}),context)).status,200);
+ }
+ assert.equal(calls,4);
+});
+test('QA preview auth rejects foreign hosts, sibling deployments and mismatched origins before SDK',async()=>{
+ let initialized=0;const route=(await load())(qaPreviewEnv,()=>{initialized++;throw Error('must not initialize');});
+ for(const request of [
+  new Request('https://evil.example/api/auth/get-session',{headers:{host:qaPreviewHost,'x-forwarded-host':qaPreviewHost}}),
+  new Request('https://buyeros-other-owned.vercel.app/api/auth/get-session'),
+  new Request(qaPreviewOrigin+'/api/auth/get-session',{headers:{origin}}),
+  new Request(origin+'/api/auth/get-session',{headers:{origin:qaPreviewOrigin}}),
+  new Request(qaPreviewOrigin+'/api/auth/sign-in/email',{method:'POST',headers:{origin}}),
+  new Request(origin+'/api/auth/sign-in/email',{method:'POST',headers:{origin:qaPreviewOrigin}}),
+  new Request(qaPreviewOrigin+'/api/auth/sign-in/email',{method:'POST'}),
+  new Request(qaPreviewOrigin+'/api/auth/get-session',{headers:{origin:'null'}}),
+ ])assert.equal((await route[request.method](request,context)).status,403);
+ assert.equal(initialized,0);
+});
+for(const [fault,change] of Object.entries({
+ preview_flag_off:{BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED:undefined},
+ wrong_platform_project:{VERCEL_PROJECT_ID:'prj_other'},
+ wrong_platform_repo:{VERCEL_GIT_REPO_ID:'987654321'},
+ wrong_platform_branch:{VERCEL_GIT_COMMIT_REF:'main'},
+ wrong_platform_source:{VERCEL_GIT_COMMIT_SHA:'b'.repeat(40)},
+ missing_expected_branch:{BUYEROS_QA_PREVIEW_BRANCH:undefined},
+ invalid_vercel_url:{VERCEL_URL:'buyeros-qa.vercel.app.evil.test'},
+}))test(`QA preview auth refuses ${fault} without SDK access`,async()=>{
+ let initialized=0;const route=(await load())(()=>({...qaPreviewEnv(),...change}),()=>{initialized++;throw Error('must not initialize');});
+ const result=await route.GET(new Request(qaPreviewOrigin+'/api/auth/get-session'),context);
+ assert.equal(result.status,fault==='preview_flag_off'?403:503);assert.equal(initialized,0);
+});
 test('C61-08 disabled auth route does not initialize SDK or replace Auth0',async()=>{let initialized=0;const route=(await load())(()=>({...env(),BUYEROS_NEON_AUTH_ROUTE_ENABLED:'0'}),()=>{initialized++;throw Error('must not initialize');});const r=await route.GET(new Request(origin+'/api/auth/get-session'),context);assert.equal(r.status,503);assert.equal(initialized,0);assert.equal(r.headers.get('cache-control'),'no-store');});
 test('C61-08 incomplete config fails closed without provider call or secret details',async()=>{let initialized=0;const value=env();delete value.BUYEROS_NEON_EXPECTED_AUTH_URL;const route=(await load())(()=>value,()=>{initialized++;throw Error('must not initialize');});const r=await route.GET(new Request(origin+'/api/auth/get-session'),context);assert.equal(r.status,503);assert.equal(initialized,0);assert.doesNotMatch(await r.text(),/CANARY|neon.tech/);});
 test('C61-08 exact POST delegates to public SDK with Lax host cookies and preserves redirect cookies',async()=>{let observed;const route=(await load())(env,config=>{observed=config;return {GET:async()=>new Response('unused'),POST:async request=>{assert.equal(request.headers.get('cookie'),'auth-session=synthetic');const headers=new Headers({location:origin+'/app'});headers.append('set-cookie','one=synthetic; HttpOnly; SameSite=Lax; Path=/');headers.append('set-cookie','two=synthetic; HttpOnly; SameSite=Lax; Path=/');return new Response(null,{status:302,headers});}};});const r=await route.POST(new Request(origin+'/api/auth/sign-in/email',{method:'POST',headers:{origin,cookie:'auth-session=synthetic'},body:'{}'}),context);assert.equal(r.status,302);assert.equal(r.headers.get('location'),origin+'/app');assert.equal(r.headers.getSetCookie().length,2);assert.equal(r.headers.get('cache-control'),'no-store');assert.deepEqual(observed,{baseUrl:authUrl,cookies:{secret:env().BUYEROS_NEON_COOKIE_SECRET,sameSite:'lax',sessionDataTtl:300},logLevel:'silent'});});

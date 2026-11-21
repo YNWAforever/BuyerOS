@@ -364,10 +364,64 @@ for(const language of ['en','zh-HK'])test(`fix1 owned capability recovery ${lang
   await expect(page).toHaveURL(new RegExp('/app/documents/'+cfg.output+'/versions/1'));
   await expect(page.getByRole('button',{name:language==='en'?'New discussion with this output':'以此成果開始新討論',exact:true})).toHaveCount(0);
   expect(new URL(page.url()).searchParams.get('project')).toBe(cfg.project);
+  const saved=`/app/discussions/s/${cfg.thread}?${base}`;
+  const read=page.waitForResponse(response=>response.request().method()==='GET'&&new URL(response.url()).pathname.endsWith(`/conversation-threads/${cfg.thread}`));
+  await page.goto(saved);
+  expect((await read).status()).toBe(200);
+  await expect(page.locator('details.conversation-task-form')).toHaveCount(0);
+  await expect(page.locator('#conversation-message')).toBeVisible();
+  await expect(page).toHaveURL(url=>url.pathname===`/app/discussions/s/${cfg.thread}`&&url.search.slice(1)===base);
  }
  await request.post(cfg.url+'/fixture-control',{data:{enabled:true,opted:true}});
 });
 
+
+test('fix1 owned continuous discussion supports three durable turns across reload and a second tab',async({page,context,request})=>{
+ test.skip(!process.env.TASK13_OWNED_CONFIG||process.env.TASK13_FULL_SHELL!=='1','Owned full shell only');
+ test.setTimeout(120_000);
+ const cfg=JSON.parse(readFileSync(process.env.TASK13_OWNED_CONFIG!,'utf8'));
+ const query=new URLSearchParams({workspace:cfg.workspace,project:cfg.project});
+ const root=`/v1/workspaces/${cfg.workspace}/projects/${cfg.project}/conversation-turns`;
+ await context.route('**/v1/**',async route=>{
+  const req=route.request(),url=new URL(req.url());
+  const response=await request.fetch(cfg.url+url.pathname+url.search,{method:req.method(),headers:req.headers(),data:req.postData()??undefined});
+  await route.fulfill({response});
+ });
+ await request.post(cfg.url+'/fixture-control',{data:{deny:false,enabled:false,opted:false}});
+ const prompts=['The first buyer is Alder and the second is Birch.','Which buyer came second?','Which buyer came first?'];
+ let threadId='';
+ const turnIds=new Set<string>();
+ const users=page.locator('.conversation-user .conversation-part-text');
+ try{
+  await page.goto('/app/discussions/new?'+query);
+  for(const [index,text] of prompts.entries()){
+   if(index===2)await page.reload();
+   await page.getByRole('textbox',{name:'Message BuyerOS'}).fill(text,{timeout:15_000});
+   const [reply]=await Promise.all([
+    page.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname===root,{timeout:20_000}),
+    page.getByRole('button',{name:'Send message',exact:true}).click({timeout:10_000}),
+   ]);
+   expect(reply.status()).toBe(200);
+   const {data}=await reply.json();
+   if(index===0)threadId=data.thread.id;
+   expect(data.thread.id).toBe(threadId);
+   expect(data.thread.messages).toHaveLength(2*(index+1));
+   expect(data.turn.status).toBe('needs_input');
+   const notices=data.turn.notices.map((notice:{code:string})=>notice.code);
+   expect(notices).toContain('CONVERSATION_MODEL_UNAVAILABLE');
+   expect(notices).not.toContain('SOURCES_REQUIRED');
+   turnIds.add(data.turn.id);
+   await expect(page).toHaveURL(url=>url.pathname==='/app/discussions/s/'+threadId&&url.search==='?'+query);
+   await expect(users).toHaveText(prompts.slice(0,index+1));
+  }
+  expect(turnIds.size).toBe(3);
+  const other=await context.newPage();
+  await other.goto(page.url());
+  await expect(other.locator('.conversation-user .conversation-part-text')).toHaveText(prompts);
+  await expect(other.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+  await other.close();
+ }finally{await request.post(cfg.url+'/fixture-control',{data:{enabled:true,opted:true}});}
+});
 
 test('fix1 delayed A field proposal cannot apply from B',async({page})=>{
  await fixture(page);let applies=0;

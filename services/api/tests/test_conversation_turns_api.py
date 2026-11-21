@@ -137,8 +137,9 @@ def fact_role(conn):
 def test_thread_first_turn_creates_thread_and_user_message_atomically(turn_api):
     """Amendment A1: thread + first user message are created in one transaction.
 
-    A new discussion has no selected source yet, so the honest status is
-    ``needs_input`` with a SOURCES_REQUIRED notice (no citations/proposal).
+    A new discussion has no selected source and no registered model route. The
+    turn is still saved with one truthful model-unavailable notice and no fake
+    assistant answer or invented source requirement.
     """
     client, dsn = turn_api
     body = turn_body()
@@ -149,15 +150,15 @@ def test_thread_first_turn_creates_thread_and_user_message_atomically(turn_api):
     assert thread['access'] == 'owner' and thread['buyerId'] is None
     assert thread['title'] == 'Summarise the selected documents'
     assert turn['status'] == 'needs_input'
-    assert [part['kind'] for part in turn['parts']] == ['text']
-    assert 'SOURCES_REQUIRED' in {notice['code'] for notice in turn['notices']}
+    assert turn['parts'] == []
+    assert {notice['code'] for notice in turn['notices']} == {'CONVERSATION_MODEL_UNAVAILABLE'}
     citations = [part for part in turn['parts'] if part['kind'] == 'citations']
     assert citations == []
     assert [message['role'] for message in thread['messages']] == ['user', 'assistant']
     assert thread['messages'][0]['client_message_id'] == body['client_message_id']
     assert thread['messages'][0]['seq'] == 1 and thread['messages'][1]['seq'] == 2
     assert 'parts' not in thread['messages'][0]
-    assert [part['kind'] for part in thread['messages'][1]['parts']] == ['text']
+    assert thread['messages'][1].get('parts', []) == []
     with psycopg.connect(dsn) as conn:
         assert fact_role(conn) == 1
         assert conn.execute('SELECT count(*) FROM conversation_turns').fetchone()[0] == 1
@@ -192,6 +193,41 @@ def test_duplicate_client_message_id_replays_without_second_thread_or_execution(
         mutation_key='turn-conflict-key')
     assert conflicting.status_code == 409
     assert conflicting.json()['code'] == 'IDEMPOTENCY_CONFLICT'
+
+
+def test_replay_never_serves_another_saved_threads_result(turn_api):
+    """A client message id is scoped to the discussion that first accepted it."""
+    client, dsn = turn_api
+    first_thread = create_thread(client)
+    body = {**turn_body(), 'thread_id': first_thread['id']}
+    first = post_turn(client, body, version=first_thread['version'])
+    assert first.status_code == 200, first.text
+    saved = first.json()['data']
+    assert saved['thread']['id'] == first_thread['id']
+
+    second_thread = create_thread(client)
+    before = client.get(f"{THREAD_ROOT}/{second_thread['id']}", headers=_h()).json()['data']
+    replay = post_turn(client, {**body, 'thread_id': second_thread['id']},
+        version=second_thread['version'])
+    assert replay.status_code == 409
+    assert replay.json()['code'] == 'IDEMPOTENCY_CONFLICT'
+    after = client.get(f"{THREAD_ROOT}/{second_thread['id']}", headers=_h()).json()['data']
+    assert [message['id'] for message in after['messages']] == [
+        message['id'] for message in before['messages']]
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute('SELECT count(*) FROM conversation_turns WHERE thread_id=%s',
+            (second_thread['id'],)).fetchone()[0] == 0
+        assert conn.execute('SELECT count(*) FROM conversation_thread_messages WHERE thread_id=%s',
+            (second_thread['id'],)).fetchone()[0] == len(before['messages'])
+
+    # Preserve the legitimate first-send null retry against its saved thread.
+    null_body = turn_body()
+    first_send = post_turn(client, null_body, mutation_key='null-first-key')
+    assert first_send.status_code == 200, first_send.text
+    retried = post_turn(client, null_body, mutation_key='null-retry-key')
+    assert retried.status_code == 200, retried.text
+    assert retried.json()['data']['turn']['id'] == first_send.json()['data']['turn']['id']
+    assert retried.json()['data']['thread']['id'] == first_send.json()['data']['thread']['id']
 
 
 def test_existing_thread_requires_current_version_and_edit_access(turn_api):

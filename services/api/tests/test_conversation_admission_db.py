@@ -17,6 +17,10 @@ from buyeros_api.api.errors import ApiError
 from buyeros_api.db.session import tenant_session
 from buyeros_api.providers.base import Money, ProviderCapability
 from buyeros_api.providers.registry import ProviderRegistration
+from buyeros_api.providers.conversation_route import (
+    ADAPTER_VERSION, CONVERSATION_ROUTE, DEFAULT_AUTH_MODEL, DEFAULT_MODEL_ID,
+    DEFAULT_PRICING_VERSION, PROVIDER)
+from buyeros_api.providers.opencode_model import CONVERSATION_ENDPOINT
 from buyeros_api.providers.live_model import canonical_json
 from buyeros_api.providers.model_receipts import PostgresModelReceipts
 from buyeros_api.services import conversation_admission as service
@@ -36,16 +40,22 @@ def paid_case(conversation_api, monkeypatch):
     from buyeros_api.execution.config import get_settings as dispatch_settings
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED', 'true')
     monkeypatch.setenv('BUYEROS_PAID_DISPATCH_ENABLED', 'true')
-    monkeypatch.setenv('BUYEROS_OPENCODE_API_KEY', 'synthetic-conversation-no-real-key')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_API_KEY', 'synthetic-conversation-no-real-key')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_ENABLED', 'true')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_WORKSPACE_ID', WORKSPACE_A)
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_PROJECT_ID', PROJECT_A)
     get_settings.cache_clear(); dispatch_settings.cache_clear()
-    monkeypatch.setattr(base, 'SELECTED_LIVE_PROVIDERS', frozenset({'opencode-go'}))
-    route = replace(service.ROUTE, route_id='conversation-grounded.v1')
-    cap = ProviderCapability('opencode-go', 'conversation-test.v1', 'model', frozenset({'US'}),
-        frozenset({'en','zh-HK'}), frozenset({'company'}), 'server-only', 'conversation-test-price-v1',
+    # Dedicated conversation credential alone selects this route; the global
+    # research provider set must stay empty for this fixture.
+    monkeypatch.setattr(base, 'SELECTED_LIVE_PROVIDERS', frozenset())
+    route = CONVERSATION_ROUTE
+    cap = ProviderCapability(PROVIDER, ADAPTER_VERSION, 'model', frozenset({'US'}),
+        frozenset({'en','zh-HK'}), frozenset({'company'}), DEFAULT_AUTH_MODEL, DEFAULT_PRICING_VERSION,
         Money(Decimal('0.100000')), 'verified', 'verified', 'unsupported', 'unsupported', 'one-day',
-        datetime.now(timezone.utc), ('https://opencode.ai/go',))
+        datetime.now(timezone.utc), ('https://opencode.ai/docs/console/models/',),
+        endpoint=CONVERSATION_ENDPOINT)
     item = ProviderRegistration(cap, lambda: None, ('synthetic:conversation-only',), model_route=route,
-        model_id='synthetic-model', policy_account_reference='synthetic-conversation-account')
+        model_id=DEFAULT_MODEL_ID, policy_account_reference='synthetic-conversation-account')
     monkeypatch.setattr(service, 'ROUTE', route); monkeypatch.setattr(service, 'REGISTRATION', item)
     from tests.policy_activation_fixtures import approve_research_fixture
     approve_research_fixture(dsn, WORKSPACE_A, PROJECT_A, domains=(), model=item.policy_binding,
@@ -63,6 +73,7 @@ def paid_case(conversation_api, monkeypatch):
         get_settings.cache_clear(); dispatch_settings.cache_clear()
         # Receipt FK/privacy history is cleaned only in this disposable fixture.
         with psycopg.connect(dsn) as db:
+            db.execute('DELETE FROM conversation_threads WHERE workspace_id=%s', (WS,))
             db.execute('DELETE FROM model_receipts WHERE workspace_id=%s', (WS,))
             db.execute('DELETE FROM provider_operations WHERE workspace_id=%s', (WS,))
 
@@ -183,7 +194,7 @@ def test_every_gate_fails_before_any_provider_call_or_reservation(paid_case, mon
         elif gate == 'route': monkeypatch.setattr(service,'ROUTE',replace(service.ROUTE,route_id=None))
         elif gate == 'registration': monkeypatch.setattr(service,'REGISTRATION',None)
         elif gate == 'capability': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,verified_at=None)))
-        elif gate == 'price': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,max_liability=Money(Decimal('0.01')))))
+        elif gate == 'price': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,max_liability=Money(Decimal('1.000001')))))
         elif gate == 'policy': db.execute('DELETE FROM policy_activation_resolutions WHERE workspace_id=%s',(WS,))
         elif gate == 'budget': db.execute('UPDATE budget_accounts SET approved_limit=0 WHERE workspace_id=%s',(WS,))
         elif gate == 'permission': headers={**_h(VIEWER),'Idempotency-Key':'gates'}
@@ -278,6 +289,117 @@ def test_two_claims_submit_at_most_once_and_db_function_is_tenant_scoped(paid_ca
     with psycopg.connect(dsn) as db:
         assert not db.execute("SELECT has_table_privilege('buyeros_api','model_receipts','UPDATE')").fetchone()[0]
         assert not db.execute("SELECT has_function_privilege('buyeros_worker','public.buyeros_transition_conversation_receipt(uuid,text,jsonb,text)','EXECUTE')").fetchone()[0]
+
+
+def test_turn_v2_prepare_claim_finalize_rechecks_current_thread_and_sources(paid_case, monkeypatch):
+    """Actual saved-turn model lifecycle: prepare, claim/finalize, replay, revoke."""
+    client, dsn, item = paid_case
+    from buyeros_api.providers.opencode_model import OpenCodeGoModelClient
+    from tests.test_conversation_threads_api import create as create_thread
+    from tests.test_conversation_turns_api import TURN_ROOT, turn_body
+    calls = []
+
+    async def complete(self, basis, route):
+        calls.append(basis)
+        from buyeros_api.providers.live_model import ModelRequest
+        return response(ModelRequest('synthetic', basis, route, self.model_id, 'US', 'en', 'company'))
+
+    monkeypatch.setattr(OpenCodeGoModelClient, 'complete', complete)
+    thread = create_thread(client, sources=[{'id': SOURCE, 'label': 'Approved offer fact'}])
+    first_body = {**turn_body(text='The first buyer was Acme.'),
+                  'thread_id': thread['id']}
+    first = client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-first',
+        'If-Match': f'"{thread["version"]}"'}, json=first_body)
+    assert first.status_code == 200, first.text
+    current = first.json()['data']['thread']
+    assert current['version'] == thread['version'] + 1
+    assert len(calls) == 1
+    assert calls[0]['thread_id'] == thread['id']
+    assert calls[0]['thread_version'] == thread['version']
+    assert calls[0]['history'] == [{'role': 'user', 'text': 'SYNTHETIC_USER_NOTE'}]
+
+    second_body = {**turn_body(text='Which buyer came second?'),
+                   'thread_id': thread['id']}
+    second = client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-second',
+        'If-Match': f'"{current["version"]}"'}, json=second_body)
+    assert second.status_code == 200, second.text
+    assert len(calls) == 2
+    basis = calls[1]
+    assert basis['question'] == 'Which buyer came second?'
+    assert basis['thread_id'] == thread['id']
+    assert basis['thread_version'] == current['version']
+    # The prior assistant body cited approved data; it is intentionally omitted
+    # because its persisted IDs do not prove unchanged content/revision.
+    assert basis['history'] == [
+        {'role': 'user', 'text': 'SYNTHETIC_USER_NOTE'},
+        {'role': 'user', 'text': 'The first buyer was Acme.'}]
+    saved = second.json()['data']['turn']
+    assert 'Which buyer came second?' not in saved['parts'][0]['text']
+    assert saved['parts'][0]['text'] == 'Check this approved source before deciding.'
+    assert saved['parts'][1]['items'][0]['id'] == SOURCE
+    # Same Idempotency-Key with a different body must 409 before any provider call.
+    conflict = client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-second',
+        'If-Match': f'"{second.json()["data"]["thread"]["version"]}"'},
+        json={**turn_body(text='A different request'), 'thread_id': thread['id']})
+    assert conflict.status_code == 409
+    assert conflict.json()['code'] == 'IDEMPOTENCY_CONFLICT'
+    assert len(calls) == 2
+    # Same client message replay never spends a second provider intent.
+    assert client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-replay',
+        'If-Match': f'"{current["version"]}"'},
+        json=second_body).json()['data']['turn']['id'] == saved['id']
+    assert len(calls) == 2
+    with psycopg.connect(dsn) as db:
+        assert db.execute('SELECT state FROM model_receipts ORDER BY created_at').fetchall() == [('received',), ('received',)]
+
+    # Revoking the selected source must stop before any provider call; the turn
+    # is still saved with a truthful source notice.
+    with psycopg.connect(dsn, autocommit=True) as db:
+        db.execute('UPDATE projects SET offer_revision=2 WHERE id=%s', (PROJECT,))
+    third_body = {**turn_body(text='Which buyer came first?'), 'thread_id': thread['id']}
+    third = client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-third',
+        'If-Match': f'"{second.json()["data"]["thread"]["version"]}"'}, json=third_body)
+    assert third.status_code == 200, third.text
+    assert len(calls) == 2
+    assert 'SOURCES_REQUIRED' in {notice['code'] for notice in third.json()['data']['turn']['notices']}
+
+
+def test_turn_answer_discarded_when_sources_change_after_adapter_finalize(paid_case, monkeypatch):
+    """A model answer frozen on old evidence must not be persisted after a gap."""
+    client, dsn, item = paid_case
+    from buyeros_api.providers.opencode_model import OpenCodeGoModelClient
+    from tests.test_conversation_threads_api import create as create_thread
+    from tests.test_conversation_turns_api import TURN_ROOT, turn_body
+    calls = []
+
+    async def complete(self, basis, route):
+        calls.append(basis)
+        from buyeros_api.providers.live_model import ModelRequest
+        return response(ModelRequest('synthetic', basis, route, self.model_id, 'US', 'en', 'company'))
+
+    monkeypatch.setattr(OpenCodeGoModelClient, 'complete', complete)
+    original_complete = service.complete_conversation
+
+    async def finalize_then_revoke(engine, workspace_id, prepared):
+        result = await original_complete(engine, workspace_id, prepared)
+        # The adapter has stored its receipt; a source revision changes before the
+        # turn takes its final lock.
+        with psycopg.connect(dsn, autocommit=True) as db:
+            db.execute('UPDATE projects SET offer_revision=2 WHERE id=%s', (PROJECT,))
+        return result
+
+    monkeypatch.setattr(service, 'complete_conversation', finalize_then_revoke)
+    thread = create_thread(client, sources=[{'id': SOURCE, 'label': 'Approved offer fact'}])
+    result = client.post(TURN_ROOT, headers={**_h(), 'Idempotency-Key': 'turn-v2-stale-gap',
+        'If-Match': f'"{thread["version"]}"'},
+        json={**turn_body(text='The first buyer was Acme.'), 'thread_id': thread['id']})
+    assert result.status_code == 200, result.text
+    assert len(calls) == 1, result.text
+    turn = result.json()['data']['turn']
+    assert 'CONVERSATION_MODEL_STALE_SOURCES' in {
+        notice['code'] for notice in turn['notices']}, turn
+    assert all(part['kind'] != 'citations' for part in turn['parts'])
+    assert 'Check this approved source' not in str(turn['parts'])
 
 
 def test_populated_migration_rollback_refuses_to_erase_receipt_or_hold(paid_case, monkeypatch):

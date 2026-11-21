@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import ts from 'typescript';
 registerHooks({resolve(s,c,next){try{return next(s,c);}catch(e){if(s.startsWith('.'))for(const ext of ['.ts','.tsx'])try{return next(s+ext,c);}catch{}throw e;}},load(u,c,next){if(/\.tsx?$/.test(u))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(u),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText};return next(u,c);}});
 
-const {ConversationDrafts,draftKey,nextDraft,readDraftValue,draftMaxText}=await import('../features/live/conversation/draft.ts');
+const {ConversationDrafts,draftKey,nextDraft,readDraftValue,draftMaxText,draftTextForPrefill,shouldSeedPrefill,carryDraftToThread}=await import('../features/live/conversation/draft.ts');
 const scope={actor:'actor-a',workspace:'workspace-a',project:'project-a'};
 const other={actor:'actor-b',workspace:'workspace-a',project:'project-a'};
 const threadId='11111111-1111-4111-8111-111111111111';
@@ -65,4 +65,34 @@ test('unavailable storage keeps the draft in this tab and never throws',()=>{
   assert.equal(draft.text,'Compose now');
   assert.deepEqual(drafts.read('new'),{...draft});
   assert.equal(drafts.available,false);
+});
+
+test('a reviewed prompt never overwrites a user-typed draft',()=>{
+  const port=storage(),drafts=new ConversationDrafts(scope,port);
+  const typed=drafts.write('home','I typed this myself',10);
+  assert.equal(draftTextForPrefill(typed,'Reviewed template prompt'),'I typed this myself');
+  assert.equal(shouldSeedPrefill(typed),false,'the prompt does not replace a typed draft');
+  assert.equal(draftTextForPrefill(null,'Reviewed template prompt'),'Reviewed template prompt');
+  assert.equal(shouldSeedPrefill(null),true,'an empty composer accepts the prompt');
+  assert.equal(draftTextForPrefill(null,null),'');
+});
+
+test('text typed while the first turn is in flight follows the created thread',()=>{
+  const port=storage(),drafts=new ConversationDrafts(scope,port);
+  // Unchanged submitted text: the successful send clears it and carries nothing.
+  drafts.write('new','First question',10);
+  assert.equal(carryDraftToThread(drafts,'new',threadId,'First question'),null);
+  assert.equal(drafts.read('new'),null);
+  assert.equal(drafts.read(threadId),null);
+  // Appended text follows verbatim: stripping a shared prefix would corrupt edits.
+  drafts.write('new','First question',20);
+  drafts.write('new','First question with a second thought',30);
+  const carried=carryDraftToThread(drafts,'new',threadId,'First question');
+  assert.equal(carried.text,'First question with a second thought');
+  assert.equal(drafts.read('new'),null);
+  assert.deepEqual(drafts.read(threadId),{...carried});
+  // Replaced text is a wholly new draft and follows unchanged.
+  drafts.write('new','Replace the whole message',40);
+  drafts.write('new','A different draft',50);
+  assert.equal(carryDraftToThread(drafts,'new',threadId,'Replace the whole message').text,'A different draft');
 });

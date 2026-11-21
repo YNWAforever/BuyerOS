@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from fastapi.responses import StreamingResponse
 
 from ..auth import Principal, get_principal
-from ..deps import get_rate_engine
+from ..deps import get_engine, get_rate_engine
 from ..errors import ApiError, envelope
 from ..idempotency import if_match_version
 from ...sales.contracts import Scope
@@ -103,7 +103,8 @@ async def create(workspace_id: uuid.UUID, project_id: uuid.UUID, payload: TurnRe
             payload = payload.model_copy(update={'expected_thread_version': expected})
         thread, role, turn = await service.create_turn(session, scope, payload, key,
             admit=lambda: turn_rate_limit.enforce_turn_rate_limit(
-                get_rate_engine(), workspace_id))
+                get_rate_engine(), workspace_id),
+            model_engine=get_engine())
         turn_payload = turn.model_dump(mode='json')
         await decorate_turn_payload(session, scope.workspace_id, scope.project_id,
             thread.id, turn.id, turn_payload, actor)

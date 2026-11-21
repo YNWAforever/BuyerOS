@@ -68,7 +68,10 @@ async def load(session, workspace_id, project_id, thread_id, actor, *, owner=Fal
     query = select(Thread).where(*thread_scope(workspace_id, project_id), Thread.id == thread_id,
         Thread.owner_user_id == actor if owner else or_(Thread.owner_user_id == actor, shared(actor)))
     if lock:
-        query = query.with_for_update()
+        # A preflight read may already have loaded this row into the identity map.
+        # A locked write must see the authoritative current version, not a cached
+        # preflight snapshot that could conceal a concurrent update.
+        query = query.with_for_update().execution_options(populate_existing=True)
     row = (await session.execute(query)).scalar_one_or_none()
     if row is None:
         raise not_found()

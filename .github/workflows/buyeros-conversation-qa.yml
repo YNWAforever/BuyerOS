@@ -3,10 +3,13 @@ name: BuyerOS authenticated conversation QA
 # Manual, protected, real-account acceptance for the conversation studio.
 # Two ways to run it, both gated by the protected environment (and therefore by
 # its required reviewers and secrets):
-#   1. workflow_dispatch from any ref that carries this file (after merge: main).
+#   1. workflow_dispatch from a reviewed main-branch workflow file.
 #   2. adding the `qa:real` label to a pull request FROM THIS REPOSITORY. PRs from
 #      forks never receive secrets, and the job refuses them explicitly.
 # It is never triggered by a push, so ordinary CI cannot reach a real account.
+# Live model recall is deliberately NOT label- or repository-variable-driven:
+# it needs a workflow_dispatch boolean AND an exact source label AND the explicit
+# 1 US dollar ceiling. Label runs always execute the nonbillable journey only.
 on:
   workflow_dispatch:
     inputs:
@@ -26,6 +29,33 @@ on:
         description: Full commit SHA the deployment must be built from
         required: true
         type: string
+      live_model_recall:
+        description: Authorize the billable live model recall acceptance (max US$1; manual dispatch only)
+        required: false
+        default: false
+        type: boolean
+      qa_isolated_rehearsal:
+        description: Run the nonbillable journey against the isolated model-QA tenant and account (manual dispatch only; no paid turns)
+        required: false
+        default: false
+        type: boolean
+      isolated_workspace_id:
+        description: Isolated model-QA workspace UUID (must equal the protected environment variable)
+        required: false
+        type: string
+      isolated_project_id:
+        description: Isolated model-QA project UUID (must equal the protected environment variable)
+        required: false
+        type: string
+      authorized_spend_usd:
+        description: Authorized spend ceiling for live model recall (must be 1)
+        required: false
+        default: '1'
+        type: string
+      model_source_label:
+        description: Exact approved QA source checkbox label (must equal the protected environment variable; approved label is product approved)
+        required: false
+        type: string
   pull_request:
     types: [labeled]
 
@@ -34,13 +64,15 @@ permissions:
   actions: read
 
 concurrency:
-  group: buyeros-conversation-qa-${{ github.event.pull_request.number || inputs.workspace_id || 'manual' }}
+  group: buyeros-conversation-qa-${{ github.event.pull_request.number || inputs.isolated_workspace_id || inputs.workspace_id || 'manual' }}
   cancel-in-progress: false
 
 env:
   QA_ORIGIN: ${{ inputs.origin || vars.BUYEROS_QA_ORIGIN }}
-  QA_WORKSPACE: ${{ inputs.workspace_id || vars.BUYEROS_QA_WORKSPACE_ID }}
-  QA_PROJECT: ${{ inputs.project_id || vars.BUYEROS_QA_PROJECT_ID }}
+  # Isolated manual modes use their own workspace/project inputs. Standard
+  # dispatch and label runs keep their existing inputs and repository variables.
+  QA_WORKSPACE: ${{ (inputs.live_model_recall == true || inputs.qa_isolated_rehearsal == true) && inputs.isolated_workspace_id || inputs.workspace_id || vars.BUYEROS_QA_WORKSPACE_ID }}
+  QA_PROJECT: ${{ (inputs.live_model_recall == true || inputs.qa_isolated_rehearsal == true) && inputs.isolated_project_id || inputs.project_id || vars.BUYEROS_QA_PROJECT_ID }}
   QA_SHA: ${{ inputs.expected_source_sha || github.event.pull_request.head.sha }}
 
 # Runner image is pinned to the supported LTS. On 2026-11-11 `ubuntu-latest`
@@ -80,10 +112,45 @@ jobs:
     environment: buyeros-conversation-qa
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      # False for pull_request/label events even if a similar dispatch input exists.
+      # This is the single source of truth for the paid opt-in; it is never read
+      # from a repository variable or a label.
+      QA_MODEL_RECALL_ENABLED: ${{ github.event_name == 'workflow_dispatch' && inputs.live_model_recall == true && 'true' || 'false' }}
+      QA_ISOLATED_REHEARSAL_ENABLED: ${{ github.event_name == 'workflow_dispatch' && inputs.qa_isolated_rehearsal == true && 'true' || 'false' }}
+      QA_MODEL_BUDGET_USD: ${{ inputs.authorized_spend_usd || '1' }}
+      QA_MODEL_SOURCE_LABEL: ${{ vars.BUYEROS_MODEL_QA_SOURCE_LABEL }}
+      # Protected environment variables are the authority for isolated modes.
+      # Dispatch inputs are checked against these before any isolated credential
+      # is exposed to a test step.
+      QA_ISOLATED_WORKSPACE_INPUT: ${{ inputs.isolated_workspace_id }}
+      QA_ISOLATED_PROJECT_INPUT: ${{ inputs.isolated_project_id }}
+      QA_MODEL_SOURCE_LABEL_INPUT: ${{ inputs.model_source_label }}
+      QA_ISOLATED_WORKSPACE_REQUIRED: ${{ vars.BUYEROS_MODEL_QA_WORKSPACE_ID }}
+      QA_ISOLATED_PROJECT_REQUIRED: ${{ vars.BUYEROS_MODEL_QA_PROJECT_ID }}
+      QA_MODEL_SOURCE_LABEL_REQUIRED: ${{ vars.BUYEROS_MODEL_QA_SOURCE_LABEL }}
     steps:
       - uses: actions/checkout@v4
         with:
+          # Pin the QA job to the exact reviewed source, not the workflow's mutable
+          # branch/merge ref. The separate metadata job verifies that this source is
+          # the READY Vercel candidate's commit before credentials are released.
+          ref: ${{ inputs.expected_source_sha || github.event.pull_request.head.sha }}
           persist-credentials: false
+      - name: Verify pinned reviewed source checkout
+        # This step and the checkout receive no account credentials.
+        run: |
+          set -euo pipefail
+          if [ -z "${QA_SHA:-}" ]; then
+            echo "BLOCKED: reviewed source SHA is not configured" >&2
+            exit 1
+          fi
+          actual="$(git rev-parse HEAD)"
+          if [ "$actual" != "$QA_SHA" ]; then
+            echo "BLOCKED: QA checkout does not match the reviewed source SHA" >&2
+            exit 1
+          fi
+          echo "checked out reviewed source: $QA_SHA"
       - uses: pnpm/action-setup@v4
         with:
           version: 11.25.0
@@ -91,11 +158,19 @@ jobs:
         with:
           node-version: '24'
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - name: Validate QA account scope inputs
+      - name: Validate QA target, reviewed source and live-recall opt-in
         env:
           QA_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
+          QA_MODEL_RECALL: ${{ env.QA_MODEL_RECALL_ENABLED }}
+          QA_ISOLATED_REHEARSAL: ${{ env.QA_ISOLATED_REHEARSAL_ENABLED }}
+          QA_MODEL_BUDGET_USD: ${{ env.QA_MODEL_BUDGET_USD }}
+          QA_MODEL_SOURCE_LABEL: ${{ env.QA_MODEL_SOURCE_LABEL }}
+          QA_ISOLATED_WORKSPACE_INPUT: ${{ env.QA_ISOLATED_WORKSPACE_INPUT }}
+          QA_ISOLATED_PROJECT_INPUT: ${{ env.QA_ISOLATED_PROJECT_INPUT }}
+          QA_MODEL_SOURCE_LABEL_INPUT: ${{ env.QA_MODEL_SOURCE_LABEL_INPUT }}
+          QA_ISOLATED_WORKSPACE_REQUIRED: ${{ env.QA_ISOLATED_WORKSPACE_REQUIRED }}
+          QA_ISOLATED_PROJECT_REQUIRED: ${{ env.QA_ISOLATED_PROJECT_REQUIRED }}
+          QA_MODEL_SOURCE_LABEL_REQUIRED: ${{ env.QA_MODEL_SOURCE_LABEL_REQUIRED }}
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -122,9 +197,52 @@ jobs:
           const bypass = process.env.QA_BYPASS;
           if (bypass && (!/^\S+$/.test(bypass) || bypass.length < 20))
             fail('BUYEROS_QA_PROTECTION_BYPASS looks invalid (expected a single token of at least 20 characters)');
+          const recall = process.env.QA_MODEL_RECALL === 'true';
+          const rehearsal = process.env.QA_ISOLATED_REHEARSAL === 'true';
+          const budget = (process.env.QA_MODEL_BUDGET_USD || '').trim();
+          const sourceLabel = (process.env.QA_MODEL_SOURCE_LABEL || '').trim();
+          const sourceLabelInput = (process.env.QA_MODEL_SOURCE_LABEL_INPUT || '').trim();
+          const isolatedWorkspace = process.env.QA_ISOLATED_WORKSPACE_INPUT || '';
+          const isolatedProject = process.env.QA_ISOLATED_PROJECT_INPUT || '';
+          const requiredWorkspace = process.env.QA_ISOLATED_WORKSPACE_REQUIRED || '';
+          const requiredProject = process.env.QA_ISOLATED_PROJECT_REQUIRED || '';
+          const requiredLabel = (process.env.QA_MODEL_SOURCE_LABEL_REQUIRED || '').trim();
+          if (recall && rehearsal) fail('live model recall and nonbillable rehearsal are mutually exclusive');
+          if ((recall || rehearsal) && process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch')
+            fail('isolated QA modes are manual-dispatch only');
+          if (recall || rehearsal) {
+            // The protected environment variables are authoritative. Compare the
+            // dispatch inputs before any isolated credential reaches a test step.
+            if (!uuid.test(requiredWorkspace) || !uuid.test(requiredProject))
+              fail('protected BUYEROS_MODEL_QA_WORKSPACE_ID/PROJECT_ID are not configured');
+            if (isolatedWorkspace !== requiredWorkspace || isolatedProject !== requiredProject)
+              fail('isolated dispatch workspace/project must equal the protected environment variables');
+          }
+          if (recall) {
+            if (!requiredLabel) fail('protected BUYEROS_MODEL_QA_SOURCE_LABEL is not configured');
+            if (sourceLabelInput !== requiredLabel || sourceLabel !== requiredLabel)
+              fail('dispatch model_source_label must equal the protected BUYEROS_MODEL_QA_SOURCE_LABEL');
+          }
+          if (recall) {
+            // Paid recall is allowed only after an explicit manual dispatch and
+            // protected-environment approval. A label can never reach this branch.
+            if (budget !== '1') fail('live model recall requires authorized_spend_usd=1');
+            if (!sourceLabel) fail('BUYEROS_QA_MODEL_SOURCE_LABEL is required for live model recall');
+            if (sourceLabel.length > 200 || /[\r\n]/.test(sourceLabel))
+              fail('BUYEROS_QA_MODEL_SOURCE_LABEL must be a bounded single line');
+          }
           console.log('target accepted: ' + url.origin + (bypass ? ' (with deployment-protection bypass)' : ''));
+          console.log(recall ? 'live model recall enabled under the 1 USD ceiling'
+            : rehearsal ? 'isolated nonbillable rehearsal enabled for the dedicated model-QA tenant'
+            : 'live model recall disabled');
           NODE
-      - name: Run the authenticated conversation QA journey
+      # Account credentials are added only to the test step for the current mode.
+      # The paid recall step uses the isolated model-QA account secrets and never
+      # falls back to the production QA account used by the nonbillable journey.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run nonbillable authenticated conversation QA
+        if: ${{ env.QA_MODEL_RECALL_ENABLED != 'true' && env.QA_ISOLATED_REHEARSAL_ENABLED != 'true' }}
         env:
           BUYEROS_QA_ORIGIN: ${{ env.QA_ORIGIN }}
           BUYEROS_QA_WORKSPACE_ID: ${{ env.QA_WORKSPACE }}
@@ -137,10 +255,72 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/conversation-qa
-          pnpm exec playwright test --config playwright.conversation-real.config.ts
+          pnpm exec playwright test --config playwright.conversation-real.config.ts --grep-invert "authorized model recalls"
+      - name: Run isolated nonbillable QA rehearsal
+        if: ${{ success() && env.QA_ISOLATED_REHEARSAL_ENABLED == 'true' }}
+        env:
+          BUYEROS_QA_ORIGIN: ${{ env.QA_ORIGIN }}
+          BUYEROS_QA_WORKSPACE_ID: ${{ env.QA_ISOLATED_WORKSPACE_REQUIRED }}
+          BUYEROS_QA_PROJECT_ID: ${{ env.QA_ISOLATED_PROJECT_REQUIRED }}
+          BUYEROS_QA_EXPECTED_SOURCE_SHA: ${{ env.QA_SHA }}
+          # Same isolated model-QA issuer/account as the paid recall, never the
+          # standard QA account. This step performs no paid turns.
+          BUYEROS_NEON_REAL_EMAIL: ${{ secrets.BUYEROS_MODEL_QA_EMAIL }}
+          BUYEROS_NEON_REAL_PASSWORD: ${{ secrets.BUYEROS_MODEL_QA_PASSWORD }}
+          BUYEROS_QA_PROTECTION_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUYEROS_NEON_REAL_EMAIL:-}" ] || [ -z "${BUYEROS_NEON_REAL_PASSWORD:-}" ]; then
+            echo "BLOCKED: dedicated BUYEROS_MODEL_QA_EMAIL/BUYEROS_MODEL_QA_PASSWORD secrets are not configured" >&2
+            exit 1
+          fi
+          mkdir -p artifacts/conversation-qa
+          pnpm exec playwright test --config playwright.conversation-real.config.ts --grep-invert "authorized model recalls"
+      - name: Preserve nonbillable QA report
+        if: always() && env.QA_MODEL_RECALL_ENABLED != 'true'
+        run: |
+          set -euo pipefail
+          if [ -f artifacts/conversation-qa/results.xml ]; then
+            mv artifacts/conversation-qa/results.xml artifacts/conversation-qa/results-nonbillable.xml
+          fi
+      - name: Run authorized live model recall
+        if: ${{ success() && env.QA_MODEL_RECALL_ENABLED == 'true' }}
+        env:
+          BUYEROS_QA_ORIGIN: ${{ env.QA_ORIGIN }}
+          BUYEROS_QA_WORKSPACE_ID: ${{ env.QA_ISOLATED_WORKSPACE_REQUIRED }}
+          BUYEROS_QA_PROJECT_ID: ${{ env.QA_ISOLATED_PROJECT_REQUIRED }}
+          BUYEROS_QA_EXPECTED_SOURCE_SHA: ${{ env.QA_SHA }}
+          # Dedicated isolated model-QA account only. No production QA fallback.
+          BUYEROS_NEON_REAL_EMAIL: ${{ secrets.BUYEROS_MODEL_QA_EMAIL }}
+          BUYEROS_NEON_REAL_PASSWORD: ${{ secrets.BUYEROS_MODEL_QA_PASSWORD }}
+          BUYEROS_QA_PROTECTION_BYPASS: ${{ secrets.BUYEROS_QA_PROTECTION_BYPASS }}
+          BUYEROS_QA_MODEL_RECALL: ${{ env.QA_MODEL_RECALL_ENABLED }}
+          BUYEROS_QA_LIVE_RECALL_BUDGET_USD: ${{ env.QA_MODEL_BUDGET_USD }}
+          BUYEROS_QA_MODEL_SOURCE_LABEL: ${{ env.QA_MODEL_SOURCE_LABEL_REQUIRED }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUYEROS_NEON_REAL_EMAIL:-}" ] || [ -z "${BUYEROS_NEON_REAL_PASSWORD:-}" ]; then
+            echo "BLOCKED: dedicated BUYEROS_MODEL_QA_EMAIL/BUYEROS_MODEL_QA_PASSWORD secrets are not configured" >&2
+            exit 1
+          fi
+          mkdir -p artifacts/conversation-qa
+          # The grep keeps this billable invocation to the two-thread recall test;
+          # no other journey can run under the dedicated account.
+          pnpm exec playwright test --config playwright.conversation-real.config.ts --grep "authorized model recalls"
+      - name: Preserve live-recall QA report
+        if: always() && env.QA_MODEL_RECALL_ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          if [ -f artifacts/conversation-qa/results.xml ]; then
+            mv artifacts/conversation-qa/results.xml artifacts/conversation-qa/results-recall.xml
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: buyeros-conversation-qa
-          path: artifacts/conversation-qa/
+          # Traces can contain session/login request data; upload only the
+          # assertion report and deliberate screenshots.
+          path: |
+            artifacts/conversation-qa/results*.xml
+            artifacts/conversation-qa/*.png
           if-no-files-found: warn

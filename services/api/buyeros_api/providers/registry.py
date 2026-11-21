@@ -146,6 +146,8 @@ class ProviderRegistration:
                 'callback': cap.callback, 'cancel': cap.cancel, 'retention': cap.retention,
                 'verified_at': cap.verified_at.isoformat() if cap.verified_at else None,
                 'source_urls': list(cap.source_urls), 'sandbox_evidence': list(self.sandbox_evidence)}
+        if cap.endpoint is not None:
+            value['endpoint'] = cap.endpoint
         if self.verified_filters is not None:
             value['verified_filters']=sorted(self.verified_filters)
             value['market_languages']={market:list(languages) for market,languages in self.market_languages}

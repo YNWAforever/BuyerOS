@@ -13,7 +13,7 @@ export function neonAuthHandlers(environment:()=>Record<string,string|undefined>
       const env=environment();if(env.BUYEROS_NEON_AUTH_ROUTE_ENABLED!=='1')return failure(503);
       const config=loadNeonConfig(env),target=new URL(request.url);
       if(!target.pathname.startsWith('/api/auth/'))return failure(404);
-      if(target.origin!==config.publicOrigin&&target.origin!==config.stagedOrigin)return failure(403);
+      if(target.origin!==config.publicOrigin&&target.origin!==config.stagedOrigin&&target.origin!==config.qaPreviewOrigin)return failure(403);
       const origin=request.headers.get('origin');
       if(origin&&origin!==target.origin||method==='POST'&&!origin)return failure(403);
       const sdkConfig:SdkConfig={baseUrl:config.authUrl,cookies:{secret:config.cookieSecret,sameSite:'lax',sessionDataTtl:300},logLevel:'silent'};

@@ -40,7 +40,7 @@ jobs:
           mkdir -p artifacts/repair
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py tests/test_conversation_qa_target.py tests/test_release_input_review.py tests/test_runtime_target_review.py --collect-only -q > artifacts/repair/promotion-discovery.txt
           services/api/.venv/bin/python -m pytest tests/test_release_readiness.py tests/test_candidate_promotion.py tests/test_runtime_bundle.py tests/test_runtime_bundle_workflow.py tests/test_promotion_transport.py tests/test_workspace_runtime_observations.py tests/test_runtime_observation_packet.py tests/test_runtime_observation_workflow.py tests/test_conversation_qa_target.py tests/test_release_input_review.py tests/test_runtime_target_review.py -q --junitxml=artifacts/repair/promotion.xml
-          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 463 --junit artifacts/repair/promotion.xml
+          python scripts/check-required-tests.py --pytest-discovery artifacts/repair/promotion-discovery.txt --expected-count 466 --junit artifacts/repair/promotion.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -65,7 +65,7 @@ jobs:
           mkdir -p test-results
           pnpm test:core --test-reporter=junit --test-reporter-destination=test-results/core-client.xml --test-reporter=spec --test-reporter-destination=stdout
           python scripts/check-required-tests.py --junit test-results/core-client.xml
-          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==196, 'missing, duplicate or file-only core client execution'"
+          python -c "import xml.etree.ElementTree as E; cases=list(E.parse('test-results/core-client.xml').getroot().iter('testcase')); names={c.get('name') for c in cases}; assert len(cases)==len(names)==209, 'missing, duplicate or file-only core client execution'"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -145,8 +145,16 @@ jobs:
           import xml.etree.ElementTree as ET
           cases = list(ET.parse('test-results/conversation-studio.xml').getroot().iter('testcase'))
           names = {case.get('name') for case in cases}
-          assert len(cases) == 32, (len(cases), sorted(names))
-          assert 'turn metrics dashboard shows bounded project aggregates and fails closed' in names, names
+          assert len(cases) == len(names) == 40, (len(cases), sorted(names))
+          assert not [c.get('name') for c in cases if any(c.find(tag) is not None for tag in ('skipped', 'failure', 'error'))]
+          required = {
+              'turn metrics dashboard shows bounded project aggregates and fails closed',
+              'an uncertain first send recovers after reload without resending the edited draft',
+              'a first send is persisted before its response and cleared on success',
+              'a definite rejection can be corrected and sent again instead of replayed forever',
+              'a late absent probe never turns a normal quick action into a note',
+          }
+          assert required <= names, sorted(required - names)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -684,13 +692,13 @@ jobs:
         working-directory: services/api
         run: |
           uv run --frozen pytest tests --collect-only -q > artifacts/c61-full-discovery.txt
-          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 4079 --discovery-only
+          python ../../scripts/check-required-tests.py --pytest-discovery artifacts/c61-full-discovery.txt --expected-count 4117 --discovery-only
       - name: Prepare owned marketing intake fixture
         working-directory: services/api
         run: uv run --frozen python tools/run_marketing_intake.py --github-env --receipt artifacts/marketing-api.target.json
       - run: uv run --frozen pytest tests -q --junitxml=artifacts/tests.xml
         working-directory: services/api
-      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 4079 --junit services/api/artifacts/tests.xml
+      - run: python scripts/check-required-tests.py --pytest-discovery services/api/artifacts/c61-full-discovery.txt --expected-count 4117 --junit services/api/artifacts/tests.xml
       - name: Clean owned marketing intake fixture
         if: ${{ always() && hashFiles('services/api/artifacts/marketing-api.target.json') != '' }}
         working-directory: services/api
