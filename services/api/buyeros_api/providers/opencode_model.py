@@ -6,7 +6,7 @@ proposal is then re-validated deterministically, so a model that ignores the
 schema yields 'unknown', never a stored assessment.
 """
 from __future__ import annotations
-import asyncio,hashlib,json,math,re
+import asyncio,hashlib,json,logging,math,re
 from datetime import datetime,timezone
 import httpx
 from .model import ModelRoute
@@ -77,6 +77,7 @@ class OpenCodeGoModelClient:
                 raise ValueError('exact bounded sales route/model required')
         payload=self._payload(basis,route);size=len(canonical_json(payload))
         if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
+        stage='http'
         try:
             async with asyncio.timeout(route.deadline_seconds):
                 headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json',
@@ -90,32 +91,46 @@ class OpenCodeGoModelClient:
                     async for chunk in response.aiter_bytes():
                         if len(raw)+len(chunk)>MAX_RESPONSE_BYTES:raise ModelResponseUnknown('model response exceeds byte budget')
                         raw.extend(chunk)
+            stage='response_json'
             body=json.loads(raw)
+            stage='model_identity'
             if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} and (not isinstance(body,dict) or body.get('model')!=self.model_id):raise ModelResponseUnknown('frozen conversation model changed')
+            stage='completion'
             choices=body.get('choices') if isinstance(body,dict) else None
+            if isinstance(choices,list) and len(choices)==1 and isinstance(choices[0],dict) and choices[0].get('finish_reason')=='length':
+                stage='completion_length'
             if (not isinstance(body.get('id'),str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,240}',body['id'])
                 or not isinstance(choices,list) or len(choices)!=1 or not isinstance(choices[0],dict)
                 or choices[0].get('finish_reason')!='stop'):raise ModelResponseUnknown('model response incomplete or unverified')
+            stage='assistant_message'
             message=choices[0].get('message')
             if (not isinstance(message,dict) or message.get('role')!='assistant' or message.get('tool_calls') or message.get('function_call') or message.get('refusal')
                 or not isinstance(message.get('content'),str)):raise ModelResponseUnknown('model tool/foreign role output blocked')
             text=message['content'].strip()
             if text.startswith('```'):text=re.sub(r'^```(?:json)?\s*|\s*```$','',text)
             if self._api_key in text:raise ModelResponseUnknown('bounded model text unavailable')
+            stage='usage'
             usage=body.get('usage')
             if not isinstance(usage,dict) or any(type(usage.get(k)) is not int or usage[k]<0 for k in ['prompt_tokens','completion_tokens']):raise ModelResponseUnknown('typed model usage unavailable')
             if basis.get('schema')=='conversation-basis.v1':
+                stage='go_billing'
                 opencode=usage.get('opencode')
                 if (not isinstance(opencode,dict) or opencode.get('billing_source') not in {'go','go-plus'}
                     or type(usage.get('cost')) not in {int,float} or usage['cost']!=0):
                     raise ModelResponseUnknown('reviewed Go billing not confirmed')
+            stage='token_limits'
             input_tokens,output_tokens=usage['prompt_tokens'],usage['completion_tokens']
             if input_tokens>route.max_input_tokens or output_tokens>route.max_output_tokens:raise ModelResponseUnknown('model usage outside admitted bounds')
-            parsed=json.loads(text);assessment=validate_live_proposal(parsed,basis)
+            stage='proposal_json'
+            parsed=json.loads(text)
+            stage='proposal_policy'
+            assessment=validate_live_proposal(parsed,basis)
             return {'provider_ref':body['id'],'proposal':parsed,'assessment':assessment,
                     'usage':{'input_tokens':input_tokens,'output_tokens':output_tokens,'total_tokens':input_tokens+output_tokens},
                     'model_id':self.model_id,'prompt_version':route.prompt_version}
-        except ModelResponseUnknown:
-            raise
-        except (httpx.HTTPError,TimeoutError,ValueError,UnicodeError,KeyError,TypeError,AttributeError) as error:
+        except (ModelResponseUnknown,httpx.HTTPError,TimeoutError,ValueError,UnicodeError,KeyError,TypeError,AttributeError) as error:
+            if basis.get('schema')=='conversation-basis.v1':
+                logging.getLogger(__name__).warning('discussion_model_response_unverified stage=%s',stage)
+            if isinstance(error,ModelResponseUnknown):
+                raise
             raise ModelResponseUnknown('model acceptance, result or usage is unknown') from error
