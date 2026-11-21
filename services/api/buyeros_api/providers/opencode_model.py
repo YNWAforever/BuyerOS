@@ -57,6 +57,7 @@ class OpenCodeGoModelClient:
         if not isinstance(model_id,str) or not re.fullmatch(r'[A-Za-z0-9._:-]{1,128}',model_id):raise ValueError('explicit model id required')
         if endpoint not in ENDPOINTS:raise ValueError('approved HTTPS model endpoint required')
         self._api_key,self.http,self.model_id,self.endpoint=api_key,http,model_id,endpoint
+        self.failed_verification_stage=None
 
     def _payload(self,basis:dict,route:ModelRoute)->dict:
         return model_payload(basis,route,self.model_id)
@@ -113,10 +114,12 @@ class OpenCodeGoModelClient:
             usage=body.get('usage')
             if not isinstance(usage,dict) or any(type(usage.get(k)) is not int or usage[k]<0 for k in ['prompt_tokens','completion_tokens']):raise ModelResponseUnknown('typed model usage unavailable')
             if basis.get('schema')=='conversation-basis.v1':
-                stage='go_billing'
+                stage='go_billing_source'
                 opencode=usage.get('opencode')
-                if (not isinstance(opencode,dict) or opencode.get('billing_source') not in {'go','go-plus'}
-                    or type(usage.get('cost')) not in {int,float} or usage['cost']!=0):
+                if not isinstance(opencode,dict) or opencode.get('billing_source') not in {'go','go-plus'}:
+                    raise ModelResponseUnknown('reviewed Go billing not confirmed')
+                stage='go_billing_cost'
+                if type(usage.get('cost')) not in {int,float} or usage['cost']!=0:
                     raise ModelResponseUnknown('reviewed Go billing not confirmed')
             stage='token_limits'
             input_tokens,output_tokens=usage['prompt_tokens'],usage['completion_tokens']
@@ -130,8 +133,7 @@ class OpenCodeGoModelClient:
                     'model_id':self.model_id,'prompt_version':route.prompt_version}
         except (ModelResponseUnknown,httpx.HTTPError,TimeoutError,ValueError,UnicodeError,KeyError,TypeError,AttributeError) as error:
             if basis.get('schema')=='conversation-basis.v1':
-                # Vercel's Python runtime captures stdout for request logs.
-                print(f'discussion_model_response_unverified stage={stage}',flush=True)
+                self.failed_verification_stage=stage
             if isinstance(error,ModelResponseUnknown):
                 raise
             raise ModelResponseUnknown('model acceptance, result or usage is unknown') from error

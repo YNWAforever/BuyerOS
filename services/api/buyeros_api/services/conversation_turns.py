@@ -593,6 +593,9 @@ MODEL_FAILURE_NOTICES = {
 
 
 def model_failure_answer(exc: ApiError, language='en') -> TurnAnswer:
+    if exc.code == 'CONVERSATION_MODEL_QA_VERIFICATION':
+        return TurnAnswer(notices=(TurnNotice(code='CONVERSATION_MODEL_UNAVAILABLE',
+            message=exc.message, recovery=Recovery(label='Review model settings')),), skip_plan=True)
     code, message = MODEL_FAILURE_NOTICES.get(exc.code,
         ('CONVERSATION_MODEL_UNAVAILABLE',
          'Your message was saved. Model replies are unavailable in this project.'))

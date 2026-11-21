@@ -293,6 +293,10 @@ async def complete_conversation(engine, workspace_id, prepared):
             async with asyncio.timeout(request.route.deadline_seconds + 5):
                 result = await adapter.submit(intent)
             if result.state != 'accepted':
+                is_qa = str(workspace_id) == '064d5168-709b-57e7-a7c3-871c2f16c814'
+                if is_qa and os.environ.get('VERCEL_ENV') == 'preview':
+                    stage = client.failed_verification_stage or 'receipt'
+                    raise ApiError(503, 'CONVERSATION_MODEL_QA_VERIFICATION', f'QA verification failed at {stage}.')
                 raise unavailable()
             saved = await store.get(ref)
             if saved is None or saved['state'] != 'received':

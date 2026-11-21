@@ -208,23 +208,17 @@ class LiveModelAdapter:
             if claimed:await self.receipts.finish(ref,state='unknown')
             return SubmissionResult('unknown',ref)
         if not claimed:return SubmissionResult('accepted' if receipt['state']=='received' else 'unknown',ref)
-        stage='provider_response'
         try:
             response=await self.client.complete(request.basis,request.route)
-            stage='adapter_assessment'
             if (not isinstance(response,dict) or response.get('model_id')!=request.model_id or
                 response.get('prompt_version')!=request.route.prompt_version or len(canonical_json(response))>MAX_RESPONSE_BYTES or
                 validate_live_proposal(response['proposal'],request.basis)!=response.get('assessment')):raise ModelResponseUnknown('verified model result unavailable')
             digest=hashlib.sha256(canonical_json(response)).hexdigest()
-            stage='receipt_write'
             await self.receipts.finish(ref,state='received',response=response,digest=digest)
-            stage='receipt_read'
             saved=await self.receipts.get(ref)
             if saved is None or saved['state']!='received' or saved['digest']!=digest:raise ModelResponseUnknown('durable model receipt unavailable')
             return SubmissionResult('accepted',ref,redacted_digest='sha256:'+digest)
         except Exception:
-            if request.basis.get('schema')=='conversation-basis.v1':
-                print(f'discussion_model_adapter_unverified stage={stage}',flush=True)
             try:
                 saved=await self.receipts.get(ref)
                 if saved is not None and saved['state']=='received':return SubmissionResult('accepted',ref,redacted_digest='sha256:'+saved['digest'])
