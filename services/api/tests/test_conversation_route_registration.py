@@ -1,6 +1,6 @@
 """Code-owned conversation route registration and disabled-by-default opt-in."""
 import inspect
-from copy import replace
+from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
 
