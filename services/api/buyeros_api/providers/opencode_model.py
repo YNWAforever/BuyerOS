@@ -42,6 +42,10 @@ def model_payload(basis:dict,route:ModelRoute,model_id:str)->dict:
         source_data=basis
     system=(prompt+' Prompt version: '+route.prompt_version+
             ' Reply with one JSON object only, matching this JSON schema: '+json.dumps(schema,separators=(',',':')))
+    if basis.get('schema')=='conversation-basis.v1':
+        first_citation=basis['sources'][0]['citation']['id']
+        example={'text':'Your short answer goes here.','citations':[first_citation],'status':'needs_review'}
+        system+=' Example response structure: '+json.dumps(example,separators=(',',':'))+' Replace the example text with the answer.'
     payload={'model':model_id,'max_tokens':route.max_output_tokens,'stream':False,
             'response_format':{'type':'json_object'},
             'messages':[{'role':'system','content':system},
@@ -133,7 +137,10 @@ class OpenCodeGoModelClient:
                     'model_id':self.model_id,'prompt_version':route.prompt_version}
         except (ModelResponseUnknown,httpx.HTTPError,TimeoutError,ValueError,UnicodeError,KeyError,TypeError,AttributeError) as error:
             if basis.get('schema')=='conversation-basis.v1':
-                self.failed_verification_stage=stage
+                proposal_error=str(error) if stage=='proposal_policy' and isinstance(error,ValueError) else ''
+                allowed={'conversation_reply_fields','conversation_reply_status','conversation_reply_text',
+                         'conversation_reply_citations','conversation_reply_unselected_citation'}
+                self.failed_verification_stage=proposal_error if proposal_error in allowed else stage
             if isinstance(error,ModelResponseUnknown):
                 raise
             raise ModelResponseUnknown('model acceptance, result or usage is unknown') from error

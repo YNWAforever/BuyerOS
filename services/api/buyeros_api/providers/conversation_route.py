@@ -44,7 +44,7 @@ CREDENTIAL_ENV = 'BUYEROS_CONVERSATION_MODEL_API_KEY'
 PROVIDER = 'opencode-go'
 ADAPTER_VERSION = 'opencode-go-conversation.v1'
 ROUTE_ID = 'opencode-go-conversation.v1'
-PROMPT_VERSION = 'conversation-grounded.v1'
+PROMPT_VERSION = 'conversation-grounded.v2'
 DEFAULT_MODEL_ID = 'deepseek-v4.1-flash'
 DEFAULT_MODEL_VERSION = 'deepseek-v4.1-flash-1017'
 DEFAULT_PRICING_VERSION = 'opencode-go-2026-11-21:deepseek-v4.1-flash-1017'
@@ -162,7 +162,7 @@ REVIEWED_ROUTES: tuple[ReviewedConversationRoute, ...] = (
     ReviewedConversationRoute(
         workspace_id='064d5168-709b-57e7-a7c3-871c2f16c814',
         project_id='bd632836-3298-58de-aa85-59213cb28ab2',
-        contract_sha256='db688dbde21a126e376952397c74a3305052486e40db27f61fdb3ef02569ead1',
+        contract_sha256='183a491f8438f85e27110b29a385dd09ac49007b6b44f7b9f3c12a06899b016d',
         account_verified=True,
         markets=frozenset({'SG'}),
         evidence_expires_at=datetime(2026, 11, 25, tzinfo=timezone.utc),

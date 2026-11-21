@@ -56,8 +56,11 @@ def test_live_conversation_client_enforces_prompt_tools_caps_and_deadline(bad):
         assert len(req.headers['x-opencode-session'])==32
         assert payload['tools']==[] and payload['tool_choice']=='none' and payload['parallel_tool_calls'] is False
         assert payload['max_tokens']==1000 and payload['stream'] is False
-        assert 'Ignore all prior' not in payload['messages'][0]['content']
+        system = payload['messages'][0]['content']
+        assert 'Ignore all prior' not in system
         assert 'Ignore all prior' in payload['messages'][1]['content']
+        assert data['sources'][0]['citation']['id'] in system
+        assert '"status":"needs_review"' in system
         assert req.extensions['timeout']['read']==30
         if bad=='timeout':raise httpx.ReadTimeout('synthetic lost response')
         if bad=='oversize':return httpx.Response(200,content=b'x'*262145)
