@@ -137,9 +137,9 @@ visitConfig(configSource);assert.equal(defineExpressions.length,1);
 const publicSlots=['BUYEROS_AUTH_PROVIDER','BUYEROS_NEON_AUTH_ROUTE_ENABLED','BUYEROS_NEON_ENVIRONMENT','BUYEROS_NEON_AUTH_URL','BUYEROS_NEON_EXPECTED_AUTH_URL','BUYEROS_PUBLIC_ORIGIN','BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN'];
 const publicValues=['neon','1','preview','https://fixture.neon.tech/auth','https://fixture.neon.tech/auth','https://buyeros.test','https://buyeros.test'];
 const neonRuntime={NODE_ENV:'production',VERCEL_ENV:'preview',BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2)};
-async function compiledAuth(values,runtime={}){
+async function compiledAuth(values,runtime={},vercelTarget=false){
  const buildEnvironment=Object.fromEntries(publicSlots.map((key,i)=>[key,values[i]]));
- const definitions=vm.runInNewContext(`(${defineExpressions[0]})`,{process:{env:buildEnvironment},vercelTarget:false});
+ const definitions=vm.runInNewContext(`(${defineExpressions[0]})`,{process:{env:buildEnvironment},vercelTarget,command:'build'});
  const transformed=await transformWithOxc(`globalThis.captured=${authArguments[0]};`,'layout-public-config.ts',{define:definitions});
  const scope={process:{env:runtime}};vm.runInNewContext(transformed.code,scope);
  return loadPublicAuth(scope.captured);
@@ -163,4 +163,32 @@ await check('compiled layout preserves runtime provider selection and closed Neo
  assert.equal(unavailable.provider,'unavailable');
  assert.doesNotMatch(JSON.stringify(unavailable),/auth0\.com/);
 });
+await check('compiled layout forwards the platform-bound QA preview origin contract',async()=>{
+ const forwarded=authArguments[0];
+ for(const key of ['BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED','BUYEROS_QA_PREVIEW_PROJECT_ID','BUYEROS_QA_PREVIEW_TEAM_ID','BUYEROS_QA_PREVIEW_REPO','BUYEROS_QA_PREVIEW_REPO_ID','BUYEROS_QA_PREVIEW_BRANCH','BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN','BUYEROS_RUNTIME_SOURCE_SHA','VERCEL_URL','VERCEL_PROJECT_ID','VERCEL_GIT_REPO_ID','VERCEL_GIT_COMMIT_REF','VERCEL_GIT_COMMIT_SHA']){
+  assert.ok(forwarded.includes('process.env.'+key),'layout must forward '+key);
+ }
+ for(const key of ['BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED','BUYEROS_QA_PREVIEW_PROJECT_ID','BUYEROS_QA_PREVIEW_TEAM_ID','BUYEROS_QA_PREVIEW_REPO','BUYEROS_QA_PREVIEW_REPO_ID','BUYEROS_QA_PREVIEW_BRANCH','BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN','BUYEROS_RUNTIME_SOURCE_SHA']){
+  assert.ok(defineExpressions[0].includes('process.env.'+key),'Vite public proxy must define '+key);
+ }
+});
+ await check('compiled Vercel layout keeps platform facts runtime-accessible and ignores empty optional preview values',async()=>{
+  const runtime={NODE_ENV:'production',BUYEROS_AUTH_PROVIDER:'neon',BUYEROS_NEON_AUTH_ROUTE_ENABLED:'1',
+   BUYEROS_NEON_ENVIRONMENT:'preview',BUYEROS_NEON_AUTH_URL:'https://fixture.neon.tech/auth',
+   BUYEROS_NEON_EXPECTED_AUTH_URL:'https://fixture.neon.tech/auth',BUYEROS_PUBLIC_ORIGIN:'https://buyeros.test',
+   BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN:'https://buyeros.test',BUYEROS_NEON_COOKIE_SECRET:'synthetic-runtime-config-control'.repeat(2),
+   BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED:'1',BUYEROS_QA_PREVIEW_PROJECT_ID:'prj_qa',
+   BUYEROS_QA_PREVIEW_TEAM_ID:'',BUYEROS_QA_PREVIEW_REPO:'YNWAforever/BuyerOS',BUYEROS_QA_PREVIEW_REPO_ID:'123456789',
+   BUYEROS_QA_PREVIEW_BRANCH:'codex/qa-preview',BUYEROS_RUNTIME_SOURCE_SHA:'a'.repeat(40),
+   BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN:'',VERCEL_ENV:'preview',VERCEL_URL:'buyeros-qa-abc123-team.vercel.app',
+   VERCEL_PROJECT_ID:'prj_qa',VERCEL_GIT_PROVIDER:'github',VERCEL_GIT_REPO_OWNER:'YNWAforever',
+   VERCEL_GIT_REPO_SLUG:'BuyerOS',VERCEL_GIT_REPO_ID:'123456789',VERCEL_GIT_COMMIT_REF:'codex/qa-preview',
+   VERCEL_GIT_COMMIT_SHA:'a'.repeat(40)};
+  const neon=await compiledAuth([],runtime,true);
+  assert.equal(neon.provider,'neon');
+  assert.doesNotMatch(JSON.stringify(neon),/candidate|prj_qa|codex\/qa-preview|team\.vercel|synthetic-runtime/);
+  const unconfiguredPreview=await compiledAuth([],{...runtime,BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED:'',
+   BUYEROS_QA_PREVIEW_PROJECT_ID:'',BUYEROS_QA_PREVIEW_TEAM_ID:'',BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN:''},true);
+  assert.equal(unconfiguredPreview.provider,'neon');
+ });
 console.log(`${n} live auth checks passed including compiled public runtime`);

@@ -618,7 +618,8 @@ async def prepare_context_answer(engine, session, scope: Scope, payload: TurnReq
     if deadline is not None and not deadline.should_start():
         return None
     project = await _project(session, scope)
-    if not conversation_admission.configured_for(project, payload.language):
+    if not conversation_admission.configured_for(project, payload.language,
+            workspace_id=scope.workspace_id, project_id=scope.project_id):
         return None
     # Buyer identity is contextual, not an approved paid source; keep it out of
     # the model basis so every model citation is selected approved offer data.
@@ -830,7 +831,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
                 'discussion note limit reached; start another discussion and keep unsent text')
         project = await _project(session, scope)
         from . import conversation_admission
-        model_available = conversation_admission.configured_for(project, payload.language)
+        model_available = conversation_admission.configured_for(project, payload.language,
+            workspace_id=scope.workspace_id, project_id=scope.project_id)
         if model_engine is not None and model_available and deadline.should_start():
             # Same-key/different-body and in-flight conflicts must be decided
             # before admission or any provider spend.
@@ -863,7 +865,8 @@ async def create_turn(session, scope: Scope, payload: TurnRequest, key: str,
     if project is None:
         project = await _project(session, scope)
         from . import conversation_admission
-        model_available = conversation_admission.configured_for(project, payload.language)
+        model_available = conversation_admission.configured_for(project, payload.language,
+            workspace_id=scope.workspace_id, project_id=scope.project_id)
     if payload.buyer_id is not None:
         # New thread link: the buyer must be current, same-project and readable now.
         buyer = await _buyer_projection(session, scope, payload.buyer_id)

@@ -36,10 +36,16 @@ def paid_case(conversation_api, monkeypatch):
     from buyeros_api.execution.config import get_settings as dispatch_settings
     monkeypatch.setenv('BUYEROS_PAID_ADMISSION_ENABLED', 'true')
     monkeypatch.setenv('BUYEROS_PAID_DISPATCH_ENABLED', 'true')
-    monkeypatch.setenv('BUYEROS_OPENCODE_API_KEY', 'synthetic-conversation-no-real-key')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_API_KEY', 'synthetic-conversation-no-real-key')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_ENABLED', 'true')
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_WORKSPACE_ID', WORKSPACE_A)
+    monkeypatch.setenv('BUYEROS_CONVERSATION_MODEL_PROJECT_ID', PROJECT_A)
     get_settings.cache_clear(); dispatch_settings.cache_clear()
-    monkeypatch.setattr(base, 'SELECTED_LIVE_PROVIDERS', frozenset({'opencode-go'}))
-    route = replace(service.ROUTE, route_id='conversation-grounded.v1')
+    # Dedicated conversation credential alone selects this route; the global
+    # research provider set must stay empty for this fixture.
+    monkeypatch.setattr(base, 'SELECTED_LIVE_PROVIDERS', frozenset())
+    from buyeros_api.providers.conversation_route import CONVERSATION_ROUTE
+    route = CONVERSATION_ROUTE
     cap = ProviderCapability('opencode-go', 'conversation-test.v1', 'model', frozenset({'US'}),
         frozenset({'en','zh-HK'}), frozenset({'company'}), 'server-only', 'conversation-test-price-v1',
         Money(Decimal('0.100000')), 'verified', 'verified', 'unsupported', 'unsupported', 'one-day',
@@ -184,7 +190,7 @@ def test_every_gate_fails_before_any_provider_call_or_reservation(paid_case, mon
         elif gate == 'route': monkeypatch.setattr(service,'ROUTE',replace(service.ROUTE,route_id=None))
         elif gate == 'registration': monkeypatch.setattr(service,'REGISTRATION',None)
         elif gate == 'capability': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,verified_at=None)))
-        elif gate == 'price': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,max_liability=Money(Decimal('0.01')))))
+        elif gate == 'price': monkeypatch.setattr(service,'REGISTRATION',replace(item,capability=replace(item.capability,max_liability=Money(Decimal('1.000001')))))
         elif gate == 'policy': db.execute('DELETE FROM policy_activation_resolutions WHERE workspace_id=%s',(WS,))
         elif gate == 'budget': db.execute('UPDATE budget_accounts SET approved_limit=0 WHERE workspace_id=%s',(WS,))
         elif gate == 'permission': headers={**_h(VIEWER),'Idempotency-Key':'gates'}

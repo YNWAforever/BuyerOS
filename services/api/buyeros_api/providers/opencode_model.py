@@ -14,6 +14,12 @@ from .live_model import (PROMPT,PROPOSAL_SCHEMA,MAX_INPUT_BYTES,MAX_RESPONSE_BYT
                          _basis,_current_source,canonical_json,validate_live_proposal)
 
 ENDPOINT='https://opencode.ai/zen/go/v1/chat/completions'
+# Public Go catalog (2026-11-21) documents this OpenAI-compatible base for
+# chat-completions: https://opencode.ai/inference/go/openai/v1. Keep the legacy
+# sales/fit endpoint above unchanged for existing callers; conversation schema
+# is pinned to the current documented endpoint.
+CONVERSATION_ENDPOINT='https://opencode.ai/inference/go/openai/v1/chat/completions'
+ENDPOINTS=frozenset({ENDPOINT,CONVERSATION_ENDPOINT})
 DEFAULT_MODEL_ID='kimi-k3'
 # No token-count endpoint: bound input conservatively at one token per 3 bytes, then recheck reported usage.
 BYTES_PER_TOKEN_FLOOR=3
@@ -39,10 +45,11 @@ def model_payload(basis:dict,route:ModelRoute,model_id:str)->dict:
 
 
 class OpenCodeGoModelClient:
-    def __init__(self,*,api_key:str,http:httpx.AsyncClient,model_id:str=DEFAULT_MODEL_ID):
+    def __init__(self,*,api_key:str,http:httpx.AsyncClient,model_id:str=DEFAULT_MODEL_ID,endpoint:str=ENDPOINT):
         if not isinstance(api_key,str) or not 1<=len(api_key)<=4096 or any(ord(c)<33 or ord(c)>126 for c in api_key):raise ValueError('server-only model credential required')
         if not isinstance(model_id,str) or not re.fullmatch(r'[A-Za-z0-9._:-]{1,128}',model_id):raise ValueError('explicit model id required')
-        self._api_key,self.http,self.model_id=api_key,http,model_id
+        if endpoint not in ENDPOINTS:raise ValueError('approved HTTPS model endpoint required')
+        self._api_key,self.http,self.model_id,self.endpoint=api_key,http,model_id,endpoint
 
     def _payload(self,basis:dict,route:ModelRoute)->dict:
         return model_payload(basis,route,self.model_id)
@@ -52,6 +59,8 @@ class OpenCodeGoModelClient:
         if (not isinstance(route,ModelRoute) or route.permitted_tools or not route.route_id or
             not re.fullmatch(r'[A-Za-z0-9._-]{1,80}',route.prompt_version) or
             any(type(v) is not int for v in [route.max_input_tokens,route.max_output_tokens,route.deadline_seconds,route.repair_limit])):raise ValueError('verified code-owned model route required')
+        if basis.get('schema')=='conversation-basis.v1' and self.endpoint!=CONVERSATION_ENDPOINT:
+            raise ValueError('conversation schema requires the current documented HTTPS endpoint')
         # Do not send private expired/foreign source prose to any provider.
         if any(not _current_source(item,basis,now) for item in evidence.values()):raise ValueError('model input has noncurrent or unverified source')
         if basis.get('schema')=='sales-basis.v1':
@@ -63,7 +72,7 @@ class OpenCodeGoModelClient:
         if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
         try:
             async with asyncio.timeout(route.deadline_seconds):
-                async with self.http.stream('POST',ENDPOINT,json=payload,headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json'},
+                async with self.http.stream('POST',self.endpoint,json=payload,headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json'},
                                             follow_redirects=False,timeout=route.deadline_seconds) as response:
                     if response.status_code!=200:raise ModelResponseUnknown('model response unavailable')
                     raw=bytearray()

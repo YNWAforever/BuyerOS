@@ -217,49 +217,121 @@ test('QA conversation studio: first turn, durable transcript and unsent draft',a
   }finally{await context.close();}
 });
 
+function trackMutations(page:Page,out:string[]):void{
+  page.on('request',request=>{
+    const path=new URL(request.url()).pathname;
+    if(path.startsWith('/v1/')&&!['GET','HEAD','OPTIONS'].includes(request.method()))
+      out.push(`${request.method()} ${path}`);
+  });
+}
+function word(name:string):RegExp{
+  return new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'i');
+}
 test('authorized model recalls the correct buyer independently in two saved discussions',async({context})=>{
-  test.skip(process.env.BUYEROS_QA_MODEL_RECALL!=='true','Requires separately authorized model QA');
-  test.setTimeout(360_000);
+  // Two independent manual gates. A label-triggered run receives no recall env
+  // from the workflow, and a local run without the explicit 1 USD ceiling skips.
+  test.skip(process.env.BUYEROS_QA_MODEL_RECALL!=='true',
+    'Requires explicit manual live-recall opt-in; never enabled by a label');
+  const budget=required('BUYEROS_QA_LIVE_RECALL_BUDGET_USD');
+  if(budget!=='1')throw new Error('BLOCKED: live model recall requires a 1 USD authorization ceiling');
   const qa=qaEnv();
+  const sourceName=required('BUYEROS_QA_MODEL_SOURCE_LABEL').trim();
+  if(!sourceName||sourceName.length>200||/[\r\n]/.test(sourceName))
+    throw new Error('BLOCKED: BUYEROS_QA_MODEL_SOURCE_LABEL must be a bounded single line');
+  const pairs:Array<[string,string]>= [['Alder','Birch'],['Cedar','Willow']];
+  const allNames=pairs.flat();
+  if(allNames.some(name=>name.toLowerCase()===sourceName.toLowerCase()))
+    throw new Error('BLOCKED: the approved source label must be independent of the synthetic buyer names');
+  test.setTimeout(360_000);
   await context.addInitScript(()=>localStorage.setItem('buyeros.locale','en'));
+  const mutations:string[]=[];
   const page=await context.newPage();
-  await signIn(page,qa);
-  const sourceName=required('BUYEROS_QA_MODEL_SOURCE_LABEL');
-  const pairs=[['Alder','Birch'],['Cedar','Willow']];
-  const threads:string[]=[];
-  for(const [first,second] of pairs){
-    await page.goto(scoped('/app/discussions/new',qa));
-    const intro=`For this exercise the first buyer is ${first} and the second buyer is ${second}.`;
-    const {threadId}=await sendTurn(page,intro,1);
-    expect(threads).not.toContain(threadId);
-    threads.push(threadId);
-    const url=scoped(`/app/discussions/s/${threadId}`,qa);
-    await expect(page).toHaveURL(url);
-    const sourcesTab=page.getByRole('tab',{name:'Sources',exact:true});
-    if(!await sourcesTab.isVisible())await page.getByRole('button',{name:'Show context panel',exact:true}).click();
-    await sourcesTab.click();
-    const saveSelection=page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname.endsWith(`/conversation-threads/${threadId}/sources`));
-    await page.getByRole('checkbox',{name:sourceName,exact:true}).check();
-    expect((await saveSelection).status()).toBe(200);
-    await page.reload();
-    const question='Which buyer was second? Reply with only the name.';
-    expect((await sendTurn(page,question,2)).threadId).toBe(threadId);
-    const answer=page.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
-    await expect(answer).toContainText(new RegExp(`\\b${second}\\b`,'i'));
-    await expect(answer).not.toContainText(new RegExp(`\\b${first}\\b`,'i'));
-    const reopened=await context.newPage();
-    await reopened.goto(url);
-    const followUp='Which buyer was first? Reply with only the name.';
-    expect((await sendTurn(reopened,followUp,3)).threadId).toBe(threadId);
-    const firstAnswer=reopened.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
-    await expect(firstAnswer).toContainText(new RegExp(`\\b${first}\\b`,'i'));
-    await expect(firstAnswer).not.toContainText(new RegExp(`\\b${second}\\b`,'i'));
-    await page.reload();
-    await expect(userMessages(page)).toHaveText([intro,question,followUp]);
-    await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
-    await expect(page).toHaveURL(url);
-    await reopened.close();
-  }
+  trackMutations(page,mutations);
+  interface RecallEvidence{threadId:string;url:string;pair:[string,string];intro:string;question:string;followUp:string;savedAnswers:string[];}
+  const evidence:RecallEvidence[]=[];
+  const seenThreadIds=new Set<string>();
+  try{
+    // Source selection is configuration only; no approval, dispatch or quote is
+    // ever clicked. The one paid path is the fixed turn count below.
+    await signIn(page,qa);
+    for(const pair of pairs){
+      const [first,second]=pair;
+      await page.goto(scoped('/app/discussions/new',qa));
+      await waitForStudio(page);
+      const intro=`For this exercise the first buyer is ${first} and the second buyer is ${second}.`;
+      const {threadId}=await sendTurn(page,intro,1);
+      expect(seenThreadIds.has(threadId),'each recall thread is independent').toBe(false);
+      seenThreadIds.add(threadId);
+      const url=scoped(`/app/discussions/s/${threadId}`,qa);
+      await expect(page).toHaveURL(url);
+      const sourcesTab=page.getByRole('tab',{name:'Sources',exact:true});
+      if(!await sourcesTab.isVisible())await page.getByRole('button',{name:'Show context panel',exact:true}).click();
+      await sourcesTab.click();
+      const saveSelection=page.waitForResponse(r=>r.request().method()==='PUT'&&new URL(r.url()).pathname.endsWith(`/conversation-threads/${threadId}/sources`));
+      await page.getByRole('checkbox',{name:sourceName,exact:true}).check();
+      expect((await saveSelection).status()).toBe(200);
+      await page.reload();
+      await waitForStudio(page);
+      const question='Which buyer was second? Reply with only the name.';
+      expect((await sendTurn(page,question,2)).threadId).toBe(threadId);
+      const secondAnswer=page.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
+      await expect(secondAnswer).toContainText(word(second));
+      // The answer must not name the other buyer in this thread, nor any buyer
+      // from the other saved thread.
+      for(const name of allNames.filter(name=>name!==second))
+        await expect(secondAnswer).not.toContainText(word(name));
+      const reopened=await context.newPage();
+      const followUp='Which buyer was first? Reply with only the name.';
+      trackMutations(reopened,mutations);
+      try{
+        await reopened.goto(url);
+        await waitForStudio(reopened);
+        expect((await sendTurn(reopened,followUp,3)).threadId).toBe(threadId);
+        const firstAnswer=reopened.getByRole('article',{name:'BuyerOS reply'}).last().locator('.conversation-part-text');
+        await expect(firstAnswer).toContainText(word(first));
+        for(const name of allNames.filter(name=>name!==first))
+          await expect(firstAnswer).not.toContainText(word(name));
+        const savedAnswers=await reopened.getByRole('article',{name:'BuyerOS reply'})
+          .locator('.conversation-part-text, .conversation-notice').allTextContents();
+        await expect(userMessages(reopened)).toHaveText([intro,question,followUp]);
+        await expect(reopened.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+        evidence.push({threadId,url,pair,intro,question,followUp,savedAnswers});
+      }finally{await reopened.close();}
+      await page.reload();
+      await waitForStudio(page);
+      await expect(userMessages(page)).toHaveText([intro,question,followUp]);
+      await expect(page.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+    }
+    // Audit both stored threads only after both exist: each transcript is
+    // independently durable and no stored reply names a buyer from the other one.
+    expect(evidence).toHaveLength(2);
+    for(const row of evidence){
+      const audit=await context.newPage();
+      trackMutations(audit,mutations);
+      try{
+        await audit.goto(row.url);
+        await waitForStudio(audit);
+        await expect(userMessages(audit)).toHaveText([row.intro,row.question,row.followUp]);
+        await expect(audit.getByRole('article',{name:'BuyerOS reply'})).toHaveCount(3);
+        const stored=await audit.getByRole('article',{name:'BuyerOS reply'})
+          .locator('.conversation-part-text, .conversation-notice').allTextContents();
+        expect(stored,'saved replies are the same independently read back').toEqual(row.savedAnswers);
+        const otherThreadNames=allNames.filter(name=>!row.pair.includes(name));
+        for(const text of stored)for(const name of otherThreadNames)
+          expect(text.toLowerCase()).not.toContain(name.toLowerCase());
+      }finally{await audit.close();}
+    }
+    // Fixed billable scope: two threads x three turns, two source selections.
+    // No unrelated paid journey, approval, dispatch, cancel or quote mutation.
+    const writes=mutations.filter(row=>row.startsWith('POST ')||row.startsWith('PUT '));
+    expect(writes.filter(row=>/^POST \/v1\/.*\/conversation-turns$/.test(row)),'six fixed model turns').toHaveLength(6);
+    expect(writes.filter(row=>/^PUT \/v1\/.*\/conversation-threads\/[0-9a-f-]{36}\/sources$/.test(row)),'two source selections').toHaveLength(2);
+    expect(writes.filter(row=>!/^POST \/v1\/.*\/conversation-turns$|^PUT \/v1\/.*\/conversation-threads\/[0-9a-f-]{36}\/sources$/.test(row)),
+      'no unrelated billable or approval mutation').toEqual([]);
+    expect(mutations.filter(row=>/\/decisions$|\/cancel$|\/dispatch|\/quotes?$|\/approve$|\/native-actions$|\/send$/.test(row)),
+      'no paid or approval journey').toEqual([]);
+    test.info().annotations.push({type:'live-recall-budget-usd',description:budget});
+  }finally{await page.close();}
 });
 
 test('QA conversation studio renders in EN and zh-HK',async({context})=>{

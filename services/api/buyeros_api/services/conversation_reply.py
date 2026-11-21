@@ -7,13 +7,13 @@ from sqlalchemy import select
 from ..api.errors import ApiError
 from ..api.schemas import OfferFact
 from ..db.icp import IcpVersion, Project, canonical_hash
-from ..providers.model import ModelRoute
+from ..providers.conversation_route import ROUTE
 from .icp_service import effective_offer_facts
 from .offer_document_refs import validate_offer_document_refs
 
-ROUTE = ModelRoute(prompt_version="conversation-grounded.v1", permitted_tools=frozenset(),
-                   max_input_tokens=6000, max_output_tokens=1000, deadline_seconds=30,
-                   repair_limit=0)  # route_id=None: deliberately unselected, no live call.
+# The route object is code-owned with a dedicated id; selection remains absent
+# until the reviewed conversation registration and per-scope opt-in are present.
+__all__ = ['ROUTE', 'Grounding', 'unavailable_source', 'resolve_sources', 'reply_from_grounding']
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 
 

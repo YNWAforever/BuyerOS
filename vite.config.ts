@@ -86,6 +86,17 @@ export default defineConfig(async ({ command, isPreview }) => {
         "process.env.BUYEROS_NEON_EXPECTED_AUTH_URL": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_AUTH_URL ?? ""),
         "process.env.BUYEROS_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_PUBLIC_ORIGIN ?? ""),
         "process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN": JSON.stringify(process.env.BUYEROS_NEON_EXPECTED_PUBLIC_ORIGIN ?? ""),
+        // Empty defaults are disabled sentinels: the preview opt-in and optional
+        // team/expected-origin bindings treat '' as unset, so an unconfigured
+        // Cloudflare build cannot reject an otherwise valid login.
+        "process.env.BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED": JSON.stringify(process.env.BUYEROS_NEON_QA_PREVIEW_ORIGIN_ENABLED ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_PROJECT_ID": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_PROJECT_ID ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_TEAM_ID": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_TEAM_ID ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_REPO": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_REPO ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_REPO_ID": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_REPO_ID ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_BRANCH": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_BRANCH ?? ""),
+        "process.env.BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN": JSON.stringify(process.env.BUYEROS_QA_PREVIEW_EXPECTED_ORIGIN ?? ""),
+        "process.env.BUYEROS_RUNTIME_SOURCE_SHA": JSON.stringify(process.env.BUYEROS_RUNTIME_SOURCE_SHA ?? ""),
       } : {}),
     },
     server: {

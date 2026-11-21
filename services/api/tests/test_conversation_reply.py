@@ -16,7 +16,8 @@ CANDIDATE = {"text": "Review the cited approved source before deciding.", "citat
 
 
 def test_live_admission_stays_closed_and_route_has_no_tools():
-    assert ROUTE.route_id is None and not ROUTE.permitted_tools and ROUTE.repair_limit == 0
+    assert (ROUTE.route_id == 'opencode-go-conversation.v1' and not ROUTE.permitted_tools
+            and ROUTE.repair_limit == 0)
     with pytest.raises(ApiError, match="admission is unavailable") as exc:
         reply_from_grounding(GROUNDING)
     assert exc.value.status_code == 503
