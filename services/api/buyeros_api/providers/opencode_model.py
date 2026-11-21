@@ -6,7 +6,7 @@ proposal is then re-validated deterministically, so a model that ignores the
 schema yields 'unknown', never a stored assessment.
 """
 from __future__ import annotations
-import asyncio,hashlib,json,logging,math,re
+import asyncio,hashlib,json,math,re
 from datetime import datetime,timezone
 import httpx
 from .model import ModelRoute
@@ -130,7 +130,8 @@ class OpenCodeGoModelClient:
                     'model_id':self.model_id,'prompt_version':route.prompt_version}
         except (ModelResponseUnknown,httpx.HTTPError,TimeoutError,ValueError,UnicodeError,KeyError,TypeError,AttributeError) as error:
             if basis.get('schema')=='conversation-basis.v1':
-                logging.getLogger(__name__).warning('discussion_model_response_unverified stage=%s',stage)
+                # Vercel's Python runtime captures stdout for request logs.
+                print(f'discussion_model_response_unverified stage={stage}',flush=True)
             if isinstance(error,ModelResponseUnknown):
                 raise
             raise ModelResponseUnknown('model acceptance, result or usage is unknown') from error
