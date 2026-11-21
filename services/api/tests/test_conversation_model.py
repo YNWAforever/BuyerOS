@@ -29,7 +29,7 @@ def test_conversation_basis_has_no_run_buyer_company_or_tools_authority():
     data=basis();request=ModelRequest('conversation:synthetic',data,replace(ROUTE,route_id='conversation-grounded.v1'),'synthetic-model','US','en','company')
     assert request.basis['schema']=='conversation-basis.v1'
     assert not {'run_id','buyer_id','company_id'} & data.keys()
-    assert ROUTE.route_id=='opencode-console-conversation.v1' and not ROUTE.permitted_tools and ROUTE.deadline_seconds==30
+    assert ROUTE.route_id=='opencode-go-conversation.v1' and not ROUTE.permitted_tools and ROUTE.deadline_seconds==30
     with pytest.raises(ValueError):validate_basis({**data,'run_id':str(uuid.uuid4())})
 
 
@@ -47,11 +47,13 @@ def test_output_rejects_tools_unselected_citations_and_unreviewed_success(bad):
     with pytest.raises(ValueError):validate_proposal(proposal,data)
 
 
-@pytest.mark.parametrize('bad',[None,'timeout','tool-call','over-tokens','oversize','wrong-model'])
+@pytest.mark.parametrize('bad',[None,'timeout','tool-call','over-tokens','oversize','wrong-model','billing'])
 def test_live_conversation_client_enforces_prompt_tools_caps_and_deadline(bad):
     data=basis();calls=[]
     def transport(req):
         calls.append(req);payload=json.loads(req.content)
+        assert req.headers['User-Agent']=='BuyerOS/1.0'
+        assert len(req.headers['x-opencode-session'])==32
         assert payload['tools']==[] and payload['tool_choice']=='none' and payload['parallel_tool_calls'] is False
         assert payload['max_tokens']==1000 and payload['stream'] is False
         assert 'Ignore all prior' not in payload['messages'][0]['content']
@@ -64,7 +66,9 @@ def test_live_conversation_client_enforces_prompt_tools_caps_and_deadline(bad):
         if bad=='tool-call':msg['tool_calls']=[{'function':{'name':'send'}}]
         return httpx.Response(200,json={'id':'synthetic-response','model':'other' if bad=='wrong-model' else 'synthetic-model',
             'choices':[{'finish_reason':'stop','message':msg}],
-            'usage':{'prompt_tokens':6001 if bad=='over-tokens' else 500,'completion_tokens':100}})
+            'usage':{'prompt_tokens':6001 if bad=='over-tokens' else 500,'completion_tokens':100,
+                     'cost':0.01 if bad=='billing' else 0,
+                     'opencode':{'billing_source':'balance' if bad=='billing' else 'go'}}})
     async def run():
         async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as http:
             client=OpenCodeGoModelClient(api_key='synthetic-not-real',http=http,model_id='synthetic-model',endpoint=CONVERSATION_ENDPOINT)
@@ -80,7 +84,8 @@ def _conversation_ok(data):
     proposal={'text':'Review the selected source.','status':'needs_review','citations':[data['sources'][0]['citation']['id']]}
     return {'id':'synthetic-response','model':'synthetic-model',
             'choices':[{'finish_reason':'stop','message':{'role':'assistant','content':json.dumps(proposal)}}],
-            'usage':{'prompt_tokens':500,'completion_tokens':100}}
+            'usage':{'prompt_tokens':500,'completion_tokens':100,'cost':0,
+                     'opencode':{'billing_source':'go'}}}
 
 
 def test_conversation_transport_pins_documented_endpoint_and_dedicated_auth():
@@ -89,6 +94,9 @@ def test_conversation_transport_pins_documented_endpoint_and_dedicated_auth():
         calls.append(req)
         assert str(req.url)==CONVERSATION_ENDPOINT
         assert req.headers['Authorization']=='Bearer synthetic-dedicated-only'
+        assert req.headers['User-Agent']=='BuyerOS/1.0'
+        assert len(req.headers['x-opencode-session'])==32
+        assert data['basis_hash'] not in req.headers['x-opencode-session']
         return httpx.Response(200,json=_conversation_ok(data))
     async def run():
         async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as http:

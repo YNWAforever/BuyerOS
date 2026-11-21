@@ -19,7 +19,6 @@ class ProviderName(StrEnum):
     HUNTER = 'hunter'
     EXA_SEARCH = 'exa-search'
     OPENCODE_GO = 'opencode-go'
-    OPENCODE_CONSOLE = 'opencode-console'
 
 
 class ProviderUnavailable(ApiError):

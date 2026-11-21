@@ -1,8 +1,8 @@
 """Reviewed code-owned conversation model route and disabled-by-default opt-in.
 
-The default discussion binding is the paid Console model ``deepseek-v4.1-flash``
-called with the BuyerOS Console service-account credential. A conversation call
-is possible only when all of these hold:
+The default discussion binding is ``deepseek-v4.1-flash`` called through the
+documented OpenCode Go endpoint using the BuyerOS service-account credential. A
+conversation call is possible only when all of these hold:
 
 * an operator explicitly enables this exact workspace/project pair through
   ``BUYEROS_CONVERSATION_MODEL_ENABLED=true`` plus the two id variables, and
@@ -10,7 +10,7 @@ is possible only when all of these hold:
   research provider selector or key);
 * one ``ReviewedConversationRoute`` below is pinned to that exact pair and was
   independently reviewed with the code-owned default model/version, tariff upper
-  bound, markets/languages, dated Console source URLs, service-account identity,
+  bound, markets/languages, dated Go source URLs, service-account identity,
   retained/expiry terms and expected provider-contract hash;
 * the account/model verification is marked complete and any reviewed evidence
   expiry has not passed;
@@ -41,13 +41,13 @@ PROJECT_ENV = 'BUYEROS_CONVERSATION_MODEL_PROJECT_ID'
 # credential must not select or run any unrelated research/model operation.
 CREDENTIAL_ENV = 'BUYEROS_CONVERSATION_MODEL_API_KEY'
 
-PROVIDER = 'opencode-console'
-ADAPTER_VERSION = 'opencode-console-conversation.v1'
-ROUTE_ID = 'opencode-console-conversation.v1'
+PROVIDER = 'opencode-go'
+ADAPTER_VERSION = 'opencode-go-conversation.v1'
+ROUTE_ID = 'opencode-go-conversation.v1'
 PROMPT_VERSION = 'conversation-grounded.v1'
 DEFAULT_MODEL_ID = 'deepseek-v4.1-flash'
 DEFAULT_MODEL_VERSION = 'deepseek-v4.1-flash-1017'
-DEFAULT_PRICING_VERSION = 'opencode-console-2026-11-21:deepseek-v4.1-flash-1017'
+DEFAULT_PRICING_VERSION = 'opencode-go-2026-11-21:deepseek-v4.1-flash-1017'
 DEFAULT_AUTH_MODEL = 'service-account bearer key'
 DEFAULT_POLICY_ACCOUNT_REFERENCE = 'buyeros-conversation-service-account'
 DEFAULT_MARKETS = frozenset({'US'})
@@ -55,13 +55,13 @@ REVIEWED_MARKETS = frozenset({'US', 'SG'})
 DEFAULT_LANGUAGES = frozenset({'en'})
 DEFAULT_VERIFIED_AT = datetime(2026, 11, 21, tzinfo=timezone.utc)
 DEFAULT_SOURCE_URLS = (
-    'https://opencode.ai/docs/console/api/#service-accounts',
-    'https://opencode.ai/docs/console/api/inference/',
-    'https://opencode.ai/docs/console/models/#pricing',
-    'https://opencode.ai/docs/console/models/#privacy',
+    'https://opencode.ai/inference/go/v1/models',
+    'https://opencode.ai/docs/console/go/#where-can-i-use-it',
+    'https://opencode.ai/docs/console/go/#endpoints',
+    'https://opencode.ai/docs/console/go/#privacy',
 )
-DEFAULT_RETENTION = ('zero retention and no training per Console model privacy; '
-    'no listed exception for deepseek-v4.1-flash')
+DEFAULT_RETENTION = ('0 days; DeepSeek ZDR agreement valid through 2026-11-30; '
+    'no training per Go privacy terms')
 ACCOUNT_KIND = 'service-account'
 # The receipt transition in migration 0057 claims an exact US$0.10 hold.
 # Published token cost at the request caps is US$0.0030.
@@ -162,7 +162,7 @@ REVIEWED_ROUTES: tuple[ReviewedConversationRoute, ...] = (
     ReviewedConversationRoute(
         workspace_id='064d5168-709b-57e7-a7c3-871c2f16c814',
         project_id='bd632836-3298-58de-aa85-59213cb28ab2',
-        contract_sha256='c3ed9af2029ce3364c297218e70bc141f3667406d9d53c210f47a2ee19688c65',
+        contract_sha256='db688dbde21a126e376952397c74a3305052486e40db27f61fdb3ef02569ead1',
         account_verified=True,
         markets=frozenset({'SG'}),
         evidence_expires_at=datetime(2026, 11, 25, tzinfo=timezone.utc),

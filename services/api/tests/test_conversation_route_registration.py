@@ -56,7 +56,7 @@ def test_registration_absent_and_selection_disabled_by_default(monkeypatch):
     # A reviewed QA row may exist, but selection stays disabled until the exact
     # operator env opt-in is present; this test must not require an empty registry.
     monkeypatch.setattr(conversation_route, 'REVIEWED_ROUTES', (reviewed_facts(),))
-    assert conversation_route.CONVERSATION_ROUTE.route_id == 'opencode-console-conversation.v1'
+    assert conversation_route.CONVERSATION_ROUTE.route_id == 'opencode-go-conversation.v1'
     assert not conversation_route.CONVERSATION_ROUTE.permitted_tools
     assert conversation_route.CONVERSATION_TEST_EVIDENCE == (
         'services/api/tests/test_conversation_admission_db.py',

@@ -14,7 +14,7 @@ StatusState = Literal["accepted", "pending", "unknown", "succeeded", "not_found"
 _QUANTUM = Decimal("0.000001")
 # Live adapters that share the durable search/model receipt ports.
 LIVE_SEARCH_PROVIDERS: frozenset[str] = frozenset({"brave-search", "exa-search"})
-LIVE_MODEL_PROVIDERS: frozenset[str] = frozenset({"openai-responses", "opencode-go", "opencode-console"})
+LIVE_MODEL_PROVIDERS: frozenset[str] = frozenset({"openai-responses", "opencode-go"})
 
 
 def _selected_from_environment() -> frozenset[str]:

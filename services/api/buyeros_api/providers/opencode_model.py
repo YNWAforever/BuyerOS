@@ -6,7 +6,7 @@ proposal is then re-validated deterministically, so a model that ignores the
 schema yields 'unknown', never a stored assessment.
 """
 from __future__ import annotations
-import asyncio,json,math,re
+import asyncio,hashlib,json,math,re
 from datetime import datetime,timezone
 import httpx
 from .model import ModelRoute
@@ -14,14 +14,22 @@ from .live_model import (PROMPT,PROPOSAL_SCHEMA,MAX_INPUT_BYTES,MAX_RESPONSE_BYT
                          _basis,_current_source,canonical_json,validate_live_proposal)
 
 ENDPOINT='https://opencode.ai/zen/go/v1/chat/completions'
-# Paid Console service-account catalog (2026-11-21) documents this endpoint:
-# https://opencode.ai/inference/openai/v1/chat/completions. The legacy endpoint
-# above remains unchanged for existing fit/sales callers.
-CONVERSATION_ENDPOINT='https://opencode.ai/inference/openai/v1/chat/completions'
+# Documented Go API endpoint (2026-11-21). The legacy endpoint above remains
+# unchanged for existing fit/sales callers.
+CONVERSATION_ENDPOINT='https://opencode.ai/inference/go/openai/v1/chat/completions'
 ENDPOINTS=frozenset({ENDPOINT,CONVERSATION_ENDPOINT})
 DEFAULT_MODEL_ID='kimi-k3'
+USER_AGENT='BuyerOS/1.0'
 # No token-count endpoint: bound input conservatively at one token per 3 bytes, then recheck reported usage.
 BYTES_PER_TOKEN_FLOOR=3
+
+
+def conversation_session_header(basis:dict)->str:
+    """Stable, non-identifying session value for the stored conversation thread."""
+    seed=basis.get('thread_id') or basis.get('basis_hash')
+    if not isinstance(seed,str) or not seed:
+        raise ValueError('stored conversation thread identity required')
+    return hashlib.sha256(('buyeros-conversation-session.v1:'+seed).encode()).hexdigest()[:32]
 
 
 def model_payload(basis:dict,route:ModelRoute,model_id:str)->dict:
@@ -71,7 +79,11 @@ class OpenCodeGoModelClient:
         if size>MAX_INPUT_BYTES or math.ceil(size/(1 if basis.get('schema') in {'conversation-basis.v1','sales-basis.v1'} else BYTES_PER_TOKEN_FLOOR))>route.max_input_tokens:raise ValueError('input token/byte budget exceeded')
         try:
             async with asyncio.timeout(route.deadline_seconds):
-                async with self.http.stream('POST',self.endpoint,json=payload,headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json'},
+                headers={'Authorization':'Bearer '+self._api_key,'Accept':'application/json',
+                         'User-Agent':USER_AGENT}
+                if basis.get('schema')=='conversation-basis.v1':
+                    headers['x-opencode-session']=conversation_session_header(basis)
+                async with self.http.stream('POST',self.endpoint,json=payload,headers=headers,
                                             follow_redirects=False,timeout=route.deadline_seconds) as response:
                     if response.status_code!=200:raise ModelResponseUnknown('model response unavailable')
                     raw=bytearray()
@@ -92,6 +104,11 @@ class OpenCodeGoModelClient:
             if self._api_key in text:raise ModelResponseUnknown('bounded model text unavailable')
             usage=body.get('usage')
             if not isinstance(usage,dict) or any(type(usage.get(k)) is not int or usage[k]<0 for k in ['prompt_tokens','completion_tokens']):raise ModelResponseUnknown('typed model usage unavailable')
+            if basis.get('schema')=='conversation-basis.v1':
+                opencode=usage.get('opencode')
+                if (not isinstance(opencode,dict) or opencode.get('billing_source') not in {'go','go-plus'}
+                    or type(usage.get('cost')) not in {int,float} or usage['cost']!=0):
+                    raise ModelResponseUnknown('reviewed Go billing not confirmed')
             input_tokens,output_tokens=usage['prompt_tokens'],usage['completion_tokens']
             if input_tokens>route.max_input_tokens or output_tokens>route.max_output_tokens:raise ModelResponseUnknown('model usage outside admitted bounds')
             parsed=json.loads(text);assessment=validate_live_proposal(parsed,basis)
